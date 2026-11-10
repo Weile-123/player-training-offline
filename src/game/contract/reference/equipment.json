@@ -1,0 +1,1084 @@
+{
+  "project": "王牌训练师",
+  "dataStatus": "community-sourced; names and basketball conversions are design drafts, not verified in-game equivalents",
+  "version": "2026-10-19",
+  "notes": [
+    "原作权重票券改为训练五结果权重，正式实装须统一计算概率",
+    "原作按秒计算的手感持续时长需转换为本游戏按次数的机制",
+    "所有金额为原作机制量级的对应示意，不是已平衡的篮球游戏数值",
+    "部分物品依赖原作的剑架/商人/每日供货机制，应先映射为休息室/资产商店/每月招生",
+    "disabled和removed项默认不参与商店生成"
+  ],
+  "relics": [
+    {
+      "id": "relic_001",
+      "sourceName": "Ash Sieve",
+      "name": "伤病保险",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "重伤出售球员时额外获得500美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_002",
+      "sourceName": "Bent Nail",
+      "name": "基础投篮机",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "成功权重+4",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_003",
+      "sourceName": "Black Knot",
+      "name": "护膝绑带",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "重伤概率降低10%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_004",
+      "sourceName": "Blunt Mallet",
+      "name": "矫正训练仪",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "将1点轻伤权重转换为成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_005",
+      "sourceName": "Bound Idol",
+      "name": "里程奖碑",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "球员训练等级首次达到4、8、12等4的倍数时，估值提高15%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_006",
+      "sourceName": "Charcoal Pouch",
+      "name": "训练营补贴",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "球员基础估值+80美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_007",
+      "sourceName": "First Brand",
+      "name": "新人首训课",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "球员首次训练若成功或大成功，额外提升2级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_008",
+      "sourceName": "Heavy Paperweight",
+      "name": "心理辅导手册",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持，球员估值+180美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_009",
+      "sourceName": "Inspection Stamp",
+      "name": "球探认证章",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "每次成功或大成功，球员估值+100美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_010",
+      "sourceName": "Iron Signet",
+      "name": "明星训练师徽章",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "球员估值提高15%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_011",
+      "sourceName": "Leather Loop",
+      "name": "节奏训练带",
+      "type": "equipment",
+      "category": "speed",
+      "status": "active",
+      "description": "非手感火热状态训练动画速度+20%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_012",
+      "sourceName": "Lucky Coal",
+      "name": "幸运护腕",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "大成功权重+1",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_013",
+      "sourceName": "Patched Apron",
+      "name": "康复补偿协议",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "每次轻伤，球员估值+140美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_014",
+      "sourceName": "Patient Weight",
+      "name": "冥想训练垫",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "维持权重+3",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_015",
+      "sourceName": "Red Thread",
+      "name": "镇静呼吸器",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "出现维持后，下一次训练重伤概率降低20%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_016",
+      "sourceName": "Relief Sack",
+      "name": "补招名额",
+      "type": "equipment",
+      "category": "supply",
+      "status": "disabled",
+      "description": "某月还款失败后，下月额外获得1名球员",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_017",
+      "sourceName": "Sealing Stone",
+      "name": "训练计时器",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "维持权重+2；每连续2次维持，训练等级+1",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_018",
+      "sourceName": "Wax Effigy",
+      "name": "节奏匹配器",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "连续2次获得相同结果，球员估值+150美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_019",
+      "sourceName": "Worn Whetstone",
+      "name": "动作校正板",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "将2点维持权重转换为成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_020",
+      "sourceName": "Undertaker's Chalice",
+      "name": "重伤理赔协议",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "球员重伤时额外获得最高历史估值的30%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_021",
+      "sourceName": "Blind Die",
+      "name": "逆境投篮骰",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "轻伤或维持后，下一次大成功权重+3",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_022",
+      "sourceName": "Chained Hourglass",
+      "name": "专注节拍器",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "非手感火热状态下维持时，有50%概率获得1点手感",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_023",
+      "sourceName": "Closed Third Eye",
+      "name": "比赛阅读眼镜",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "维持后下一次成功权重+4",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_024",
+      "sourceName": "Cold Teacup",
+      "name": "冷静剂",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持，球员估值提高6%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_026",
+      "sourceName": "Cracked Wristwatch",
+      "name": "伤后调整腕表",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "非手感火热状态下，每次轻伤增加1点手感",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_027",
+      "sourceName": "Double Knot",
+      "name": "连胜庆功绳",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "连续2次成功或大成功，球员估值提高10%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_028",
+      "sourceName": "Hungry Molar",
+      "name": "传承笔记",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "训练等级至少+4的球员重伤后，下名新球员永久获得4点成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_029",
+      "sourceName": "Iron Comb",
+      "name": "伤病价值评估表",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "每次轻伤，向估值中补偿伤前等级价值的5%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_030",
+      "sourceName": "Iron Hoop",
+      "name": "专业护踝",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "重伤权重-2",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_032",
+      "sourceName": "Little Wind Bell",
+      "name": "投篮节奏带",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持使下一次成功额外+1级，最多积累2级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_033",
+      "sourceName": "Thorn Weight",
+      "name": "负重背心",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "球员估值+10%，但将2点维持权重转换为轻伤权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_034",
+      "sourceName": "Broken Holy Sword",
+      "name": "传奇伤病档案",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "重伤球员等级的30%传承给下一名初级球员，同时获得3点手感",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_035",
+      "sourceName": "Cracked Crown",
+      "name": "损失补偿基金",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "保留轻伤所损失等级价值的50%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_036",
+      "sourceName": "Cracked Splice",
+      "name": "适应性康复绷带",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "每次轻伤后本球员重伤概率降低15%，最高降低60%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_037",
+      "sourceName": "Golden Nail",
+      "name": "黄金投篮手套",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "大成功权重+2",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_038",
+      "sourceName": "Grudge Nail",
+      "name": "不屈斗志",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "球员重伤后，储存等同其训练等级数量的一次性大成功权重点数",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_039",
+      "sourceName": "Mourning Knot",
+      "name": "信用逆袭徽章",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "每次月供失败，为本局永久增加1点大成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_040",
+      "sourceName": "Scorched Charm",
+      "name": "逐步热身计划",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "非手感火热状态下每次成功或大成功使本球员重伤概率降低3%，最高18%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_041",
+      "sourceName": "Sealed Heart",
+      "name": "蓄力投篮指导",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持使下一次大成功额外+1级，最多+4级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_042",
+      "sourceName": "Third Hand",
+      "name": "连续得分指导",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "每连续2次成功或大成功，额外提升1级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_043",
+      "sourceName": "Worn Voucher",
+      "name": "训练器材优惠券",
+      "type": "equipment",
+      "category": "shop",
+      "status": "active",
+      "description": "每月商店免费刷新1次",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_044",
+      "sourceName": "Burial Coin",
+      "name": "停用手感传承章",
+      "type": "equipment",
+      "category": "break",
+      "status": "disabled",
+      "description": "重伤时剩余手感传承给下一名初级球员；目前停用",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_045",
+      "sourceName": "Collector's Hook",
+      "name": "器材回收凭证",
+      "type": "equipment",
+      "category": "shop",
+      "status": "active",
+      "description": "刷新商店后，可将本月首名未训练球员兑换成2点装备商店信用额",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_046",
+      "sourceName": "Cracked Bell",
+      "name": "绝佳表现奖金",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "每次大成功使估值提高20%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_047",
+      "sourceName": "Defeated King's Seal",
+      "name": "逆境突破指南",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "每次轻伤，为下一次大成功额外增加1级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_048",
+      "sourceName": "Ember Locket",
+      "name": "开场热身项链",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "每名球员首次普通训练获得2点手感",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_049",
+      "sourceName": "Interlocking Weights",
+      "name": "反弹训练器",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "轻伤后立刻成功或大成功，额外提升2级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_050",
+      "sourceName": "Journeyman Badge",
+      "name": "招生口碑认证",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "月供完成后，下个月所有新球员训练等级至少为+2",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_051",
+      "sourceName": "Lightning Mark",
+      "name": "黄金手感印记",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "非手感火热状态下触发大成功，下一次重伤概率降低40%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_052",
+      "sourceName": "Silver Tuning Fork",
+      "name": "完美出手校准器",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "非手感火热状态下每次大成功额外提升1级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_053",
+      "sourceName": "Sleeping Ember",
+      "name": "被动成长课程",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持有70%概率使训练等级+1",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_054",
+      "sourceName": "Soot Censer",
+      "name": "多样化训练计划",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "若结果不同于上一次，球员基础估值+20美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_055",
+      "sourceName": "Unbroken Oath",
+      "name": "伤后不退训练法",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "每次轻伤有70%概率补回1级训练等级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_056",
+      "sourceName": "Wirebound Scabbard",
+      "name": "月度伤病豁免卡",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "每个月首次重伤改为轻伤",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_057",
+      "sourceName": "Worn Grip",
+      "name": "专业防滑手套",
+      "type": "equipment",
+      "category": "speed",
+      "status": "active",
+      "description": "训练动画速度+15%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_058",
+      "sourceName": "Black Iron Stone",
+      "name": "高阶球探报告",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "训练等级达到+8后，球员估值提高30%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_059",
+      "sourceName": "Bronze Cog",
+      "name": "投篮动作记忆器",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "每次成功为当前球员增加1点成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_060",
+      "sourceName": "Dragonscale Tongs",
+      "name": "高级护具组合",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "训练等级达到+6后，重伤概率降低25%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_061",
+      "sourceName": "Echo Hammer",
+      "name": "回响投篮机",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "每次成功或大成功，有25%概率额外提升1级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_062",
+      "sourceName": "Giant's Spine",
+      "name": "抗伤护腰",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "每累计2次轻伤，储存一次把重伤转化为轻伤的机会",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_063",
+      "sourceName": "Glass Hourglass",
+      "name": "巅峰时刻计时器",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热期间每次大成功额外提升3级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_064",
+      "sourceName": "Golden Cog",
+      "name": "投篮表现奖励器",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "每次成功，球员基础估值+30美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_065",
+      "sourceName": "Ossuary King's Scabbard",
+      "name": "伤病经验档案",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "等级至少+7的球员重伤时，将其前一次训练结果对应权重永久+1",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_066",
+      "sourceName": "Sealed Rebate",
+      "name": "还款优惠协议",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "每月最低还款要求降低10%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_067",
+      "sourceName": "Smith's Testament",
+      "name": "王牌招生推荐信",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "用等级至少+10的球员完成月供后，下月一名新球员继承其30%的等级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_068",
+      "sourceName": "Tax Tally",
+      "name": "准时还款积分卡",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "每次足额还款获得1点装备商店信用额",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_069",
+      "sourceName": "Bell Collar",
+      "name": "连投估值放大器",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热期间每次训练球员估值提高5%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_070",
+      "sourceName": "Headless Bell",
+      "name": "终场加练铃",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热结束时训练等级+1",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_071",
+      "sourceName": "Obsidian Eye",
+      "name": "高阶投篮视镜",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "训练等级达到+8后，将2点成功权重转换为大成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_072",
+      "sourceName": "Red Hourglass",
+      "name": "火热延时表",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热持续时间+1秒（回合制需改为增加训练次数）",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_073",
+      "sourceName": "Royal Spike",
+      "name": "大师投篮设备",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "成功权重+6",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_074",
+      "sourceName": "Silver Supply Writ",
+      "name": "招生扩展许可",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "从下次招募起，每月基础新球员名额+2",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_075",
+      "sourceName": "Butterfingers",
+      "name": "极限冒险护腕",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "重伤权重+3，大成功权重+5",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_076",
+      "sourceName": "Dawn Scabbard",
+      "name": "冠军训练传承书",
+      "type": "equipment",
+      "category": "break",
+      "status": "active",
+      "description": "重伤球员等级的40%传承给下一名初级球员，同时获得4点手感",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_077",
+      "sourceName": "Dragon’s Pardon",
+      "name": "信用紧急保障",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "首次遭遇信用归零时避免游戏结束并减轻1级信用惩罚，随后消耗",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_078",
+      "sourceName": "King's Empty Cup",
+      "name": "耐心积蓄器",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "每次维持为当前球员增加1点大成功权重",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_079",
+      "sourceName": "Phoenix Ash",
+      "name": "顶级运动医疗险",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "每名球员首次重伤可免除强制出售，但损失40%估值",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_080",
+      "sourceName": "Sickle and Hammer",
+      "name": "五维均衡训练法",
+      "type": "equipment",
+      "category": "odds",
+      "status": "active",
+      "description": "将五种训练结果的基础权重都设为5",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_081",
+      "sourceName": "Split Twin Mirror",
+      "name": "训练结果复刻镜",
+      "type": "equipment",
+      "category": "streak",
+      "status": "active",
+      "description": "每出现连续2次相同结果，重复最近一次装备估值加成",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_082",
+      "sourceName": "Wandering Ghost’s Ledger",
+      "name": "采购网络扩展合同",
+      "type": "equipment",
+      "category": "shop",
+      "status": "active",
+      "description": "从下次商人出现起，额外增加2个商品选项",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_083",
+      "sourceName": "Pocket Hearth",
+      "name": "训练营声望基金",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "本局每次足额还款后，所有球员基础估值额外增加20美元",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_084",
+      "sourceName": "Abyssal Pearl",
+      "name": "伤病缓冲核心",
+      "type": "equipment",
+      "category": "damage",
+      "status": "active",
+      "description": "轻伤权重+3；每名球员前2次轻伤不降低训练等级，依然触发轻伤装备效果",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_085",
+      "sourceName": "Ceaseless Driveshaft",
+      "name": "持续进步训练器",
+      "type": "equipment",
+      "category": "success",
+      "status": "active",
+      "description": "每累计2次成功，额外提升1级",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_086",
+      "sourceName": "Eternal Seed",
+      "name": "低强度理财计划",
+      "type": "equipment",
+      "category": "hold",
+      "status": "active",
+      "description": "维持权重+6；每次维持增加40美元基础估值",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_087",
+      "sourceName": "Perfect Mana Core",
+      "name": "巅峰投篮核心",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热期间大成功权重+6",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_088",
+      "sourceName": "Possessed Bellows",
+      "name": "超频训练机",
+      "type": "equipment",
+      "category": "speed",
+      "status": "active",
+      "description": "手感火热期间训练动画速度+30%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_089",
+      "sourceName": "Royal Change",
+      "name": "超额还款返利",
+      "type": "equipment",
+      "category": "economy",
+      "status": "active",
+      "description": "本月超额还款的30%用于抵扣下月最低月供，抵扣最多30%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_090",
+      "sourceName": "Unyielding Cornerstone",
+      "name": "终极防护装备",
+      "type": "equipment",
+      "category": "protection",
+      "status": "active",
+      "description": "每名球员首次重伤自动转换为轻伤",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_091",
+      "sourceName": "Supply Permit",
+      "name": "长期招生许可证",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "从下个月起，每月额外获得1名球员",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_092",
+      "sourceName": "Dragon Heart",
+      "name": "高阶明星代言",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "训练等级+7后，每次成功或大成功使估值提高15%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_093",
+      "sourceName": "Seal of Twins",
+      "name": "双生球员计划",
+      "type": "equipment",
+      "category": "special",
+      "status": "active",
+      "description": "每次非重伤训练有2%概率复制当前球员",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_094",
+      "sourceName": "Undertaker’s Ledger",
+      "name": "伤病补招合同",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "等级至少+7的球员重伤后，下个月额外招收1人，每月最多2人",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_095",
+      "sourceName": "Undying Wick",
+      "name": "持久火热训练带",
+      "type": "equipment",
+      "category": "hot",
+      "status": "active",
+      "description": "手感火热持续时间+2秒（回合制需改为增加训练次数）",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_096",
+      "sourceName": "Dragon Signet",
+      "name": "超级巨星经纪合同",
+      "type": "equipment",
+      "category": "value",
+      "status": "active",
+      "description": "训练等级+12后，球员估值提高50%",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_097",
+      "sourceName": "Oracle Die",
+      "name": "传奇投篮骰",
+      "type": "equipment",
+      "category": "great",
+      "status": "active",
+      "description": "大成功权重+4",
+      "source": "https://www.forgetax.tools/relics"
+    },
+    {
+      "id": "relic_098",
+      "sourceName": "Lifetime Contract",
+      "name": "金牌训练师终身协议",
+      "type": "equipment",
+      "category": "supply",
+      "status": "active",
+      "description": "新入营球员初始训练等级+7，免除热身准备步骤",
+      "source": "https://www.forgetax.tools/relics"
+    }
+  ],
+  "items": [
+    {
+      "id": "item_001",
+      "sourceName": "Cracked Dragon Scale",
+      "name": "运动医疗护盾",
+      "type": "consumable",
+      "status": "active",
+      "description": "下次训练若触发重伤则阻止重伤；无论结果如何均消耗",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_002",
+      "sourceName": "Regret Clockwork",
+      "name": "训练录像回溯器",
+      "type": "consumable",
+      "status": "active",
+      "description": "撤销最近一次训练结果，包括重伤；需要保存上次训练的状态快照",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_003",
+      "sourceName": "Red Chalk",
+      "name": "投篮热区粉笔",
+      "type": "consumable",
+      "status": "active",
+      "description": "下一次训练的大成功权重翻倍",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_004",
+      "sourceName": "Powder Pouch",
+      "name": "孤注一掷训练券",
+      "type": "consumable",
+      "status": "active",
+      "description": "下一次普通训练：成功和大成功都转为大成功，其余结果全部转为重伤",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_005",
+      "sourceName": "Cold Star Shard",
+      "name": "冰感能量饮料",
+      "type": "consumable",
+      "status": "active",
+      "description": "立即增加3点手感；手感火热期间不可使用",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_006",
+      "sourceName": "Incense of Oblivion",
+      "name": "征信修复协议",
+      "type": "instant",
+      "status": "active",
+      "description": "购买即减轻1级债务违约惩罚；本局限一次",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_007",
+      "sourceName": "Ghost Delivery Note",
+      "name": "青年球员推荐函",
+      "type": "instant",
+      "status": "active",
+      "description": "购买后下个月额外招收2名年轻球员",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_008",
+      "sourceName": "Tempering Oil",
+      "name": "动作矫正喷雾",
+      "type": "consumable",
+      "status": "removed",
+      "description": "接下来3次训练，将2点轻伤权重转换为成功权重",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_009",
+      "sourceName": "Muffled Candle",
+      "name": "静心香薰",
+      "type": "consumable",
+      "status": "removed",
+      "description": "下一次普通训练结果必定为维持",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_010",
+      "sourceName": "Emergency Steel Core",
+      "name": "紧急康复包",
+      "type": "consumable",
+      "status": "removed",
+      "description": "恢复因轻伤损失的1级训练等级",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_011",
+      "sourceName": "Contract Ink",
+      "name": "本月还款协商书",
+      "type": "consumable",
+      "status": "removed",
+      "description": "本月最低还款要求降低20%，每月限用一次",
+      "source": "https://www.forgetax.tools/merchant"
+    },
+    {
+      "id": "item_012",
+      "sourceName": "Echo Dust",
+      "name": "奖金回声卡",
+      "type": "consumable",
+      "status": "removed",
+      "description": "下一次训练首次触发的装备估值奖励额外重复一次",
+      "source": "https://www.forgetax.tools/merchant"
+    }
+  ]
+}

@@ -1,0 +1,394 @@
+/* 第五轮方案 B 与商店设计实装：实时文字、库存和交互，透明商品图。 */
+.contract-game .game-viewport{grid-template-rows:min(8cqh,calc(var(--layout-width)*.14)) min(12cqh,calc(var(--layout-width)*.23)) min(18cqh,calc(var(--layout-width)*.30)) minmax(0,1fr) min(7cqh,54px,calc(var(--layout-width)*.145)) var(--dock-height)}
+@container game-shell (min-aspect-ratio:11/10){.contract-game .game-viewport{grid-template-rows:12% 17% minmax(0,1fr) min(12cqh,54px) var(--dock-height)}}
+.delivery-scoreboard{flex:1;min-width:0;display:grid;grid-template-columns:1.25fr 1.08fr .75fr;grid-template-rows:minmax(0,1fr) auto;gap:0;padding:4px 5px;border:2px solid #f3dfb7;border-radius:9px;background:#10283b var(--asset-art-game-ink-png,url('/art/game/ink.png')) center/cover;box-shadow:inset 0 0 0 2px #102432,inset 0 0 0 3px #c4b08d;color:#fff0d2;line-height:1.05}
+.delivery-scoreboard>div{min-width:0}
+.score-value,.score-target,.score-coupons{padding:1px 7px;display:flex;flex-direction:column;justify-content:center}
+.score-target{border-left:1px solid #e5d4b2}
+.delivery-scoreboard small{font-size:clamp(10px,2.7cqw,16px);font-weight:950;line-height:1.2;background:#ad3029;clip-path:polygon(5% 0,100% 0,92% 100%,0 100%);padding:2px 7px;width:fit-content;white-space:nowrap}
+.delivery-scoreboard b{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;font:950 clamp(13px,var(--number-size,6cqw),42px)/1 Impact,'Arial Narrow',sans-serif;letter-spacing:-.025em;white-space:nowrap;font-variant-numeric:tabular-nums}
+.score-value>b{color:#a5d3f1}.score-target>b{color:#ff634f}
+.score-coupons{grid-column:3;grid-row:1/3;border-left:1px solid #e5d4b2;align-items:center}
+.score-coupons>div{display:flex;align-items:center;gap:2px;max-width:100%;color:#ffbd45}
+.score-coupons b{font-size:clamp(15px,5.5cqw,38px);white-space:normal;overflow-wrap:anywhere;min-width:0}
+.sponsor-ticket{width:44px;height:32px;flex:none;color:#efb647;rotate:-12deg}
+.score-coupons .sponsor-ticket{width:clamp(15px,5cqw,36px);height:auto}
+.delivery-scoreboard .score-progress{grid-column:1/3;display:flex;align-items:center;gap:6px;padding:2px 7px 0;min-height:10px}
+.score-progress>div{height:7px;flex:1;min-width:10px;border:1px solid #ead9b8;border-radius:10px;padding:1px;overflow:hidden}
+.score-progress i{display:block;height:100%;background:#ff634f;border-radius:10px}
+.score-progress>span{font-size:clamp(7px,1.55cqw,10px);font-weight:850;max-width:65%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.delivery-scoreboard.is-met .score-progress i{background:#82cbae}
+/* 场内遮罩、可点击球探入口、中央提示分别占据三层。 */
+.court-state-shade{position:absolute;inset:0;background:#0008;z-index:9}
+.stage-navigation{z-index:10}
+.game-screen .inventory-home-button{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px}.inventory-home-button .game-icon{width:22px;height:22px}
+.court-state-overlay{z-index:11;background:none;pointer-events:none}
+.court-state-overlay .court-message{pointer-events:auto}
+/* 与数据栏保持一致：价值蓝色、指标红色；达标状态仍由横幅表达。 */
+.settlement-value>b{color:#235c7b}.settlement-target>b{color:#b4382d}
+
+.game-screen.comic-dialog-layer .comic-dialog.commerce-dialog{width:min(660px,100%);max-width:660px;border:3px solid #ddcba8;padding:5px;background:#102638 var(--asset-art-game-ink-png,url('/art/game/ink.png')) center/cover;container-type:inline-size;clip-path:polygon(12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px),0 12px)}
+.game-screen.comic-dialog-layer .commerce-dialog::before{inset:7px;background:transparent;border:1px solid #d9c6a0;clip-path:none}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-heading{min-height:76px;padding:4px 8px 8px;align-items:center}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-heading::before{display:none}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-heading h2{padding:10px 28px 12px 14px;border:0;font-size:clamp(27px,7cqw,48px);font-weight:1000;letter-spacing:.015em;max-width:calc(100% - 52px);background:#ae3526 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;transform:rotate(-2deg);text-shadow:2px 2px #70261d}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-close{margin:0;width:40px;height:40px;box-shadow:0 0 0 2px #0b1d2b,0 0 0 3px #b8a98c}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-scroll{padding:4px 8px 10px;scrollbar-color:#b49b72 #122432}
+.commerce-view{color:#0e2637;font-weight:750}
+.shop-wallet,.commerce-product,.scout-market-hero,.inventory-unlocks,.shop-replace,.commerce-empty{background:#f3e6c7 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.shop-wallet{display:grid;grid-template-columns:.85fr 1.15fr;gap:0;border:3px double #a5916b;padding:12px 14px 5px;margin-bottom:12px;box-shadow:0 2px #081927}
+.shop-wallet>div{display:flex;align-items:center;gap:10px;min-width:0}
+.shop-wallet>div+div{border-left:1px solid #b5a281;padding-left:14px}
+.shop-wallet .sponsor-ticket{width:clamp(35px,12cqw,75px);height:auto}
+.shop-wallet .game-icon{width:clamp(30px,10cqw,65px);height:55px;flex:none}
+.shop-wallet span{min-width:0}
+.shop-wallet small{display:block;font-size:clamp(12px,3cqw,20px);font-weight:950}
+.shop-wallet b{font:950 clamp(21px,6.6cqw,44px)/1.1 Impact,'Arial Narrow',sans-serif;overflow-wrap:anywhere}
+.shop-wallet .wallet-coupons{color:#8c5919}
+.game-screen.comic-dialog-layer .shop-wallet>p{grid-column:1/-1;margin:6px 0 0;text-align:center;font-size:clamp(10px,2.4cqw,15px);font-weight:800}
+.shop-replace{display:block;padding:10px;margin-bottom:10px}
+.commerce-products{display:grid;gap:10px}
+.commerce-product{position:relative;display:grid;min-width:0;gap:10px;padding:12px;border:3px double #8b7657;outline:1px solid #e9dab7;outline-offset:-5px;box-shadow:0 3px 0 #061723;align-items:center}
+.equipment-product{grid-template-columns:34% minmax(0,1fr);min-height:180px}
+.product-art{position:relative;align-self:stretch;display:flex;align-items:center;justify-content:center;min-width:0;isolation:isolate}
+.product-art::before{content:'';position:absolute;inset:18% 4%;z-index:-1;background:repeating-linear-gradient(143deg,transparent 0 7px,#23495b33 8px 11px,transparent 12px 15px);clip-path:polygon(0 28%,78% 0,69% 18%,100% 17%,67% 45%,99% 36%,71% 72%,85% 72%,10% 100%,23% 69%,0 79%)}
+.commerce-product .product-image{width:100%;height:100%;max-height:180px;object-fit:contain;display:block}
+.equipment-product .product-art{border-right:1px solid #b7a17b;padding-right:9px}
+.product-copy{min-width:0}
+.commerce-view .product-copy h3{font-size:clamp(17px,4.4cqw,29px);font-weight:1000;line-height:1.3;margin:0 0 8px;overflow-wrap:anywhere}
+.rarity-badge{display:inline-block;font-size:clamp(10px,2.1cqw,13px);font-weight:900;color:#fff0d3;background:#736b5c;outline:1px solid #f2e2c2;outline-offset:-3px;padding:4px 10px;margin-left:7px;vertical-align:middle;white-space:nowrap;clip-path:polygon(5px 0,calc(100% - 5px) 0,100% 5px,100% calc(100% - 5px),calc(100% - 5px) 100%,5px 100%,0 calc(100% - 5px),0 5px)}
+.rarity-rare .rarity-badge,.rarity-badge.rarity-rare{background:#265585}.rarity-legendary .rarity-badge,.rarity-badge.rarity-legendary{background:#996317}
+.game-screen.comic-dialog-layer .commerce-product p{font-size:clamp(12px,2.8cqw,17px);line-height:1.55;margin:6px 0;color:#24333c;overflow-wrap:anywhere}
+.equipment-effect{border-top:1px solid #b19c77;padding-top:7px;font-weight:900}
+.equipment-effect>span{display:block;font-size:10px;font-weight:600;color:#7a6850;letter-spacing:.1em;margin-bottom:2px}
+.game-screen.comic-dialog-layer .commerce-dialog .commerce-buy{display:flex;align-items:center;justify-content:center;gap:6px;background:#9e3027 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;border:1px solid #6e241b;outline:1px solid #f3d8ae;outline-offset:-4px;color:#fff0d0;box-shadow:none;min-height:43px;font-size:clamp(13px,3cqw,20px);font-weight:950;width:100%;padding:9px 8px;overflow-wrap:anywhere}
+.commerce-buy .sponsor-ticket{width:30px;height:24px}
+.commerce-buy i{font-style:normal;font-size:25px;margin-left:auto}
+.commerce-buy span{min-width:0}
+.shop-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#f6e8cb;padding:14px 0 3px}
+.shop-footer>strong{font-size:clamp(12px,3cqw,20px);white-space:nowrap}
+.shop-footer b{font-size:1.4em;margin-left:5px}
+.game-screen.comic-dialog-layer .commerce-dialog .shop-footer>button{font-size:clamp(12px,2.8cqw,18px);padding:7px 12px;border:3px double #273841;box-shadow:none}
+.shop-footer>button{display:flex;align-items:center;justify-content:center;gap:8px}
+.shop-footer .shop-refresh-icon{display:block;width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.shop-footer .shop-refresh-label{font-size:inherit;line-height:1.3}
+.commerce-empty{text-align:center;padding:30px 14px;border:3px double #927d5d;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.commerce-empty>strong{font-size:20px}.commerce-empty>.game-icon{width:50px;height:50px;margin-bottom:10px}
+
+.game-screen.comic-dialog-layer .scout-dialog::before,.game-screen.comic-dialog-layer .inventory-dialog::before{background:#f3e6c7 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.game-screen.comic-dialog-layer .scout-dialog .sheet-scroll,.game-screen.comic-dialog-layer .inventory-dialog .sheet-scroll{scrollbar-color:#9d835b #eadbb9}
+.scout-market-hero{display:grid;grid-template-columns:minmax(0,1fr) 48%;align-items:center;border:3px double #9d8764;padding:8px 10px;margin-bottom:6px}
+.scout-market-hero>div{display:flex;flex-direction:column;min-width:0}
+.scout-market-hero strong{font-size:clamp(12px,3.5cqw,23px);border-bottom:1px solid #927d5d;padding-bottom:8px;margin-bottom:7px}
+.scout-market-hero span{font-size:clamp(13px,3.5cqw,23px)}
+.scout-market-hero b{font:950 clamp(28px,8.5cqw,56px)/1.15 Impact,'Arial Narrow',sans-serif;color:#173e58;overflow-wrap:anywhere}
+.scout-market-hero>img{width:100%;height:clamp(90px,28cqw,170px);object-fit:contain}
+.game-screen.comic-dialog-layer .market-caption{text-align:center;margin:8px 0 12px;font-weight:900;font-size:clamp(12px,3cqw,19px);color:#173245}
+.commerce-view .commerce-section-title{display:flex;align-items:center;gap:10px;font-size:clamp(22px,5cqw,32px);font-weight:1000;letter-spacing:.08em;color:#fff0d1;background:#9e3027 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;padding:7px 20px 7px 12px;margin:14px 0 10px;clip-path:polygon(2% 0,100% 0,96% 100%,0 100%)}
+.commerce-section-title>.game-icon{width:30px;height:30px}
+.market-product,.inventory-product{grid-template-columns:24% minmax(0,1fr) 28%;gap:8px;padding:10px;min-height:120px}
+.market-product .product-image,.inventory-product .product-image{max-height:140px}
+.product-purchase{display:flex;flex-direction:column;gap:7px;align-items:center;min-width:0}
+.product-purchase>small{font-size:clamp(10px,2.6cqw,16px);font-weight:850}
+.market-product .product-copy h3{font-size:clamp(16px,4cqw,25px);margin-bottom:5px}
+.product-copy h3>small:not(.rarity-badge){display:block;font-size:12px;margin-top:4px}
+.recruit-note{font-size:10px;color:#63583e}
+.game-screen.comic-dialog-layer .market-fineprint{margin-top:18px;font-size:12px}
+.is-depleted .product-art{filter:grayscale(1);opacity:.5}
+.is-depleted .product-purchase>b{color:#8d897e}
+
+.inventory-tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;border:3px double #122f42;padding:3px;background:#e9dabc;margin:0 0 12px;isolation:isolate}
+.inventory-tabs>i{position:absolute;z-index:-1;left:3px;top:3px;bottom:3px;width:calc(50% - 3px);background:#102638 var(--asset-art-game-ink-png,url('/art/game/ink.png')) center/cover;box-shadow:inset 0 0 0 1px #ebd7b4;transition:transform .2s}
+.inventory-tabs.show-equipment>i{transform:translateX(100%)}
+.game-screen.comic-dialog-layer .inventory-tabs>button{position:relative;background:none;border:0;color:#102638;font-size:clamp(16px,4cqw,26px);font-weight:950;min-height:48px;padding:8px 4px}
+.game-screen.comic-dialog-layer .inventory-tabs>button[aria-selected=true]{color:#fff0d3}
+.inventory-tabs>button[aria-selected=true]::after{content:'';position:absolute;bottom:4px;left:38%;right:38%;height:3px;background:#c7432d}
+.inventory-product{border-color:#183141;outline-color:#bfa882}
+.inventory-product .product-copy h3{width:fit-content;max-width:100%;padding:4px 12px 4px 8px;font-size:clamp(16px,4cqw,26px);color:#fff1d3;background:#a33328 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;clip-path:polygon(3% 0,100% 0,95% 100%,0 100%)}
+.inventory-product .product-purchase>b{font:950 clamp(28px,8cqw,48px)/1.1 Impact,'Arial Narrow',sans-serif}
+.game-screen.comic-dialog-layer .inventory-product .secondary{width:100%;font-size:clamp(12px,2.8cqw,17px);min-height:36px;padding:7px 4px;border:3px double #193243;box-shadow:none}
+.inventory-product.is-depleted .secondary{background:#ccc5b2;color:#59626a;opacity:.8}
+.inventory-unlocks{margin:14px 0 0;border-top:4px double #123044;padding:10px 4px}
+.inventory-unlocks>summary{display:flex;align-items:center;flex-wrap:wrap;gap:8px;cursor:pointer;list-style:none;font-size:clamp(18px,4.5cqw,28px);font-weight:950}
+.inventory-unlocks>summary::-webkit-details-marker{display:none}
+.inventory-unlocks>summary>span{flex:1}.inventory-unlocks>summary>span::before{content:'›';display:inline-block;margin-right:8px;color:#a12f25}
+.inventory-unlocks[open]>summary>span::before{rotate:90deg}
+.inventory-unlocks progress{display:block;width:100%;height:12px;appearance:none;border:1px solid #163144;padding:2px;background:#d9cdb5}
+.inventory-unlocks progress::-webkit-progress-bar{background:#c8bda8}.inventory-unlocks progress::-webkit-progress-value{background:#ad3628}.inventory-unlocks progress::-moz-progress-bar{background:#ad3628}
+.commerce-dialog button:focus-visible,.inventory-unlocks>summary:focus-visible{outline:3px solid #28749a;outline-offset:3px}
+@container(max-width:400px){
+ .shop-wallet{padding:8px}.shop-wallet>div{gap:5px}.shop-wallet>div+div{padding-left:8px}
+ .equipment-product{grid-template-columns:31% minmax(0,1fr);padding:9px;gap:8px;min-height:160px}
+ .equipment-product .product-art{padding-right:5px}
+ .rarity-badge{margin-left:4px;padding:4px 7px}
+ .market-product,.inventory-product{grid-template-columns:25% minmax(0,1fr);gap:6px 9px;padding:9px}
+ .market-product .product-art,.inventory-product .product-art{grid-row:1/3}
+ .market-product .product-purchase,.inventory-product .product-purchase{grid-column:2;flex-direction:row;justify-content:space-between;gap:6px}
+ .market-product .product-purchase>small{white-space:nowrap}
+ .market-product .commerce-buy,.inventory-product .secondary{flex:1}
+ .inventory-product .product-purchase>b{font-size:25px}
+ .commerce-product .product-copy h3{margin-bottom:4px}
+}
+@media(prefers-reduced-motion:reduce){.inventory-tabs>i{transition:none}}
+/* 用细密网点与斜线复刻印刷质感，避免将低分辨率小纹理放大。 */
+.delivery-scoreboard,.inventory-tabs>i,.game-screen.comic-dialog-layer .comic-dialog.commerce-dialog{background-color:#102638;background-image:radial-gradient(#47647a33 .65px,transparent .9px),repeating-linear-gradient(135deg,transparent 0 38px,#28435833 39px 43px,transparent 44px 71px);background-size:4px 4px,auto}
+.game-screen.comic-dialog-layer .commerce-dialog .sheet-heading h2,.game-screen.comic-dialog-layer .commerce-dialog .commerce-buy,.commerce-view .commerce-section-title,.inventory-product .product-copy h3{background-color:#a63128;background-image:radial-gradient(#f3d6a633 .6px,transparent .8px),linear-gradient(125deg,#ba4030,#842923);background-size:4px 4px,auto}
+
+/* 计分牌还原：独立圆角内框、斜切标题、大号数字、球场线稿与券章。 */
+.contract-game .game-viewport{grid-template-rows:min(8cqh,calc(var(--layout-width)*.14)) min(15cqh,calc(var(--layout-width)*.29)) min(18cqh,calc(var(--layout-width)*.30)) minmax(0,1fr) min(7cqh,54px,calc(var(--layout-width)*.145)) var(--dock-height)}
+@container game-shell (min-aspect-ratio:11/10){.contract-game .game-viewport{grid-template-rows:12% 22% minmax(0,1fr) min(12cqh,54px) var(--dock-height)}}
+.delivery-scoreboard{position:relative;isolation:isolate;grid-template-columns:1.25fr 1.15fr .72fr;padding:5px;gap:0 3px;border:2px solid #e8d8b6;border-radius:12px;background:#091f30;box-shadow:0 0 0 1px #050e17,inset 0 0 0 2px #0a1b29,inset 0 0 0 3px #a8b4b6;overflow:hidden}
+.delivery-scoreboard::before{content:'';position:absolute;inset:5px calc(22.86% + 5px) 5px 5px;border:1px solid #e2d1ae;border-radius:7px;pointer-events:none;z-index:-1}
+.scoreboard-art{position:absolute;inset:0;width:100%;height:100%;z-index:-2;pointer-events:none}
+.score-value,.score-target{padding:4px 8px 0;justify-content:space-between;align-items:center}
+.score-target{border-left:1px solid #e2d1ae;border-radius:7px 0 0 0}
+.delivery-scoreboard small{font-size:clamp(10px,3cqw,21px);font-style:italic;font-weight:1000;align-self:flex-start;padding:3px 15px 3px 7px;line-height:1.1;background:linear-gradient(105deg,#b52c24,#812820);clip-path:polygon(5% 0,96% 0,92% 23%,100% 6%,94% 45%,99% 38%,89% 100%,0 100%);text-shadow:1px 1px #6b221d;letter-spacing:-.035em}
+.delivery-scoreboard b{font-size:clamp(22px,var(--number-size,10cqw),78px);line-height:.98;font-weight:1000;letter-spacing:-.02em;filter:drop-shadow(1px 2px 0 #0005)}
+.score-value>b,.score-target>b{padding:2px 0 3px;background-image:repeating-linear-gradient(126deg,transparent 0 34px,#10273999 35px 36px,transparent 37px 53px);background-clip:text;-webkit-background-clip:text}
+.score-coupons{padding:5px 5px 4px;border:1px solid #e2d1ae;border-radius:7px;justify-content:space-around}
+.score-coupons small{align-self:center}
+.score-coupons>div{width:100%;justify-content:center;gap:0}
+.score-coupons .sponsor-ticket{width:54%;max-width:73px;height:auto;rotate:-20deg;margin-right:-5px}
+.score-coupons b{font-size:clamp(24px,10cqw,76px);white-space:nowrap;overflow:hidden;overflow-wrap:normal}
+.delivery-scoreboard .score-progress{padding:3px 8px 5px;gap:7px;min-height:15px}
+.score-progress>div{height:clamp(9px,2.3cqw,17px);border:1px solid #f2dfb8;box-shadow:0 0 0 1px #071622,inset 0 0 0 1px #041721;padding:2px}
+.score-progress i,.delivery-scoreboard.is-met .score-progress i{background:linear-gradient(#ff6755,#e64132)}
+.score-progress>span{font-size:clamp(8px,1.9cqw,13px);line-height:1.1;max-width:48%;color:#f8e6c3}
+
+/* 背包只管理器材。 */
+.commerce-view .inventory-heading{display:flex;align-items:center;gap:10px;margin:0 0 12px;padding:11px 13px;border:3px double #e4d3af;background:#102638;color:#fff0d2;font-size:clamp(17px,4cqw,26px)}
+.inventory-heading>.game-icon{width:28px;height:28px}.inventory-heading>b{margin-left:auto;font-family:Impact,'Arial Narrow',sans-serif;font-size:1.4em}
+.game-screen.comic-dialog-layer .inventory-product .discard-confirm{background:#e6a298;color:#080b0d;border-color:#663a34;opacity:1}
+
+/* Grow to fit products; only the product list scrolls at the viewport cap. */
+.game-screen.comic-dialog-layer .comic-dialog.equipment-dialog{--shop-height-cap:min(90dvh,calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom)));height:auto;min-height:min(var(--shop-retained-height,820px),var(--shop-height-cap));max-height:var(--shop-height-cap)}
+.game-screen.comic-dialog-layer .equipment-dialog .sheet-scroll{display:flex;flex-direction:column;overflow:hidden;padding-bottom:5px}
+.equipment-dialog .contract-panel{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.equipment-dialog .contract-notice{flex:none;margin:0 0 6px}
+.equipment-shop{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.equipment-shop .shop-wallet{flex:none;margin-bottom:9px;padding:8px 12px}
+.equipment-shop .shop-wallet small{font-size:clamp(11px,2.5cqw,17px)}
+.equipment-shop .shop-wallet b{font-size:clamp(22px,5.7cqw,36px)}
+.equipment-shop .shop-wallet .sponsor-ticket{width:clamp(33px,10cqw,58px)}
+.equipment-shop .shop-wallet .game-icon{width:clamp(30px,8cqw,50px);height:43px}
+.equipment-shop .shop-replace{flex:none;margin:0 0 7px;padding:6px;font-size:12px}
+.equipment-shop .shop-replace select{padding:5px;margin:3px 0;font-size:13px}
+.equipment-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:1px 5px 5px 0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#bba17b #132a38}
+.equipment-scroll:focus-visible{outline:2px solid #efca7f;outline-offset:-2px}
+.equipment-shop .equipment-product{grid-template-columns:27% minmax(0,1fr);min-height:145px;padding:10px;gap:10px}
+.equipment-shop .equipment-product .product-image{max-height:125px}
+.equipment-shop .product-copy h3{font-size:clamp(15px,3.4cqw,22px);margin-bottom:5px}
+.game-screen.comic-dialog-layer .equipment-shop .equipment-effect{font-size:clamp(11px,2.4cqw,15px);line-height:1.5;margin:4px 0 7px;padding-top:5px}
+.equipment-shop .rarity-badge{font-size:clamp(9px,1.9cqw,12px)}
+.game-screen.comic-dialog-layer .equipment-shop .commerce-buy{font-size:clamp(12px,2.6cqw,17px);min-height:36px;padding:7px}
+.equipment-shop .shop-footer{flex:none;margin-top:7px;border-top:1px solid #b9a882;padding:8px 0 2px}
+.equipment-shop .shop-footer>strong{font-size:clamp(11px,2.6cqw,17px)}
+.game-screen.comic-dialog-layer .equipment-shop .shop-footer>button{min-height:38px;font-size:clamp(11px,2.5cqw,16px);padding:6px 10px}
+
+/* 一次性物品确认：物品卡、效果、明确的作用目标和底部操作。 */
+.game-screen.comic-dialog-layer .comic-dialog.item-use-dialog{width:min(520px,100%);max-width:520px}
+.game-screen.comic-dialog-layer .item-use-dialog::before{background:#f3e6c7 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.game-screen.comic-dialog-layer .item-use-dialog .sheet-heading{background:#102638}
+.item-use{padding:3px 4px;color:#142c3b}
+.item-use-hero{display:grid;grid-template-columns:35% minmax(0,1fr);align-items:center;gap:14px;padding:9px 10px;margin-bottom:10px;border:3px double #aa9470;background:linear-gradient(120deg,#e8d5ae88,#fff4de99)}
+.item-use-art{position:relative;display:flex;align-items:center;justify-content:center;min-height:110px;background:repeating-linear-gradient(135deg,transparent 0 14px,#193f5122 15px 17px,transparent 18px 23px);clip-path:polygon(0 12%,100% 0,96% 96%,9% 100%)}
+.item-use-art>.consumable-icon{width:100%;height:130px;max-width:none;max-height:none;object-fit:contain}
+.item-use-hero small{display:block;font-size:12px;letter-spacing:.1em;color:#73644a}
+.contract-panel .item-use-hero h3{font-size:clamp(22px,6.2cqw,33px);font-weight:1000;line-height:1.25;margin:4px 0 10px}
+.item-stock{display:inline-flex;align-items:center;gap:10px;background:#102638;color:#f8e9ca;border:3px double #d6bd8f;padding:4px 12px;font-size:12px}
+.item-stock b{font:900 30px/1 Impact,'Arial Narrow',sans-serif;color:#ffc14c}
+.item-effect{padding:12px 14px;border-left:4px solid #235b74;background:#fff3d6aa;margin-bottom:12px}
+.item-effect h4{font-size:12px;color:#235b74;margin:0 0 5px;letter-spacing:.12em}
+.game-screen.comic-dialog-layer .item-effect p{font-size:clamp(14px,3.5cqw,18px);font-weight:900;line-height:1.6;margin:0;color:#132d3f}
+.item-risk .item-effect{border-color:#ad382c}.item-risk .item-effect h4{color:#a23027}
+.item-risk-note{display:block;color:#9f3129;font-size:12px;border-top:1px solid #d3b695;padding-top:7px;margin-top:8px}
+.item-target{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #a79370;background:#eadbbd88;position:relative}
+.item-target-portrait{width:48px;height:58px;display:block;flex:none;border:2px solid #243b46;overflow:hidden}
+.item-target-portrait>*{width:100%;height:100%;object-fit:cover;object-position:top}
+.item-target>div{min-width:0;flex:1}.item-target small{display:block;font-size:11px;color:#73634d}
+.item-target strong{display:block;font-size:clamp(15px,3.8cqw,20px);font-weight:950}
+.item-target div>span{display:block;font-size:11px;color:#5c615e}
+.item-recovery-tag{align-self:flex-start;font-size:10px;color:#205f47;border:1px solid #3f8067;padding:3px;background:#d8e9cd;white-space:nowrap}
+.game-screen.comic-dialog-layer .item-use-block{margin:10px 0 0;padding:7px 10px;background:#eed8ab;border:1px solid #c6a16a;color:#6c4524;font-size:12px;font-weight:800}
+.item-use-footer{margin-top:12px;border-top:3px double #a48b65;padding-top:8px}
+.game-screen.comic-dialog-layer .item-use-footer>p{margin:0 0 10px;text-align:center;font-size:12px;color:#6b5e48}
+.item-use-footer p>b{color:#9c3027;font-size:16px}
+.game-screen.comic-dialog-layer .item-use .item-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.game-screen.comic-dialog-layer .item-use .item-detail-actions>button{font-size:clamp(16px,4cqw,21px);min-height:47px;padding:9px;border:3px double #173447;box-shadow:0 3px #a18c66}
+.game-screen.comic-dialog-layer .item-use .item-detail-actions>.primary{background:#ad3429;color:#fff0d0}
+.game-screen.comic-dialog-layer .item-use .item-detail-actions>.primary:disabled{background:#b7ab95;color:#f4eada;opacity:.75}
+@media(max-height:550px){.game-screen.comic-dialog-layer .equipment-dialog .sheet-heading{min-height:51px;padding:2px 6px 5px}.game-screen.comic-dialog-layer .equipment-dialog .sheet-heading h2{font-size:24px;padding:6px 20px 6px 10px}.equipment-shop .shop-wallet{padding:4px 9px;margin-bottom:6px}.equipment-shop .shop-wallet b{font-size:24px}.equipment-shop .shop-wallet .game-icon{height:30px}.equipment-shop .shop-footer{margin-top:4px;padding-top:5px}}
+
+/* 更紧凑的数据栏；实测数字与进度相交时隐藏进度，保留测量槽位。 */
+.contract-game .game-viewport{grid-template-rows:min(8cqh,calc(var(--layout-width)*.14)) min(12cqh,calc(var(--layout-width)*.235)) min(18cqh,calc(var(--layout-width)*.30)) minmax(0,1fr) min(7cqh,54px,calc(var(--layout-width)*.145)) var(--dock-height)}
+@container game-shell (min-aspect-ratio:11/10){.contract-game .game-viewport{grid-template-rows:12% 19% minmax(0,1fr) min(12cqh,54px) var(--dock-height)}}
+.delivery-scoreboard b{font-size:clamp(18px,var(--number-size,8.3cqw),63px)}
+.delivery-scoreboard small{font-size:clamp(9px,2.6cqw,17px);padding-top:2px;padding-bottom:2px}
+.score-coupons{align-items:stretch;justify-content:space-between}
+.score-coupons small{align-self:flex-start}
+.score-coupons b{font-size:clamp(22px,8.4cqw,62px)}
+.score-coupons .sponsor-ticket{max-width:60px}
+.delivery-scoreboard .score-progress{min-height:12px;padding-top:2px;padding-bottom:3px}
+.score-progress>div{height:clamp(7px,1.8cqw,13px)}
+.score-progress>span{font-size:clamp(7px,1.65cqw,11px)}
+.delivery-scoreboard.progress-hidden .score-progress{visibility:hidden;pointer-events:none}
+
+.template-main-identity>small.template-heading{display:flex;align-items:center;gap:4px;letter-spacing:0;min-width:0;white-space:nowrap;font-size:min(2.9cqw,11cqh)}
+.template-heading>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.template-heading>.template-training-level{flex:none;font-size:min(2.8cqw,10cqh);font-weight:900;font-style:italic;line-height:1.2;padding:.4cqw .9cqw;background:#205541;color:#fff0d0}
+.game-screen .template-identity-meta>.template-share-button{width:auto;min-width:0;min-height:0;padding:.55cqw 1cqw;border:1px solid #f7dfaa;border-radius:4px;background:linear-gradient(#30745b,#164631);box-shadow:0 2px 0 #0c3024,0 0 0 1px #173e32;color:#fff;font-size:min(2.55cqw,9cqh);font-style:normal;line-height:1.2;cursor:pointer;white-space:nowrap}
+.template-share-button:focus-visible{outline:2px solid #b12b22;outline-offset:3px}.template-share-button:active:not(:disabled){transform:translateY(1px);box-shadow:none}
+.court-state-overlay .court-message{width:72%;max-width:390px;padding:clamp(10px,2.2cqw,17px)}
+.court-message-actions{display:flex;gap:10px}
+.court-state-overlay .court-message-actions>button{flex:1;min-width:0;min-height:38px;font-size:clamp(11px,2.6cqw,18px);padding:9px 6px;white-space:nowrap}
+.court-state-overlay .court-message-actions>.secondary{background:#ead6ae;color:#142c3b;border:2px solid #e9d1a6;border-radius:8px;font-weight:950}
+
+.game-screen.comic-dialog-layer .inventory-unlocks-trigger{display:flex;align-items:center;flex-wrap:wrap;gap:8px;width:100%;padding:12px 5px;border:0;border-top:4px double #123044;background:#f3e6c7;color:#142e3f;box-shadow:none;text-align:left;font-size:clamp(18px,4.5cqw,28px);font-weight:950}
+.inventory-unlocks-trigger>span{flex:1}.inventory-unlocks-trigger>span::before{content:'›';margin-right:8px;color:#a12f25}
+.game-screen.comic-dialog-layer .unlocks-dialog::before{background:#f3e6c7 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.unlocks-panel>.unlock-card{display:flex;align-items:center;gap:12px;padding:12px;margin-bottom:10px;border:2px solid #a28c64;background:#f5e7c9;text-align:left;animation:none}
+.unlock-card>.product-image{width:72px;height:80px;object-fit:contain;flex:none}
+.unlock-card:not(.is-unlocked)>.product-image{filter:grayscale(1);opacity:.7}
+.unlock-card>div{min-width:0}.unlock-card h3{font-size:17px}.unlock-card small{display:inline-block;padding:2px 7px;background:#766b58;color:#fff0d1;font-size:11px}
+.unlock-card.is-unlocked small{background:#205541}
+.game-screen.comic-dialog-layer .unlock-card p{font-size:12px;line-height:1.5;margin:6px 0 0}
+
+.shot-status-pops{position:absolute;inset:0;z-index:12;pointer-events:none;overflow:hidden}
+.shot-status-position{position:absolute;display:block;transform:translate(-50%,-50%);pointer-events:none}
+.shot-status-image{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 0 #06111bcc);transform-origin:center;animation:shot-status-impact 280ms linear both;will-change:transform}
+@keyframes shot-status-impact{0%{transform:scale(0);opacity:0}30%{transform:scale(1.1);opacity:1}55%,75%{transform:scale(1);opacity:1}100%{transform:scale(.96);opacity:0}}
+.shot-status-pops.is-reduced .shot-status-image{animation:none}
+@media(prefers-reduced-motion:reduce){.shot-status-image{animation:none}}
+
+/* 第六轮：数字保持完整行高，检测真实字形后才显示进度。 */
+.delivery-scoreboard{container-type:size}
+.score-value>b,.score-target>b{flex-shrink:0;line-height:1.08;font-size:max(14px,min(var(--number-size,8.3cqw),63px,calc(100cqh - 26px)))}
+.score-value>small,.score-target>small{flex-shrink:0}
+.score-coupons .sponsor-ticket{width:40%;max-width:44px;margin-right:0}
+.score-coupons b{font-size:max(18px,min(8.4cqw,62px,calc(100cqh - 26px)))}
+.score-value,.score-target{min-height:0;padding-bottom:4px}
+.game-screen .dock-shoot:disabled{filter:grayscale(1);opacity:.55;cursor:default}
+
+/* 补剂将三个不可能结果收起；保留节点使恢复五段时也能平滑过渡。 */
+.probability-track{grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:0;transition:grid-template-columns 200ms ease-out}
+.probability-segment{border:0;box-shadow:inset 0 0 0 1.5px #0b1218;transition:opacity 160ms ease-out}
+.supplement-active .probability-track{grid-template-columns:1fr 0fr 0fr 0fr 1fr}
+.supplement-active .probability-segment[aria-hidden=true]{opacity:0;visibility:hidden}
+.merchant-tabs{margin:8px 0 12px;flex:none}
+.merchant-tabs+div .commerce-section-title{display:none}
+
+.game-screen.comic-dialog-layer .contract-panel>.roster-intro{font-size:clamp(12px,2.6cqw,15px);line-height:1.5;margin:3px 0 10px}
+.contract-panel .roster-identity h3{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.contract-panel .roster-identity h3 small{margin:0;flex:none;line-height:1.2}
+.roster-value{padding-bottom:0}
+.roster-value::after{display:none}
+.roster-value b{color:#205541}
+.roster-card-body{row-gap:4px;grid-template-rows:auto auto}
+.roster-attributes{align-self:start}
+
+.unlock-progress,.collection-progress{display:flex;align-items:center;gap:12px;margin:4px 0 8px}
+.unlock-progress progress,.collection-progress progress{flex:1;min-width:0;height:12px;accent-color:#b42d24}
+.unlock-progress>b,.collection-progress>b{flex:none;color:#102638;font-size:18px}
+.game-screen.comic-dialog-layer .unlocks-panel>p{font-size:13px;margin:5px 0 12px;line-height:1.5}
+.unlocks-panel>.unlock-card{padding:8px;gap:9px}
+.unlock-card>div{flex:1}
+.unlock-card>small{flex:none;margin-left:auto;white-space:nowrap}
+.unlock-card>.product-image{width:60px;height:67px}
+.game-screen.comic-dialog-layer .unlock-card h3{font-size:16px;margin:0}
+
+/* 图鉴先实装身份保护、接口头像和独立档案；两套完整美术方案另附预览。 */
+.contract-collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.game-screen .contract-collection>button{display:flex;flex-direction:column;align-items:stretch;gap:0;padding:4px;border:2px solid #263d49;background:#efe1c2;color:#102638;border-radius:3px;box-shadow:2px 3px 0 #8a785d;min-width:0}
+.contract-collection .collection-photo{width:100%;aspect-ratio:1.2;height:auto;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:radial-gradient(#ddc89f 1px,transparent 1.5px) 0 0/5px 5px,linear-gradient(135deg,#e6d2a9,#b8ac8e)}
+.contract-collection .collection-photo>img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(1px 0 #fff0d0) drop-shadow(-1px 0 #fff0d0) drop-shadow(2px 3px #10263888)}
+.contract-collection>button>b{font-size:clamp(11px,2.7cqw,16px);line-height:1.4;padding:6px 2px;min-height:2.8em;display:grid;place-items:center}
+.game-screen .contract-collection>button:disabled{opacity:1;cursor:default;background:#bbc0bb;border-color:#50606a;color:#58656a;box-shadow:none}
+.contract-collection .collection-locked .collection-photo{background:radial-gradient(#50616a55 1px,transparent 1.5px) 0 0/5px 5px,#1e303a}
+.collection-unknown{height:100%;width:100%;fill:#0d1920;filter:grayscale(1) brightness(.7)}
+.collection-unknown text{fill:#6e7d83;font:bold 30px sans-serif}
+.collection-detail>header{display:flex;align-items:center;gap:15px}
+.collection-detail>header>.collection-photo{width:40%;display:block;aspect-ratio:1.2;background:radial-gradient(#9e8b6933 1px,transparent 1px) 0 0/4px 4px,#ded0ac;border:3px double #102638}
+.collection-detail .collection-photo>img{width:100%;height:100%;object-fit:contain;object-position:bottom;filter:drop-shadow(2px 2px #10263855)}
+.collection-detail>header h3{font-size:clamp(20px,5cqw,30px)}
+.game-screen .collection-detail .collection-requirements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:16px 0;border:0;background:none}
+.collection-requirements>div{padding:10px 5px;border:1px solid #998764;background:#eee0bd;text-align:center}
+.game-screen .collection-requirements dt{font-size:11px;color:#665c4c;padding:0;border:0;text-align:center}
+.game-screen .collection-requirements dd{margin:6px 0 0;font-weight:900;font-size:13px;color:#173c42;padding:0;border:0;text-align:center}
+.collection-detail>section{padding:12px;margin:12px 0;background:#f9edcf;border-left:4px solid #ae3127}
+.collection-detail>section h3{margin:0 0 8px;font-size:18px}
+.game-screen.comic-dialog-layer .collection-detail p{font-size:14px;line-height:1.6;margin:6px 0}
+.collection-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px}
+.collection-stats>div{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:14px}
+.collection-stats progress{grid-column:1/3;width:100%;height:7px;appearance:none;border:0;background:#c8bda8}
+.collection-stats progress::-webkit-progress-bar{background:#c8bda8}
+.collection-stats progress::-webkit-progress-value{background:#205541}
+.collection-stats progress::-moz-progress-bar{background:#205541}
+.collection-detail>.secondary{width:100%;margin-top:12px}
+.collection-photo{position:relative}
+.collection-photo>.template-silhouette{position:absolute;inset:0;width:100%;height:100%}
+.collection-photo>.template-silhouette>span{font-size:11px}
+.game-screen.comic-dialog-layer .contract-panel>.collection-progress{padding:4px 0;margin:0 0 12px;border:0;background:none;box-shadow:none}
+.unlock-progress progress,.collection-progress progress{appearance:none;border:1px solid #9c8762;border-radius:3px;background:#bfb7a6;overflow:hidden}
+.unlock-progress progress::-webkit-progress-bar,.collection-progress progress::-webkit-progress-bar{background:#bfb7a6}
+.unlock-progress progress::-webkit-progress-value,.collection-progress progress::-webkit-progress-value{background:#b42d24}
+.unlock-progress progress::-moz-progress-bar,.collection-progress progress::-moz-progress-bar{background:#b42d24}
+@media(prefers-reduced-motion:reduce){.probability-track{transition:none}}
+.reduce-motion .probability-track{transition:none}
+
+/* 赞助券内容居中在标题以下的可用区域，底部留白。 */
+.score-coupons{justify-content:flex-start;padding-bottom:8px}
+.score-coupons>small{flex:none}
+.score-coupons>div{flex:1;min-height:0;align-items:center;justify-content:center}
+.template-portrait-content{position:absolute;inset:0;display:block;transform-origin:50% 55%}
+.unlocks-panel>.unlock-card:not(.is-unlocked){border-color:#a28f6a;background:#eee2c4;box-shadow:none}
+.unlocks-panel>.unlock-card.is-unlocked{border-color:#a46e20;background:linear-gradient(115deg,#fff2c9,#eee3bd);box-shadow:inset 0 0 0 1px #ffdfa0,inset 0 0 18px #f7ce6b66,0 0 7px #e1b45066}
+.unlock-card.is-unlocked>.product-image{filter:drop-shadow(0 0 5px #eabf6188)}
+.unlock-card .unlock-condition{display:inline-block;margin-right:5px;padding:1px 5px;font-size:10px;font-weight:900;line-height:1.4;color:#f8edce;background:#766b58;border-radius:2px;vertical-align:1px}
+.front-shot-court{transition:box-shadow .7s ease}
+.front-shot-court.hot-court{box-shadow:inset 0 0 35px #ff671532}
+.front-shot-court.hot-court::before{display:none}
+.contract-heat{transition:border-color .42s ease,box-shadow .7s ease}
+.contract-heat.active{border-color:#ffe3a6;box-shadow:0 0 12px #ff5b2d77}
+.contract-heat-track i::after{content:'';position:absolute;inset:0;opacity:0;background:linear-gradient(#ff3f0c,#ff9b16 60%,#ffe078);transition:opacity .42s ease;pointer-events:none}
+.contract-heat.active .contract-heat-track i::after{opacity:1}
+@media(prefers-reduced-motion:reduce){.front-shot-court,.contract-heat,.contract-heat-track i::after{transition:none}}
+
+.contract-heat.active .contract-heat-track i{transition:height .1s linear}.reduce-motion .contract-heat-track i{transition:none}
+@media(prefers-reduced-motion:reduce){.contract-heat.active .contract-heat-track i{transition:none}}
+
+/* Numbers occupy the full space between their title and the progress/bottom edge. */
+.delivery-scoreboard .score-value,.delivery-scoreboard .score-target{display:grid;grid-template-rows:auto minmax(0,1fr);align-items:stretch;justify-content:stretch;padding:4px 8px 0}
+.delivery-scoreboard .score-target{border-radius:0}.score-number{min-width:0;min-height:0;display:flex;align-items:center;justify-content:center}.delivery-scoreboard .score-number>b{flex:none;max-width:100%;padding:0;line-height:1.08;font-size:max(14px,min(var(--number-size,8.3cqw),63px,calc(100cqh - 26px)))}
+.delivery-scoreboard.progress-hidden{grid-template-rows:minmax(0,1fr)}.delivery-scoreboard.progress-hidden .score-progress{display:none}.delivery-scoreboard.progress-hidden .score-coupons{grid-row:1}
+
+.score-value .score-number>b{color:#a5d3f1}.score-target .score-number>b{color:#ff634f}
+
+.game-screen.comic-dialog-layer .shop-coupon-help{flex:none;margin:0 0 9px;padding:8px 10px;border-left:3px solid #b58943;background:#e6d4ad;color:#37453f;font-size:clamp(11px,2.4cqw,14px);line-height:1.55}.shop-coupon-help strong{display:block;color:#16323f;margin-bottom:2px}
+
+/* 器械稀有度：只调整边框，保留普通纸卡。 */
+.equipment-product.rarity-rare{border-color:#267bb4;outline-color:#80bbdf;box-shadow:inset 0 0 0 1px #267bb4,0 3px #061723}
+.equipment-product.rarity-legendary{border-color:#bb811d;outline-color:#f5d47d;box-shadow:inset 0 0 0 1px #d4a13d,0 3px #061723}
+
+/* Coupon counts always show every digit; JS fits the font to the remaining width. */
+.score-coupons>div{min-width:0}.score-coupons b{display:block;flex:1;min-width:0;white-space:nowrap;text-align:center;text-overflow:clip;overflow:visible}
+.score-coupons .sponsor-ticket{flex:none}.score-coupons.many-coupons .sponsor-ticket{width:24%}
+.shop-wallet .wallet-coupon-label{display:flex;align-items:center;gap:6px}
+.game-screen .shop-wallet .coupon-help-button{display:inline-grid;place-items:center;align-self:center;flex:none;width:18px;height:18px;min-height:18px;max-height:18px;min-width:0;padding:0;border:1.5px solid #18313e;border-radius:50%;background:#f8edcf;color:#18313e;font:900 12px/1 Arial;box-shadow:1px 1px #b9a276}
+.equipment-shop .shop-wallet{grid-template-columns:1.5fr 1fr}
+.wallet-coupon-actions{display:flex;align-items:center;gap:8px}
+.game-screen .sponsor-share-button{width:auto;min-width:0;min-height:0;padding:7px 9px;border:2px solid #16323f;background:linear-gradient(110deg,#ffe7a1,#f5c54c);box-shadow:2px 3px #9e8050;color:#16323f;font-size:clamp(10px,2.4cqw,15px);font-weight:900;line-height:1.2;white-space:nowrap}
+.game-screen .sponsor-share-button:disabled{opacity:.65;cursor:wait}
+.coupon-help-dialog .sheet-scroll{padding:14px}
+.coupon-method{display:grid;grid-template-columns:24% minmax(0,1fr);gap:16px;border:3px double #17313e;box-shadow:0 3px #b59a67;padding:14px;margin:0 0 14px;background:#f8ebce}
+.coupon-method:last-child{margin-bottom:0}
+.coupon-method-art{position:relative;display:grid;place-items:center;background:radial-gradient(#42606b 1px,transparent 1px) 0 0/6px 6px,#132e3c;border:3px double #dec994;color:#ffe4a2;min-height:110px}
+.coupon-method-art i{position:absolute;top:-7px;left:-7px;padding:6px;border:2px solid #16323f;border-radius:50%;background:#f1c75c;color:#16323f;font:bold 24px/1 Impact,sans-serif}
+.coupon-method-art .game-icon,.coupon-method-art .sponsor-ticket{width:78%;height:auto}
+.coupon-method h3{margin:0 0 8px;color:#112d3b;font-size:clamp(20px,4.6cqw,32px);font-weight:950}
+.coupon-method h3 small{display:inline-block;vertical-align:middle;background:#205941;color:#fff1cc;padding:4px 7px;font-size:clamp(10px,2.3cqw,14px);white-space:nowrap}
+.coupon-method p{margin:6px 0;font-size:clamp(12px,2.8cqw,17px);line-height:1.6}
+.coupon-method strong{display:block;padding:7px;background:#f5d894;color:#b52b21;font-size:clamp(17px,3.6cqw,24px)}
+.coupon-method .coupon-method-note{color:#645945;font-size:clamp(11px,2.4cqw,14px)}
+.game-screen .coupon-method .sponsor-share-button{width:100%;margin-top:10px;padding:12px;font-size:20px}
+.sponsor-share-error{position:fixed;z-index:500;bottom:24px;left:5%;right:5%;padding:12px 40px 12px 14px;background:#f8ebce;border:2px solid #16323f;box-shadow:3px 4px #9e8050;color:#16323f;font-size:14px}
+.sponsor-share-error button{position:absolute;right:8px;top:6px;min-width:0;padding:4px;background:none;border:0}

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta name="referrer" content="no-referrer" /><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>投篮动画调试台 · 速度与篮球大小</title><link rel="stylesheet" href="./player.css"></head>
+<body><main>
+<header><h1>投篮动画调试台</h1><p>实时调整播放速度和篮球大小，五种结果同步对比。暂停后可拖动进度或逐帧查看。</p></header>
+<section class="controls" aria-label="动画控制">
+<div class="adjustments">
+<div class="adjustment"><label for="speed">播放速度 <output id="speed-label" for="speed speed-number">1.00×</output></label><div class="slider-row"><input id="speed" type="range" min="0.1" max="4" step="0.05" value="1"><input id="speed-number" aria-label="播放速度倍数" type="number" min="0.1" max="4" step="0.05" value="1"><span>×</span></div><small>0.1× 慢放 — 4× 快放</small><div class="presets" aria-label="常用播放速度"><button data-speed=".25">¼ 速</button><button data-speed=".5">½ 速</button><button data-speed="1">原速</button><button data-speed="2">2 倍速</button></div></div>
+<div class="adjustment"><label for="size">篮球大小 <output id="size-label" for="size size-number">100%</output></label><div class="slider-row"><input id="size" type="range" min="25" max="250" step="5" value="100"><input id="size-number" aria-label="篮球大小百分比" type="number" min="25" max="250" step="5" value="100"><span>%</span></div><small>只缩放篮球；场景、篮筐及球路保持不变。</small></div>
+</div>
+<div class="transport"><button id="play" data-needs-assets disabled aria-pressed="false">播放</button><button id="replay" data-needs-assets disabled>从头重播</button><button id="prev" class="secondary" data-needs-assets disabled aria-label="上一帧">← 上一帧</button><button id="next" class="secondary" data-needs-assets disabled aria-label="下一帧">下一帧 →</button><button id="reset" class="secondary">恢复默认</button><label class="loop-label"><input id="loop" type="checkbox" checked>循环播放</label><span class="cycle" id="cycle">—</span></div>
+<div class="timeline"><label for="seek">播放进度</label><input id="seek" type="range" min="0" max="3930" step="1" value="0" data-needs-assets disabled><output id="time" for="seek">0.00 / 3.93 秒</output></div>
+<div class="status-row"><p id="status" role="status">正在加载动画素材…</p><span id="frame">1 / 103 帧</span></div>
+</section>
+<section class="grid" aria-label="五种投篮动画">
+<article style="--accent:#76e7a0"><h2>大成功 · 空心入网</h2><canvas data-kind="great" width="720" height="540" role="img" aria-label="可调的大成功空心入网动画">请使用支持 Canvas 的浏览器。</canvas><p>篮网保持原色；穿网时，一圈断开的绿色漫画弧线和少量短线向外散开。</p></article>
+<article style="--accent:#ead6a2"><h2>成功 · 中央弹筐入网</h2><canvas data-kind="success" width="720" height="540" role="img" aria-label="可调的成功中央弹筐入网动画">请使用支持 Canvas 的浏览器。</canvas><p>命中正中后沿，居中弹起一次再入网；篮球下落渐隐。</p></article>
+<article style="--accent:#a9c2d9"><h2>维持 · 弹筐而出</h2><canvas data-kind="hold" width="720" height="540" role="img" aria-label="可调的维持弹筐而出动画">请使用支持 Canvas 的浏览器。</canvas><p>碰筐后向外弹出，篮球沿下落过程逐渐消失。</p></article>
+<article style="--accent:#e7a266"><h2>轻伤 · 出手失力</h2><canvas data-kind="minor" width="720" height="540" role="img" aria-label="可调的轻伤出手失力动画">请使用支持 Canvas 的浏览器。</canvas><p>球出手后偏向一侧，未到篮筐便落下；轻微震动和痛感短线提示仍可训练。</p></article>
+<article style="--accent:#e36b57"><h2>重伤 · 脱手失衡</h2><canvas data-kind="severe" width="720" height="540" role="img" aria-label="可调的重伤脱手失衡动画">请使用支持 Canvas 的浏览器。</canvas><p>起手时篮球脱手，视角短暂下沉倾斜，红色冲击短线配合“训练终止”提示。</p></article>
+</section>
+<p class="note">调试偏好仅保存在本机浏览器，不影响游戏存档；动画使用当前游戏渲染器和数据。</p>
+<noscript><p>请启用 JavaScript 使用动画调试台。</p></noscript>
+</main><script type="module" src="./player.mjs"></script></body></html>

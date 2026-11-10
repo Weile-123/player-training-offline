@@ -1,0 +1,502 @@
+{
+  "caruso": {
+    "nbaId": 1627936,
+    "name": "Alex Caruso",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1627936.png"
+  },
+  "beverley": {
+    "nbaId": 201976,
+    "name": "Patrick Beverley",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201976.png"
+  },
+  "duncan-robinson": {
+    "nbaId": 1629130,
+    "name": "Duncan Robinson",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1629130.png"
+  },
+  "seth-curry": {
+    "nbaId": 203552,
+    "name": "Seth Curry",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203552.png"
+  },
+  "tucker": {
+    "nbaId": 200782,
+    "name": "P.J. Tucker",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200782.png"
+  },
+  "mcgee": {
+    "nbaId": 201580,
+    "name": "JaVale McGee",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201580.png"
+  },
+  "conley": {
+    "nbaId": 201144,
+    "name": "Mike Conley",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201144.png"
+  },
+  "mccollum": {
+    "nbaId": 203468,
+    "name": "CJ McCollum",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203468.png"
+  },
+  "brook-lopez": {
+    "nbaId": 201572,
+    "name": "Brook Lopez",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201572.png"
+  },
+  "capela": {
+    "nbaId": 203991,
+    "name": "Clint Capela",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203991.png"
+  },
+  "gordon": {
+    "nbaId": 203932,
+    "name": "Aaron Gordon",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203932.png"
+  },
+  "harris": {
+    "nbaId": 202699,
+    "name": "Tobias Harris",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202699.png"
+  },
+  "irving": {
+    "nbaId": 202681,
+    "name": "Kyrie Irving",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202681.png"
+  },
+  "paul-george": {
+    "nbaId": 202331,
+    "name": "Paul George",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202331.png"
+  },
+  "butler": {
+    "nbaId": 202710,
+    "name": "Jimmy Butler III",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202710.png"
+  },
+  "thompson": {
+    "nbaId": 202691,
+    "name": "Klay Thompson",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202691.png"
+  },
+  "draymond": {
+    "nbaId": 203110,
+    "name": "Draymond Green",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203110.png"
+  },
+  "gobert": {
+    "nbaId": 203497,
+    "name": "Rudy Gobert",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203497.png"
+  },
+  "nash": {
+    "nbaId": 959,
+    "name": "Steve Nash",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/959.png"
+  },
+  "bryant": {
+    "nbaId": 977,
+    "name": "Kobe Bryant",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/977.png"
+  },
+  "durant": {
+    "nbaId": 201142,
+    "name": "Kevin Durant",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201142.png"
+  },
+  "leonard": {
+    "nbaId": 202695,
+    "name": "Kawhi Leonard",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202695.png"
+  },
+  "antetokounmpo": {
+    "nbaId": 203507,
+    "name": "Giannis Antetokounmpo",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203507.png"
+  },
+  "jokic": {
+    "nbaId": 203999,
+    "name": "Nikola Jokić",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203999.png"
+  },
+  "curry": {
+    "nbaId": 201939,
+    "name": "Stephen Curry",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201939.png"
+  },
+  "jordan": {
+    "nbaId": 893,
+    "name": "Michael Jordan",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/893.png"
+  },
+  "lebron": {
+    "nbaId": 2544,
+    "name": "LeBron James",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2544.png"
+  },
+  "magic": {
+    "nbaId": 77142,
+    "name": "Magic Johnson",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/77142.png"
+  },
+  "duncan": {
+    "nbaId": 1495,
+    "name": "Tim Duncan",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1495.png"
+  },
+  "oneal": {
+    "nbaId": 406,
+    "name": "Shaquille O'Neal",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/406.png"
+  },
+  "korver": {
+    "nbaId": 2594,
+    "name": "Kyle Korver",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2594.png"
+  },
+  "redick": {
+    "nbaId": 200755,
+    "name": "JJ Redick",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200755.png"
+  },
+  "tony-allen": {
+    "nbaId": 2754,
+    "name": "Tony Allen",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2754.png"
+  },
+  "battier": {
+    "nbaId": 2203,
+    "name": "Shane Battier",
+    "source": "https://a.espncdn.com/i/headshots/nba/players/full/976.png"
+  },
+  "bowen": {
+    "nbaId": 1477,
+    "name": "Bruce Bowen",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1477.png"
+  },
+  "patty-mills": {
+    "nbaId": 201988,
+    "name": "Patty Mills",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201988.png"
+  },
+  "dell-curry": {
+    "nbaId": 209,
+    "name": "Dell Curry",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/209.png"
+  },
+  "livingston": {
+    "nbaId": 2733,
+    "name": "Shaun Livingston",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2733.png"
+  },
+  "haslem": {
+    "nbaId": 2617,
+    "name": "Udonis Haslem",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2617.png"
+  },
+  "birdman": {
+    "nbaId": 2365,
+    "name": "Chris Andersen",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2365.png"
+  },
+  "steven-adams": {
+    "nbaId": 203500,
+    "name": "Steven Adams",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203500.png"
+  },
+  "danny-green": {
+    "nbaId": 201980,
+    "name": "Danny Green",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201980.png"
+  },
+  "joe-harris": {
+    "nbaId": 203925,
+    "name": "Joe Harris",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203925.png"
+  },
+  "jose-calderon": {
+    "nbaId": 101181,
+    "name": "Jose Calderon",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/101181.png"
+  },
+  "jrue": {
+    "nbaId": 201950,
+    "name": "Jrue Holiday",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201950.png"
+  },
+  "rondo": {
+    "nbaId": 200765,
+    "name": "Rajon Rondo",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200765.png"
+  },
+  "rubio": {
+    "nbaId": 201937,
+    "name": "Ricky Rubio",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201937.png"
+  },
+  "lowry": {
+    "nbaId": 200768,
+    "name": "Kyle Lowry",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200768.png"
+  },
+  "kemba": {
+    "nbaId": 202689,
+    "name": "Kemba Walker",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202689.png"
+  },
+  "lou-williams": {
+    "nbaId": 101150,
+    "name": "Lou Williams",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/101150.png"
+  },
+  "jason-terry": {
+    "nbaId": 1891,
+    "name": "Jason Terry",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1891.png"
+  },
+  "ariza": {
+    "nbaId": 2772,
+    "name": "Trevor Ariza",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2772.png"
+  },
+  "iguodala": {
+    "nbaId": 2738,
+    "name": "Andre Iguodala",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2738.png"
+  },
+  "shawn-marion": {
+    "nbaId": 1890,
+    "name": "Shawn Marion",
+    "source": "https://a.espncdn.com/i/headshots/nba/players/full/510.png"
+  },
+  "millsap": {
+    "nbaId": 200794,
+    "name": "Paul Millsap",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200794.png"
+  },
+  "ibaka": {
+    "nbaId": 201586,
+    "name": "Serge Ibaka",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201586.png"
+  },
+  "deandre-jordan": {
+    "nbaId": 201599,
+    "name": "DeAndre Jordan",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201599.png"
+  },
+  "valanciunas": {
+    "nbaId": 202685,
+    "name": "Jonas Valanciunas",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/202685.png"
+  },
+  "trae": {
+    "nbaId": 1629027,
+    "name": "Trae Young",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1629027.png"
+  },
+  "derrick-rose": {
+    "nbaId": 201565,
+    "name": "Derrick Rose",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201565.png"
+  },
+  "tony-parker": {
+    "nbaId": 2225,
+    "name": "Tony Parker",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2225.png"
+  },
+  "gilbert-arenas": {
+    "nbaId": 2240,
+    "name": "Gilbert Arenas",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2240.png"
+  },
+  "booker": {
+    "nbaId": 1626164,
+    "name": "Devin Booker",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1626164.png"
+  },
+  "donovan-mitchell": {
+    "nbaId": 1628378,
+    "name": "Donovan Mitchell",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1628378.png"
+  },
+  "bradley-beal": {
+    "nbaId": 203078,
+    "name": "Bradley Beal",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203078.png"
+  },
+  "derozan": {
+    "nbaId": 201942,
+    "name": "DeMar DeRozan",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201942.png"
+  },
+  "grant-hill": {
+    "nbaId": 255,
+    "name": "Grant Hill",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/255.png"
+  },
+  "peja": {
+    "nbaId": 978,
+    "name": "Peja Stojakovic",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/978.png"
+  },
+  "kevin-love": {
+    "nbaId": 201567,
+    "name": "Kevin Love",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201567.png"
+  },
+  "aldridge": {
+    "nbaId": 200746,
+    "name": "LaMarcus Aldridge",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/200746.png"
+  },
+  "chris-bosh": {
+    "nbaId": 2547,
+    "name": "Chris Bosh",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2547.png"
+  },
+  "ben-wallace": {
+    "nbaId": 1112,
+    "name": "Ben Wallace",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1112.png"
+  },
+  "lillard": {
+    "nbaId": 203081,
+    "name": "Damian Lillard",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203081.png"
+  },
+  "chris-paul": {
+    "nbaId": 101108,
+    "name": "Chris Paul",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/101108.png"
+  },
+  "westbrook": {
+    "nbaId": 201566,
+    "name": "Russell Westbrook",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201566.png"
+  },
+  "harden": {
+    "nbaId": 201935,
+    "name": "James Harden",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/201935.png"
+  },
+  "wade": {
+    "nbaId": 2548,
+    "name": "Dwyane Wade",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2548.png"
+  },
+  "iverson": {
+    "nbaId": 947,
+    "name": "Allen Iverson",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/947.png"
+  },
+  "mcgrady": {
+    "nbaId": 1503,
+    "name": "Tracy McGrady",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1503.png"
+  },
+  "vince-carter": {
+    "nbaId": 1713,
+    "name": "Vince Carter",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1713.png"
+  },
+  "paul-pierce": {
+    "nbaId": 1718,
+    "name": "Paul Pierce",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1718.png"
+  },
+  "carmelo": {
+    "nbaId": 2546,
+    "name": "Carmelo Anthony",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2546.png"
+  },
+  "nowitzki": {
+    "nbaId": 1717,
+    "name": "Dirk Nowitzki",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1717.png"
+  },
+  "pau-gasol": {
+    "nbaId": 2200,
+    "name": "Pau Gasol",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/2200.png"
+  },
+  "embiid": {
+    "nbaId": 203954,
+    "name": "Joel Embiid",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203954.png"
+  },
+  "anthony-davis": {
+    "nbaId": 203076,
+    "name": "Anthony Davis",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/203076.png"
+  },
+  "oscar": {
+    "nbaId": 600015,
+    "name": "Oscar Robertson",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/600015.png"
+  },
+  "isiah": {
+    "nbaId": 78318,
+    "name": "Isiah Thomas",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/78318.png"
+  },
+  "stockton": {
+    "nbaId": 304,
+    "name": "John Stockton",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/304.png"
+  },
+  "jerry-west": {
+    "nbaId": 78497,
+    "name": "Jerry West",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/78497.png"
+  },
+  "ray-allen": {
+    "nbaId": 951,
+    "name": "Ray Allen",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/951.png"
+  },
+  "reggie-miller": {
+    "nbaId": 397,
+    "name": "Reggie Miller",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/397.png"
+  },
+  "bird": {
+    "nbaId": 1449,
+    "name": "Larry Bird",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/1449.png"
+  },
+  "erving": {
+    "nbaId": 76681,
+    "name": "Julius Erving",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/76681.png"
+  },
+  "pippen": {
+    "nbaId": 937,
+    "name": "Scottie Pippen",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/937.png"
+  },
+  "garnett": {
+    "nbaId": 708,
+    "name": "Kevin Garnett",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/708.png"
+  },
+  "karl-malone": {
+    "nbaId": 252,
+    "name": "Karl Malone",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/252.png"
+  },
+  "hakeem": {
+    "nbaId": 165,
+    "name": "Hakeem Olajuwon",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/165.png"
+  },
+  "kareem": {
+    "nbaId": 76003,
+    "name": "Kareem Abdul-Jabbar",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/76003.png"
+  },
+  "wilt": {
+    "nbaId": 76375,
+    "name": "Wilt Chamberlain",
+    "source": "https://cdn.nba.com/headshots/nba/latest/260x190/76375.png"
+  }
+}

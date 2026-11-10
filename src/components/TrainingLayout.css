@@ -1,0 +1,86 @@
+/* Main training view only; preserve shared cards and landscape court controls. */
+.training-layout.contract-game .game-viewport{grid-template-rows:min(8cqh,calc(var(--layout-width)*.14)) min(12cqh,calc(var(--layout-width)*.235)) min(20cqh,calc(var(--layout-width)*.31)) min(7cqh,54px,calc(var(--layout-width)*.12)) minmax(0,1fr) var(--dock-height)}
+.training-layout .game-player{grid-row:3;grid-template-columns:minmax(0,1fr);gap:0;padding:.6cqh 1.7% .6cqh}
+.training-layout .game-viewport>.probability-panel{grid-row:4}
+.training-layout .game-stage{grid-row:5}
+.training-layout .player-value-card{display:grid;grid-template-rows:minmax(0,1fr) 38%;min-width:0;min-height:0;background:linear-gradient(#f2e3c3,#f2e3c3) padding-box,var(--tier-metal) border-box;border:4px solid transparent;border-radius:0;box-shadow:0 0 0 2px #25383d,inset 0 0 0 2px #765136,inset 0 0 0 4px #f9e8c8;overflow:hidden}
+.training-layout .player-value-card .star-template-panel{grid-template-columns:23% minmax(0,1fr) 25% 18%;grid-template-rows:minmax(0,1fr);gap:0 1.5%;padding:6px;border:0;box-shadow:none;background:transparent;overflow:visible}
+.training-layout .player-value-card .star-template-panel[data-tier]{border:0;box-shadow:none;background:transparent;animation:none}
+.training-layout .player-value-card .star-template-panel[data-tier]::before,.training-layout .player-value-card .star-template-panel[data-tier]::after{content:none}
+.training-layout .player-value-card[data-tier=legend]{--tier-metal:conic-gradient(from var(--legend-angle),#fa675d,#ffc14c,#a2da59,#40c7bb,#4c9fe8,#a17ce5,#eb77ba,#fa675d);animation:legend-border-orbit 6s linear infinite}
+.training-layout.reduce-motion .player-value-card[data-tier=legend]{animation:none}
+@media(prefers-reduced-motion:reduce){.training-layout .player-value-card[data-tier=legend]{animation:none}}
+.training-layout .template-portrait-slot{position:absolute;top:6px;left:6px;width:22%;height:calc(100% / .62 - 12px);grid-column:auto;grid-row:auto;align-self:auto}
+.training-layout .template-portrait-slot .template-portrait-content{inset:1px}
+.training-layout .template-main-identity{--template-name-max:min(4.7cqw,28cqh);justify-content:center;gap:4%;overflow:visible}
+.training-layout .template-main-identity>small.template-heading{flex-wrap:wrap;font-size:min(2.3cqw,10cqh);gap:2px}
+.training-layout .template-identity-meta{flex-wrap:wrap}
+.training-layout .template-main-identity>strong{max-height:none;flex-shrink:0;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.12}
+.training-layout .template-identity-meta{font-size:min(3.1cqw,15cqh)}
+.training-layout.game-screen .template-identity-meta>.template-share-button{font-size:min(2.8cqw,14cqh)}
+.training-layout .player-value-amount>.fitted-amount>span{display:inline-block;flex:none;line-height:1.2;padding:2px 3px 4px 0}
+.training-layout .template-live-rating{grid-column:4;grid-row:1;border-left:1px solid #142b36;padding-left:1.3cqw;gap:4%;justify-content:space-between}
+.training-layout .template-live-rating>small{font-weight:950;font-size:min(2.8cqw,14cqh)}
+.training-layout .template-live-rating>b{box-sizing:border-box;margin:0;max-height:none;width:100%;flex:1;border:3px double #d4ad58;border-radius:5px;background:radial-gradient(circle at center,#22648355 0 1px,transparent 1.3px) right bottom/5px 5px,linear-gradient(130deg,#071923,#0e2e41);box-shadow:0 0 0 1px #10232e,inset 0 0 0 1px #07151d;color:#5cdda4;font-style:normal;font-size:min(7.4cqw,38cqh);letter-spacing:-.04em;text-shadow:1px 2px 0 #030f17}
+.training-layout .template-live-stats{grid-column:3;grid-row:1;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));grid-auto-flow:column;border-top:0;gap:2px 0;align-self:center;height:80%}
+.training-layout .template-live-stats>span{flex-direction:row;gap:7%;border-right:0}
+.training-layout .template-live-stats>span:nth-child(-n+3){border-right:1px solid #bca574}
+.training-layout .template-live-stats small{font-size:min(2.4cqw,13cqh);font-weight:850}
+.training-layout .template-live-stats b{font-size:min(4.1cqw,22cqh)}
+.training-layout.contract-game .game-viewport{--dock-height:calc(var(--items-height) + 10px + var(--action-height))}
+.training-layout .contract-clean-dock .consumable-bar{top:7px}
+.training-layout .player-value-footer{display:grid;grid-template-columns:minmax(0,1fr) 42%;align-items:stretch;gap:2%;margin:0 6px 0 25%;padding:2px 0 4px;border-top:2px solid #18313e;min-width:0;min-height:0}
+.training-layout .player-value-amount{display:flex;align-items:center;gap:2%;min-width:0;color:#0b2432;overflow:hidden}
+.training-layout .player-value-amount>small{flex:none;align-self:flex-start;margin-top:3%;font-weight:950;font-size:clamp(9px,2.3cqw,16px);line-height:1.2}
+.training-layout .player-value-amount>.fitted-amount{display:flex;align-items:center;flex:1;min-width:0;min-height:0;height:100%;box-sizing:border-box;overflow:visible;font:950 min(8.7cqw,6.4cqh)/1.2 Impact,'Arial Narrow',sans-serif;letter-spacing:-.04em;white-space:nowrap}
+.training-layout .player-value-amount>small{color:#0b2432}
+.training-layout .value-tone-black>.fitted-amount{color:#101820}
+.training-layout .value-tone-bronze>.fitted-amount{color:#965322}
+.training-layout .value-tone-silver>.fitted-amount{color:#79848e;text-shadow:0 1px 0 #fff3d7}
+.training-layout .value-tone-gold>.fitted-amount{color:#b67a08;text-shadow:0 1px 0 #ffe9a2}
+.training-layout .value-tone-red>.fitted-amount{color:#c62e24}
+.training-layout .value-tone-rainbow>.fitted-amount{color:#9c258d}
+.training-layout .player-value-amount>.fitted-amount>span{-webkit-text-stroke:1px #302518;paint-order:stroke fill}
+.training-layout .player-value-amount>.fitted-amount{filter:drop-shadow(2px 2px 0 #071923)}
+.training-layout .value-tone-black>.fitted-amount>span{-webkit-text-stroke:.5px #101820}
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+ .training-layout .value-tone-rainbow>.fitted-amount>span{color:transparent;background:linear-gradient(110deg,#f22c55,#f9ac16,#24b883,#1a9ef2,#b853ec,#ff427d,#f22c55);background-size:300% 200%;background-clip:text;-webkit-background-clip:text;animation:value-fluid 6s ease-in-out infinite alternate}
+}
+@keyframes value-fluid{from{background-position:0% 20%}to{background-position:100% 80%}}
+.training-layout .value-tone-bronze{--value-silk:linear-gradient(165deg,#ad6d38 5%,#c98b50 35%,#eac08c 43%,#cf945b 49%,#b97b43 65%,#d49d64 95%)}
+.training-layout .value-tone-silver{--value-silk:linear-gradient(165deg,#8d9dad 5%,#bbc8d2 35%,#e4edf4 43%,#c1ced8 49%,#9baebb 65%,#c6d2dc 95%)}
+.training-layout .value-tone-gold{--value-silk:linear-gradient(165deg,#ce981d 5%,#e8b934 35%,#ffe499 43%,#efc44c 49%,#d6a525 65%,#f1ce60 95%)}
+.training-layout .value-tone-red{--value-silk:linear-gradient(165deg,#cf3039 5%,#e64b50 35%,#ff9690 43%,#ed5e60 49%,#d83a44 65%,#ef6968 95%)}
+@supports ((background-clip:text) or (-webkit-background-clip:text)){
+ .training-layout :is(.value-tone-bronze,.value-tone-silver,.value-tone-gold,.value-tone-red)>.fitted-amount{ text-shadow:none;filter:drop-shadow(2px 2px 0 #38271d)}
+ .training-layout :is(.value-tone-bronze,.value-tone-silver,.value-tone-gold,.value-tone-red)>.fitted-amount>span{color:transparent;background-image:var(--value-silk);background-clip:text;-webkit-background-clip:text}
+ .training-layout .value-tone-rainbow>.fitted-amount{filter:drop-shadow(2px 2px 0 #38271d)}
+}
+.training-layout.reduce-motion .value-tone-rainbow>.fitted-amount>span{animation:none}
+@media(prefers-reduced-motion:reduce){.training-layout .value-tone-rainbow>.fitted-amount>span{animation:none}}
+.training-layout .player-value-footer .sell-shortcut{grid-column:auto;flex-direction:row;gap:5%;min-width:0;min-height:0;margin:0;padding:2px 5px;border:3px double #f5dbab;border-radius:4px;background:linear-gradient(110deg,#d43c29,#a8201b);box-shadow:inset 0 0 0 1px #601b18,1px 2px 0 #102532;color:#fff0ce;clip-path:none}
+.training-layout .player-value-footer .sell-shortcut>span{font-size:clamp(12px,3.6cqw,25px);font-weight:950;white-space:nowrap}
+.training-layout .player-value-footer .sell-shortcut>i{font-size:4cqw;font-style:normal}
+.training-layout .score-roster-controls{grid-column:3;grid-row:1/3;position:relative;z-index:1;padding:3px 4px 3px 7px;border-left:1px solid #d9c89f;min-height:0}
+.training-layout .delivery-scoreboard.progress-hidden .score-roster-controls{grid-row:1}
+.training-layout .score-roster-controls .player-shortcuts{height:100%;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:repeat(2,minmax(0,1fr));gap:5px}
+.training-layout .score-roster-controls .paper-panel{display:grid;grid-template-columns:22% minmax(0,1fr) auto;align-items:center;justify-items:center;gap:3px;padding:3px 5px;min-height:0;border:3px double #e7c98e;border-radius:5px;box-shadow:inset 0 0 0 1px #142d3c,0 2px 0 #050f17;background:linear-gradient(#193e51,#0c2637);color:#fff0c8;clip-path:none}
+.training-layout .score-roster-controls .paper-panel::before,.training-layout .score-roster-controls .paper-panel::after{content:none}
+.training-layout .score-roster-controls .paper-panel>span{font-size:clamp(10px,2.6cqw,18px);font-weight:900;white-space:nowrap}
+.training-layout .score-roster-controls .paper-panel .game-icon{width:100%;height:auto;max-height:100%}
+.training-layout .score-roster-controls .paper-panel>b{font-size:clamp(13px,3.8cqw,26px);color:#f5c655;letter-spacing:0}
+.training-layout .score-roster-controls .paper-panel:active,.training-layout .sell-shortcut:active:not(:disabled){transform:translateY(1px);box-shadow:none}
+.training-layout .score-roster-controls .paper-panel:focus-visible{outline:2px solid #fff0c8;outline-offset:2px}
+/* Offset alpha outlines avoid the sharp miter spikes on Chinese currency units. */
+.training-layout .player-value-amount>.fitted-amount>span{-webkit-text-stroke:0;filter:drop-shadow(1px 0 0 #302518) drop-shadow(-1px 0 0 #302518) drop-shadow(0 1px 0 #302518) drop-shadow(0 -1px 0 #302518)}
+.training-layout .value-tone-black>.fitted-amount,.training-layout .value-tone-black>.fitted-amount>span{filter:none;text-shadow:none;-webkit-text-stroke:0}
+@container game-shell (min-aspect-ratio:11/10){
+ .training-layout.contract-game .game-viewport{grid-template-rows:12% 19% minmax(0,1fr) min(12cqh,54px) var(--dock-height)}
+ .training-layout .game-player{grid-area:3/1}
+ .training-layout .game-stage{grid-area:1/2/6/3}
+ .training-layout .game-viewport>.probability-panel{grid-area:4/1}
+ .training-layout .player-value-amount{flex-direction:column;align-items:stretch;justify-content:center}
+ .training-layout .player-value-amount>small{margin:0}
+ .training-layout .player-value-amount>.fitted-amount{flex:0 1 auto;font-size:min(4.8cqw,5cqh)}
+ .training-layout .player-value-footer .sell-shortcut>span{font-size:clamp(11px,2cqw,20px)}
+}

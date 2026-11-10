@@ -1,0 +1,13 @@
+.dev-console{display:grid;gap:10px}
+.game-screen .dev-console-note{margin:0;font-size:12px;line-height:1.6;color:#63563e}
+.dev-console-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 10px;border:1px solid #ad9564;background:#fff4d6}
+.dev-console-row>div{display:grid;gap:4px;min-width:0}
+.dev-console-row strong{font-size:16px;color:#102a38}
+.dev-console-row small{font-size:12px;line-height:1.4;color:#695d44}
+.game-screen .dev-console-row button{flex-shrink:0;min-width:84px;padding:9px 10px;border:2px solid #102a38;background:#102a38;color:#f7e6be;font-size:14px;font-weight:800;border-radius:3px}
+.game-screen .dev-console-row button[aria-pressed=true]{background:#235c48;border-color:#235c48}
+.dev-console-inventory{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.dev-console-inventory span{display:flex;justify-content:space-between;gap:4px;padding:6px;background:#e4d5b2;font-size:12px}
+.dev-console-inventory b{color:#a82e24}
+.game-screen .dev-console-feedback{min-height:20px;margin:0;color:#235c48;font-size:13px;font-weight:700}
+.game-screen .dev-console-row button:disabled{opacity:.45;cursor:not-allowed}

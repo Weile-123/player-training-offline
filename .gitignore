@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.npm-cache/
+.tmp/
+*.tsbuildinfo
+logs/
+output/
+/hupu-ai-game-skills/
+
+.env*
+credentials.json
+env-detail.json
+debug-context.json
+debug-logs.json

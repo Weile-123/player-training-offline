@@ -1,0 +1,105 @@
+/* One palette for template badges and the court / roster / lounge card frames.
+   Tier IDs and matching thresholds deliberately remain independent of labels. */
+[data-tier]{--tier-ink:#37444b;--tier-edge:#858c8d;--tier-light:#e1e2dd;--tier-metal:linear-gradient(135deg,#a8aead,#e1e2dd 46%,#838e90);--tier-corner:0px;--tier-line:0px}
+[data-tier=rotation]{--tier-ink:#492b1d;--tier-edge:#a46742;--tier-light:#f3d1a0;--tier-metal:linear-gradient(125deg,#855033,#e7b882 37%,#f7dec0 48%,#ad714b 70%,#875035)}
+[data-tier=starter]{--tier-ink:#233641;--tier-edge:#7d929e;--tier-light:#fffdf2;--tier-metal:linear-gradient(125deg,#718b9a,#f5f5e8 30%,#b7c8ce 48%,#fcfff7 67%,#7c929f);--tier-corner:17px;--tier-line:2px}
+[data-tier=star]{--tier-ink:#573516;--tier-edge:#b57f28;--tier-light:#fff2b4;--tier-metal:linear-gradient(125deg,#99702c,#efc76c 23%,#fff4bc 44%,#cb9434 65%,#f5d88b 84%,#9c702a);--tier-corner:24px;--tier-line:3px}
+[data-tier=superstar]{--tier-ink:#fff1ff;--tier-edge:#8850ad;--tier-light:#edcaff;--tier-metal:linear-gradient(125deg,#664184,#ac79c7 25%,#f0d1ff 43%,#8a50ad 61%,#d8b6ef 82%,#674081);--tier-corner:29px;--tier-line:3px}
+[data-tier=legend]{--tier-ink:#182b34;--tier-edge:#b27e49;--tier-light:#fff1bd;--tier-metal:linear-gradient(115deg,#edb968,#f4dfa5 14%,#a2dbc9 29%,#a7c7ed 44%,#c1a3df 57%,#eca6a5 73%,#f5d489 88%,#c5e2b7);--tier-corner:34px;--tier-line:3px}
+
+.star-template-panel[data-tier],.contract-panel .roster-card[data-tier]{
+ position:relative;isolation:isolate;border:3px solid transparent;
+ background:linear-gradient(#f1e2c6,#f1e2c6) padding-box,var(--tier-metal) border-box;
+ box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #142a34,2px 3px 0 #081922;
+}
+.contract-panel .roster-card[data-tier]{background:linear-gradient(#f4e6cc,#f4e6cc) padding-box,var(--tier-metal) border-box}
+.star-template-panel[data-tier=undiscovered],.contract-panel .roster-card[data-tier=undiscovered]{box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #96958a,2px 3px 0 #081922}
+.star-template-panel[data-tier=rotation],.contract-panel .roster-card[data-tier=rotation]{box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #784c34,inset 0 0 0 3px #ead1ab,2px 3px 0 #081922}
+.star-template-panel[data-tier=star],.contract-panel .roster-card[data-tier=star],
+.star-template-panel[data-tier=superstar],.contract-panel .roster-card[data-tier=superstar],
+.star-template-panel[data-tier=legend],.contract-panel .roster-card[data-tier=legend]{box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #142a34,inset 0 0 0 3px var(--tier-light),inset 0 0 0 4px var(--tier-edge),2px 3px 0 #081922}
+/* Foil corner brackets sit entirely inside the existing padding. */
+.star-template-panel[data-tier]::before,.contract-panel .roster-card[data-tier]::before{
+ content:'';position:absolute;inset:4px;z-index:2;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(var(--tier-edge),var(--tier-edge)) left top/var(--tier-corner) var(--tier-line),linear-gradient(var(--tier-edge),var(--tier-edge)) left top/var(--tier-line) var(--tier-corner),linear-gradient(var(--tier-edge),var(--tier-edge)) right top/var(--tier-corner) var(--tier-line),linear-gradient(var(--tier-edge),var(--tier-edge)) right top/var(--tier-line) var(--tier-corner),linear-gradient(var(--tier-edge),var(--tier-edge)) left bottom/var(--tier-corner) var(--tier-line),linear-gradient(var(--tier-edge),var(--tier-edge)) left bottom/var(--tier-line) var(--tier-corner),linear-gradient(var(--tier-edge),var(--tier-edge)) right bottom/var(--tier-corner) var(--tier-line),linear-gradient(var(--tier-edge),var(--tier-edge)) right bottom/var(--tier-line) var(--tier-corner);
+ background-repeat:no-repeat;
+}
+.star-template-panel[data-tier=legend]::after,.contract-panel .roster-card[data-tier=legend]::after{
+ content:'';position:absolute;inset:0;pointer-events:none;z-index:3;
+}
+.star-template-panel[data-tier=legend]::after,.contract-panel .roster-card[data-tier=legend]::after{background:var(--tier-metal) center top/65% 4px,var(--tier-metal) center bottom/65% 4px;background-repeat:no-repeat}
+.star-template-panel[data-tier] .template-portrait-slot{border-color:var(--tier-edge);box-shadow:0 0 0 1px #192d34,1px 2px 0 var(--tier-light)}
+.roster-card[data-tier] .roster-portrait{border-color:var(--tier-edge)}
+.star-template-panel[data-tier] .template-identity-meta>b,
+.contract-panel .roster-card[data-tier] .roster-identity h3 small,
+.album-tier[data-tier]{
+ color:var(--tier-ink);background:var(--tier-metal);border:1px solid var(--tier-edge);
+ box-shadow:inset 0 1px 0 #fff7,0 1px 0 #13232e33;text-shadow:0 1px 0 #ffffff30;
+ font-style:normal;font-weight:950;
+}
+.album-tier[data-tier=superstar],.star-template-panel[data-tier=superstar] .template-identity-meta>b,.contract-panel .roster-card[data-tier=superstar] .roster-identity h3 small{background:linear-gradient(120deg,#653c82,#9a61bb,#694384);text-shadow:0 1px 1px #3a204c}
+.collection-locked .album-tier[data-tier]{filter:saturate(.55);opacity:.85}
+
+/* Bronze labels keep their metallic hue while using consistently dark ink. */
+.star-template-panel[data-tier=rotation] .template-identity-meta>b,
+.contract-panel .roster-card[data-tier=rotation] .roster-identity h3 small,
+.album-tier[data-tier=rotation]{background:linear-gradient(120deg,#c99865,#f0c993 48%,#cf9f6c);color:#29190e;text-shadow:none;border-color:#875431}
+
+@property --legend-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+@keyframes legend-border-orbit{to{--legend-angle:360deg}}
+.star-template-panel[data-tier=legend],.contract-panel .roster-card[data-tier=legend]{
+ --tier-metal:conic-gradient(from var(--legend-angle),#fa675d,#ffc14c,#a2da59,#40c7bb,#4c9fe8,#a17ce5,#eb77ba,#fa675d);
+ animation:legend-border-orbit 6s linear infinite;
+}
+.star-template-panel[data-tier=legend]::after,.contract-panel .roster-card[data-tier=legend]::after{
+ inset:0;padding:3px;border-radius:inherit;background:var(--tier-metal);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+}
+.star-template-panel[data-tier=legend] .template-identity-meta>b,.contract-panel .roster-card[data-tier=legend] .roster-identity h3 small,.album-tier[data-tier=legend]{background:linear-gradient(115deg,#ffc58a,#bce6bb,#abd4ef,#d0b4ec,#f1b1c6);color:#182b34}
+@media(prefers-reduced-motion:reduce){.star-template-panel[data-tier=legend],.contract-panel .roster-card[data-tier=legend]{animation:none}}
+.reduce-motion .star-template-panel[data-tier=legend],.reduce-motion .roster-card[data-tier=legend]{animation:none}
+
+/* Collection frames share the court palette; the portrait and paper stay still. */
+.game-screen .album-grid>.album-card[data-tier]{
+ border-color:transparent;
+ background:var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover padding-box,linear-gradient(#eddbb3,#eddbb3) padding-box,var(--tier-metal) border-box;
+ box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px var(--tier-light),1px 2px 0 #081922;
+}
+/* Matte dark bronze versus bright gold: distinguish tiers even at thumbnail size. */
+.game-screen .album-grid>.album-card[data-tier=rotation]{
+ --tier-edge:#78472f;--tier-light:#b87c53;
+ --tier-metal:linear-gradient(125deg,#563526,#a56b45 48%,#65402b);
+ box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #a97451,1px 2px 0 #081922;
+}
+.game-screen .album-grid>.album-card[data-tier=star]{
+ --tier-edge:#e9ad16;--tier-light:#fff2a0;
+ --tier-metal:linear-gradient(125deg,#b97d09,#ffd42a 26%,#fff2a0 45%,#eab00d 66%,#ffe55a 85%,#c48a0d);
+ box-shadow:0 0 0 1px #785209,inset 0 0 0 1px #fff2a0,inset 0 0 0 2px #d7a427,0 0 4px #f5c33188,1px 2px 0 #081922;
+}
+.game-screen .album-grid>.album-card[data-tier=legend]{
+ --tier-metal:conic-gradient(from var(--legend-angle),#fa675d,#ffc14c,#a2da59,#40c7bb,#4c9fe8,#a17ce5,#eb77ba,#fa675d);
+ animation:legend-border-orbit 6s linear infinite;
+}
+@media(prefers-reduced-motion:reduce){.game-screen .album-grid>.album-card[data-tier=legend]{animation:none}}
+.reduce-motion .game-screen .album-grid>.album-card[data-tier=legend],
+.game-screen.reduce-motion .album-grid>.album-card[data-tier=legend]{animation:none}
+
+/* All tiers use uninterrupted frames without corner brackets. */
+.star-template-panel[data-tier]::before,.contract-panel .roster-card[data-tier]::before{content:none}
+
+/* Foil frames: restrained edge light, never covering the portrait or text. */
+[data-tier=superstar]{--tier-ink:#fff0df;--tier-edge:#b32c26;--tier-light:#ffc4a3;--tier-metal:linear-gradient(125deg,#8f2423,#d94c36 25%,#ffc0a0 43%,#b22c28 61%,#ee795b 82%,#8f2423)}
+.album-tier[data-tier=superstar],.star-template-panel[data-tier=superstar] .template-identity-meta>b,.contract-panel .roster-card[data-tier=superstar] .roster-identity h3 small{background:linear-gradient(120deg,#a12a24,#d34c34,#a12a24);color:#fff1dc;text-shadow:0 1px 1px #5f1717}
+.star-template-panel[data-tier=star],.contract-panel .roster-card[data-tier=star]{--frame-light:#eaba43aa}
+.star-template-panel[data-tier=superstar],.contract-panel .roster-card[data-tier=superstar]{--frame-light:#ed483f99}
+.star-template-panel[data-tier=legend],.contract-panel .roster-card[data-tier=legend]{--frame-light:#a4cfff88}
+.star-template-panel:is([data-tier=star],[data-tier=superstar],[data-tier=legend]),.contract-panel .roster-card:is([data-tier=star],[data-tier=superstar],[data-tier=legend]){box-shadow:0 0 0 1px #142a34,0 0 9px 1px var(--frame-light),inset 0 0 0 1px #142a34,inset 0 0 0 3px var(--tier-light),inset 0 0 9px 2px var(--frame-light),2px 3px 0 #081922}
+
+/* Shared portrait edges, including dialogs: no clipped upper corners. */
+.game-screen .tier-portrait-frame[data-tier]{
+ box-sizing:border-box;border:3px solid var(--tier-edge);border-image:var(--tier-metal) 1;
+ border-radius:0;clip-path:none;box-shadow:0 0 0 1px #18313e;
+}
+.game-screen .tier-portrait-frame[data-tier=legend]{--tier-metal:linear-gradient(115deg,#ff846b,#ffd45b,#60cfb3,#64b9f6,#bf85ec,#fa8fbc)}
+.game-screen .tier-portrait-frame .album-portrait-surface{clip-path:none}

@@ -1,0 +1,261 @@
+/* 方案 A：局部替换操作区 / 球员卡；其余弹窗保留原来的美漫样式。 */
+.scheme-art{display:block;overflow:hidden;flex:none}
+.rookie-portrait{width:100%;height:100%;object-fit:cover}
+.contract-collection .rookie-portrait{height:90px;width:100%}
+.contract-game .contract-clean-dock{background:#091c27}
+.contract-clean-dock .consumable-bar{left:2.5%;right:2.5%;top:3%;height:29%;gap:1.5%}
+.consumable-scroll{background:#091c27;border:3px solid #f2e1be;border-radius:12px;box-shadow:0 0 0 2px #040d13,2px 4px 0 #0008;gap:5px;padding:5px;scrollbar-width:none}
+.consumable-scroll::-webkit-scrollbar{display:none}
+.game-screen .consumable-slot{flex:0 0 118px;max-height:none;min-height:0;gap:4px;padding:4px;border:0;border-radius:8px;background:#f6e8cc;color:#071722;box-shadow:none;align-items:center;justify-content:space-evenly}
+.consumable-slot .consumable-icon{width:auto;height:90%;max-width:48%;max-height:none;aspect-ratio:.68}
+.consumable-slot .item_004{color:#b63326}
+.consumable-slot>span{display:flex;flex-direction:column;gap:1px;min-width:0}
+.consumable-slot strong{font-size:clamp(10px,1.8cqw,16px);font-weight:900;white-space:nowrap}
+.consumable-slot b{position:static;background:none;color:#09151e;padding:0;font-size:clamp(14px,2.7cqw,22px);line-height:1.1}
+.game-screen .dock-utility{position:relative;flex:0 0 11.5%;max-width:none;min-width:32px;align-self:center;height:82%;padding:7px;border:3px solid #071016;border-radius:10px;background:#f4e4c5;box-shadow:0 0 0 2px #e9d8b5,2px 4px #000b}
+.dock-utility::before{content:'';position:absolute;inset:3px;border:1px solid #0b1720;border-radius:5px;pointer-events:none}
+.dock-utility .game-icon{height:90%;width:90%;max-height:none}
+.game-screen .css-dock-button{border:3px solid #08141c;border-radius:14px;outline:2px solid #e8d5b0;box-shadow:3px 5px 0 #030b10;background:#f1dfbd var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;gap:5%;font-size:clamp(12px,3.5cqw,30px);z-index:1}
+.css-dock-button::before{inset:4px;border:1.5px solid #101920;border-radius:8px}
+.css-dock-button .game-icon{width:23%;height:53%}
+.game-screen .dock-month{left:2.5%;width:32%;top:48%;height:32%}
+.game-screen .dock-rest{left:65.5%;width:32%;top:48%;height:32%}
+.game-screen .dock-shoot{z-index:3}
+.roster-cards{container-type:inline-size}
+.contract-panel .roster-card{padding:12px;border:3px solid #081820;border-radius:14px;background:#f6e7c8 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;box-shadow:inset 0 0 0 3px #f9e9ca,inset 0 0 0 4px #17212a,2px 4px 0 #06131d;overflow:hidden;color:#081b26}
+.roster-card-body{display:grid;grid-template-columns:25% minmax(0,1fr) 25%;grid-template-rows:auto 1fr;gap:8px 12px;align-items:start}
+.roster-card .roster-portrait{grid-row:1/3;display:block;width:100%;height:100%;min-height:114px;overflow:hidden;border:3px solid #071721;border-radius:5px;aspect-ratio:233/255;background:#c9b697}
+.roster-card .roster-portrait img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.roster-identity{min-width:0;padding-top:3px}
+.contract-panel .roster-identity h3{font-size:clamp(16px,4cqw,30px);line-height:1.2;font-weight:950;margin:0;letter-spacing:-.04em}
+.contract-panel .roster-identity h3 small{display:inline-block;vertical-align:middle;font-size:.52em;background:#ba2c22;color:#fff0d6;border-radius:4px;padding:4px 6px;letter-spacing:0;white-space:nowrap;margin-top:3px}
+.contract-panel .roster-identity p{display:flex;align-items:center;gap:5px;flex-wrap:wrap;font-size:clamp(11px,2.5cqw,18px);margin:10px 0 0;line-height:1.2}
+.roster-identity p i{display:block;height:1em;border-left:1px solid #17202a;margin:0 6px}
+.roster-queued{font-size:10px;color:#a53126}
+.roster-value{text-align:right;min-width:0;align-self:start;position:relative;padding:0 0 8px}
+.roster-value small{font-size:clamp(10px,2.4cqw,18px);font-weight:800}
+.roster-value b{display:block;font-family:'Anton','Impact',sans-serif;font-weight:900;font-size:clamp(23px,6.9cqw,56px);line-height:1.15;letter-spacing:-.04em;overflow-wrap:anywhere}
+.roster-value::after{content:'';position:absolute;bottom:0;right:0;width:90%;height:4px;border-radius:5px;background:#b83227;rotate:-3deg}
+.roster-attributes{grid-column:2/4;display:grid;grid-template-columns:1.9fr repeat(6,1fr);align-self:end;border:1.5px solid #b9a484;border-radius:8px;box-shadow:inset 0 1px 5px #ad987b2b;padding:8px 3px;min-width:0}
+.roster-attributes>div{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;border-left:1px solid #b3a083;line-height:1.2}
+.roster-attributes>div:first-child{border-left:0}
+.roster-attributes small{font-size:clamp(9px,1.9cqw,14px);font-weight:800;white-space:nowrap}
+.roster-attributes b{font-family:'Anton','Impact',sans-serif;font-size:clamp(14px,4.1cqw,31px);margin-top:5px;white-space:nowrap}
+.roster-attributes .roster-rating b{font-size:clamp(17px,5.8cqw,45px);color:#b52e25}
+.roster-attributes .roster-rating{background:transparent;color:#081b26;align-self:stretch;padding:0;gap:0}
+.roster-attributes .roster-rating b{font-style:normal;line-height:1.2}
+.roster-attributes .roster-rating small{margin:0;color:#081b26;font-size:clamp(9px,1.9cqw,14px)}
+.game-screen .contract-roster-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.game-screen .contract-roster-actions>button{display:flex;justify-content:center;align-items:center;gap:7px;position:relative;padding:9px 4px;min-height:54px;font-size:clamp(11px,2.85cqw,21px);font-weight:900;border:3px solid #081922;border-radius:10px;background:#f0dfbc;color:#081922;box-shadow:1px 3px 0 #b09a71;line-height:1.15}
+.contract-roster-actions>button::before{content:'';position:absolute;inset:3px;border:1px solid currentColor;border-radius:5px;pointer-events:none}
+.contract-roster-actions .game-icon{width:22%;height:auto;max-width:37px;flex:none}
+.contract-roster-actions>button span{margin:0}
+.game-screen .contract-roster-actions>.primary{color:#fff0d8;background:linear-gradient(120deg,#c52e22,#a6201b)}
+.game-screen .contract-roster-actions>button:disabled{opacity:1;color:#a9aca9;border-color:#8e999a;background:#566772;box-shadow:none;cursor:default}
+.game-screen .contract-roster-actions>button:active:not(:disabled){translate:0 2px;box-shadow:none}
+/* 首页：文字图片与实时存档信息分层。 */
+.contract-home .home-brand{width:100%;height:24cqh;padding-top:1cqh}
+.contract-home .home-background{background-image:url('../public/art/home/background-simple-sky.png');background-size:cover;background-position:center top}
+@media(max-aspect-ratio:1/1){.contract-home .home-background{background-image:url('../public/art/home/background-portrait-simple-sky.png');background-position:center top}}
+.contract-title-image{padding:0;transform:none}
+.home-brand .contract-title-image img{object-position:center top}
+.home-continue.has-progress{display:flex;align-items:center;justify-content:center;gap:2%;height:calc(14 * var(--u));margin:calc(2 * var(--u)) 0 calc(1 * var(--u));padding:0 3%;color:#f5e8cc;background:#071620 var(--asset-art-game-probability-grain-png,url('/art/game/probability-grain.png')) center/cover;border:3px solid #f1e1bf;border-radius:4px;box-shadow:inset 0 0 0 2px #06131d,0 0 0 2px #07131b;clip-path:polygon(3% 0,96% 1%,100% 20%,99% 84%,96% 100%,3% 98%,0 79%,1% 19%)}
+.home-continue.has-progress::before{content:'';position:absolute;inset:3px;border:1px solid #e5d3ad;border-radius:2px;pointer-events:none}
+.home-continue.has-progress>.game-icon{width:11%;height:65%;flex:none}
+.home-continue.has-progress>strong{font-size:clamp(14px,4.5cqw,22px);font-weight:950;white-space:nowrap;text-shadow:1px 2px #000}
+.home-save-progress{display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;border-left:1px solid #8c806d;padding-left:2%;font-size:clamp(9px,2.7cqw,13px);font-weight:800;min-width:0}
+.home-save-progress .credit-hearts{gap:0}
+.home-save-progress .credit-hearts .heart{width:clamp(13px,4.3cqw,21px);height:clamp(13px,4.3cqw,21px)}
+.continue-chevron{font-size:28px;line-height:1;margin-left:auto}
+.home-continue.has-progress{background:#08141c var(--asset-art-home-continue-frame-svg,url('/art/home/continue-frame.svg')) center/100% 100% no-repeat;border:0;box-shadow:none;justify-content:space-between;padding:0 5%}
+.home-continue.has-progress::before{display:none}
+.home-continue.has-progress>strong{font-size:clamp(16px,5.3cqw,26px)}
+.home-save-progress{font-size:clamp(10px,2.9cqw,14px)}
+.continue-chevron{margin-left:0}
+/* 只覆盖名单按钮；优先级高于通用弹窗按钮规则。 */
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>button{display:flex;justify-content:center;align-items:center;gap:7px;padding:9px 4px;min-height:54px;font-size:clamp(11px,2.85cqw,21px);font-weight:900;border:3px solid #081922;border-radius:10px;background:#f0dfbc;color:#081922;box-shadow:1px 3px 0 #b09a71;line-height:1.15}
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>.primary{color:#fff0d8;background:linear-gradient(120deg,#c52e22,#a6201b)}
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>button:disabled{opacity:1;color:#a9aca9;border-color:#8e999a;background:#566772;box-shadow:none}
+.game-screen.comic-dialog-layer .comic-dialog.scheme-roster-dialog{width:min(720px,100%);max-width:none}
+@container(max-width:370px){.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>button{gap:3px;padding:8px 2px;min-height:45px;border-width:2px;font-size:10px}.roster-attributes .roster-rating small{font-size:8px}.contract-roster-actions .game-icon{width:17%;}.roster-card .roster-portrait{min-height:96px}.roster-card-body{grid-template-rows:auto auto}.roster-attributes{padding:6px 1px}}
+@container (max-width:370px){.roster-card-body{grid-template-columns:25% minmax(0,1fr) 26%;gap:6px}.contract-panel .roster-card{padding:9px}.roster-card .roster-portrait{min-height:100px}.contract-panel .roster-identity h3{font-size:15px}.contract-panel .roster-identity p{font-size:10px;gap:3px;margin-top:6px}.roster-identity p i{margin:0 2px}.roster-attributes{padding:7px 0}.roster-attributes small{font-size:8px}.game-screen .contract-roster-actions{gap:5px}.game-screen .contract-roster-actions>button{font-size:11px;gap:3px;min-height:45px;border-width:2px}.roster-value b{font-size:24px}.roster-value small{font-size:10px}}
+@media(max-width:480px){.game-screen .consumable-slot{flex-basis:91px}.consumable-scroll{border-width:2px;border-radius:8px;padding:4px}.game-screen .dock-utility{padding:4px;border-width:2px;border-radius:7px}.game-screen .css-dock-button{border-width:2px;border-radius:9px}.css-dock-button::before{inset:3px;border-width:1px;border-radius:6px}.game-screen .css-dock-button{outline-width:1px}}
+
+/* 固定五格物品 + 独立投篮行。按钮按真实尺寸参与布局，不使用视觉scale挤占上行。 */
+.contract-game .game-viewport{
+ --dock-column-width:var(--layout-width);
+ --dock-reference-width:min(var(--dock-column-width),calc(28cqh * 887 / 442));
+ --shot-width:min(calc(var(--dock-reference-width) * .359 * var(--shoot-button-scale,1)),calc(var(--dock-column-width) * .58),38cqh);
+ --shot-height:calc(var(--shot-width) * .944);
+ --items-height:clamp(46px,calc(var(--dock-reference-width) * .125),80px);
+ --action-height:max(var(--shot-height),58px);
+ --dock-height:calc(var(--items-height) + 6px + var(--action-height));
+ grid-template-rows:min(8cqh,calc(var(--layout-width)*.14)) min(9cqh,calc(var(--layout-width)*.16)) min(18cqh,calc(var(--layout-width)*.30)) minmax(0,1fr) min(7cqh,54px,calc(var(--layout-width)*.145)) var(--dock-height);
+}
+@container game-shell (min-aspect-ratio:11/10){.contract-game .game-viewport{--dock-column-width:calc(var(--layout-width) * .45);grid-template-rows:12% 14% minmax(0,1fr) min(12cqh,54px) var(--dock-height)}}
+.contract-game .contract-clean-dock{padding:0;border-bottom:0}
+.contract-clean-dock .dock-canvas{width:100%;height:100%;aspect-ratio:auto;max-height:none}
+.contract-clean-dock .consumable-bar{top:0;left:2.5%;right:2.5%;height:var(--items-height);gap:1.5%;align-items:stretch}
+.consumable-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));flex:1;min-width:0;gap:3px;padding:4px;border:2px solid #f2e1be;border-radius:10px;background:#091c27;box-shadow:0 0 0 1px #040d13;overflow:hidden}
+.game-screen .consumable-grid .consumable-slot{display:flex;flex-direction:row;min-width:0;width:100%;height:100%;min-height:0;max-height:none;border-radius:5px;gap:2px;padding:2px;overflow:hidden}
+.consumable-grid .consumable-slot .consumable-icon{height:85%;max-width:48%;width:auto;max-height:none}
+.consumable-grid .consumable-slot span{display:flex;flex-direction:column;align-items:center;gap:2px}
+.consumable-grid .consumable-slot strong{font-size:clamp(8px,1.6cqw,12px)}
+.consumable-grid .consumable-slot b{font-size:clamp(10px,2cqw,16px);white-space:nowrap}
+.game-screen .consumable-grid .consumable-slot:disabled{opacity:1;filter:grayscale(1);background:#7b8587;color:#3a4247;cursor:not-allowed}
+.consumable-grid .consumable-slot:disabled .consumable-icon{opacity:.48}
+.contract-clean-dock .dock-utility{height:90%;align-self:center;flex-basis:10%;min-width:28px;padding:4px}
+.contract-clean-dock .dock-shoot{width:var(--shot-width);height:var(--shot-height);top:auto;bottom:0;left:50%;transform:translateX(-50%);z-index:3}
+.contract-clean-dock .dock-month,.contract-clean-dock .dock-rest{top:auto;bottom:calc((var(--action-height) - clamp(38px,calc(var(--action-height) * .48),100px)) / 2);height:clamp(38px,calc(var(--action-height) * .48),100px);max-height:100px;min-height:38px}
+.contract-clean-dock .dock-month{left:2.5%;width:32%}.contract-clean-dock .dock-rest{left:65.5%;width:32%}
+@container (max-width:430px){.consumable-grid{gap:2px;padding:3px}.contract-clean-dock .css-dock-button{font-size:clamp(10px,3.5cqw,20px)}}
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>.signing-confirm{background:#f0b2a7;color:#76231d;border-color:#632822}
+.contract-panel .roster-identity .roster-level{font-family:Impact,'Arial Narrow',sans-serif;font-size:1.65em;font-weight:900;color:#0b1c26;line-height:1}
+.roster-empty{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:24px 16px;margin:16px 0 6px;background:#f3e4c7;border:2px dashed #b19a72;border-radius:10px}
+.roster-empty>.game-icon{width:52px;height:52px;color:#8b795c}
+.roster-empty p{font-size:13px}.roster-empty>button{display:flex;gap:8px;align-items:center;justify-content:center;max-width:270px}
+.consumable-source{padding:12px;background:#efe0bf;border:1px solid #a88e66;border-radius:6px;margin:8px 0 14px}
+.consumable-source p{font-size:12px!important;margin:5px 0 10px}.consumable-source>button{width:100%}
+.home-menu .art-button{border:2px solid #0a1720;border-radius:7px;outline:2px solid #f2dfb9;box-shadow:0 4px 0 #06111c,0 0 0 4px #08151e;background:#ead9b6;overflow:hidden}
+.home-menu .art-button img{object-fit:fill}
+.contract-home .home-menu .home-menu-button{display:grid;grid-template-columns:30% minmax(0,1fr) 8%;gap:2%;align-items:center;padding:5%;color:#0b1419;background:#ead9b6 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;box-shadow:inset 0 0 0 2px #f8eaca,inset 0 0 0 4px #17242b,0 4px 0 #06111c,0 0 0 4px #08151e}
+.home-menu-button .home-menu-ink{display:block;width:100%;height:100%;min-height:0;overflow:hidden;pointer-events:none}
+.home-menu-button .home-menu-label{font:950 calc(4.3 * var(--u))/1.1 "Microsoft YaHei","PingFang SC",sans-serif;white-space:nowrap;text-align:center;letter-spacing:0;color:inherit}
+.home-menu-button .home-menu-chevron{display:block;width:100%;height:auto;pointer-events:none}
+
+/* 首页同组按钮共用宽度与间距；新生涯随继续按钮一起参与布局。 */
+.contract-home .home-controls{--home-action-gap:calc(2.5 * var(--u));gap:var(--home-action-gap)}
+.contract-home .home-career-actions{gap:var(--home-action-gap)}
+.contract-home .home-menu{gap:var(--home-action-gap)}
+.contract-home .home-continue{width:100%;margin:0}
+.contract-home .home-new-game{width:100%;height:auto}
+.contract-home .home-new-game img{width:100%;height:auto;object-fit:fill}
+.contract-home .home-continue.has-progress{height:calc(16 * var(--u));padding:calc(1.5 * var(--u)) 5%;margin:0}
+
+/* 五格均为左图右文，图标使用独立透明PNG，contain保证完整显示。 */
+.game-screen .consumable-grid .consumable-slot{flex-direction:row;justify-content:center;gap:3px;padding:3px}
+.consumable-grid .consumable-slot .consumable-icon{display:block;width:44%;height:100%;max-width:none;max-height:none;min-width:0;object-fit:contain;aspect-ratio:auto;flex:0 1 44%}
+.consumable-grid .consumable-slot>span{flex:1;min-width:0;align-items:center;justify-content:center;gap:2px}
+.consumable-grid .consumable-slot strong{display:block;font-size:clamp(9px,1.8cqw,16px);line-height:1.15;white-space:nowrap}
+.consumable-grid .consumable-slot b{font-size:clamp(11px,2.4cqw,20px);line-height:1.15}
+.item-detail>img.consumable-icon{max-width:none;max-height:none;width:100px;height:100px;object-fit:contain}
+
+/* 两侧各两行，整列与中央投篮按钮完全同高、同顶同底。 */
+.contract-game .game-viewport{--action-height:var(--shot-height)}
+.dock-side{position:absolute;bottom:0;height:var(--shot-height);width:calc((95% - var(--shot-width)) / 2 - 6px);display:grid;grid-template-rows:repeat(2,minmax(0,1fr));gap:clamp(3px,.8cqw,7px);container-type:size}
+.dock-side-left{left:2.5%}.dock-side-right{right:2.5%}
+.contract-clean-dock .dock-side .css-dock-button{position:relative;inset:auto;width:100%;height:100%;min-height:0;max-height:none;border-radius:10px;font-size:clamp(8px,12cqw,22px);line-height:1;gap:4%;padding:0;display:flex;justify-content:center;align-items:center}
+.dock-side .css-dock-button .game-icon{width:20%;height:55%;max-width:none;min-width:0}
+.dock-side .css-dock-button strong{white-space:nowrap}
+.contract-clean-dock .dock-side .dock-month{background:#cb7569;color:#471f1b}
+.contract-clean-dock .dock-side .dock-rest{background:#8eaf94;color:#183c29}
+@container (max-width:80px){.dock-side .css-dock-button::before{inset:2px;border-radius:5px}.contract-clean-dock .dock-side .css-dock-button{border-width:2px;border-radius:7px;outline-width:1px}}
+
+/* 弧形操作区：两列居中留白，轮廓按投篮按钮实际椭圆尺寸绘制。 */
+.contract-clean-dock .dock-side{height:calc(var(--shot-height) * .9);bottom:calc(var(--shot-height) * .05);width:calc((95% - var(--shot-width) * .68) / 2 - 6px);gap:clamp(8px,1.5cqw,12px)}
+.contract-clean-dock .dock-side .css-dock-button{--button-paper:#f2e3c5;background:none;border:0;outline:0;box-shadow:none;border-radius:0;gap:3%;font-size:clamp(8px,10.5cqw,23px);font-weight:950;color:#091820;isolation:isolate}
+.contract-clean-dock .dock-side-left .css-dock-button{padding-right:calc(var(--shot-width) * .14)}
+.contract-clean-dock .dock-side-right .css-dock-button{padding-left:calc(var(--shot-width) * .14)}
+.contract-clean-dock .dock-side .css-dock-button::before{display:none}
+.contract-clean-dock .dock-side .dock-month{--button-paper:#cf7c70;color:#090f12}
+.contract-clean-dock .dock-side .dock-rest{--button-paper:#8eaf94;color:#163428}
+.dock-side .css-dock-button strong{font-weight:1000;text-shadow:.3px 0 currentColor,-.3px 0 currentColor}
+.dock-side .css-dock-button>.game-icon{width:20%;flex:none}
+.dock-button-frame{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:-1;pointer-events:none}
+.dock-frame-rim{fill:none;stroke:#f5e4bf;stroke-width:7;stroke-linejoin:round}
+.dock-frame-paper{fill:var(--button-paper);stroke:#091820;stroke-width:2;stroke-linejoin:round}
+.dock-frame-line{fill:none;stroke:#344047;stroke-width:1;stroke-linejoin:round}
+.contract-clean-dock .consumable-grid{gap:clamp(5px,1.2cqw,9px);padding:clamp(5px,1.2cqw,9px);border-radius:12px}
+.consumable-grid .consumable-slot strong{font-size:clamp(10px,2.2cqw,18px);font-weight:1000;text-shadow:.25px 0 currentColor;line-height:1.2}
+.game-screen .consumable-grid .consumable-slot{padding:2px;gap:1px}
+.consumable-grid .consumable-slot .consumable-icon{width:38%;flex-basis:38%}
+
+.contract-game .contract-delivery-summary{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1.1fr) minmax(0,.65fr);gap:0;padding:4px 3%;align-items:center}
+.contract-delivery-summary>div{min-width:0;padding:0 8px;border-left:1px solid #9b886b}
+.contract-delivery-summary>div:first-child{border:0;padding-left:0}
+.contract-delivery-summary small{display:block;font-size:clamp(10px,2.1cqw,16px);font-weight:850}
+.contract-delivery-summary b{display:block;font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(20px,5.3cqw,38px);font-weight:950;line-height:1.1;overflow-wrap:anywhere;max-height:2.2em;overflow:auto}
+.delivery-current b{color:#b32e25}.contract-delivery-summary .delivery-coupons b{color:#755329;font-size:clamp(18px,3.7cqw,29px)}
+.game-screen.comic-dialog-layer .comic-dialog .roster-tabs{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;gap:4px;border:2px solid #0c202a;border-radius:10px;background:#d6c5a3;margin:14px 0}
+.roster-tabs>i{position:absolute;left:4px;top:4px;bottom:4px;width:calc(50% - 6px);background:#10232e;border-radius:6px;box-shadow:0 2px 0 #8b795a;transition:transform .2s ease;pointer-events:none}
+.roster-tabs.show-queued>i{transform:translateX(calc(100% + 4px))}
+.game-screen.comic-dialog-layer .comic-dialog .roster-tabs>button{position:relative;z-index:1;background:transparent;border:0;box-shadow:none;color:#26343a;border-radius:6px;font-weight:950;min-height:42px;padding:8px 4px;font-size:clamp(13px,3cqw,20px)}
+.game-screen.comic-dialog-layer .comic-dialog .roster-tabs>button[aria-selected=true]{color:#f7e6c4}
+.roster-tabs b{font-size:.85em;margin-left:5px;opacity:.8}
+.stage-navigation{position:absolute;top:3%;left:2%;z-index:10;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.stage-navigation .contract-stage-tools{position:static}
+.scout-entry{display:flex;flex-direction:column;align-items:center;width:clamp(74px,19cqw,118px)}
+.game-screen .scout-shop{position:relative;width:100%;padding:0;background:none;border:0;box-shadow:none;min-height:0;display:block}
+.scout-shop img{width:100%;height:auto;display:block;aspect-ratio:4/3;object-fit:contain}
+.game-screen .scout-shop:disabled{opacity:1;filter:grayscale(1);cursor:default}
+.scout-entry small{font-size:clamp(9px,2.1cqw,13px);line-height:1.3;color:#f3e0bb;background:#091b2be8;border:1px solid #ae9874;padding:2px 5px;border-radius:3px;white-space:nowrap}
+.scout-dot{position:absolute;right:3%;top:3%;width:11px;height:11px;border:2px solid #fff0cc;border-radius:50%;background:#ef3029;box-shadow:0 1px 3px #0009}
+.scout-shop.is-open{animation:scout-reminder 2s ease-in-out infinite;transform-origin:50% 80%}
+@keyframes scout-reminder{0%,76%,100%{transform:rotate(0)}80%,88%{transform:rotate(-5deg)}84%,92%{transform:rotate(5deg)}96%{transform:rotate(-2deg)}}
+.reduce-motion .scout-shop.is-open{animation:none}.scout-shop:focus-visible{outline:2px solid #ffe4a6;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.scout-shop.is-open{animation:none}.roster-tabs>i{transition:none}}
+.scout-arrival{text-align:center}.scout-arrival>img{display:block;width:min(200px,55%);margin:0 auto 12px}.scout-arrival>.primary{width:100%}
+.court-state-overlay{position:absolute;inset:0;z-index:9;background:#0008;display:flex;align-items:center;justify-content:center;padding:12px;pointer-events:auto}
+.court-state-overlay .court-message{position:relative;inset:auto;width:76%;padding:clamp(10px,2.5cqw,20px);border:2px solid #e8d1a8;border-radius:9px;box-shadow:0 4px 0 #0009;background:#0b1d2bf2}
+.court-state-overlay .court-message strong{display:block;font-size:clamp(14px,3.5cqw,26px);font-weight:950}
+.court-state-overlay .court-message p{font-size:clamp(11px,2.5cqw,17px);line-height:1.5;margin:8px 0 12px}
+.court-state-overlay .court-message .primary{width:100%;min-height:36px;font-weight:950;font-size:clamp(12px,3cqw,20px)}
+
+/* 交付确认：所有数字均为实时数据，名单独立滚动。 */
+.contract-delivery-summary>div:nth-child(2)>b{color:#235c7b}
+.game-screen.comic-dialog-layer .comic-dialog.settlement-dialog{width:min(600px,100%)}
+.game-screen.comic-dialog-layer .settlement-dialog::before{background:#f2e4c5 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.game-screen.comic-dialog-layer .settlement-dialog .sheet-scroll{padding:8px 18px 18px}
+.settlement-confirm{--settlement-accent:#216441;--settlement-tint:#dfe8ce;container-type:inline-size}
+.settlement-confirm.is-unmet{--settlement-accent:#ad3328;--settlement-tint:#efd4c4}
+.settlement-state{display:flex;align-items:center;gap:10px;padding:11px 16px;margin:0 0 15px;color:#fff3da;background:var(--settlement-accent);clip-path:polygon(1% 0,100% 2%,98% 100%,0 97%);font-size:clamp(16px,4cqw,24px);font-weight:950;line-height:1.25}
+.settlement-state>span{display:grid;place-items:center;border:2px solid currentColor;border-radius:50%;width:27px;height:27px;flex:none;font-size:20px;font-weight:1000}
+.settlement-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.settlement-metric{display:flex;align-items:center;justify-content:center;flex-direction:column;min-width:0;padding:13px 8px 10px;background:#fbf1dbb0;border:2px solid #998769;border-radius:5px;box-shadow:inset 0 0 0 3px #f6e9cc;line-height:1.2;text-align:center}
+.settlement-metric>span{font-size:clamp(15px,3.8cqw,22px);font-weight:950;letter-spacing:.04em}
+.settlement-metric>b{display:block;max-width:100%;font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(29px,10cqw,59px);font-weight:950;line-height:1.1;margin:7px 0;color:var(--settlement-accent);letter-spacing:-.02em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.settlement-target>b{color:#235c7b}
+.settlement-metric>small{font-size:clamp(11px,3cqw,17px);font-weight:850;color:var(--settlement-accent)}
+.settlement-target>small{color:#55616a;font-weight:650}
+.settlement-value{background:var(--settlement-tint);border-color:var(--settlement-accent)}
+.settlement-list-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:16px 0 8px}
+.contract-panel .settlement-list-heading h3{margin:0;padding:4px 14px;background:#102431;color:#f8e9cb;font-size:clamp(14px,3.5cqw,20px);clip-path:polygon(2% 0,100% 2%,96% 100%,0 100%)}
+.settlement-list-heading>small{font-size:11px;color:#706249;white-space:nowrap}
+.settlement-player-list{height:clamp(130px,29dvh,284px);overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#163346 #d5c3a0;scrollbar-gutter:stable;border:2px solid #142630;border-radius:4px;background:#f8edcf99;padding:7px;box-shadow:inset 0 0 0 2px #fcf1d8}
+.settlement-player-list:focus-visible{outline:2px solid #235c7b;outline-offset:2px}
+.settlement-player-list ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.settlement-player-list li{display:grid;grid-template-columns:54px minmax(0,1fr) minmax(60px,34%);gap:10px;align-items:center;min-height:70px;padding:7px;background:linear-gradient(110deg,#fff7e5aa,#eddfbf88);border:1px solid #c5b48f;box-shadow:0 2px 0 #d5c5a5}
+.settlement-portrait{position:relative;isolation:isolate;display:block;width:54px;height:58px;overflow:hidden;border:2px solid #162936;background:#e2cfaa}
+.settlement-portrait>img,.settlement-portrait>svg,.settlement-portrait>.template-silhouette{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.settlement-player-info{display:flex;flex-direction:column;gap:3px;min-width:0;line-height:1.35}
+.settlement-player-info>strong{font-size:clamp(13px,3.3cqw,18px);font-weight:950;overflow-wrap:anywhere}
+.settlement-player-info>small{font-size:clamp(11px,2.7cqw,15px);color:#4b5150}
+.settlement-player-value{font-family:Impact,'Arial Narrow',sans-serif;font-size:clamp(19px,5.3cqw,30px);line-height:1.2;color:#0b2233;text-align:right;overflow-wrap:anywhere}
+.settlement-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;min-height:100%;padding:14px;color:#695d48}
+.settlement-empty>strong{font-size:17px}.settlement-empty>span{font-size:12px}
+.settlement-compensation{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#e4d3b0;padding:6px 10px;margin-top:8px;font-size:12px}.settlement-compensation b{overflow-wrap:anywhere;min-width:0}
+.game-screen.comic-dialog-layer .settlement-explanation p{font-size:12px;line-height:1.5;margin:9px 0;color:#3b403c}
+.settlement-credit>b{font-size:14px;color:#102431}.settlement-credit>strong{color:#aa2c23}.settlement-credit>span{color:#88541f}
+.settlement-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px}
+.game-screen.comic-dialog-layer .comic-dialog .settlement-actions>button{position:relative;font-size:clamp(16px,4.2cqw,24px);font-weight:950;min-height:52px;border-radius:4px;padding:10px 5px;border:2px solid #11212b;box-shadow:inset 0 0 0 2px #f2e4c2,2px 3px 0 #ab9671}
+.game-screen.comic-dialog-layer .comic-dialog .settlement-submit{background:var(--settlement-accent);color:#fff1d2}
+.game-screen.comic-dialog-layer .comic-dialog .settlement-adjust{display:block;margin:10px auto 0;padding:3px 10px;min-height:30px;border:0;background:transparent;box-shadow:none;color:#304b58;font-size:12px;font-weight:800;text-decoration:underline;text-underline-offset:3px}
+@media(max-width:380px){.game-screen.comic-dialog-layer .settlement-dialog .sheet-scroll{padding:4px 11px 15px}.settlement-player-list li{grid-template-columns:42px minmax(0,1fr) minmax(48px,32%);gap:6px;padding:5px}.settlement-portrait{width:42px;height:48px}.settlement-player-value{font-size:19px}.settlement-metric{padding:10px 5px}.settlement-state{gap:7px;padding:10px}.settlement-list-heading>small{font-size:10px}}
+
+/* 第五轮局部修订：球场提示遮盖球探入口，操作图标与文字略缩小。 */
+.stage-navigation{z-index:8}
+.contract-clean-dock .dock-side .css-dock-button{font-size:clamp(8px,9.6cqw,21px)}
+.dock-side .css-dock-button>.dock-action-icon{width:18%;height:49%;stroke-width:2.5}
+.contract-delivery-summary b{overflow:hidden;max-height:none;line-height:1.15}
+.contract-panel .product-card{display:grid;grid-template-columns:84px minmax(0,1fr);column-gap:12px;align-items:start}
+.product-card>.product-image{display:block;width:84px;height:84px;object-fit:contain;grid-column:1;grid-row:1/3;align-self:center;background:transparent}
+.product-card>h3,.product-card>p{grid-column:2;min-width:0;margin:3px 0}
+.product-card>button{grid-column:1/-1;margin-top:10px}
+
+.roster-value>b.fitted-amount{font-size:clamp(19px,5.7cqw,44px);white-space:nowrap;overflow-wrap:normal;line-height:1.15}
+.fitted-amount>span{display:inline-block;white-space:nowrap;max-width:none}
+.template-portrait-slot img.high-potential-portrait{object-fit:cover}
+
+/* 签约沿用双线纸框，仅更换主色与确认内容。 */
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>.signing-button{background:#24654e;color:#fff0ce}
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions>.signing-confirm{background:#f0b2a7;color:#111;border-color:#632822}

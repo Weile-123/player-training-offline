@@ -1,0 +1,101 @@
+/* Selected paper collector album. All text, photos and values remain live DOM. */
+.game-screen.comic-dialog-layer .comic-sheet-album{width:min(680px,100%);max-width:none;padding:6px;border:2px solid #e4cea0;box-shadow:inset 0 0 0 2px #0c2230,0 5px 24px #0009;clip-path:polygon(13px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 13px);container-type:inline-size}
+.game-screen.comic-dialog-layer .comic-sheet-album::before{inset:6px;background:#eeddb5 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-heading{min-height:clamp(68px,16cqw,110px);align-items:center;padding:0 7px 7px 0;background:linear-gradient(174deg,#102a39 0 42%,transparent 43%)}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-heading::before{display:none}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-heading h2{display:flex;align-items:center;gap:7px;min-width:72%;max-width:85%;padding:7px 24px 12px 8px;margin:0 0 0 -4px;rotate:-3deg;border:0;line-height:1.15;font-size:clamp(28px,8.9cqw,60px);font-weight:1000;font-style:italic;letter-spacing:-.07em;color:#fbe8b9;text-shadow:2px 3px 0 #6f211b;background:#b42d23 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;clip-path:polygon(4% 6%,100% 0,96% 19%,99% 20%,94% 47%,98% 44%,92% 100%,0 100%,5% 70%,0 73%)}
+.album-title-ball{width:clamp(27px,9cqw,61px);height:auto;flex:none;rotate:-20deg}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-close{width:clamp(34px,8cqw,54px);height:clamp(34px,8cqw,54px);min-height:0;margin:0;border:3px double #f5dfae;background:#0e2938;box-shadow:0 0 0 2px #0a1b25}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-close svg{stroke-width:6;width:74%;height:74%}
+.game-screen.comic-dialog-layer .comic-sheet-album>.sheet-scroll{padding:4px 7px 12px;scrollbar-color:#ae8751 #e5d3ac}
+.game-screen.comic-dialog-layer .collection-album-dialog{height:min(94dvh,1080px)}
+.game-screen.comic-dialog-layer .collection-album-dialog>.sheet-scroll{display:flex;flex-direction:column;overflow:hidden;min-height:0}
+.collection-album-dialog>.sheet-scroll>.contract-panel{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden}
+.album-view{display:flex;flex-direction:column;min-height:0;flex:1;container-type:inline-size}
+.album-progress{display:flex;align-items:center;gap:8px;flex:none;padding:8px 10px;margin:0 0 10px;background:#0d2736 var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) right center/100px auto no-repeat;border:4px double #f2dbac;border-radius:8px;outline:2px solid #102635;color:#f4dfb3}
+.album-progress>strong{font-size:clamp(12px,3.4cqw,23px);white-space:nowrap;font-weight:950}
+.album-progress>b{font:900 clamp(14px,4.8cqw,31px)/1 Impact,sans-serif;white-space:nowrap}
+.album-progress>progress{appearance:none;flex:1;min-width:10px;height:clamp(12px,3.2cqw,21px);border:2px solid #f1d6a4;border-radius:20px;padding:2px;background:#071a24;overflow:hidden}
+.album-progress>progress::-webkit-progress-bar{background:#30444a;border-radius:20px}
+.album-progress>progress::-webkit-progress-value{background:linear-gradient(#dc4635,#b52120);border-radius:20px}
+.album-progress>progress::-moz-progress-bar{background:#c82d26;border-radius:20px}
+.album-grid.contract-collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:calc((100cqw - 32px) / 2.28);align-content:start;gap:9px;margin:2px 0 0;padding:2px 4px 6px 2px;overflow-y:auto;overflow-x:hidden;min-height:0;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#9e8053 transparent}
+.game-screen .album-grid>.album-card{position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;height:100%;min-height:0;align-self:start;gap:0;padding:3px;border:3px solid #0b2330;border-radius:6px;background:#eddbb3 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;box-shadow:1px 2px 0 #a08d68;color:#0b2330;overflow:hidden}
+.album-grid .album-card .collection-photo{position:relative;display:block;aspect-ratio:.95;width:100%;height:auto;overflow:hidden;background: var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) center/cover,radial-gradient(#79939b44 .7px,transparent 1px) 0 0/3px 3px,#0b2432;clip-path:none}
+.album-grid .album-card .collection-photo>img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:center bottom;filter:drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0)}
+.album-grid .album-card .collection-photo{height:100%;aspect-ratio:auto;min-height:0}
+.game-screen .album-grid>.album-card>b{display:grid;place-items:center;min-height:2.1em;padding:4px 0;font-size:clamp(10px,2.8cqw,19px);font-weight:1000;line-height:1.2;letter-spacing:-.05em}
+.game-screen .album-grid>.album-card:disabled{background:#eddbb3 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;color:#0b2330;border-color:#0b2330;opacity:1;box-shadow:none}
+.album-unknown{display:block;width:100%;height:100%;fill:#09171e;stroke:#ad9b76;stroke-width:1.1}
+.album-unknown text{stroke:none;fill:#b2a17f;font:900 52px Impact,sans-serif}
+.album-grid .template-silhouette{position:absolute;inset:0;width:100%;height:100%}
+.album-grid .template-silhouette>span{font-size:10px}
+.album-icon{width:1.3em;height:1.3em;flex:none;color:#0c2837}
+.album-detail{color:#0c2635}
+.album-hero{display:grid;grid-template-columns:33% minmax(0,1fr);gap:12px;align-items:stretch}
+.album-hero-photo{position:relative;align-self:stretch;min-width:0;min-height:0;box-sizing:border-box;overflow:hidden;padding:4px;border:3px solid #a77854;border-radius:7px;outline:2px solid #132b35;box-shadow:inset 0 0 0 1px #f7dfb1,1px 2px 0 #a08d68;background:#eddcb6}
+.album-hero-photo>.collection-photo{position:absolute;inset:4px;overflow:hidden;background:var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) center/cover,radial-gradient(#79939b44 .7px,transparent 1px) 0 0/3px 3px,#0b2432}
+.album-hero-photo .collection-photo>img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:center bottom;filter:drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0)}
+.album-hero-photo .template-silhouette{position:absolute;inset:0;width:100%;height:100%}
+.album-hero-info{display:flex;flex-direction:column;justify-content:flex-start;gap:7px;min-width:0;padding:0}
+.album-hero-info>h3{font-size:clamp(16px,4.4cqw,30px);line-height:1.2;font-weight:1000;letter-spacing:-.07em;margin:0}
+.game-screen.comic-dialog-layer .comic-sheet-album .album-style{margin:0;padding:4px 3px;background:#b82f25 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;clip-path:polygon(4% 8%,100% 0,96% 75%,0 100%);color:#f8e6bd;font-size:clamp(14px,3.5cqw,23px);font-weight:1000;line-height:1.1;text-align:center}
+.game-screen .comic-sheet-album .album-requirements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px;border:0;background:none;margin:0}
+.album-requirements>div{border:3px double #132e3b;border-radius:5px;background:#f0dfb9;min-width:0;overflow:hidden}
+.game-screen .comic-sheet-album .album-requirements dt{padding:4px 0;border:0;background:#102c3a;color:#f5dfae;font-size:clamp(8px,1.9cqw,13px);line-height:1.2;text-align:center;white-space:nowrap}
+.game-screen .comic-sheet-album .album-requirements dd{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 1px;margin:0;border:0;min-height:clamp(72px,17cqw,110px);font-size:clamp(10px,2.5cqw,17px);line-height:1.1;text-align:center;color:#0b2432}
+.album-requirements dd>.album-icon{width:clamp(24px,6cqw,40px);height:clamp(24px,6cqw,40px);margin-bottom:3px}
+.album-requirements dd>b{font:900 clamp(13px,3.4cqw,23px)/1 Impact,sans-serif;letter-spacing:-.04em}
+.album-requirements>div:first-child dd>b{font-size:clamp(24px,6.4cqw,42px);color:#b82d23}
+.album-section{margin-top:15px;padding:0 9px 11px;border:5px double #0b2636;border-radius:8px;background:#f1dfb7 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;box-shadow:inset 0 0 0 1px #ba9d67}
+.album-section>h3{width:fit-content;min-width:35%;margin:-1px 0 8px -7px;padding:4px 19px 7px 9px;background:#ba2e22 var(--asset-art-game-red-png,url('/art/game/red.png')) center/cover;clip-path:polygon(5% 0,100% 0,92% 45%,98% 44%,88% 100%,0 100%);font-size:clamp(17px,4.6cqw,30px);font-weight:1000;font-style:italic;line-height:1.1;color:#ffe9ba}
+.album-thresholds{display:flex;flex-wrap:wrap;justify-content:center;row-gap:12px}
+.album-thresholds>div{flex:1 0 22%;min-width:0;display:flex;flex-direction:column;align-items:center;border-right:1px solid #8d7956;padding:2px 5px}
+.album-thresholds>div:last-child{border:0}
+.album-thresholds>div>span{display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;font-size:clamp(10px,2.6cqw,17px);font-weight:950}
+.album-thresholds strong{font:900 clamp(29px,8cqw,53px)/1 Impact,sans-serif;color:#a52b24;letter-spacing:-.03em}
+.album-thresholds strong>i{font:900 .55em/1 sans-serif;color:#0b2737;font-style:normal;margin-right:2px}
+.album-thresholds strong>em{font-size:.7em;font-style:normal}
+.album-matching{padding-bottom:12px}
+.game-screen.comic-dialog-layer .comic-dialog .album-matching>.album-route-intro{display:flex;align-items:center;justify-content:center;gap:8px;margin:0 0 12px;padding:7px 4px;border:1px solid #bd9855;border-radius:5px;background:#102e3c;color:#fff;font-size:clamp(10px,2.9cqw,19px);font-weight:800;line-height:1.4;white-space:nowrap}
+.album-route-intro>span{color:#e5b95d;font-size:.85em}
+.album-route{overflow:hidden;border:3px double #13313e;border-radius:9px;background:radial-gradient(#b58e4930 .65px,transparent 1px) right top/4px 4px,#fff1cd;box-shadow:inset 0 0 0 2px #d2ad67}
+.album-route>header{display:flex;gap:7px;align-items:center;min-width:0;background:linear-gradient(90deg,#ead5a6aa,transparent)}
+.album-route h4{flex:none;margin:0;padding:6px 18px 7px 9px;background:#123445;color:#fff0c8;font-size:clamp(15px,4cqw,26px);font-weight:950;line-height:1.2;clip-path:polygon(0 0,100% 0,calc(100% - 10px) 100%,0 100%)}
+.album-route header>span{min-width:0;margin-right:5px;padding:2px 6px;border:1px solid #ba9651;background:#f5dfae;color:#18323c;font-size:clamp(10px,2.8cqw,18px);font-weight:800;line-height:1.4}
+.album-route.is-specialist h4{background:#b52e22}
+.album-route .album-thresholds{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:clamp(10px,3cqw,20px) 3px}
+.album-route .album-thresholds[data-count="2"]{grid-template-columns:repeat(2,minmax(0,1fr))}
+.album-route .album-thresholds[data-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.album-route .album-thresholds[data-count="5"],.album-route .album-thresholds[data-count="6"],.album-route .album-thresholds[data-count="7"]{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:12px}
+.album-route .album-thresholds>div{gap:5px;padding:1px 3px;border-color:#b7985c}
+.album-route .album-thresholds>div:last-child{border-right:0}
+.album-route .album-thresholds>div>span{gap:2px;font-size:clamp(8px,2.25cqw,15px)}
+.album-route .album-thresholds strong{font-size:clamp(27px,8cqw,53px)}
+.album-route .album-thresholds[data-count="3"] strong{font-size:clamp(32px,9cqw,60px)}
+.album-route-or{position:relative;display:grid;place-items:center;height:clamp(31px,8cqw,51px);isolation:isolate}
+.album-route-or::before{content:'';position:absolute;left:4%;right:4%;top:50%;height:1px;background:#b79351;z-index:-1}
+.album-route-or>span{display:grid;place-items:center;width:clamp(29px,7cqw,45px);aspect-ratio:1;border:3px double #17333e;border-radius:50%;box-shadow:0 0 0 3px #f2dfb5;background:#f9e9c1;color:#14313d;font-size:clamp(16px,4cqw,26px);font-weight:950}
+.game-screen .album-matching>.album-route-floor{margin:10px 0 0;font-size:clamp(11px,2.8cqw,18px);line-height:1.5;color:#624f32}
+.album-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.album-stats>div{display:grid;grid-template-columns:auto 1fr auto;gap:3px;align-items:center;padding:6px;border:1px solid #7d755e;border-radius:5px;background:#f5e7c6}
+.album-stats>div>span{font-size:clamp(11px,2.9cqw,19px);font-weight:950;white-space:nowrap}
+.album-stats>div>b{font:900 clamp(20px,5.4cqw,36px)/1 Impact,sans-serif}
+.album-stats .album-icon{width:clamp(18px,4.5cqw,30px);height:clamp(18px,4.5cqw,30px)}
+.album-stat-track{grid-column:1/4;position:relative;height:clamp(11px,3cqw,20px);border:1px solid #183142;background:#909b97;overflow:hidden}
+.album-stat-track>i{display:block;height:100%;background:var(--stat-color)}
+.album-stat-track::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 calc(10% - 1px),#192d3488 calc(10% - 1px) 10%);pointer-events:none}
+.game-screen .album-detail>.album-back{display:flex;align-items:center;justify-content:center;gap:7px;width:65%;margin:16px auto 1px;padding:5px 14px;min-height:48px;border:5px double #0b2636;border-radius:10px;background:#f4e3bd var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;color:#0b2636;font-size:clamp(21px,5.5cqw,36px);font-weight:1000;box-shadow:2px 3px 0 #a69067}
+.album-back>span{font-size:1.5em;line-height:1}
+.game-screen.comic-dialog-layer .comic-sheet-album .sheet-heading h2,.game-screen.comic-dialog-layer .comic-sheet-album .album-style,.album-section>h3{background-color:#b72e24;background-image:radial-gradient(#ffe0a43b .65px,transparent .95px),repeating-linear-gradient(174deg,transparent 0 19px,#791b1c19 20px 21px,transparent 22px 37px),linear-gradient(110deg,#c63528,#98251f);background-size:3px 3px,auto,auto}
+.game-screen.comic-dialog-layer .comic-sheet-album::before{background-image:radial-gradient(#76562c20 .55px,transparent .9px),var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png'));background-size:3px 3px,cover}
+@container(max-width:360px){.album-hero{gap:8px}.album-stats>div{padding:4px}.album-thresholds>div{padding:2px}.album-progress{gap:5px;padding:6px}.album-grid.contract-collection{gap:6px}.game-screen .album-grid>.album-card{padding:2px;border-width:2px}.album-section{padding:0 5px 8px}}
+
+/* Shared collector photo treatment for the court and both roster lists. */
+.template-portrait-slot:has(.album-portrait-surface){background:#eddbb3;border-radius:5px}.template-portrait-content.album-portrait-surface{inset:3px}
+.album-portrait-surface,.roster-card .roster-portrait.album-portrait-surface{background:var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) center/cover,radial-gradient(#79939b44 .7px,transparent 1px) 0 0/3px 3px,#0b2432;clip-path:none}
+.template-portrait-content.album-portrait-surface>img,.roster-card .roster-portrait.album-portrait-surface>img{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover;object-position:center bottom;filter:drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0)}
+.game-screen .album-grid>.album-card>b{gap:4px;padding:4px 0;align-content:center}.album-tier{display:inline-block;width:fit-content;justify-self:center;background:#355c55;color:#fff0ca;border:1px solid #172e35;padding:2px 7px;font-size:clamp(9px,2.3cqw,13px);line-height:1.1;font-weight:900;font-style:normal;white-space:nowrap;letter-spacing:0}
+.album-tier[data-tier=starter]{background:#2c5877}.album-tier[data-tier=star]{background:#9c482b}.album-tier[data-tier=superstar]{background:#73508a}.album-tier[data-tier=legend]{background:#ac2b22;border-color:#c79a47;color:#fff0ad}.collection-locked .album-tier{background:#4a565b;border-color:#6b7675;color:#d0c9b8}.album-style .album-tier{vertical-align:middle}
+
+.album-hero-info>h3 .album-tier{font-size:clamp(9px,2cqw,14px);vertical-align:middle;letter-spacing:0;padding:3px 5px;margin-left:3px}

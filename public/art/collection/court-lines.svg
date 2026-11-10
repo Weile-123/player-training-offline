@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 320" fill="none" stroke="#e4cea1" stroke-width="2.5">
+ <g opacity=".45" transform="rotate(-24 150 160)">
+  <circle cx="160" cy="160" r="125"/><path d="M35 160h250M160 35v250M74 67q172 93 0 186M246 67q-172 93 0 186"/>
+  <path d="M-30 45h95v100h-95M-30 255h95v-70h-95"/>
+ </g>
+</svg>

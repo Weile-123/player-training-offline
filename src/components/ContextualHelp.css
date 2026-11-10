@@ -1,0 +1,8 @@
+.context-help{--tip-accent:#193b49;position:fixed;z-index:70;top:max(8px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);width:min(360px,calc(100vw - 24px));box-sizing:border-box;background:radial-gradient(#ac8d5220 .65px,transparent 1px) 0 0/5px 5px,#f9edcf;border:2px solid #173441;border-left:5px solid var(--tip-accent);border-radius:3px;box-shadow:2px 3px 0 #ac8c54;color:#173441;font-family:var(--font-body,sans-serif)}
+.context-help-template{--tip-accent:#226047}.context-help-heat{--tip-accent:#a36910}.context-help-shortfall{--tip-accent:#b72b21}
+.context-help>div{display:flex;align-items:center}.context-help button{border:0;background:none;color:inherit;font:inherit;cursor:pointer;min-height:42px}
+.context-help .context-help-title{display:flex;align-items:center;gap:9px;flex:1;min-width:0;text-align:left;padding:7px 10px;color:var(--tip-accent)}
+.context-help-title .game-icon{width:24px;height:24px;flex:none}.context-help-title strong{font-size:14px;line-height:1.3;flex:1}.context-help-title span{font-size:20px}
+.context-help .context-help-close{width:36px;font-size:23px;flex:none;padding:0}
+.context-help p{margin:0 10px 10px;padding-top:8px;border-top:1px solid #c8b48f;font-size:13px;line-height:1.6;font-weight:500}
+.context-help button:focus-visible{outline:3px solid #cb8d23;outline-offset:-3px}

@@ -1,0 +1,13 @@
+@font-face{
+ font-family:'GameBlack';
+ src:url('./black_bont.ttf') format('truetype');
+ font-weight:400;
+ font-style:normal;
+ font-display:swap;
+ /* At 32px, sampled Chinese headings draw ~27px high versus YaHei's ~32px.
+    Compensate this face only; keep each component's original font-size. */
+ size-adjust:118.5%;
+}
+/* Display lettering is opt-in; descriptions and compact labels stay readable. */
+:root{--font-display:'GameBlack','Microsoft YaHei',sans-serif;--font-body:'PingFang SC','Microsoft YaHei',system-ui,sans-serif;--font-number:Impact,'Arial Narrow',sans-serif}
+button,input,textarea,select{font-family:inherit}

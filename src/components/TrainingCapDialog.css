@@ -1,0 +1,11 @@
+.game-screen .comic-dialog.training-cap-dialog{width:min(520px,100%)}
+.game-screen.comic-dialog-layer .comic-dialog.training-cap-dialog .sheet-heading h2{flex:none;font-size:24px;white-space:nowrap}
+.training-cap-player{display:grid;grid-template-columns:32% minmax(0,1fr);gap:14px;align-items:center;color:#132f3c}
+.training-cap-portrait{position:relative;height:150px;border:3px double #aa8d56;background:#14303d;overflow:hidden;border-radius:5px}
+.training-cap-portrait>img{width:100%;height:100%;object-fit:cover;object-position:center bottom}.training-cap-portrait .template-silhouette{height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;color:#eddfb7}.training-cap-portrait svg{height:75%;fill:#bbab87}
+.training-cap-portrait .template-silhouette>span{font-size:11px}.training-cap-player h3{font-weight:900}
+.training-cap-player h3{margin:0 0 8px;font-size:25px;line-height:1.2}.training-cap-player small{display:block;margin-top:10px;font-size:13px}.training-cap-player strong{display:block;font:900 clamp(23px,6cqw,37px)/1.15 Impact,sans-serif;color:#24654e;overflow-wrap:anywhere}
+.training-cap-level{display:inline-block;background:#205e48;color:#fff0c9;padding:3px 10px;font-weight:900}.training-cap-level b{font-family:Impact,sans-serif;font-size:28px}
+.training-cap-stats{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));padding:10px 0;margin-top:14px;border-block:3px double #927c54;color:#132f3c}.training-cap-stats>div{text-align:center;border-right:1px solid #b6a17d}.training-cap-stats>div:last-child{border:0}.training-cap-stats small{display:block;font-size:12px}.training-cap-stats b{font:900 26px/1.2 Impact,sans-serif}
+.training-cap-copy{font-size:14px;line-height:1.7;color:#51462f}.training-cap-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.training-cap-actions button{min-height:46px;font-weight:900}.training-cap-actions .training-cap-share{grid-column:1/-1}
+@media(max-width:360px){.training-cap-player h3{font-size:21px}.training-cap-portrait{height:125px}.training-cap-player{gap:8px}}

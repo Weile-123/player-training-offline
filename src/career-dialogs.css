@@ -1,0 +1,90 @@
+.game-screen.comic-dialog-layer .career-start-dialog{width:min(560px,100%);padding:6px;background:#102a37}
+.game-screen.comic-dialog-layer .career-start-dialog::before{inset:5px;background:radial-gradient(#b9964b22 .65px,transparent .9px) 0 0/4px 4px,linear-gradient(110deg,#fff1d3,#eddfbd)}
+.game-screen.comic-dialog-layer .career-start-dialog .sheet-heading h2{padding:12px 36px 13px 18px;font-size:clamp(26px,7vw,38px);background:radial-gradient(#ffcf8666 .7px,transparent 1px) 0 0/4px 4px,linear-gradient(105deg,#d63225,#a8251d);text-shadow:2px 2px #7f211b}
+.game-screen.comic-dialog-layer .career-start-dialog .sheet-scroll{padding:12px 14px 18px}
+.career-start-content{container-type:inline-size;text-align:center;color:#102a37}
+.career-save-card{position:relative;isolation:isolate;border:4px double #183442;border-radius:8px;padding:14px 12px 10px;background:radial-gradient(#c69e4a38 .75px,transparent 1px) 0 0/5px 5px,linear-gradient(115deg,#fff1d6,#f3e3be);box-shadow:inset 0 0 0 3px #edd19a,2px 3px 0 #a68b5777;overflow:hidden}
+.career-save-card::before,.career-save-card::after{content:'';position:absolute;z-index:-1;top:24%;width:52%;aspect-ratio:1;border:1px solid #b5924a40;border-radius:50%;box-shadow:0 0 0 23px #b5924a10,0 0 0 24px #b5924a22;pointer-events:none}
+.career-save-card::before{left:-35%}.career-save-card::after{right:-35%}
+.career-save-heading{display:flex;align-items:center;justify-content:center;gap:8px;padding-bottom:12px;border-bottom:1px solid #c5a86e}
+.career-save-heading>span{color:#b88a32;font-size:20px}
+.contract-panel .career-save-heading h3{margin:0;font-size:clamp(18px,5.6cqw,27px);line-height:1.2;color:#102a37}
+.career-save-heading>strong{flex:none;padding:4px 9px;border:3px double #e8c888;border-radius:20px;background:#bd2d23;color:#fff0ce;font-size:clamp(11px,3cqw,14px);line-height:1.1}
+.career-save-details{display:grid;grid-template-columns:1fr 1fr;align-items:stretch;margin:16px 0 12px}
+.career-save-month,.career-save-credit{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:10px}
+.career-save-month{border-right:1px solid #b99757;padding-right:10px}.career-save-credit{padding-left:10px}
+.career-save-label{font-size:clamp(14px,4.3cqw,20px);line-height:1.3}
+.career-save-month-value{display:flex;align-items:baseline;justify-content:center;gap:4px;width:100%}
+.career-save-month-value>span{font-size:clamp(15px,4.5cqw,24px)}
+.career-save-month-value>b{font-size:clamp(28px,calc(46cqw / var(--month-digits)),116px);line-height:1;letter-spacing:-.06em;color:#102a37;text-shadow:1px 1px #fff4d5,2px 2px #b79143}
+.career-save-credit .credit-hearts{display:flex;gap:4px;align-items:center;justify-content:center}
+.career-save-credit .credit-hearts .heart{width:clamp(25px,8cqw,43px);height:auto;filter:drop-shadow(1px 2px 0 #bb9450)}
+.game-screen.comic-dialog-layer .career-save-credit p{margin:0;font-size:clamp(10px,3cqw,14px);line-height:1.4;color:#183442}
+.game-screen.comic-dialog-layer .career-save-caption{display:flex;align-items:center;gap:8px;padding-top:10px;margin:0;border-top:1px solid #c5a86e;font-size:clamp(11px,3.4cqw,15px);color:#183442}
+.career-save-caption::before,.career-save-caption::after{content:'';height:1px;flex:1;background:#c5a86e}
+.career-start-actions{display:grid;gap:12px;margin-top:16px;padding:0 2px 3px}
+.game-screen.comic-dialog-layer .career-start-actions button{min-height:52px;padding:12px 8px;border:5px double #15303b;border-radius:6px;box-shadow:2px 3px 0 #ac8e55;font-size:clamp(15px,4.7cqw,22px);line-height:1.3}
+.game-screen.comic-dialog-layer .career-start-actions .primary{border-color:#f5dc9d;outline:2px solid #142d38;background:radial-gradient(#ffce7755 .6px,transparent 1px) 0 0/4px 4px,linear-gradient(105deg,#d23424,#af271e);font-size:clamp(20px,6cqw,28px);text-shadow:1px 2px #8c2119}
+.career-start-actions .primary span{margin-left:12px;font-size:1.25em;line-height:1}
+@media(max-width:360px){.career-save-card{padding:12px 8px 9px}.career-save-heading{gap:5px}.career-save-heading>span{display:none}.career-save-credit{padding-left:6px}.career-save-month{padding-right:6px}}
+.feedback-form{display:grid;gap:14px;padding-top:8px}
+.feedback-form textarea{display:block;width:100%;min-height:180px;max-height:45dvh;resize:vertical;border:2px solid #a5906b;padding:14px;background:#fff3d8;color:#122b3a;font:inherit;line-height:1.7;border-radius:0}
+.feedback-form textarea:focus{outline:2px solid #a83827;outline-offset:2px}
+/* Terminal results: fixed title/actions, only the actual career record scrolls. */
+.game-screen.comic-dialog-layer.career-end-layer{z-index:100}
+.career-end-backdrop{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));background:#030b13d6;pointer-events:auto}
+.career-end-dialog{container-type:inline-size;position:relative;display:flex;flex-direction:column;min-height:0;width:min(500px,100%);max-height:calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));padding:8px 10px 10px;border:6px double #142c39;border-radius:10px;background:#f2e4c2 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover;color:#102b3b;box-shadow:0 0 0 2px #e9cc92,7px 9px #0009;animation:career-end-enter .25s ease-out both}
+.career-end-heading{flex:none;text-align:center;padding:0 6px}
+.career-end-heading h2{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 8px 4px;padding:6px 15px 10px;font-size:clamp(29px,10cqw,48px);font-weight:1000;font-style:italic;line-height:1.05;color:#fff0cf;text-shadow:2px 3px #7e211c;background:radial-gradient(#f3c87a66 .7px,transparent 1px) 0 0/4px 4px,linear-gradient(105deg,#db3023,#ac221b);clip-path:polygon(4% 8%,100% 0,97% 20%,100% 26%,94% 94%,0 100%,3% 71%,0 70%);transform:rotate(-2deg)}
+.career-end-heading .album-title-ball{width:1.05em;height:1.05em;flex:none}
+.career-end-heading p{display:flex;align-items:center;justify-content:center;gap:8px;margin:6px 0;font-size:clamp(17px,5cqw,25px);line-height:1.2;font-weight:1000;color:#102b3b}
+.career-end-heading p::before,.career-end-heading p::after{content:'';height:1px;background:#173748;flex:1;max-width:22%}
+.career-end-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#a18659 transparent;padding:2px 3px 4px}
+.career-end-stats{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr) minmax(0,.9fr);gap:5px;margin:0 0 9px}
+.career-end-stats>div{text-align:center;border:1px solid #9b865a;border-radius:4px;background:#fff1cf66;padding:5px 3px;min-width:0}
+.career-end-stats dt{font-size:clamp(10px,2.8cqw,13px);font-weight:900}
+.career-end-stats dd{margin:0;font:clamp(20px,6.1cqw,32px)/1.2 Impact,'Arial Narrow',sans-serif;color:#b72e25;overflow-wrap:anywhere}
+.career-end-stats small{font-size:.55em;font-family:system-ui;font-weight:900}
+.career-end-section{position:relative;border:4px double #193442;border-radius:7px;margin-top:9px;padding:0 7px 7px;background:radial-gradient(#ba96552a .5px,transparent .9px) 0 0/4px 4px,#f9ecca77}
+.career-end-section h3{position:relative;margin:-4px 4% 5px;padding:4px 12px 5px;color:#fff1d0;background:radial-gradient(#f5c78c55 .8px,transparent 1px) 0 0/3px 3px,#b92b22;clip-path:polygon(4% 0,100% 0,94% 100%,0 100%);text-align:center;font-size:clamp(17px,5cqw,25px);line-height:1.1;font-weight:1000}
+.career-best-hero{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:10px;align-items:center}
+.career-best-photo{position:relative;min-height:0;aspect-ratio:1;max-height:190px;overflow:hidden;background:radial-gradient(ellipse at 50% 65%,#50616a99,transparent 70%),repeating-linear-gradient(135deg,transparent 0 12px,#d6c18d10 12px 13px),#122c3a;border:1px solid #b79c67;border-radius:5px;clip-path:none}
+.career-best-photo::before{content:'';position:absolute;inset:8px;border:1px solid #e4d2aa30;border-radius:3px}
+.career-best-photo::after{content:'';position:absolute;width:70%;aspect-ratio:1;border:1px solid #e4d2aa20;border-radius:50%;left:15%;top:15%;pointer-events:none}
+.career-best-photo .template-portrait-photo{position:absolute;z-index:1;bottom:0;left:0;display:block;width:100%;height:100%;object-fit:cover;object-position:center bottom;filter:none}
+.career-best-photo .template-silhouette{display:flex;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:flex-end;color:#ebdab8;font-size:11px}
+.career-best-photo .template-silhouette svg{height:75%;width:75%;fill:#b4a687}
+.career-best-info{display:flex;flex-direction:column;justify-content:center;gap:7px;min-width:0}
+.career-best-info>strong{font-size:clamp(12px,3.7cqw,19px);font-weight:1000;line-height:1.4;overflow-wrap:anywhere}
+.career-best-value{color:#b9241e;font:clamp(26px,8.1cqw,42px)/1.12 Impact,'Arial Narrow',sans-serif;overflow-wrap:anywhere}
+.career-best-level,.career-best-rating{display:flex;justify-content:center;align-items:center;gap:5px;background:#1c6247;color:#fff0cf;padding:5px 3px;border-radius:3px;box-shadow:inset 0 0 0 1px #b4a06a;font-size:clamp(12px,3.5cqw,18px);font-weight:950;line-height:1.2}
+.career-best-rating{background:#102d3e}
+.career-best-info .album-icon{width:1.2em;height:1.2em;color:inherit}
+.career-peak-label{display:flex;align-items:center;gap:8px;font-weight:900;font-size:clamp(11px,3cqw,15px);text-align:center;margin:4px 0}
+.career-peak-label::before,.career-peak-label::after{content:'';height:1px;flex:1;background:#9e8354}
+.career-best-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+.career-best-stats>div{display:grid;grid-template-columns:1fr auto;gap:3px;border:1px solid #9d885b;background:#fff0ceaa;border-radius:4px;padding:4px 5px;font-size:clamp(11px,3.2cqw,16px);font-weight:900;line-height:1.1}
+.career-best-stats b{font-family:Impact,sans-serif;color:#b52b23;font-size:1.3em}
+.career-stat-track{position:relative;grid-column:1/-1;height:clamp(7px,2.2cqw,11px);border:1px solid #777c66;background:#a8ad9a}
+.career-stat-track i{display:block;height:100%;background:var(--stat-color)}
+.career-stat-track::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(10% - 1px),#f9edce99 calc(10% - 1px),#f9edce99 10%)}
+.career-equipment{margin-top:12px}
+.career-equipment-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.career-equipment-grid>div{display:flex;align-items:center;flex-direction:column;justify-content:space-between;min-width:0;padding:3px 2px;border:1px solid #9e875b;border-radius:4px;background:linear-gradient(120deg,#f9edcf88,#f2deae66)}
+.career-equipment-grid .product-image{display:block;width:100%;height:auto;aspect-ratio:1.1;object-fit:contain;mix-blend-mode:multiply}
+.career-equipment-grid strong{font-size:clamp(9px,2.7cqw,13px);line-height:1.25;text-align:center;overflow-wrap:anywhere}
+.career-best-empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 8px;color:#79684d;gap:8px}
+.career-best-empty>.album-icon{width:38px;height:38px;opacity:.55}
+.career-best-empty p,.career-equipment-empty{font-size:12px;margin:4px 0;text-align:center;color:#7b6746}
+.career-equipment-empty{padding:16px}
+.career-end-actions{flex:none;display:grid;grid-template-columns:1fr 1fr;gap:7px;padding-top:7px;border-top:3px double #a48e63;margin-top:4px}
+.game-screen .career-end-actions button{display:flex;align-items:center;justify-content:center;gap:5px;padding:6px 4px;min-height:44px;background:#f3e5c4;color:#102b3b;border:3px double #153342;border-radius:5px;box-shadow:1px 2px #a68c5d;font-size:clamp(11px,3.1cqw,16px);line-height:1.2;font-weight:950}
+.game-screen .career-end-actions button:disabled{opacity:1;cursor:default;filter:none}
+.game-screen .career-end-actions .career-end-home{grid-column:1/-1;min-height:43px;color:#fff0cf;background:radial-gradient(#e6ac6955 .65px,transparent 1px) 0 0/4px 4px,linear-gradient(100deg,#d63226,#b72920);border-color:#102c3a;font-size:clamp(19px,5.6cqw,28px);cursor:pointer}
+.career-end-actions svg{width:25px;height:25px;flex:none;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+.career-end-actions small{display:block;font-size:.72em;margin-top:3px;letter-spacing:.04em}
+.career-end-actions button:focus-visible{outline:3px solid #d39129;outline-offset:3px}
+@keyframes career-end-enter{from{opacity:0;transform:translateY(9px) scale(.97)}to{opacity:1;transform:none}}
+@media(max-height:550px){.career-end-heading h2{font-size:27px;padding:3px 10px 5px}.career-end-heading p{font-size:15px;margin:4px 0}.game-screen .career-end-actions button{min-height:35px}.game-screen .career-end-actions .career-end-home{min-height:34px;font-size:19px}}
+@media(prefers-reduced-motion:reduce){.career-end-dialog{animation:none}}
+.career-end-dialog.reduce-motion{animation:none}

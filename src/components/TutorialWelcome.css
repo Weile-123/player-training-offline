@@ -1,0 +1,42 @@
+.game-screen.comic-dialog-layer .comic-dialog.tutorial-intro-dialog{width:min(480px,100%);container-type:inline-size;--welcome-ink:#0c2533;--welcome-red:#c92b21}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-heading{min-height:0;padding:0 0 9px}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-heading h2{max-width:94%;padding:10px 28px 12px 13px;font-size:clamp(23px,7.1cqw,34px);line-height:1.2;letter-spacing:0;white-space:nowrap;background:radial-gradient(#ef9e5744 .7px,transparent 1px) 0 0/4px 4px,linear-gradient(110deg,#e03628,#b3231c);text-shadow:2px 3px #771d16}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-heading::before{right:8px;top:12px;width:95px;height:43px}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-scroll{padding:0 12px 0}
+.welcome-content{display:grid;gap:10px;color:var(--welcome-ink);font-family:var(--font-body,sans-serif)}
+.welcome-hero{display:grid;grid-template-columns:minmax(0,1fr) 32%;align-items:center;gap:0;padding:4px 4px 0}
+.welcome-hero h3{position:relative;z-index:1;margin:0 -12px 0 0;color:var(--welcome-ink);font:400 clamp(24px,7.4cqw,36px)/1.28 var(--font-display,sans-serif);letter-spacing:-.025em}
+.welcome-art{display:block;width:100%;height:auto;overflow:visible}
+.welcome-hero .welcome-art{transform:rotate(-4deg)}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog p{margin:0;color:var(--welcome-ink);font:600 clamp(12px,3.1cqw,14px)/1.6 var(--font-body,sans-serif)}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .welcome-story{padding:0 4px}
+.welcome-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:0;padding:8px 4px;list-style:none;border:2px solid var(--welcome-ink);border-radius:9px 2px;background:linear-gradient(115deg,#fff3d9,#f1e3c0);box-shadow:0 2px 0 #b4a27f}
+.welcome-steps li{position:relative;display:grid;justify-items:center;align-content:center;min-width:0}
+.welcome-step-number{position:absolute;top:2px;left:4px;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#edb536;color:var(--welcome-ink);font:400 14px/1 var(--font-display,sans-serif)}
+.welcome-steps .welcome-art{width:clamp(42px,12.5cqw,60px)}
+.welcome-steps strong{font:400 clamp(16px,4.4cqw,21px)/1.3 var(--font-display,sans-serif);white-space:nowrap}
+.welcome-step-arrow{position:absolute;right:-9px;top:19%;font:900 30px/1 sans-serif;color:#e7a523;text-shadow:1px 1px #fff0b0}
+.welcome-target{position:relative;display:grid;grid-template-columns:minmax(0,1fr) 17%;align-items:center;gap:5px 6px;border:3px solid var(--welcome-ink);border-radius:10px 3px;padding:10px 12px;background:radial-gradient(#fff4c655 .65px,transparent .9px) 0 0/4px 4px,linear-gradient(110deg,#ffdb70,#f2be43);box-shadow:0 2px 0 #b69a54}
+.welcome-label{display:table;margin:0 0 6px;padding:3px 17px 4px 9px;clip-path:polygon(8px 0,calc(100% - 9px) 0,100% 50%,calc(100% - 9px) 100%,0 100%,0 8px);background:var(--welcome-ink);color:#fff0d2;font:400 clamp(17px,4.5cqw,22px)/1.2 var(--font-display,sans-serif);white-space:nowrap}
+.welcome-equation{display:block;white-space:nowrap;font:400 clamp(18px,4.7cqw,24px)/1.35 var(--font-display,sans-serif);letter-spacing:-.025em}
+.welcome-equation em{color:var(--welcome-red);font-style:normal;font-size:1.3em;vertical-align:-.04em}
+.welcome-target>p{grid-column:1/-1}
+.welcome-rules{padding:10px 10px 8px;border:2px solid #aa9c7b;border-radius:9px 2px;background:#fff3d333}
+.welcome-credit{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:5px;padding-bottom:10px;border-bottom:2px solid var(--welcome-ink)}
+.welcome-credit p{grid-column:1/-1}
+.welcome-credit .welcome-label{margin:0}
+.welcome-credit .credit-hearts{gap:4px;padding-top:1px}
+.welcome-credit .credit-hearts .heart{width:clamp(24px,6.8cqw,32px);height:clamp(24px,6.8cqw,32px)}
+.welcome-credit .credit-hearts .heart.filled .heart-body{stroke:var(--welcome-ink);stroke-width:2}
+.welcome-victory{display:grid;grid-template-columns:17% minmax(0,1fr);align-items:center;gap:9px;padding-top:10px}
+.welcome-victory .welcome-label{margin-bottom:5px}
+.welcome-victory .welcome-label em{color:#ffc747;font-style:normal;font-size:1.15em}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .welcome-note{display:flex;align-items:center;justify-content:center;gap:7px;color:#786d55;font-size:clamp(10px,2.65cqw,12px);font-weight:400;white-space:nowrap}
+.welcome-note::before,.welcome-note::after{content:'';flex:1;height:1px;background:#b9a77d}
+.welcome-footer{flex:none;padding:10px 12px 16px}
+.game-screen.comic-dialog-layer .tutorial-intro-dialog .tutorial-intro-start{display:flex;align-items:center;justify-content:center;gap:12px;min-height:56px;width:100%;padding:9px 8px;border:3px solid var(--welcome-ink);border-radius:8px 3px;background:radial-gradient(#f5b76e55 .7px,transparent 1px) 0 0/4px 4px,linear-gradient(110deg,#df3226,#bd241e);color:#fff0ce;box-shadow:inset 0 0 0 2px #ec7050,3px 4px 0 #b79b51;text-shadow:2px 2px #8b2219;font:400 clamp(24px,6.8cqw,33px)/1.3 var(--font-display,sans-serif);cursor:pointer}
+.tutorial-intro-start>span{font:900 40px/.8 sans-serif}
+.tutorial-intro-start:focus-visible{outline:3px solid #d59926;outline-offset:3px}
+.tutorial-intro-start:active{transform:translateY(2px)}
+@media(max-height:740px){.welcome-content{gap:7px}.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-heading{padding-bottom:5px}.welcome-target{padding:7px 9px}.welcome-rules{padding:7px 9px}.welcome-credit{padding-bottom:7px}.welcome-victory{padding-top:7px}.welcome-footer{padding-top:7px;padding-bottom:12px}.welcome-steps{padding-block:5px}}
+@media(max-height:620px){.welcome-hero h3{font-size:clamp(23px,6.2cqw,30px)}.welcome-hero .welcome-art{max-height:72px}.welcome-steps .welcome-art{max-height:40px}.game-screen.comic-dialog-layer .tutorial-intro-dialog .tutorial-intro-start{min-height:48px;font-size:24px}.game-screen.comic-dialog-layer .tutorial-intro-dialog .sheet-heading h2{font-size:25px;padding-block:7px}}

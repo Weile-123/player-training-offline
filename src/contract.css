@@ -1,0 +1,40 @@
+/* 复用美漫纸张、红色印章、球场和并发帧动画；新数据均为实时DOM。 */
+.contract-title{color:#f4e5c8;transform:rotate(-5deg);font:1000 clamp(34px,11cqw,68px)/.9 'Microsoft YaHei',sans-serif;letter-spacing:-.06em;text-shadow:3px 4px #090f16,6px 8px #ad2e24;margin:0;padding:10px 0}
+.contract-title em{font-style:normal}.contract-title small{display:block;font-size:.27em;letter-spacing:.1em;background:#b42f27;color:#fff0d0;padding:7px 9px;margin-top:12px;width:max-content;text-shadow:1px 1px #101c27}
+.contract-home .home-brand{height:25cqh;width:90%}.contract-home-message{margin:0;color:#fff1cf;background:#07121ce8;padding:6px;font-size:12px;text-align:center}
+.contract-game .cash-display b,.contract-game .debt-amount b,.contract-game .minimum-payment b{font-size:clamp(12px,3.4cqw,25px);max-width:30cqw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.contract-game .finance-paper{gap:1cqw}.contract-game .repay-button{font-size:clamp(10px,2.5cqw,19px)}
+.contract-status{position:absolute;bottom:2%;left:2%;right:15%;padding:6px 8px;color:#f5e5c6;background:#0a1725e8;border:1px solid #ab9774;font-size:clamp(10px,2.4cqw,15px);z-index:8;pointer-events:none;max-height:28%;overflow:hidden}
+.contract-status small{display:block;color:#ffbd82}.contract-stage-tools{position:absolute;top:3%;left:2%;z-index:8;display:flex;background:#0b1723e8;border:1px solid #c5b18a}.contract-stage-tools button{color:#f3dfb7;padding:5px 8px;font-size:clamp(10px,2.6cqw,16px)}
+.contract-heat{position:absolute;z-index:7;right:2%;top:3%;height:85%;max-height:260px;width:11%;max-width:65px;background:#0c1924ed;border:2px solid #e3c897;display:flex;align-items:center;flex-direction:column;padding:5px;gap:4px;font-size:clamp(10px,2.5cqw,17px)}
+.contract-heat-track{position:relative;flex:1;width:70%;background:#283744;border:1px solid #ba9f70;overflow:hidden}.contract-heat-track i{position:absolute;bottom:0;width:100%;background:repeating-linear-gradient(0deg,#e9a33f 0,#fbd17d 15px,#74502c 16px);transition:height .2s ease}.contract-heat.active{border-color:#ff663d;box-shadow:0 0 12px #c8372566}.contract-heat.active i{background:#db4930}
+.game-screen .dock-control.contract-relabel{display:flex;align-items:center;justify-content:center;gap:5%;background:#f0e1c6 var(--asset-art-game-paper-png,url('/art/game/paper.png')) center/cover;clip-path:polygon(3% 0,97% 2%,100% 93%,94% 100%,0 96%);font-size:3.2cqw;line-height:1.05;box-shadow:inset 0 0 0 1px #9c8866}.contract-relabel .game-icon{width:28%;height:65%}
+.contract-panel{font-weight:500;font-size:14px;line-height:1.6;color:#111c24}.contract-panel p{margin:10px 0}.contract-panel h3{font-size:18px;font-weight:900;margin:5px 0}.contract-panel h3 small{font-size:12px}.contract-panel input,.contract-panel select{width:100%;background:#fff2d7;border:1px solid #8d7855;color:#15202b;padding:10px;margin:8px 0;font-size:16px}
+.contract-cards{display:grid;gap:12px;margin:12px 0}.contract-card{padding:12px;background:#f6e6c5;border:2px solid #172431;box-shadow:3px 3px 0 #aa9670;overflow-wrap:anywhere}.contract-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.contract-panel button{min-height:38px;padding:7px 12px}.contract-panel button:disabled{opacity:.45}.contract-panel .primary{color:#fff1d5;background:#af3028;border:1px solid #591e19}.contract-panel .secondary{color:#14212d;background:#e7d2aa;border:1px solid #887450}.contract-roster-head{display:flex;gap:12px;align-items:center}.contract-roster-head .roster-portrait{width:65px;flex:none}.contract-roster-head p{margin:3px 0}.contract-notice{background:#f9d994;border-left:4px solid #ae3227;padding:8px}.contract-unlock{padding:6px;border-bottom:1px solid #b5a17d}.contract-unlock span{display:block;font-size:12px}
+.contract-collection{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:14px}.contract-collection button{display:flex;flex-direction:column;padding:6px;background:#20303c;color:#f6e5c3;min-width:0;border:2px solid #3e4c54;overflow:hidden}.contract-collection .discovered{border-color:#bc7934;background:#682f29}.contract-collection img,.contract-collection .template-silhouette{height:90px;max-width:100%;object-fit:contain}.contract-collection b{font-size:12px}.contract-collection small{font-size:11px}
+@media(max-height:550px){.contract-game .game-viewport{grid-template-rows:45px 55px 100px minmax(60px,1fr) 40px 145px;overflow-y:auto}.contract-game .game-dock{position:sticky;bottom:0;z-index:10}.contract-heat{max-height:140px}}
+@media(prefers-reduced-motion:reduce){.contract-heat-track i{transition:none}}
+
+/* 本轮局部操作调整；不改变其余页面主题。 */
+.contract-game .credit-display{border-left:0}
+.contract-game .contract-clean-dock{background:#0b1720;background-image:none}
+.contract-clean-dock .dock-canvas{background:none}
+.consumable-bar{position:absolute;left:2%;right:2%;top:3%;height:26%;display:flex;gap:2%;align-items:stretch;z-index:2}
+.consumable-scroll{display:flex;flex:1;gap:6px;min-width:0;overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;touch-action:pan-x;scrollbar-width:thin;scrollbar-color:#9b8562 #132532;background:#132532;border:1px solid #b8a581;align-items:center;padding:3px 5px;cursor:grab}
+.consumable-scroll:active{cursor:grabbing}
+.game-screen .consumable-slot{position:relative;flex:0 0 51px;height:100%;min-height:34px;max-height:64px;border:1px solid #a58b5c;background:#ead9b6;color:#14212b;padding:3px;user-select:none;display:flex;align-items:center;justify-content:center}
+.consumable-icon{width:38px;height:38px;max-width:80%;max-height:90%;flex:none}
+.consumable-slot b{position:absolute;right:2px;bottom:0;background:#0b1720;color:#f5e4c5;padding:0 3px;font:800 12px/1.3 sans-serif}
+.game-screen .dock-utility{flex:0 0 13%;max-width:65px;min-width:38px;min-height:34px;display:grid;place-items:center;background:#ead9b6;color:#111c24;border:2px solid #c9b28b;box-shadow:2px 3px #0008;padding:4px}
+.dock-utility .game-icon{width:85%;height:85%;max-height:42px}
+.game-screen .css-dock-button{display:flex;align-items:center;justify-content:center;gap:4%;background:#ead9b6;border:2px solid #101b23;outline:1px solid #ceb992;box-shadow:3px 4px #0007;clip-path:none;color:#0b1720;font-size:clamp(12px,3.6cqw,26px)}
+.css-dock-button::before{content:'';position:absolute;inset:4px;border:1px solid #8e7b59;pointer-events:none}
+.css-dock-button .game-icon{width:25%;height:60%}.css-dock-button strong{white-space:nowrap}
+.game-screen .css-dock-button:active:not(:disabled),.game-screen .dock-utility:active:not(:disabled){translate:0 3px;box-shadow:none}
+.game-screen .css-dock-button:disabled{opacity:.5}
+.game-screen .contract-roster-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex-wrap:nowrap}
+.game-screen .contract-roster-actions>button{width:100%;min-width:0;font-size:12px;padding:7px 3px;min-height:44px;line-height:1.3}
+.item-detail>.consumable-icon{display:block;margin:12px auto;width:76px;height:76px;color:#a52d25}
+.item-detail h3 small{font-size:14px}.game-screen .item-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(min-width:600px){.game-screen .consumable-slot{flex-basis:68px}.game-screen .contract-roster-actions>button{font-size:14px}}
+.severe-shot-input-lock{position:fixed;inset:0;z-index:2147483647;cursor:wait;touch-action:none}

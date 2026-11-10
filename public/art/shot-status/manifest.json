@@ -1,0 +1,40 @@
+{
+  "tool": "built-in imagegen",
+  "assets": [
+    {
+      "id": "hold",
+      "label": "维持",
+      "prompt": "Create a production-ready transparent PNG game UI comic impact word sprite for a vintage Chinese basketball training game. Single isolated badge, exact Chinese text \"维持\" ONLY, perfectly legible bold hand-lettered Chinese display typography slanted slightly right, large characters occupy 80% of badge. steel blue and cream, restrained short horizontal speed marks. Thick near-black navy ink outlines, small offset dark shadow, subtle screenprint wear and sparse halftone inside painted shapes. Compact jagged brush-painted burst behind the characters, entirely part of the isolated sticker. Wide horizontal composition, roughly 2.2:1 badge silhouette centered, minimal transparent margins, complete uncropped marks. Match cream paper / navy / vermilion sports-comic game art. This is one of a cohesive five-outcome set, not a UI screen. No basketball player, no scenery, no photo, no extra English, no extra text, no rectangular background, no checkerboard painted in. Genuine alpha transparent outside badge. Make 维持 the unmistakable focal point at tiny mobile sizes.",
+      "source": "C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-f68ca062-9aa4-4adb-86dd-e27867a2f00d.png",
+      "path": "public/art/shot-status/hold.png"
+    },
+    {
+      "id": "success",
+      "label": "成功",
+      "prompt": "Create a production-ready transparent PNG game UI comic impact word sprite for a vintage Chinese basketball training game. Single isolated badge, exact Chinese text \"成功\" ONLY, perfectly legible bold hand-lettered Chinese display typography slanted slightly right, large characters occupy 80% of badge. emerald green and cream, crisp upward speed marks. Thick near-black navy ink outlines, small offset dark shadow, subtle screenprint wear and sparse halftone inside painted shapes. Compact jagged brush-painted burst behind the characters, entirely part of the isolated sticker. Wide horizontal composition, roughly 2.2:1 badge silhouette centered, minimal transparent margins, complete uncropped marks. Match cream paper / navy / vermilion sports-comic game art. This is one of a cohesive five-outcome set, not a UI screen. No basketball player, no scenery, no photo, no extra English, no extra text, no rectangular background, no checkerboard painted in. Genuine alpha transparent outside badge. Make 成功 the unmistakable focal point at tiny mobile sizes.",
+      "source": "C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-603bd578-7d24-4875-b7d1-12298b2875a7.png",
+      "path": "public/art/shot-status/success.png"
+    },
+    {
+      "id": "great",
+      "label": "大成功",
+      "prompt": "Create a production-ready transparent PNG game UI comic impact word sprite for a vintage Chinese basketball training game. Single isolated badge, exact Chinese text \"大成功\" ONLY, perfectly legible bold hand-lettered Chinese display typography slanted slightly right, large characters occupy 80% of badge. golden orange and cream, energetic broad starburst and small stars. Thick near-black navy ink outlines, small offset dark shadow, subtle screenprint wear and sparse halftone inside painted shapes. Compact jagged brush-painted burst behind the characters, entirely part of the isolated sticker. Wide horizontal composition, roughly 2.2:1 badge silhouette centered, minimal transparent margins, complete uncropped marks. Match cream paper / navy / vermilion sports-comic game art. This is one of a cohesive five-outcome set, not a UI screen. No basketball player, no scenery, no photo, no extra English, no extra text, no rectangular background, no checkerboard painted in. Genuine alpha transparent outside badge. Make 大成功 the unmistakable focal point at tiny mobile sizes.",
+      "source": "C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-328eb805-1606-439f-b6eb-77354497cf96.png",
+      "path": "public/art/shot-status/great.png"
+    },
+    {
+      "id": "minor",
+      "label": "轻伤",
+      "prompt": "Create a production-ready transparent PNG game UI comic impact word sprite for a vintage Chinese basketball training game. Single isolated badge, exact Chinese text \"轻伤\" ONLY, perfectly legible bold hand-lettered Chinese display typography slanted slightly right, large characters occupy 80% of badge. amber yellow and cream, small sharp warning impact streaks. Thick near-black navy ink outlines, small offset dark shadow, subtle screenprint wear and sparse halftone inside painted shapes. Compact jagged brush-painted burst behind the characters, entirely part of the isolated sticker. Wide horizontal composition, roughly 2.2:1 badge silhouette centered, minimal transparent margins, complete uncropped marks. Match cream paper / navy / vermilion sports-comic game art. This is one of a cohesive five-outcome set, not a UI screen. No basketball player, no scenery, no photo, no extra English, no extra text, no rectangular background, no checkerboard painted in. Genuine alpha transparent outside badge. Make 轻伤 the unmistakable focal point at tiny mobile sizes.",
+      "source": "C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-f8705e83-f03c-4cd4-bed6-4a5f8da31d59.png",
+      "path": "public/art/shot-status/minor.png"
+    },
+    {
+      "id": "severe",
+      "label": "重伤",
+      "prompt": "Create a production-ready transparent PNG game UI comic impact word sprite for a vintage Chinese basketball training game. Single isolated badge, exact Chinese text \"重伤\" ONLY, perfectly legible bold hand-lettered Chinese display typography slanted slightly right, large characters occupy 80% of badge. crimson red and cream, dramatic fractured impact starburst. Thick near-black navy ink outlines, small offset dark shadow, subtle screenprint wear and sparse halftone inside painted shapes. Compact jagged brush-painted burst behind the characters, entirely part of the isolated sticker. Wide horizontal composition, roughly 2.2:1 badge silhouette centered, minimal transparent margins, complete uncropped marks. Match cream paper / navy / vermilion sports-comic game art. This is one of a cohesive five-outcome set, not a UI screen. No basketball player, no scenery, no photo, no extra English, no extra text, no rectangular background, no checkerboard painted in. Genuine alpha transparent outside badge. Make 重伤 the unmistakable focal point at tiny mobile sizes.",
+      "source": "C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-5d7e4f4b-b61b-4d6f-8ae8-e37747950211.png",
+      "path": "public/art/shot-status/severe.png"
+    }
+  ]
+}

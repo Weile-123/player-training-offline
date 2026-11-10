@@ -1,0 +1,25 @@
+/* One dialog surface for home, gameplay, collection and nested confirmations. */
+.game-screen.comic-dialog-layer{position:fixed;inset:0;width:100%;height:100dvh;max-width:none;margin:0;overflow:visible;background:transparent;container-type:normal;container-name:none;pointer-events:none;isolation:isolate;font-weight:500}
+.comic-dialog-layer .comic-dialog-backdrop{position:absolute;inset:0;z-index:auto;display:flex;align-items:center;justify-content:center;padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom));background:#050d15b8;backdrop-filter:none;pointer-events:auto}
+.game-screen.comic-dialog-layer .comic-dialog{display:flex;flex-direction:column;position:relative;isolation:isolate;width:min(480px,100%);max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));min-height:0;margin:0;padding:3px;border:0;border-radius:0;background:#101b23;color:#101b23;box-shadow:none;filter:drop-shadow(4px 5px 0 #0007);clip-path:polygon(13px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 13px),calc(100% - 13px) 100%,0 100%,0 13px);overflow:hidden}
+.game-screen.comic-dialog-layer .comic-dialog::before{content:'';position:absolute;inset:3px;z-index:-1;background:linear-gradient(110deg,#f8edcf,#eddfbd);clip-path:polygon(11px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 11px),calc(100% - 11px) 100%,0 100%,0 11px);pointer-events:none}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-heading{position:relative;display:flex;align-items:flex-start;justify-content:space-between;isolation:isolate;min-height:64px;flex:none;padding:0 12px 0 0;border:0;background:transparent;gap:12px}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-heading::before{content:'';position:absolute;right:10px;top:9px;width:110px;height:46px;z-index:-1;opacity:.85;background:radial-gradient(#e9a52f 1px,transparent 1.25px) 0 0/4px 4px;clip-path:polygon(45% 0,100% 0,100% 100%,0 100%)}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-heading h2{position:relative;flex:0 1 auto;min-width:40%;max-width:calc(100% - 58px);margin:0;padding:10px 29px 10px 15px;border:0;border-bottom:3px solid #101b23;background:linear-gradient(105deg,#d52e25,#b7221b);color:#fff0d4;font-size:clamp(22px,5.8vw,29px);font-weight:1000;font-style:normal;letter-spacing:-.04em;line-height:1.15;text-shadow:1px 1px #7b211c;overflow-wrap:anywhere;clip-path:polygon(12px 0,calc(100% - 9px) 0,100% 20%,calc(100% - 24px) 100%,0 100%,0 12px)}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-close{display:grid;place-items:center;position:relative;flex:none;width:40px;height:40px;min-height:40px;margin:12px 0 0;padding:0;background:#101b23;color:#f9eccb;border:2px solid #f5e4bf;box-shadow:0 0 0 1px #101b23;border-radius:0}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-close .game-icon{width:27px;height:27px;stroke-width:3.2}
+.game-screen.comic-dialog-layer .comic-dialog .sheet-scroll{position:relative;flex:1 1 auto;min-width:0;min-height:0;padding:5px 16px 20px;background:transparent;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#aa8c60 #ead8b6}
+.game-screen.comic-dialog-layer .comic-dialog p{color:#4e4536;line-height:1.75}
+.game-screen.comic-dialog-layer .comic-dialog .primary,.game-screen.comic-dialog-layer .comic-dialog .secondary{min-height:44px;border:2px solid #101b23;border-radius:0;padding:11px 9px;box-shadow:2px 3px 0 #9e8966;font-size:14px;font-weight:900;line-height:1.4;white-space:normal}
+.game-screen.comic-dialog-layer .comic-dialog .primary{background:linear-gradient(#ce3529,#b82720);color:#fff0d4}
+.game-screen.comic-dialog-layer .comic-dialog .secondary{background:#eee0bd;color:#101b23}
+.game-screen.comic-dialog-layer .comic-dialog .primary:disabled{opacity:.5}
+.game-screen.comic-dialog-layer .comic-dialog .dialog-actions{gap:12px;margin-top:16px}
+.game-screen.comic-dialog-layer .comic-dialog .dialog-actions button{min-height:48px;font-size:16px;font-style:normal}
+.game-screen.comic-dialog-layer .comic-sheet-workshop{width:min(520px,100%)}
+.comic-dialog .existing-save-warning{padding:13px 12px;border:2px solid #aa2b22;border-left:6px solid #b92d26;background:#edc8ab;margin:4px 0 14px}
+.comic-dialog .existing-save-warning>strong{display:block;font-size:23px;font-weight:1000;color:#a6241d}
+.game-screen.comic-dialog-layer .comic-dialog .existing-save-warning p{font-size:13px;color:#7a2e20;font-weight:800;margin:5px 0 0}
+.comic-dialog .existing-save-summary{margin:10px 0}
+.comic-dialog .asset-confirm-art{width:100%;height:90px;object-fit:contain}
+.comic-dialog .empty{background:#eee0bd;border:2px solid #101b23;border-radius:0;padding:16px;font-size:13px}

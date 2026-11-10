@@ -1,0 +1,40 @@
+/* Three roles: comic display titles, neutral reading text, compact score digits.
+   Avoid applying the display face to whole panels: small children must not inherit it. */
+:root,.game-screen,.tutorial-spotlight{font-family:var(--font-body)}
+
+.game-screen.comic-dialog-layer .comic-dialog .sheet-heading h2,
+.game-screen .career-end-heading h2,
+.game-screen .career-end-section h3,
+.game-screen .completion-confirm .plain-dialog-heading h2,
+.contract-panel .career-save-heading h3,
+.home-menu-button .home-menu-label,
+.home-continue>strong,
+.game-stage .stage-collection-button>span,
+.game-screen.comic-dialog-layer .career-start-actions button,
+.game-screen .completion-endless>span,
+.game-screen .career-end-home{
+ font-family:var(--font-display);
+ font-weight:400;
+ font-style:normal;
+ letter-spacing:0;
+}
+
+/* Decorative section titles remain distinct from supporting copy. */
+.career-save-month-value>b{font-family:var(--font-number);font-variant-numeric:tabular-nums}
+.career-save-heading>strong,.career-save-label,.career-save-caption,
+.career-save-credit p,.game-screen .completion-endless small,
+.game-screen .career-end-section h3 small{
+ font-family:var(--font-body);
+}
+.game-screen .settings-tutorial-row small,
+.game-screen .settings-feedback-entry small,
+.game-screen .save-progress small,
+.game-screen .cloud-auto-status{
+ font-family:var(--font-body);
+ font-weight:400;
+ letter-spacing:0;
+}
+.save-progress b,.save-progress small{font-variant-numeric:tabular-nums}
+
+/* Keep long amounts fitted while using the original numeric face. */
+.delivery-scoreboard .score-number>.fitted-amount{width:100%;text-align:center}

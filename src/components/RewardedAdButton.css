@@ -1,0 +1,22 @@
+.reward-ad-control{display:flex;flex-direction:column;min-width:0}
+.reward-ad-control .reward-ad-button{display:flex;align-items:center;justify-content:center;gap:7px;min-height:44px;padding:9px 12px;border:3px double #c9a363;border-radius:4px;background:#12313f;color:#fff0cc;box-shadow:2px 3px 0 #081a24;font:800 14px/1.3 var(--font-body,sans-serif);cursor:pointer}
+.game-screen .reward-ad-control.is-gold .reward-ad-button{background:linear-gradient(110deg,#ffe994,#ffda5b 52%,#edb735);border:3px solid #102633;color:#102633;box-shadow:inset 0 0 0 2px #fff0a6,2px 3px 0 #79613a}
+.reward-ad-control .reward-ad-button:disabled{cursor:default;opacity:.55}
+.reward-ad-control .reward-ad-button:not(:disabled):active{transform:translateY(2px);box-shadow:none}
+.reward-ad-control svg{width:22px;height:22px;flex:none;stroke:currentColor;stroke-width:1.7;fill:none}
+.equipment-shop .shop-footer{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}
+.equipment-shop .shop-footer>strong{grid-column:1/-1}
+.equipment-shop .shop-footer .reward-ad-button>span{font-size:clamp(11px,2.5cqw,16px);line-height:1.3;margin:0}
+.equipment-shop .shop-footer .reward-ad-button{min-height:38px;padding:6px;gap:4px}
+.market-ad-footer{display:flex;align-items:center;gap:8px;margin-top:8px}.market-ad-footer>.reward-ad-control{flex:1}
+.contract-heat.energy-meter.has-ad{height:calc(var(--court-meter-height) - 40px)}
+.energy-meter>.reward-ad-control{position:absolute;top:calc(100% + 4px);right:0;width:max-content;min-width:100%;color:#fff0cc}
+.energy-meter .reward-ad-button{width:auto;min-width:0;min-height:0;padding:3px 6px;font-size:10px;white-space:nowrap}
+.career-end-actions>.reward-ad-control{align-self:stretch}.career-end-actions .reward-ad-button{height:100%}
+.game-screen .career-end-actions .reward-ad-button:disabled{opacity:.55}
+.ad-shield-status{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);z-index:9;padding:5px 10px;border:2px solid #e2bc72;background:#123a40;color:#ffefb9;border-radius:4px;font:700 12px/1.4 var(--font-body,sans-serif);pointer-events:none;white-space:nowrap}
+.reward-ad-wait-copy{padding:28px 8px;text-align:center;font-size:18px;line-height:1.7;outline:none}
+
+.game-screen.comic-dialog-layer .equipment-shop .shop-footer .reward-ad-button{min-height:38px;height:100%;padding:6px 10px;gap:8px;border:3px double #273841;border-radius:0;box-shadow:none;font-size:clamp(11px,2.5cqw,16px);font-weight:900;line-height:1.4}
+.equipment-shop .shop-footer{align-items:stretch}
+.equipment-shop .shop-footer .reward-ad-control{height:100%}

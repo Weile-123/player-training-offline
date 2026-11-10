@@ -1,0 +1,16 @@
+{
+  "tool": "image_gen",
+  "date": "2026-10-20",
+  "assets": [
+    {
+      "name": "backboard-flame.png",
+      "prompt": "Create ONE transparent PNG game VFX sprite, isolated. Style reference is attached basketball comic game. Draw ONLY a thin rectangular frame made of burning orange vermilion golden flames and small glowing embers. Overall image landscape 3:2. The rectangular EMPTY transparent central hole occupies x=15% to85%, y=30% to85%; inside fully transparent, no board. Fire border around those four edges, taller licking flames above upper edge up to y=7%, small jagged flame tongues along side edges. Bottom edge is thin glowing orange. Outer edges fully transparent. Hand-painted comic fiery ink shapes with warm luminous orange and pale yellow cores, delicate realistic texture matching reference. NO actual backboard, basketball, hoop, court, text, scene, black background or opaque interior. This is overlaid around an existing rectangular backboard. Keep large transparent hole perfectly unobscured.",
+      "source": "Generated images are saved to C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2 as C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-1d0f1d60-510e-401b-9e10-d686f2632b91.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "name": "ball-flame.png",
+      "prompt": "Create ONE transparent PNG isolated game VFX sprite, square. ONLY a circular aura of orange red fire with subtle golden sparks around an empty transparent circle. Match fiery basketball effect of supplied comic game reference. Central circular hole radius 28% of image width at center (50%,58%), perfectly transparent, no basketball drawn. Fire rises from lower arc around left/right sides into thin wispy upward tongues, outermost reach x8%..92%,y7%..95%. Hand-painted sports manga flame with warm luminous orange yellow cores and crimson edges, fine illustrated texture. No ball, no court, no text, no black backdrop, no border. Must be transparent alpha so actual moving basketball is visible through center.",
+      "source": "Generated images are saved to C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2 as C:\\Users\\Weile\\.codex\\generated_images\\01a1334a-f77b-7140-a137-661770db9ef2\\exec-05de5300-a6fd-474b-820a-ee1d186d665f.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    }
+  ]
+}

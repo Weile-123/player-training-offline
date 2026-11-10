@@ -1,0 +1,21 @@
+.game-screen.comic-dialog-layer .comic-dialog.month-transition-dialog{width:min(90vw,520px)}
+.game-screen.comic-dialog-layer .month-transition-dialog .sheet-heading h2{max-width:90%;padding-right:42px}
+.game-screen.comic-dialog-layer .month-transition-dialog .sheet-scroll{padding:9px 22px 24px}
+.month-transition-content{text-align:center}
+.game-screen .month-transition-dialog .month-transition-eyebrow{margin:9px 0 20px;color:#766347;font-size:14px;font-weight:800;letter-spacing:1px}
+.month-transition-number{display:flex;align-items:center;justify-content:center;gap:10px;min-height:174px;padding:24px 12px;border-block:3px double #bc9658;background:repeating-linear-gradient(135deg,#163542 0 1px,#102c3a 1px 14px);box-shadow:0 5px 0 #baa27544;overflow:hidden}
+.month-transition-unit{font-size:clamp(21px,5vw,29px);color:#f5e4bb;font-weight:900}
+.month-transition-digits{display:flex;font-size:clamp(40px,calc(48vw / var(--month-digits)),126px);font-family:Impact,'Arial Black','Microsoft YaHei',sans-serif;font-weight:900;line-height:1;color:#f9cf68;font-variant-numeric:tabular-nums;text-shadow:2px 3px #6c4f2c}
+.month-transition-digit{display:block;overflow:hidden;height:1em;width:.68em;text-align:center}
+.month-transition-track{display:flex;flex-direction:column;transform:translateY(0)}
+.month-transition-track>span{display:block;flex:none;height:1em;line-height:1}
+.month-transition-digit.is-moving .month-transition-track{animation-name:month-number-roll;animation-timing-function:cubic-bezier(.23,.82,.25,1);animation-fill-mode:both}
+@keyframes month-number-roll{from{transform:translateY(0)}to{transform:translateY(-50%)}}
+.game-screen .month-transition-dialog .month-transition-route{margin:17px 0 10px;font-size:15px;font-weight:850;color:#766347;font-variant-numeric:tabular-nums}
+.month-transition-route span{margin:0 12px;color:#b52f24}
+.month-transition-divider{display:flex;align-items:center;justify-content:center;gap:13px;color:#b58d49;font-size:16px}
+.month-transition-divider i{width:24%;height:1px;background:#bca16e}
+.game-screen .month-transition-dialog .month-transition-caption{margin:8px 0 0;font-size:17px;font-weight:900;color:#183743}
+@media(max-width:380px){.month-transition-number{gap:7px;min-height:140px;padding:20px 8px}.game-screen.comic-dialog-layer .month-transition-dialog .sheet-scroll{padding-inline:14px}.game-screen .month-transition-dialog .month-transition-caption{font-size:15px}}
+@media(max-height:480px){.month-transition-number{min-height:100px;padding:12px}.month-transition-digits{font-size:min(70px,calc(48vw / var(--month-digits)))}.game-screen .month-transition-dialog .month-transition-eyebrow{margin:0 0 8px}.game-screen .month-transition-dialog .month-transition-route{margin:8px 0}.game-screen.comic-dialog-layer .month-transition-dialog .sheet-scroll{padding-bottom:12px}}
+@media(prefers-reduced-motion:reduce){.month-transition-digit.is-moving .month-transition-track{animation:none;transform:translateY(-50%)}}

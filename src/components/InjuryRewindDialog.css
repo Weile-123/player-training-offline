@@ -1,0 +1,18 @@
+.game-screen.comic-dialog-layer .comic-dialog.injury-rewind-dialog{width:min(100%,580px);container-type:inline-size;color:#102633}
+.game-screen.comic-dialog-layer .injury-rewind-dialog .sheet-scroll{padding:12px 20px 24px}
+.injury-rewind-benefit{display:grid;grid-template-columns:minmax(0,1fr) 22%;align-items:center;gap:10px;padding:10px 4px 20px}
+.game-screen .injury-rewind-description{margin:0;font:900 clamp(19px,4.8cqw,28px)/1.65 var(--font-body,sans-serif);letter-spacing:-.045em;color:#102633}
+.injury-rewind-description strong{position:relative;isolation:isolate;display:block;width:max-content;max-width:100%;margin-top:4px;color:#bd291e;font:400 clamp(22px,5.7cqw,34px)/1.45 var(--font-display,sans-serif);letter-spacing:0}
+.injury-rewind-description strong::before{content:'';position:absolute;inset:5px -5px 0;z-index:-1;background:#ffe292;clip-path:polygon(3% 0,100% 0,97% 100%,0 100%)}
+.injury-rewind-description strong b{font:inherit;font-size:1.35em}
+.injury-rewind-emblem{display:block;width:100%;height:auto;filter:drop-shadow(1px 2px 0 #c8ae72)}
+.game-screen .injury-rewind-hint{margin:0;padding:12px 14px;border:2px solid #cabb94;border-radius:5px;background:#f5e9c9;color:#615944;font:400 clamp(12px,2.8cqw,15px)/1.7 var(--font-body,sans-serif)}
+.injury-rewind-actions{display:grid;gap:14px;margin-top:16px}
+.injury-rewind-ad-limit{display:block;margin-top:8px;padding:7px 9px;border-left:4px solid #b92b22;background:#ffe39a;color:#a3221c;font-weight:900;font-size:clamp(14px,3.4cqw,19px);line-height:1.55}
+.game-screen .injury-rewind-actions .reward-ad-button,.game-screen .injury-rewind-actions .injury-rewind-dismiss{width:100%;min-height:56px;padding:10px 8px;border:3px solid #102633;border-radius:5px;font:400 clamp(21px,5.1cqw,29px)/1.25 var(--font-display,sans-serif);cursor:pointer}
+.game-screen .injury-rewind-actions .reward-ad-button svg{width:30px;height:30px;stroke-width:2.1;stroke-linecap:round;stroke-linejoin:round}
+.game-screen .injury-rewind-actions .injury-rewind-dismiss{background:linear-gradient(110deg,#d83126,#b71f1b);color:#fff0cc;box-shadow:inset 0 0 0 2px #e8624b,2px 4px 0 #806437;text-shadow:1px 2px 0 #8d2118}
+.game-screen .injury-rewind-actions .injury-rewind-dismiss:active{transform:translateY(2px);box-shadow:inset 0 0 0 2px #e8624b}
+.injury-rewind-actions button:focus-visible{outline:3px solid #c58621;outline-offset:4px}
+@container (max-width:360px){.injury-rewind-benefit{gap:6px;padding-inline:0}.injury-rewind-description strong{letter-spacing:-.04em}}
+@media(max-height:540px){.injury-rewind-benefit{padding-block:0 10px}.injury-rewind-actions{gap:10px;margin-top:12px}.game-screen .injury-rewind-actions .reward-ad-button,.game-screen .injury-rewind-actions .injury-rewind-dismiss{min-height:46px}}

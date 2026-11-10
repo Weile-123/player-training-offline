@@ -1,0 +1,382 @@
+{
+  "title": "ForgeTax 数值资料整理",
+  "source_note": "非官方 ForgeTax.tools 自称取自 Steam Build 25755699；2026-10-19 检索。此为可核实的公开资料整理，并非游戏源码。",
+  "sources": {
+    "quota": "https://www.forgetax.tools/tribute",
+    "value": "https://www.forgetax.tools/guides/sword-value",
+    "odds": "https://www.forgetax.tools/guides/forging-odds",
+    "merchant": "https://www.forgetax.tools/merchant",
+    "shop": "https://www.forgetax.tools/tools/relic-shop",
+    "frenzy": "https://www.forgetax.tools/guides/frenzy"
+  },
+  "sword_value": {
+    "base": 320,
+    "merchant_base": 640,
+    "per_level_multiplier": 1.5,
+    "great_total_value_multiplier": 2.5,
+    "success_level_delta": 1,
+    "great_level_delta": 2,
+    "damage_level_delta": -1,
+    "minimum_level": 0,
+    "plain_formula": "round(base*1.5**level)",
+    "with_relics_approx": "round((effectiveBase*1.5**level+flatBonus)*allMultipliers); must retain extra Great-derived state",
+    "great_note": "The exact internal storage representation for banked Great premium is not confirmed by the public guide. Do not approximate it by simply changing level."
+  },
+  "tribute": {
+    "days": [
+      {
+        "day": 1,
+        "quota": 1800,
+        "merchant_visit": false
+      },
+      {
+        "day": 2,
+        "quota": 2100,
+        "merchant_visit": false
+      },
+      {
+        "day": 3,
+        "quota": 2600,
+        "merchant_visit": true
+      },
+      {
+        "day": 4,
+        "quota": 3350,
+        "merchant_visit": false
+      },
+      {
+        "day": 5,
+        "quota": 4350,
+        "merchant_visit": false
+      },
+      {
+        "day": 6,
+        "quota": 5700,
+        "merchant_visit": true
+      },
+      {
+        "day": 7,
+        "quota": 7500,
+        "merchant_visit": false
+      },
+      {
+        "day": 8,
+        "quota": 9800,
+        "merchant_visit": false
+      },
+      {
+        "day": 9,
+        "quota": 12800,
+        "merchant_visit": true
+      },
+      {
+        "day": 10,
+        "quota": 16700,
+        "merchant_visit": false
+      },
+      {
+        "day": 11,
+        "quota": 21500,
+        "merchant_visit": false
+      },
+      {
+        "day": 12,
+        "quota": 27750,
+        "merchant_visit": true
+      },
+      {
+        "day": 13,
+        "quota": 35700,
+        "merchant_visit": false
+      },
+      {
+        "day": 14,
+        "quota": 45800,
+        "merchant_visit": false
+      },
+      {
+        "day": 15,
+        "quota": 58650,
+        "merchant_visit": true
+      },
+      {
+        "day": 16,
+        "quota": 74650,
+        "merchant_visit": false
+      },
+      {
+        "day": 17,
+        "quota": 94550,
+        "merchant_visit": false
+      },
+      {
+        "day": 18,
+        "quota": 119350,
+        "merchant_visit": true
+      },
+      {
+        "day": 19,
+        "quota": 149950,
+        "merchant_visit": false
+      },
+      {
+        "day": 20,
+        "quota": 186850,
+        "merchant_visit": false
+      },
+      {
+        "day": 21,
+        "quota": 232000,
+        "merchant_visit": true
+      }
+    ],
+    "after_day_21": "previous quota * 1.2 with game-specific rounding; use listed verified values or test rounding",
+    "after_day_21_known": {
+      "22": 278400,
+      "23": 334080,
+      "24": 400896,
+      "25": 481075,
+      "26": 577290,
+      "27": 692748,
+      "28": 831298,
+      "29": 997558,
+      "30": 1197069,
+      "31": 1436483,
+      "32": 1723779,
+      "33": 2068535,
+      "34": 2482242,
+      "35": 2978691,
+      "36": 3574429,
+      "37": 4289315,
+      "38": 5147178,
+      "39": 6176613,
+      "40": 7411936,
+      "41": 8894323,
+      "42": 10673188,
+      "43": 12807825,
+      "44": 15369390,
+      "45": 18443269,
+      "46": 22131922,
+      "47": 26558307
+    },
+    "failure_limit": 3,
+    "gold_from_offered_swords": "all offered value becomes gold even if quota insufficient"
+  },
+  "forging_odds": {
+    "base_tickets": {
+      "break": 9,
+      "damage": 2,
+      "hold": 5,
+      "success": 12,
+      "great": 2
+    },
+    "break_chance_percent_by_level_0_to_30": [
+      0,
+      1.8,
+      5.9,
+      12.9,
+      24.8,
+      29.7,
+      34.7,
+      38.3,
+      41.8,
+      44.3,
+      46.7,
+      49.1,
+      50.5,
+      51.9,
+      53.2,
+      54.5,
+      55.8,
+      57.6,
+      59.4,
+      61.2,
+      63,
+      63.9,
+      64.8,
+      65.7,
+      66.6,
+      67.5,
+      68.4,
+      69.3,
+      70.2,
+      71.1,
+      72
+    ],
+    "level_30_plus_break_percent": 72,
+    "other_outcome_ratio_after_break": [
+      "damage=2",
+      "hold=5",
+      "success=12",
+      "great=2"
+    ],
+    "ticket_resolution": 1000,
+    "distribution_examples": {
+      "level_0": {
+        "break": 0,
+        "damage": 9.5,
+        "hold": 23.8,
+        "success": 57.2,
+        "great": 9.5
+      },
+      "level_10": {
+        "break": 46.7,
+        "damage": 5.1,
+        "hold": 12.7,
+        "success": 30.4,
+        "great": 5.1
+      },
+      "level_30": {
+        "break": 72,
+        "damage": 2.7,
+        "hold": 6.7,
+        "success": 16,
+        "great": 2.6
+      }
+    },
+    "note": "Rounding to 1,000 tickets uses largest fractional remainders; changing ticket counts changes normalized probabilities"
+  },
+  "frenzy": {
+    "charge_needed": 10,
+    "starts_on_next_strike": true,
+    "base_duration_seconds": 4,
+    "default_time_between_strikes_seconds": 0.64,
+    "break_probability_during_frenzy": 0,
+    "max_strikes_without_speed_relics": 7
+  },
+  "merchant": {
+    "visit_every_days": 3,
+    "first_day": 3,
+    "basic_sword_price_formula": "max(700, round(0.4*quota))",
+    "basic_sword_stock_by_visit": "2 on first visit, 3 on visits 2/3, 4 on visits 4-7, 5 afterwards",
+    "repeat_purchase_multiplier": 3,
+    "item_price_by_visit": {
+      "3": {
+        "basic_sword": 1040,
+        "special_sword": 2960,
+        "cracked_dragon_scale": 1100,
+        "regret_clockwork": 3980,
+        "red_chalk": null,
+        "powder_pouch": null,
+        "cold_star_shard": null,
+        "incense_of_oblivion": null,
+        "ghost_delivery_note": null
+      },
+      "6": {
+        "basic_sword": 2280,
+        "special_sword": 6490,
+        "cracked_dragon_scale": 2400,
+        "regret_clockwork": 8730,
+        "red_chalk": 3200,
+        "powder_pouch": 5130,
+        "cold_star_shard": 3990,
+        "incense_of_oblivion": null,
+        "ghost_delivery_note": 5190
+      },
+      "9": {
+        "basic_sword": 5120,
+        "special_sword": 23300,
+        "cracked_dragon_scale": 5380,
+        "regret_clockwork": 19590,
+        "red_chalk": 7170,
+        "powder_pouch": 11520,
+        "cold_star_shard": 8960,
+        "incense_of_oblivion": 27650,
+        "ghost_delivery_note": 11650
+      },
+      "12": {
+        "basic_sword": 11100,
+        "special_sword": 50510,
+        "cracked_dragon_scale": 11660,
+        "regret_clockwork": 42460,
+        "red_chalk": 15540,
+        "powder_pouch": 24980,
+        "cold_star_shard": 19430,
+        "incense_of_oblivion": 59940,
+        "ghost_delivery_note": 25260
+      },
+      "15": {
+        "basic_sword": 23460,
+        "special_sword": 160120,
+        "cracked_dragon_scale": 24640,
+        "regret_clockwork": 89740,
+        "red_chalk": 32850,
+        "powder_pouch": 52790,
+        "cold_star_shard": 41060,
+        "incense_of_oblivion": 126690,
+        "ghost_delivery_note": 53380
+      },
+      "18": {
+        "basic_sword": 47740,
+        "special_sword": 325830,
+        "cracked_dragon_scale": 50130,
+        "regret_clockwork": 182610,
+        "red_chalk": 66840,
+        "powder_pouch": 107420,
+        "cold_star_shard": 83550,
+        "incense_of_oblivion": 257800,
+        "ghost_delivery_note": 108610
+      },
+      "21": {
+        "basic_sword": 92800,
+        "special_sword": 633360,
+        "cracked_dragon_scale": 97440,
+        "regret_clockwork": 354960,
+        "red_chalk": 129920,
+        "powder_pouch": 208800,
+        "cold_star_shard": 162400,
+        "incense_of_oblivion": 501120,
+        "ghost_delivery_note": 211120
+      }
+    },
+    "notes": "special sword price is more complex than a single formula; use validated price table first"
+  },
+  "relic_shop": {
+    "cases": 3,
+    "rarity_weights_by_period": {
+      "day_2_3": [
+        85,
+        15,
+        0
+      ],
+      "day_4_5": [
+        75,
+        25,
+        0
+      ],
+      "day_6": [
+        70,
+        25,
+        5
+      ],
+      "day_7_8": [
+        60,
+        35,
+        5
+      ],
+      "day_9_12": [
+        53,
+        35,
+        12
+      ],
+      "day_13_16": [
+        36,
+        42,
+        22
+      ],
+      "day_17_plus": [
+        28,
+        42,
+        30
+      ]
+    },
+    "rarity_order": [
+      "common",
+      "rare",
+      "legendary"
+    ],
+    "price_resource": "sword credits, one credit per offered sword regardless of grade",
+    "reroll_cost_formula": "max(150, round(0.15*quota))*(2.5**number_of_paid_rerolls_today)",
+    "owned_relics_not_reoffered": true
+  }
+}

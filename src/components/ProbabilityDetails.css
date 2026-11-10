@@ -1,0 +1,19 @@
+.probability-details{min-width:0;color:#17313f}
+.probability-details .probability-context{margin:0 0 14px;padding:8px 0;border-bottom:1px solid #a89165;font-weight:900;color:#17313f}
+.probability-details h3{margin:18px 0 12px;padding-left:9px;border-left:5px solid #17313f;font-size:clamp(18px,4.5cqw,25px);color:#17313f}
+.probability-details-strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:2px}
+.probability-details-strip>div{text-align:center;padding:10px 1px;color:#fff1d2;min-width:0}
+.probability-details-strip span{display:block;font-size:clamp(11px,2.8cqw,16px);font-weight:800}
+.probability-details-strip b{display:block;font-size:clamp(15px,4cqw,25px);line-height:1.4;white-space:nowrap}
+.probability-details .probability-caption{font-size:12px;line-height:1.6;margin:7px 0 12px;color:#645c4c}
+.probability-details table{width:100%;table-layout:fixed;border-collapse:collapse;font-size:clamp(12px,2.8cqw,16px);margin:12px 0}
+.probability-details th,.probability-details td{padding:9px 7px;border:1px solid #7c7e72;text-align:left;overflow-wrap:anywhere}
+.probability-details th{background:#ddd8c7;color:#17313f;font-weight:900}
+.probability-details .probability-base th,.probability-details .probability-base td{text-align:center;padding:8px 2px}
+.probability-base caption{text-align:left;font-weight:900;margin-bottom:6px}
+.probability-effects th:first-child{width:45%}
+.probability-effects td:first-child small{display:block;width:fit-content;padding:2px 5px;margin-bottom:4px;background:#ded9be;color:#4e5147;font-size:11px}
+.probability-effects td:nth-child(2){color:#205b44;font-weight:800}
+.probability-rules{margin:0;padding:12px 12px 12px 30px;background:#f5e9cc;border:1px solid #b49b6c;font-size:clamp(12px,2.8cqw,15px);line-height:1.75}
+.probability-rules li+li{margin-top:8px}
+.game-screen .probability-close{display:block;width:60%;margin:16px auto 0}

@@ -1,0 +1,46 @@
+import {afterEach,beforeEach,it,expect,vi} from 'vitest';
+import {createRoot} from 'react-dom/client';
+import {act} from 'preact/test-utils';
+import CareerTutorial from '../../src/components/CareerTutorial';
+import {useContract} from '../../src/contractStore';
+let root:ReturnType<typeof createRoot>;
+beforeEach(()=>{
+ Object.defineProperty(document,'fonts',{configurable:true,value:{ready:Promise.resolve()}});
+ Element.prototype.scrollIntoView=()=>{};
+ Element.prototype.animate=vi.fn(()=>({cancel(){}})) as unknown as typeof Element.prototype.animate;
+ vi.stubGlobal('matchMedia',()=>({matches:true,addEventListener(){},removeEventListener(){}}));
+});
+afterEach(()=>{if(root)act(()=>root.unmount());vi.useRealTimers();});
+const mount=(done:()=>void)=>{root=createRoot(document.getElementById('root')!);act(()=>root.render(<CareerTutorial onComplete={done} onExit={()=>{}} error=""/>));};
+const press=(selector:string)=>{const b=document.querySelector<HTMLButtonElement>(selector);expect(b,selector).toBeTruthy();act(()=>b!.click());};
+it('introduces the career, then trains before teaching the quota and real delivery without changing the save',async()=>{
+ const before=JSON.stringify(useContract.getState()),done=vi.fn();mount(done);
+ const step=()=>document.querySelector('.tutorial-spotlight')?.getAttribute('data-step');
+ expect(step()).toBeUndefined();
+ const intro=document.querySelector('.tutorial-intro-dialog');
+ expect(intro?.textContent).toContain('把潜力新人，练成明日球星。');
+ expect(intro?.textContent).toContain('信用归零则本局结束');
+ expect(intro?.textContent).toContain('21');
+ press('.tutorial-intro-start');expect(step()).toBe('train');
+ press('.dock-shoot');expect(step()).toBe('growth');
+ expect(document.querySelector('.tutorial-comparison')?.textContent).toContain('2,430');
+ press('.tutorial-next');expect(step()).toBe('goal');
+ expect(document.querySelector('.score-target')?.getAttribute('aria-describedby')).toBe('tutorial-instruction');
+ expect(document.querySelector('.tutorial-instruction')?.textContent).toContain('最低交付总价值');
+ press('.tutorial-next');expect(step()).toBe('deliver');
+ press('.sell-shortcut');expect(step()).toBe('queued');
+ press('.tutorial-next');expect(step()).toBe('month');
+ press('.dock-month');expect(step()).toBe('confirm');
+ press('.settlement-submit');
+ await act(async()=>{await new Promise(r=>setTimeout(r,1000));});
+ expect(step()).toBe('settled');press('.tutorial-next');
+ expect(done).toHaveBeenCalledTimes(1);
+ expect(JSON.stringify(useContract.getState())).toBe(before);
+});
+it('restores the original skip confirmation and cancellation',()=>{
+ const before=JSON.stringify(useContract.getState().state),done=vi.fn();mount(done);
+ press('.tutorial-intro-start');
+ press('.tutorial-skip');press('.tutorial-cancel-skip');expect(document.querySelector('.tutorial-spotlight')!.getAttribute('data-step')).toBe('train');
+ press('.tutorial-skip');press('.tutorial-confirm-skip');
+ expect(done).toHaveBeenCalledTimes(1);expect(JSON.stringify(useContract.getState().state)).toBe(before);
+});
