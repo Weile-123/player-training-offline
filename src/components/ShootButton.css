@@ -1,0 +1,36 @@
+.game-screen .dock-shoot.is-cooling:disabled {
+ filter: none;
+ opacity: 1;
+}
+
+.game-screen .dock-shoot.is-cooling:disabled::after {
+ background: transparent;
+}
+
+.game-screen .dock-shoot.is-cooling .dock-shoot-face {
+ filter: none;
+}
+
+.dock-shoot-cooldown {
+ position: absolute;
+ right: 0;
+ bottom: 0;
+ left: 0;
+ background: rgb(50 57 62 / 60%);
+ backdrop-filter: grayscale(1) brightness(.65);
+ pointer-events: none;
+}
+
+.dock-shoot-timer {
+ position: absolute;
+ top: 100%;
+ left: 50%;
+ height: var(--shoot-timer-space, 22px);
+ transform: translateX(-50%);
+ display: grid;
+ place-items: center;
+ color: #fff5dc;
+ font: 900 clamp(12px, 2.7cqw, 18px) / 1.2 sans-serif;
+ text-shadow: 0 2px 3px #07141c, 1px 0 #07141c;
+ pointer-events: none;
+}

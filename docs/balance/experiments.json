@@ -1,0 +1,95 @@
+{
+  "date": "2026-11-12",
+  "currentBalanceVersion": 3,
+  "currentBaseStamina": 20,
+  "experiments": [
+    {
+      "file": "baseline-v1.json",
+      "purpose": "Previous heavy XP curve, before this recalibration",
+      "status": "historical",
+      "baseStamina": 30,
+      "sampleSize": 100,
+      "perScenario": true
+    },
+    {
+      "file": "economy-control-v2.json",
+      "purpose": "New light XP and course caps, old fees and course-based rewards",
+      "status": "historical",
+      "baseStamina": 30,
+      "sampleSize": 10,
+      "policies": 4,
+      "horizonSeconds": 3600,
+      "reproducibility": "Captured control run; changing the output label does not restore old prices or rewards. See recorded parameters."
+    },
+    {
+      "file": "baseline-v2-stamina30.json",
+      "purpose": "Previous light XP curve with 30 base stamina, before the requested reduction to 20",
+      "status": "historical",
+      "baseStamina": 30,
+      "sampleSize": 100,
+      "perScenario": true
+    },
+    {
+      "file": "economy-v2-stamina30.json",
+      "purpose": "Previous five-policy economy run with 30 base stamina",
+      "status": "historical",
+      "baseStamina": 30,
+      "sampleSize": 10,
+      "policies": 5,
+      "horizonSeconds": 3600
+    },
+    {
+      "file": "economy-staged.json",
+      "purpose": "Historical standalone staged-policy subset already included in economy-v2-stamina30.json",
+      "status": "historical-subset",
+      "baseStamina": 30,
+      "countAsIndependentSample": false
+    },
+    {
+      "file": "gym-balance.json",
+      "purpose": "Current 20-stamina balance, six preconfigured gear scenarios",
+      "status": "current",
+      "balanceVersion": 3,
+      "baseStamina": 20,
+      "sampleSize": 100,
+      "perScenario": true
+    },
+    {
+      "file": "economy-current.json",
+      "purpose": "Current 20-stamina economy, five from-zero investment policies",
+      "status": "current",
+      "balanceVersion": 3,
+      "baseStamina": 20,
+      "sampleSize": 10,
+      "policies": 5,
+      "horizonSeconds": 3600,
+      "reproduction": "npm run simulate:gym-economy with GYM_ECONOMY_SEEDS=10 and GYM_ECONOMY_SECONDS=3600"
+    },
+    {
+      "file": "economy-endgame-v3.json",
+      "purpose": "Single-seed from-zero legal-action proof that gym level 8 and its quality gates are reachable",
+      "status": "current-reachability-proof",
+      "balanceVersion": 3,
+      "baseStamina": 20,
+      "sampleSize": 1,
+      "policy": "staged",
+      "stoppedAtSeconds": 8405.6,
+      "reproduction": "npm run simulate:gym-economy with GYM_ECONOMY_POLICY=staged, GYM_ECONOMY_SEEDS=1, GYM_ECONOMY_SECONDS=21600, GYM_ECONOMY_LABEL=endgame-v3 and GYM_ECONOMY_STOP_AT_GYM=8"
+    },
+    {
+      "file": "endgame-completion-v3.json",
+      "purpose": "Legal-action completion audit from the earned gym-8 save: all 94 equipment, five available project caps and eight individual automatic trainees",
+      "status": "current-completion-proof",
+      "baseStamina": 20,
+      "sampleSize": 1,
+      "source": "Same seed-1 endgame save; no injected currency or additional recommendation income"
+    }
+  ],
+  "notes": [
+    "balanceVersion 3 adds the 20-stamina save migration; the version does not distinguish every historical economic experiment.",
+    "The current economy dataset contains 50 one-hour trajectories. The endgame proof is one additional trajectory, not a population completion-time estimate.",
+    "The completion audit continues the same endgame trajectory and is not an independent sample.",
+    "Instant management requires active play; it is not unattended automatic revenue.",
+    "Raw settled payouts and unclaimed active-player valuations are separate."
+  ]
+}

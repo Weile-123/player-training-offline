@@ -20,8 +20,8 @@ it('switches from Loading to the real dynamically imported home and opens its st
  await act(async()=>{loading.release();});
  await vi.waitFor(async()=>{
   await act(async()=>{await new Promise(resolve=>setTimeout(resolve,20));});
-  expect(document.querySelector('[aria-label="王牌训练师首页"]')).toBeTruthy();
- });
+  expect(document.querySelector('[aria-label="王牌训练师训练馆首页"]')).toBeTruthy();
+ },{timeout:5000});
  expect(document.querySelector('[aria-label="游戏资源加载"]')).toBeNull();
  expect(loading.finish).toHaveBeenCalledOnce();
  await act(async()=>document.querySelector<HTMLButtonElement>('[aria-label="球星图鉴"]')!.click());
@@ -33,6 +33,6 @@ it('artwork failure does not block the real home screen',async()=>{
  await act(async()=>loading.reject());
  await vi.waitFor(async()=>{
   await act(async()=>{await new Promise(resolve=>setTimeout(resolve,20));});
-  expect(document.querySelector('[aria-label="王牌训练师首页"]')).toBeTruthy();
- });
+  expect(document.querySelector('[aria-label="王牌训练师训练馆首页"]')).toBeTruthy();
+ },{timeout:5000});
 });

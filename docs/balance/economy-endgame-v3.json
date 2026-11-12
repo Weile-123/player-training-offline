@@ -1,0 +1,1161 @@
+{
+  "schema": 1,
+  "balanceVersion": 3,
+  "sampleSize": 1,
+  "horizonSeconds": 21600,
+  "stopAtGym": 8,
+  "parameters": {
+    "baseStamina": 20,
+    "trainingCreditMilestones": [
+      {
+        "level": 10,
+        "tier": 2,
+        "credits": 2
+      },
+      {
+        "level": 18,
+        "tier": 3,
+        "credits": 6
+      },
+      {
+        "level": 25,
+        "tier": 4,
+        "credits": 12
+      }
+    ],
+    "projectCosts": {
+      "endurance": [
+        1,
+        2,
+        4,
+        6,
+        11,
+        19,
+        35,
+        62
+      ],
+      "recovery": [
+        1,
+        2,
+        4,
+        6,
+        11,
+        19,
+        35,
+        62
+      ],
+      "recruitment": [
+        2,
+        4,
+        7,
+        12,
+        21,
+        38
+      ],
+      "equipment": [
+        2,
+        4,
+        7,
+        12
+      ],
+      "automation": [
+        3,
+        6,
+        10,
+        18,
+        32
+      ]
+    },
+    "extraCourseRecoveryCaps": [
+      1,
+      2,
+      2,
+      3,
+      3,
+      4,
+      4,
+      4
+    ]
+  },
+  "source": "actual-engine-from-zero",
+  "assumptions": [
+    "short30-until-gym2-for-all",
+    "basic-cooperation-for-all",
+    "instant-management-actions",
+    "all-auto-after-gym2",
+    "same-purchase-priority",
+    "no-drinks",
+    "no-specialized-plans"
+  ],
+  "results": [
+    {
+      "policy": "staged",
+      "runs": [
+        {
+          "seed": 1,
+          "firstGym": {
+            "1": 0,
+            "2": 70,
+            "3": 1553.2,
+            "4": 2281,
+            "5": 3219,
+            "6": 4906.6,
+            "7": 6237.6,
+            "8": 8405.6
+          },
+          "firstPurchase": 40,
+          "purchases": [
+            {
+              "seconds": 40,
+              "type": "project",
+              "id": "recovery",
+              "cost": 1
+            },
+            {
+              "seconds": 40,
+              "type": "project",
+              "id": "endurance",
+              "cost": 1
+            },
+            {
+              "seconds": 70,
+              "type": "project",
+              "id": "recovery",
+              "cost": 2
+            },
+            {
+              "seconds": 1106,
+              "type": "project",
+              "id": "endurance",
+              "cost": 2
+            },
+            {
+              "seconds": 1106,
+              "type": "equipment",
+              "id": "relic_017",
+              "cost": 2
+            },
+            {
+              "seconds": 1106,
+              "type": "equipment",
+              "id": "relic_021",
+              "cost": 2
+            },
+            {
+              "seconds": 1106,
+              "type": "equipment",
+              "id": "relic_002",
+              "cost": 1
+            },
+            {
+              "seconds": 1106,
+              "type": "equipment",
+              "id": "relic_004",
+              "cost": 1
+            },
+            {
+              "seconds": 1106,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 2
+            },
+            {
+              "seconds": 1155.8,
+              "type": "project",
+              "id": "automation",
+              "cost": 3
+            },
+            {
+              "seconds": 1155.8,
+              "type": "project",
+              "id": "equipment",
+              "cost": 2
+            },
+            {
+              "seconds": 1505.4,
+              "type": "equipment",
+              "id": "relic_014",
+              "cost": 1
+            },
+            {
+              "seconds": 1553.2,
+              "type": "project",
+              "id": "recovery",
+              "cost": 4
+            },
+            {
+              "seconds": 1553.2,
+              "type": "project",
+              "id": "endurance",
+              "cost": 4
+            },
+            {
+              "seconds": 1553.2,
+              "type": "equipment",
+              "id": "relic_036",
+              "cost": 3
+            },
+            {
+              "seconds": 1553.2,
+              "type": "project",
+              "id": "automation",
+              "cost": 6
+            },
+            {
+              "seconds": 1805,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 4
+            },
+            {
+              "seconds": 1822.6,
+              "type": "project",
+              "id": "equipment",
+              "cost": 4
+            },
+            {
+              "seconds": 1822.6,
+              "type": "equipment",
+              "id": "relic_028",
+              "cost": 1
+            },
+            {
+              "seconds": 1822.6,
+              "type": "equipment",
+              "id": "relic_039",
+              "cost": 3
+            },
+            {
+              "seconds": 2281,
+              "type": "project",
+              "id": "recovery",
+              "cost": 6
+            },
+            {
+              "seconds": 2281,
+              "type": "project",
+              "id": "endurance",
+              "cost": 6
+            },
+            {
+              "seconds": 2281,
+              "type": "equipment",
+              "id": "relic_057",
+              "cost": 3
+            },
+            {
+              "seconds": 2281,
+              "type": "equipment",
+              "id": "relic_030",
+              "cost": 1
+            },
+            {
+              "seconds": 2281,
+              "type": "equipment",
+              "id": "relic_060",
+              "cost": 3
+            },
+            {
+              "seconds": 2281,
+              "type": "project",
+              "id": "automation",
+              "cost": 10
+            },
+            {
+              "seconds": 2281,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 7
+            },
+            {
+              "seconds": 2434.4,
+              "type": "project",
+              "id": "equipment",
+              "cost": 7
+            },
+            {
+              "seconds": 2434.4,
+              "type": "equipment",
+              "id": "relic_003",
+              "cost": 2
+            },
+            {
+              "seconds": 2434.4,
+              "type": "equipment",
+              "id": "relic_034",
+              "cost": 4
+            },
+            {
+              "seconds": 3219,
+              "type": "project",
+              "id": "recovery",
+              "cost": 11
+            },
+            {
+              "seconds": 3219,
+              "type": "project",
+              "id": "endurance",
+              "cost": 11
+            },
+            {
+              "seconds": 3219,
+              "type": "equipment",
+              "id": "relic_075",
+              "cost": 8
+            },
+            {
+              "seconds": 3219,
+              "type": "equipment",
+              "id": "relic_080",
+              "cost": 8
+            },
+            {
+              "seconds": 3219,
+              "type": "project",
+              "id": "automation",
+              "cost": 18
+            },
+            {
+              "seconds": 3219,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 12
+            },
+            {
+              "seconds": 3219,
+              "type": "project",
+              "id": "equipment",
+              "cost": 12
+            },
+            {
+              "seconds": 4906.6,
+              "type": "project",
+              "id": "recovery",
+              "cost": 19
+            },
+            {
+              "seconds": 4906.6,
+              "type": "project",
+              "id": "endurance",
+              "cost": 19
+            },
+            {
+              "seconds": 4906.6,
+              "type": "equipment",
+              "id": "relic_001",
+              "cost": 2
+            },
+            {
+              "seconds": 4906.6,
+              "type": "project",
+              "id": "automation",
+              "cost": 32
+            },
+            {
+              "seconds": 4906.6,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 21
+            },
+            {
+              "seconds": 6237.6,
+              "type": "project",
+              "id": "recovery",
+              "cost": 35
+            },
+            {
+              "seconds": 6237.6,
+              "type": "project",
+              "id": "endurance",
+              "cost": 35
+            },
+            {
+              "seconds": 6237.6,
+              "type": "project",
+              "id": "recruitment",
+              "cost": 38
+            }
+          ],
+          "actions": 19043,
+          "samples": [
+            {
+              "seconds": 600,
+              "shots": 232,
+              "recommendations": 2,
+              "tiers": [
+                0,
+                2,
+                0,
+                0,
+                0,
+                0
+              ],
+              "grossCredits": 4,
+              "credits": 0,
+              "spent": 4,
+              "fame": 78,
+              "gymLevel": 2,
+              "collection": 5,
+              "active": 2,
+              "projects": {
+                "endurance": 1,
+                "recovery": 2,
+                "recruitment": 0,
+                "equipment": 0,
+                "automation": 0,
+                "offline": 0
+              },
+              "equipment": [],
+              "averageRecommendedLevel": 7.5,
+              "pendingCredits": 8,
+              "pendingFame": 173,
+              "pendingPlayers": [
+                {
+                  "id": "gym-p4",
+                  "level": 14,
+                  "experience": 72,
+                  "shots": 86,
+                  "templateId": "booker",
+                  "credits": 6,
+                  "fame": 109
+                },
+                {
+                  "id": "gym-p3",
+                  "level": 14,
+                  "experience": 12,
+                  "shots": 86,
+                  "templateId": "mcgee",
+                  "credits": 2,
+                  "fame": 64
+                }
+              ]
+            },
+            {
+              "seconds": 1800,
+              "shots": 977,
+              "recommendations": 6,
+              "tiers": [
+                0,
+                2,
+                1,
+                3,
+                0,
+                0
+              ],
+              "grossCredits": 39,
+              "credits": 2,
+              "spent": 37,
+              "fame": 596,
+              "gymLevel": 3,
+              "collection": 14,
+              "active": 3,
+              "projects": {
+                "endurance": 3,
+                "recovery": 3,
+                "recruitment": 1,
+                "equipment": 1,
+                "automation": 2,
+                "offline": 0
+              },
+              "equipment": [
+                "relic_017",
+                "relic_021",
+                "relic_002",
+                "relic_004",
+                "relic_036"
+              ],
+              "averageRecommendedLevel": 14.5,
+              "pendingCredits": 16,
+              "pendingFame": 342,
+              "pendingPlayers": [
+                {
+                  "id": "gym-p9",
+                  "level": 17,
+                  "experience": 131,
+                  "shots": 129,
+                  "templateId": "jason-terry",
+                  "credits": 5,
+                  "fame": 101
+                },
+                {
+                  "id": "gym-p7",
+                  "level": 17,
+                  "experience": 95,
+                  "shots": 122,
+                  "templateId": "al-jefferson",
+                  "credits": 6,
+                  "fame": 135
+                },
+                {
+                  "id": "gym-p8",
+                  "level": 17,
+                  "experience": 43,
+                  "shots": 129,
+                  "templateId": "andre-miller",
+                  "credits": 5,
+                  "fame": 106
+                }
+              ]
+            },
+            {
+              "seconds": 3600,
+              "shots": 5164,
+              "recommendations": 30,
+              "tiers": [
+                0,
+                2,
+                10,
+                15,
+                2,
+                1
+              ],
+              "grossCredits": 272,
+              "credits": 94,
+              "spent": 178,
+              "fame": 3852,
+              "gymLevel": 5,
+              "collection": 45,
+              "active": 5,
+              "projects": {
+                "endurance": 5,
+                "recovery": 5,
+                "recruitment": 4,
+                "equipment": 4,
+                "automation": 4,
+                "offline": 0
+              },
+              "equipment": [
+                "relic_021",
+                "relic_004",
+                "relic_057",
+                "relic_060",
+                "relic_034",
+                "relic_075",
+                "relic_080"
+              ],
+              "averageRecommendedLevel": 18.1,
+              "pendingCredits": 54,
+              "pendingFame": 689,
+              "pendingPlayers": [
+                {
+                  "id": "gym-p35",
+                  "level": 10,
+                  "experience": 58,
+                  "shots": 50,
+                  "templateId": "derozan",
+                  "credits": 8,
+                  "fame": 88
+                },
+                {
+                  "id": "gym-p33",
+                  "level": 12,
+                  "experience": 2,
+                  "shots": 62,
+                  "templateId": "gordon",
+                  "credits": 7,
+                  "fame": 84
+                },
+                {
+                  "id": "gym-p34",
+                  "level": 11,
+                  "experience": 55,
+                  "shots": 55,
+                  "templateId": "corey-maggette",
+                  "credits": 7,
+                  "fame": 76
+                },
+                {
+                  "id": "gym-p23",
+                  "level": 29,
+                  "experience": 220,
+                  "shots": 378,
+                  "templateId": "al-jefferson",
+                  "credits": 12,
+                  "fame": 180
+                },
+                {
+                  "id": "gym-p26",
+                  "level": 27,
+                  "experience": 26,
+                  "shots": 309,
+                  "templateId": "magic",
+                  "credits": 20,
+                  "fame": 261
+                }
+              ]
+            },
+            {
+              "seconds": 7200,
+              "shots": 24647,
+              "recommendations": 139,
+              "tiers": [
+                0,
+                2,
+                35,
+                80,
+                12,
+                10
+              ],
+              "grossCredits": 1555,
+              "credits": 1176,
+              "spent": 379,
+              "fame": 21166,
+              "gymLevel": 7,
+              "collection": 77,
+              "active": 7,
+              "projects": {
+                "endurance": 7,
+                "recovery": 7,
+                "recruitment": 6,
+                "equipment": 4,
+                "automation": 5,
+                "offline": 0
+              },
+              "equipment": [
+                "relic_021",
+                "relic_004",
+                "relic_057",
+                "relic_060",
+                "relic_034",
+                "relic_075",
+                "relic_080",
+                "relic_001"
+              ],
+              "averageRecommendedLevel": 19.575539568345324,
+              "pendingCredits": 67,
+              "pendingFame": 977,
+              "pendingPlayers": [
+                {
+                  "id": "gym-p146",
+                  "level": 11,
+                  "experience": 19,
+                  "shots": 52,
+                  "templateId": "thompson",
+                  "credits": 8,
+                  "fame": 99
+                },
+                {
+                  "id": "gym-p143",
+                  "level": 17,
+                  "experience": 63,
+                  "shots": 126,
+                  "templateId": "bradley-beal",
+                  "credits": 8,
+                  "fame": 145
+                },
+                {
+                  "id": "gym-p134",
+                  "level": 28,
+                  "experience": 178,
+                  "shots": 340,
+                  "templateId": "derozan",
+                  "credits": 12,
+                  "fame": 172
+                },
+                {
+                  "id": "gym-p141",
+                  "level": 21,
+                  "experience": 79,
+                  "shots": 184,
+                  "templateId": "bradley-beal",
+                  "credits": 12,
+                  "fame": 173
+                },
+                {
+                  "id": "gym-p142",
+                  "level": 20,
+                  "experience": 67,
+                  "shots": 178,
+                  "templateId": "carmelo",
+                  "credits": 13,
+                  "fame": 210
+                },
+                {
+                  "id": "gym-p145",
+                  "level": 11,
+                  "experience": 19,
+                  "shots": 58,
+                  "templateId": "rashard-lewis",
+                  "credits": 7,
+                  "fame": 79
+                },
+                {
+                  "id": "gym-p144",
+                  "level": 14,
+                  "experience": 96,
+                  "shots": 91,
+                  "templateId": "millsap",
+                  "credits": 7,
+                  "fame": 99
+                }
+              ]
+            }
+          ],
+          "stoppedAtSeconds": 8405.6,
+          "reachedTarget": true,
+          "finalSnapshot": {
+            "seconds": 8405.6,
+            "shots": 33088,
+            "recommendations": 185,
+            "tiers": [
+              0,
+              2,
+              43,
+              111,
+              14,
+              15
+            ],
+            "grossCredits": 2121,
+            "credits": 1742,
+            "spent": 379,
+            "fame": 28689,
+            "gymLevel": 8,
+            "collection": 82,
+            "active": 6,
+            "projects": {
+              "endurance": 7,
+              "recovery": 7,
+              "recruitment": 6,
+              "equipment": 4,
+              "automation": 5,
+              "offline": 0
+            },
+            "equipment": [
+              "relic_021",
+              "relic_004",
+              "relic_057",
+              "relic_060",
+              "relic_034",
+              "relic_075",
+              "relic_080",
+              "relic_001"
+            ],
+            "averageRecommendedLevel": 19.832432432432434,
+            "pendingCredits": 54,
+            "pendingFame": 794,
+            "pendingPlayers": [
+              {
+                "id": "gym-p183",
+                "level": 23,
+                "experience": 93,
+                "shots": 230,
+                "templateId": "erving",
+                "credits": 14,
+                "fame": 278
+              },
+              {
+                "id": "gym-p191",
+                "level": 10,
+                "experience": 46,
+                "shots": 49,
+                "templateId": "lou-williams",
+                "credits": 7,
+                "fame": 71
+              },
+              {
+                "id": "gym-p189",
+                "level": 14,
+                "experience": 76,
+                "shots": 90,
+                "templateId": "millsap",
+                "credits": 7,
+                "fame": 99
+              },
+              {
+                "id": "gym-p190",
+                "level": 11,
+                "experience": 79,
+                "shots": 57,
+                "templateId": "lou-williams",
+                "credits": 7,
+                "fame": 79
+              },
+              {
+                "id": "gym-p185",
+                "level": 22,
+                "experience": 198,
+                "shots": 213,
+                "templateId": "grant-hill",
+                "credits": 12,
+                "fame": 168
+              },
+              {
+                "id": "gym-p188",
+                "level": 14,
+                "experience": 80,
+                "shots": 93,
+                "templateId": "greg-monroe",
+                "credits": 7,
+                "fame": 99
+              }
+            ]
+          }
+        }
+      ],
+      "checkpoints": [
+        {
+          "seconds": 600,
+          "sampleSize": 1,
+          "shots": {
+            "mean": 232,
+            "p50": 232,
+            "p90": 232,
+            "min": 232,
+            "max": 232
+          },
+          "recommendations": {
+            "mean": 2,
+            "p50": 2,
+            "p90": 2,
+            "min": 2,
+            "max": 2
+          },
+          "grossCredits": {
+            "mean": 4,
+            "p50": 4,
+            "p90": 4,
+            "min": 4,
+            "max": 4
+          },
+          "credits": {
+            "mean": 0,
+            "p50": 0,
+            "p90": 0,
+            "min": 0,
+            "max": 0
+          },
+          "spent": {
+            "mean": 4,
+            "p50": 4,
+            "p90": 4,
+            "min": 4,
+            "max": 4
+          },
+          "fame": {
+            "mean": 78,
+            "p50": 78,
+            "p90": 78,
+            "min": 78,
+            "max": 78
+          },
+          "gymLevel": {
+            "mean": 2,
+            "p50": 2,
+            "p90": 2,
+            "min": 2,
+            "max": 2
+          },
+          "collection": {
+            "mean": 5,
+            "p50": 5,
+            "p90": 5,
+            "min": 5,
+            "max": 5
+          },
+          "averageRecommendedLevel": {
+            "mean": 7.5,
+            "p50": 7.5,
+            "p90": 7.5,
+            "min": 7.5,
+            "max": 7.5
+          },
+          "pendingCredits": {
+            "mean": 8,
+            "p50": 8,
+            "p90": 8,
+            "min": 8,
+            "max": 8
+          },
+          "pendingFame": {
+            "mean": 173,
+            "p50": 173,
+            "p90": 173,
+            "min": 173,
+            "max": 173
+          },
+          "legends": {
+            "mean": 0,
+            "p50": 0,
+            "p90": 0,
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "seconds": 1800,
+          "sampleSize": 1,
+          "shots": {
+            "mean": 977,
+            "p50": 977,
+            "p90": 977,
+            "min": 977,
+            "max": 977
+          },
+          "recommendations": {
+            "mean": 6,
+            "p50": 6,
+            "p90": 6,
+            "min": 6,
+            "max": 6
+          },
+          "grossCredits": {
+            "mean": 39,
+            "p50": 39,
+            "p90": 39,
+            "min": 39,
+            "max": 39
+          },
+          "credits": {
+            "mean": 2,
+            "p50": 2,
+            "p90": 2,
+            "min": 2,
+            "max": 2
+          },
+          "spent": {
+            "mean": 37,
+            "p50": 37,
+            "p90": 37,
+            "min": 37,
+            "max": 37
+          },
+          "fame": {
+            "mean": 596,
+            "p50": 596,
+            "p90": 596,
+            "min": 596,
+            "max": 596
+          },
+          "gymLevel": {
+            "mean": 3,
+            "p50": 3,
+            "p90": 3,
+            "min": 3,
+            "max": 3
+          },
+          "collection": {
+            "mean": 14,
+            "p50": 14,
+            "p90": 14,
+            "min": 14,
+            "max": 14
+          },
+          "averageRecommendedLevel": {
+            "mean": 14.5,
+            "p50": 14.5,
+            "p90": 14.5,
+            "min": 14.5,
+            "max": 14.5
+          },
+          "pendingCredits": {
+            "mean": 16,
+            "p50": 16,
+            "p90": 16,
+            "min": 16,
+            "max": 16
+          },
+          "pendingFame": {
+            "mean": 342,
+            "p50": 342,
+            "p90": 342,
+            "min": 342,
+            "max": 342
+          },
+          "legends": {
+            "mean": 0,
+            "p50": 0,
+            "p90": 0,
+            "min": 0,
+            "max": 0
+          }
+        },
+        {
+          "seconds": 3600,
+          "sampleSize": 1,
+          "shots": {
+            "mean": 5164,
+            "p50": 5164,
+            "p90": 5164,
+            "min": 5164,
+            "max": 5164
+          },
+          "recommendations": {
+            "mean": 30,
+            "p50": 30,
+            "p90": 30,
+            "min": 30,
+            "max": 30
+          },
+          "grossCredits": {
+            "mean": 272,
+            "p50": 272,
+            "p90": 272,
+            "min": 272,
+            "max": 272
+          },
+          "credits": {
+            "mean": 94,
+            "p50": 94,
+            "p90": 94,
+            "min": 94,
+            "max": 94
+          },
+          "spent": {
+            "mean": 178,
+            "p50": 178,
+            "p90": 178,
+            "min": 178,
+            "max": 178
+          },
+          "fame": {
+            "mean": 3852,
+            "p50": 3852,
+            "p90": 3852,
+            "min": 3852,
+            "max": 3852
+          },
+          "gymLevel": {
+            "mean": 5,
+            "p50": 5,
+            "p90": 5,
+            "min": 5,
+            "max": 5
+          },
+          "collection": {
+            "mean": 45,
+            "p50": 45,
+            "p90": 45,
+            "min": 45,
+            "max": 45
+          },
+          "averageRecommendedLevel": {
+            "mean": 18.1,
+            "p50": 18.1,
+            "p90": 18.1,
+            "min": 18.1,
+            "max": 18.1
+          },
+          "pendingCredits": {
+            "mean": 54,
+            "p50": 54,
+            "p90": 54,
+            "min": 54,
+            "max": 54
+          },
+          "pendingFame": {
+            "mean": 689,
+            "p50": 689,
+            "p90": 689,
+            "min": 689,
+            "max": 689
+          },
+          "legends": {
+            "mean": 1,
+            "p50": 1,
+            "p90": 1,
+            "min": 1,
+            "max": 1
+          }
+        },
+        {
+          "seconds": 7200,
+          "sampleSize": 1,
+          "shots": {
+            "mean": 24647,
+            "p50": 24647,
+            "p90": 24647,
+            "min": 24647,
+            "max": 24647
+          },
+          "recommendations": {
+            "mean": 139,
+            "p50": 139,
+            "p90": 139,
+            "min": 139,
+            "max": 139
+          },
+          "grossCredits": {
+            "mean": 1555,
+            "p50": 1555,
+            "p90": 1555,
+            "min": 1555,
+            "max": 1555
+          },
+          "credits": {
+            "mean": 1176,
+            "p50": 1176,
+            "p90": 1176,
+            "min": 1176,
+            "max": 1176
+          },
+          "spent": {
+            "mean": 379,
+            "p50": 379,
+            "p90": 379,
+            "min": 379,
+            "max": 379
+          },
+          "fame": {
+            "mean": 21166,
+            "p50": 21166,
+            "p90": 21166,
+            "min": 21166,
+            "max": 21166
+          },
+          "gymLevel": {
+            "mean": 7,
+            "p50": 7,
+            "p90": 7,
+            "min": 7,
+            "max": 7
+          },
+          "collection": {
+            "mean": 77,
+            "p50": 77,
+            "p90": 77,
+            "min": 77,
+            "max": 77
+          },
+          "averageRecommendedLevel": {
+            "mean": 19.575539568345324,
+            "p50": 19.575539568345324,
+            "p90": 19.575539568345324,
+            "min": 19.575539568345324,
+            "max": 19.575539568345324
+          },
+          "pendingCredits": {
+            "mean": 67,
+            "p50": 67,
+            "p90": 67,
+            "min": 67,
+            "max": 67
+          },
+          "pendingFame": {
+            "mean": 977,
+            "p50": 977,
+            "p90": 977,
+            "min": 977,
+            "max": 977
+          },
+          "legends": {
+            "mean": 10,
+            "p50": 10,
+            "p90": 10,
+            "min": 10,
+            "max": 10
+          }
+        }
+      ],
+      "gym2": {
+        "attained": 1,
+        "seconds": {
+          "mean": 70,
+          "p50": 70,
+          "p90": 70,
+          "min": 70,
+          "max": 70
+        }
+      }
+    }
+  ]
+}

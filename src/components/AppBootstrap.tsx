@@ -14,7 +14,7 @@ export default function AppBootstrap(){
    try{await Promise.race([preloadAssets(),new Promise<void>(resolve=>{preloadTimer=setTimeout(resolve,12000);})]);}
    catch{/* Individual views retain their image fallbacks. */}
    finally{clearTimeout(preloadTimer);}
-   const module=await import('./ContractHome');
+   const module=await import('./GymHome');
    if(!active)return;finishLoading();
    // Paint the real 100% state once before showing the ready home screen.
    requestAnimationFrame(()=>requestAnimationFrame(()=>{if(active)setHome(()=>module.default)}));

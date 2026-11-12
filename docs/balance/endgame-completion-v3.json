@@ -1,0 +1,24 @@
+{
+  "source": "actual-seed1-G8-save",
+  "baseStamina": 20,
+  "gymLevel": 8,
+  "projects": {
+    "endurance": 8,
+    "recovery": 8,
+    "recruitment": 6,
+    "equipment": 4,
+    "automation": 5,
+    "offline": 0
+  },
+  "ownedEquipment": 94,
+  "collectedEquipment": 94,
+  "active": 8,
+  "staminaCap": 80,
+  "initialCredits": 1742,
+  "credits": 1227,
+  "spentAfterG8": 515,
+  "ninthRecruitRejected": true,
+  "autoShotsOnOneTick": 8,
+  "verificationPauseSeconds": 640,
+  "note": "Used existing earned coupons; no preset money, no extra payouts. Training was paused for natural stamina recovery before testing eight simultaneous automatic shots."
+}

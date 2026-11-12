@@ -1,0 +1,6 @@
+.gym-score-status{display:inline-flex;align-items:center;gap:3px;max-width:100%;white-space:nowrap}
+.gym-score-status .sponsor-ticket{flex:none;width:14px;height:10px;color:#ffbd45}
+.gym-score-status>span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.gym-stamina-meter .gym-stamina-name{color:#fff0bc;font-size:calc(var(--court-meter-height)/25);font-weight:950;line-height:1;white-space:nowrap;text-shadow:0 1px #071923}
+.gym-stamina-meter .gym-stamina-recovery{position:absolute;left:8%;right:8%;bottom:11.5%;height:2.5%;color:#fff0bc;text-align:center;font-size:calc(var(--court-meter-height)/40);font-weight:800;line-height:1;white-space:nowrap}
+.gym-stamina-meter .energy-cell.is-partial{background:linear-gradient(to top,color-mix(in srgb,var(--energy-low) calc(100% - var(--cell-tint)),var(--energy-high) var(--cell-tint)) 0 var(--stamina-fill),#142b35 var(--stamina-fill) 100%)}

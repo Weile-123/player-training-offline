@@ -1,0 +1,4407 @@
+{
+  "schema": 1,
+  "balanceVersion": 3,
+  "sampleSize": 100,
+  "seeds": [
+    1,
+    100
+  ],
+  "maxSimulatedLevel": 30,
+  "automaticPollingMs": 200,
+  "curve": [
+    {
+      "level": 0,
+      "nextLevelXP": 20,
+      "cumulativeXP": 0,
+      "expectedShots": 0,
+      "bestShots": 0,
+      "worstShots": 0
+    },
+    {
+      "level": 1,
+      "nextLevelXP": 27,
+      "cumulativeXP": 20,
+      "expectedShots": 1.9900000000000002,
+      "bestShots": 1,
+      "worstShots": 3
+    },
+    {
+      "level": 2,
+      "nextLevelXP": 33,
+      "cumulativeXP": 47,
+      "expectedShots": 4.536029999999999,
+      "bestShots": 3,
+      "worstShots": 6
+    },
+    {
+      "level": 3,
+      "nextLevelXP": 40,
+      "cumulativeXP": 80,
+      "expectedShots": 7.270237506999999,
+      "bestShots": 4,
+      "worstShots": 10
+    },
+    {
+      "level": 4,
+      "nextLevelXP": 47,
+      "cumulativeXP": 120,
+      "expectedShots": 10.71290173626141,
+      "bestShots": 6,
+      "worstShots": 15
+    },
+    {
+      "level": 5,
+      "nextLevelXP": 54,
+      "cumulativeXP": 167,
+      "expectedShots": 14.851424383307242,
+      "bestShots": 9,
+      "worstShots": 21
+    },
+    {
+      "level": 6,
+      "nextLevelXP": 62,
+      "cumulativeXP": 221,
+      "expectedShots": 19.678954703508364,
+      "bestShots": 12,
+      "worstShots": 28
+    },
+    {
+      "level": 7,
+      "nextLevelXP": 70,
+      "cumulativeXP": 283,
+      "expectedShots": 24.85136739595069,
+      "bestShots": 15,
+      "worstShots": 36
+    },
+    {
+      "level": 8,
+      "nextLevelXP": 78,
+      "cumulativeXP": 353,
+      "expectedShots": 31.058263969375734,
+      "bestShots": 18,
+      "worstShots": 45
+    },
+    {
+      "level": 9,
+      "nextLevelXP": 87,
+      "cumulativeXP": 431,
+      "expectedShots": 37.60998810935261,
+      "bestShots": 22,
+      "worstShots": 54
+    },
+    {
+      "level": 10,
+      "nextLevelXP": 95,
+      "cumulativeXP": 518,
+      "expectedShots": 45.19619500594462,
+      "bestShots": 26,
+      "worstShots": 65
+    },
+    {
+      "level": 11,
+      "nextLevelXP": 105,
+      "cumulativeXP": 613,
+      "expectedShots": 53.472057074910765,
+      "bestShots": 31,
+      "worstShots": 77
+    },
+    {
+      "level": 12,
+      "nextLevelXP": 114,
+      "cumulativeXP": 718,
+      "expectedShots": 62.43757431629007,
+      "bestShots": 36,
+      "worstShots": 90
+    },
+    {
+      "level": 13,
+      "nextLevelXP": 124,
+      "cumulativeXP": 832,
+      "expectedShots": 72.09274673008315,
+      "bestShots": 42,
+      "worstShots": 104
+    },
+    {
+      "level": 14,
+      "nextLevelXP": 134,
+      "cumulativeXP": 956,
+      "expectedShots": 82.78240190249693,
+      "bestShots": 48,
+      "worstShots": 120
+    },
+    {
+      "level": 15,
+      "nextLevelXP": 144,
+      "cumulativeXP": 1090,
+      "expectedShots": 94.50653983353139,
+      "bestShots": 55,
+      "worstShots": 137
+    },
+    {
+      "level": 16,
+      "nextLevelXP": 155,
+      "cumulativeXP": 1234,
+      "expectedShots": 106.92033293697963,
+      "bestShots": 62,
+      "worstShots": 155
+    },
+    {
+      "level": 17,
+      "nextLevelXP": 166,
+      "cumulativeXP": 1389,
+      "expectedShots": 120.36860879904852,
+      "bestShots": 70,
+      "worstShots": 174
+    },
+    {
+      "level": 18,
+      "nextLevelXP": 177,
+      "cumulativeXP": 1555,
+      "expectedShots": 134.50653983353115,
+      "bestShots": 78,
+      "worstShots": 195
+    },
+    {
+      "level": 19,
+      "nextLevelXP": 189,
+      "cumulativeXP": 1732,
+      "expectedShots": 149.67895362663447,
+      "bestShots": 87,
+      "worstShots": 217
+    },
+    {
+      "level": 20,
+      "nextLevelXP": 200,
+      "cumulativeXP": 1921,
+      "expectedShots": 166.23067776456534,
+      "bestShots": 97,
+      "worstShots": 241
+    },
+    {
+      "level": 21,
+      "nextLevelXP": 213,
+      "cumulativeXP": 2121,
+      "expectedShots": 183.47205707491005,
+      "bestShots": 107,
+      "worstShots": 266
+    },
+    {
+      "level": 22,
+      "nextLevelXP": 225,
+      "cumulativeXP": 2334,
+      "expectedShots": 201.74791914387544,
+      "bestShots": 117,
+      "worstShots": 292
+    },
+    {
+      "level": 23,
+      "nextLevelXP": 238,
+      "cumulativeXP": 2559,
+      "expectedShots": 221.05826397146149,
+      "bestShots": 128,
+      "worstShots": 320
+    },
+    {
+      "level": 24,
+      "nextLevelXP": 251,
+      "cumulativeXP": 2797,
+      "expectedShots": 241.74791914387512,
+      "bestShots": 140,
+      "worstShots": 350
+    },
+    {
+      "level": 25,
+      "nextLevelXP": 264,
+      "cumulativeXP": 3048,
+      "expectedShots": 263.12722948870254,
+      "bestShots": 153,
+      "worstShots": 381
+    },
+    {
+      "level": 26,
+      "nextLevelXP": 278,
+      "cumulativeXP": 3312,
+      "expectedShots": 285.88585017835754,
+      "bestShots": 166,
+      "worstShots": 414
+    },
+    {
+      "level": 27,
+      "nextLevelXP": 292,
+      "cumulativeXP": 3590,
+      "expectedShots": 310.0237812128401,
+      "bestShots": 180,
+      "worstShots": 449
+    },
+    {
+      "level": 28,
+      "nextLevelXP": 306,
+      "cumulativeXP": 3882,
+      "expectedShots": 335.19619500594337,
+      "bestShots": 195,
+      "worstShots": 486
+    },
+    {
+      "level": 29,
+      "nextLevelXP": 321,
+      "cumulativeXP": 4188,
+      "expectedShots": 361.40309155766727,
+      "bestShots": 210,
+      "worstShots": 524
+    },
+    {
+      "level": 30,
+      "nextLevelXP": 335,
+      "cumulativeXP": 4509,
+      "expectedShots": 389.33412604042564,
+      "bestShots": 226,
+      "worstShots": 564
+    },
+    {
+      "level": 31,
+      "nextLevelXP": 351,
+      "cumulativeXP": 4844,
+      "expectedShots": 417.9548156955975,
+      "bestShots": 243,
+      "worstShots": 606
+    },
+    {
+      "level": 32,
+      "nextLevelXP": 366,
+      "cumulativeXP": 5195,
+      "expectedShots": 448.29964328180387,
+      "bestShots": 260,
+      "worstShots": 650
+    },
+    {
+      "level": 33,
+      "nextLevelXP": 382,
+      "cumulativeXP": 5561,
+      "expectedShots": 480.0237812128375,
+      "bestShots": 279,
+      "worstShots": 696
+    },
+    {
+      "level": 34,
+      "nextLevelXP": 398,
+      "cumulativeXP": 5943,
+      "expectedShots": 512.7824019024918,
+      "bestShots": 298,
+      "worstShots": 743
+    },
+    {
+      "level": 35,
+      "nextLevelXP": 414,
+      "cumulativeXP": 6341,
+      "expectedShots": 547.2651605231806,
+      "bestShots": 318,
+      "worstShots": 793
+    },
+    {
+      "level": 36,
+      "nextLevelXP": 431,
+      "cumulativeXP": 6755,
+      "expectedShots": 582.7824019024903,
+      "bestShots": 338,
+      "worstShots": 845
+    },
+    {
+      "level": 37,
+      "nextLevelXP": 448,
+      "cumulativeXP": 7186,
+      "expectedShots": 620.0237812128345,
+      "bestShots": 360,
+      "worstShots": 899
+    },
+    {
+      "level": 38,
+      "nextLevelXP": 465,
+      "cumulativeXP": 7634,
+      "expectedShots": 658.6444708680061,
+      "bestShots": 382,
+      "worstShots": 955
+    },
+    {
+      "level": 39,
+      "nextLevelXP": 483,
+      "cumulativeXP": 8099,
+      "expectedShots": 698.6444708680054,
+      "bestShots": 405,
+      "worstShots": 1013
+    },
+    {
+      "level": 40,
+      "nextLevelXP": 500,
+      "cumulativeXP": 8582,
+      "expectedShots": 740.3686087990393,
+      "bestShots": 430,
+      "worstShots": 1073
+    },
+    {
+      "level": 41,
+      "nextLevelXP": 519,
+      "cumulativeXP": 9082,
+      "expectedShots": 783.4720570749002,
+      "bestShots": 455,
+      "worstShots": 1136
+    },
+    {
+      "level": 42,
+      "nextLevelXP": 537,
+      "cumulativeXP": 9601,
+      "expectedShots": 828.2996432817952,
+      "bestShots": 481,
+      "worstShots": 1201
+    },
+    {
+      "level": 43,
+      "nextLevelXP": 556,
+      "cumulativeXP": 10138,
+      "expectedShots": 874.5065398335182,
+      "bestShots": 507,
+      "worstShots": 1268
+    },
+    {
+      "level": 44,
+      "nextLevelXP": 575,
+      "cumulativeXP": 10694,
+      "expectedShots": 922.4375743162758,
+      "bestShots": 535,
+      "worstShots": 1337
+    },
+    {
+      "level": 45,
+      "nextLevelXP": 594,
+      "cumulativeXP": 11269,
+      "expectedShots": 972.0927467300683,
+      "bestShots": 564,
+      "worstShots": 1409
+    },
+    {
+      "level": 46,
+      "nextLevelXP": 614,
+      "cumulativeXP": 11863,
+      "expectedShots": 1023.127229488688,
+      "bestShots": 594,
+      "worstShots": 1483
+    },
+    {
+      "level": 47,
+      "nextLevelXP": 634,
+      "cumulativeXP": 12477,
+      "expectedShots": 1076.2306777645492,
+      "bestShots": 624,
+      "worstShots": 1560
+    },
+    {
+      "level": 48,
+      "nextLevelXP": 654,
+      "cumulativeXP": 13111,
+      "expectedShots": 1130.7134363852379,
+      "bestShots": 656,
+      "worstShots": 1639
+    },
+    {
+      "level": 49,
+      "nextLevelXP": 675,
+      "cumulativeXP": 13765,
+      "expectedShots": 1187.265160523169,
+      "bestShots": 689,
+      "worstShots": 1721
+    },
+    {
+      "level": 50,
+      "nextLevelXP": 695,
+      "cumulativeXP": 14440,
+      "expectedShots": 1245.1961950059274,
+      "bestShots": 722,
+      "worstShots": 1805
+    },
+    {
+      "level": 51,
+      "nextLevelXP": 717,
+      "cumulativeXP": 15135,
+      "expectedShots": 1305.1961950059274,
+      "bestShots": 757,
+      "worstShots": 1892
+    },
+    {
+      "level": 52,
+      "nextLevelXP": 738,
+      "cumulativeXP": 15852,
+      "expectedShots": 1366.920332936962,
+      "bestShots": 793,
+      "worstShots": 1982
+    },
+    {
+      "level": 53,
+      "nextLevelXP": 760,
+      "cumulativeXP": 16590,
+      "expectedShots": 1430.7134363852379,
+      "bestShots": 830,
+      "worstShots": 2074
+    },
+    {
+      "level": 54,
+      "nextLevelXP": 782,
+      "cumulativeXP": 17350,
+      "expectedShots": 1496.230677764548,
+      "bestShots": 868,
+      "worstShots": 2169
+    },
+    {
+      "level": 55,
+      "nextLevelXP": 804,
+      "cumulativeXP": 18132,
+      "expectedShots": 1563.4720570748923,
+      "bestShots": 907,
+      "worstShots": 2267
+    },
+    {
+      "level": 56,
+      "nextLevelXP": 827,
+      "cumulativeXP": 18936,
+      "expectedShots": 1632.7824019024756,
+      "bestShots": 947,
+      "worstShots": 2367
+    },
+    {
+      "level": 57,
+      "nextLevelXP": 850,
+      "cumulativeXP": 19763,
+      "expectedShots": 1704.1617122473006,
+      "bestShots": 989,
+      "worstShots": 2471
+    },
+    {
+      "level": 58,
+      "nextLevelXP": 873,
+      "cumulativeXP": 20613,
+      "expectedShots": 1777.6099881093653,
+      "bestShots": 1031,
+      "worstShots": 2577
+    },
+    {
+      "level": 59,
+      "nextLevelXP": 897,
+      "cumulativeXP": 21486,
+      "expectedShots": 1852.7824019024642,
+      "bestShots": 1075,
+      "worstShots": 2686
+    },
+    {
+      "level": 60,
+      "nextLevelXP": 920,
+      "cumulativeXP": 22383,
+      "expectedShots": 1930.0237812128044,
+      "bestShots": 1120,
+      "worstShots": 2798
+    },
+    {
+      "level": 61,
+      "nextLevelXP": 945,
+      "cumulativeXP": 23303,
+      "expectedShots": 2009.3341260403859,
+      "bestShots": 1166,
+      "worstShots": 2913
+    },
+    {
+      "level": 62,
+      "nextLevelXP": 969,
+      "cumulativeXP": 24248,
+      "expectedShots": 2090.7134363852097,
+      "bestShots": 1213,
+      "worstShots": 3031
+    },
+    {
+      "level": 63,
+      "nextLevelXP": 994,
+      "cumulativeXP": 25217,
+      "expectedShots": 2174.5065398334827,
+      "bestShots": 1261,
+      "worstShots": 3153
+    },
+    {
+      "level": 64,
+      "nextLevelXP": 1019,
+      "cumulativeXP": 26211,
+      "expectedShots": 2260.02378121279,
+      "bestShots": 1311,
+      "worstShots": 3277
+    },
+    {
+      "level": 65,
+      "nextLevelXP": 1044,
+      "cumulativeXP": 27230,
+      "expectedShots": 2347.954815695545,
+      "bestShots": 1362,
+      "worstShots": 3404
+    },
+    {
+      "level": 66,
+      "nextLevelXP": 1070,
+      "cumulativeXP": 28274,
+      "expectedShots": 2437.954815695541,
+      "bestShots": 1414,
+      "worstShots": 3535
+    },
+    {
+      "level": 67,
+      "nextLevelXP": 1096,
+      "cumulativeXP": 29344,
+      "expectedShots": 2530.02378121278,
+      "bestShots": 1468,
+      "worstShots": 3668
+    },
+    {
+      "level": 68,
+      "nextLevelXP": 1122,
+      "cumulativeXP": 30440,
+      "expectedShots": 2624.506539833466,
+      "bestShots": 1522,
+      "worstShots": 3805
+    },
+    {
+      "level": 69,
+      "nextLevelXP": 1149,
+      "cumulativeXP": 31562,
+      "expectedShots": 2721.4030915576,
+      "bestShots": 1579,
+      "worstShots": 3946
+    },
+    {
+      "level": 70,
+      "nextLevelXP": 1175,
+      "cumulativeXP": 32711,
+      "expectedShots": 2820.3686087989763,
+      "bestShots": 1636,
+      "worstShots": 4089
+    },
+    {
+      "level": 71,
+      "nextLevelXP": 1203,
+      "cumulativeXP": 33886,
+      "expectedShots": 2921.7479191437997,
+      "bestShots": 1695,
+      "worstShots": 4236
+    },
+    {
+      "level": 72,
+      "nextLevelXP": 1230,
+      "cumulativeXP": 35089,
+      "expectedShots": 3025.541022592072,
+      "bestShots": 1755,
+      "worstShots": 4387
+    },
+    {
+      "level": 73,
+      "nextLevelXP": 1258,
+      "cumulativeXP": 36319,
+      "expectedShots": 3131.403091557585,
+      "bestShots": 1816,
+      "worstShots": 4540
+    },
+    {
+      "level": 74,
+      "nextLevelXP": 1286,
+      "cumulativeXP": 37577,
+      "expectedShots": 3240.023781212754,
+      "bestShots": 1879,
+      "worstShots": 4698
+    },
+    {
+      "level": 75,
+      "nextLevelXP": 1314,
+      "cumulativeXP": 38863,
+      "expectedShots": 3350.7134363851633,
+      "bestShots": 1944,
+      "worstShots": 4858
+    },
+    {
+      "level": 76,
+      "nextLevelXP": 1343,
+      "cumulativeXP": 40177,
+      "expectedShots": 3464.161712247226,
+      "bestShots": 2009,
+      "worstShots": 5023
+    },
+    {
+      "level": 77,
+      "nextLevelXP": 1372,
+      "cumulativeXP": 41520,
+      "expectedShots": 3579.678953626527,
+      "bestShots": 2076,
+      "worstShots": 5190
+    },
+    {
+      "level": 78,
+      "nextLevelXP": 1401,
+      "cumulativeXP": 42892,
+      "expectedShots": 3697.9548156954816,
+      "bestShots": 2145,
+      "worstShots": 5362
+    },
+    {
+      "level": 79,
+      "nextLevelXP": 1431,
+      "cumulativeXP": 44293,
+      "expectedShots": 3818.989298454092,
+      "bestShots": 2215,
+      "worstShots": 5537
+    },
+    {
+      "level": 80,
+      "nextLevelXP": 1460,
+      "cumulativeXP": 45724,
+      "expectedShots": 3942.0927467299434,
+      "bestShots": 2287,
+      "worstShots": 5716
+    },
+    {
+      "level": 81,
+      "nextLevelXP": 1491,
+      "cumulativeXP": 47184,
+      "expectedShots": 4067.9548156954497,
+      "bestShots": 2360,
+      "worstShots": 5898
+    },
+    {
+      "level": 82,
+      "nextLevelXP": 1521,
+      "cumulativeXP": 48675,
+      "expectedShots": 4196.575505350604,
+      "bestShots": 2434,
+      "worstShots": 6085
+    },
+    {
+      "level": 83,
+      "nextLevelXP": 1552,
+      "cumulativeXP": 50196,
+      "expectedShots": 4327.609988109203,
+      "bestShots": 2510,
+      "worstShots": 6275
+    },
+    {
+      "level": 84,
+      "nextLevelXP": 1583,
+      "cumulativeXP": 51748,
+      "expectedShots": 4461.403091557458,
+      "bestShots": 2588,
+      "worstShots": 6469
+    },
+    {
+      "level": 85,
+      "nextLevelXP": 1614,
+      "cumulativeXP": 53331,
+      "expectedShots": 4597.95481569537,
+      "bestShots": 2667,
+      "worstShots": 6667
+    },
+    {
+      "level": 86,
+      "nextLevelXP": 1646,
+      "cumulativeXP": 54945,
+      "expectedShots": 4737.265160522944,
+      "bestShots": 2748,
+      "worstShots": 6869
+    },
+    {
+      "level": 87,
+      "nextLevelXP": 1678,
+      "cumulativeXP": 56591,
+      "expectedShots": 4878.989298453966,
+      "bestShots": 2830,
+      "worstShots": 7074
+    },
+    {
+      "level": 88,
+      "nextLevelXP": 1710,
+      "cumulativeXP": 58269,
+      "expectedShots": 5023.81688466085,
+      "bestShots": 2914,
+      "worstShots": 7284
+    },
+    {
+      "level": 89,
+      "nextLevelXP": 1743,
+      "cumulativeXP": 59979,
+      "expectedShots": 5171.058263971182,
+      "bestShots": 2999,
+      "worstShots": 7498
+    },
+    {
+      "level": 90,
+      "nextLevelXP": 1775,
+      "cumulativeXP": 61722,
+      "expectedShots": 5321.403091557376,
+      "bestShots": 3087,
+      "worstShots": 7716
+    },
+    {
+      "level": 91,
+      "nextLevelXP": 1809,
+      "cumulativeXP": 63497,
+      "expectedShots": 5474.506539833224,
+      "bestShots": 3175,
+      "worstShots": 7938
+    },
+    {
+      "level": 92,
+      "nextLevelXP": 1842,
+      "cumulativeXP": 65306,
+      "expectedShots": 5630.368608798728,
+      "bestShots": 3266,
+      "worstShots": 8164
+    },
+    {
+      "level": 93,
+      "nextLevelXP": 1876,
+      "cumulativeXP": 67148,
+      "expectedShots": 5788.989298453887,
+      "bestShots": 3358,
+      "worstShots": 8394
+    },
+    {
+      "level": 94,
+      "nextLevelXP": 1910,
+      "cumulativeXP": 69024,
+      "expectedShots": 5950.713436384907,
+      "bestShots": 3452,
+      "worstShots": 8628
+    },
+    {
+      "level": 95,
+      "nextLevelXP": 1944,
+      "cumulativeXP": 70934,
+      "expectedShots": 6115.541022591789,
+      "bestShots": 3547,
+      "worstShots": 8867
+    },
+    {
+      "level": 96,
+      "nextLevelXP": 1979,
+      "cumulativeXP": 72878,
+      "expectedShots": 6283.127229488301,
+      "bestShots": 3644,
+      "worstShots": 9110
+    },
+    {
+      "level": 97,
+      "nextLevelXP": 2014,
+      "cumulativeXP": 74857,
+      "expectedShots": 6453.816884660667,
+      "bestShots": 3743,
+      "worstShots": 9358
+    },
+    {
+      "level": 98,
+      "nextLevelXP": 2049,
+      "cumulativeXP": 76871,
+      "expectedShots": 6627.265160522687,
+      "bestShots": 3844,
+      "worstShots": 9609
+    },
+    {
+      "level": 99,
+      "nextLevelXP": null,
+      "cumulativeXP": 78920,
+      "expectedShots": 6803.8168846605695,
+      "bestShots": 3946,
+      "worstShots": 9865
+    }
+  ],
+  "scenarios": [
+    {
+      "profile": {
+        "id": "base-manual",
+        "name": "Lv1 手动·零加成",
+        "gym": 1,
+        "mode": "manual",
+        "endurance": 0,
+        "recovery": 0,
+        "automation": 0,
+        "equipment": 0,
+        "kit": false
+      },
+      "config": {
+        "capacity": 20,
+        "recoverySeconds": 20,
+        "courseRecovery": 4,
+        "automaticSeconds": null,
+        "projectInvestment": 0,
+        "equipmentInvestment": 0,
+        "equipment": []
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 1,
+            "min": 0,
+            "p50": 1,
+            "p90": 2,
+            "max": 2
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 13.83,
+            "min": 12,
+            "p50": 14,
+            "p90": 16,
+            "max": 16
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 191.82,
+            "min": 160,
+            "p50": 180,
+            "p90": 240,
+            "max": 280
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 1264.74,
+            "min": 1124,
+            "p50": 1244,
+            "p90": 1320,
+            "max": 1360
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 4322.55,
+            "min": 4160,
+            "p50": 4340,
+            "p90": 4380,
+            "max": 4482
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 40,
+            "min": 40,
+            "p50": 40,
+            "p90": 40,
+            "max": 40
+          },
+          "tiers": [
+            18,
+            63,
+            19,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 280,
+            "min": 280,
+            "p50": 280,
+            "p90": 280,
+            "max": 280
+          },
+          "tiers": [
+            12,
+            42,
+            43,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 880,
+            "min": 880,
+            "p50": 880,
+            "p90": 880,
+            "max": 880
+          },
+          "tiers": [
+            2,
+            17,
+            64,
+            16,
+            1,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 19.27,
+            "min": 3,
+            "p50": 8,
+            "p90": 53,
+            "max": 151
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 88.71,
+            "min": 2,
+            "p50": 7,
+            "p90": 283,
+            "max": 1481
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 100,
+            "mean": 71.16,
+            "min": 17,
+            "p50": 53,
+            "p90": 149,
+            "max": 365
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 530.87,
+            "min": 16,
+            "p50": 283,
+            "p90": 1460,
+            "max": 4020
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 75,
+            "mean": 168.62666666666667,
+            "min": 43,
+            "p50": 161,
+            "p90": 284,
+            "max": 394
+          },
+          "seconds": {
+            "count": 75,
+            "mean": 1680.1466666666668,
+            "min": 163,
+            "p50": 1601,
+            "p90": 3044,
+            "max": 4364
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 38,
+            "mean": 248.39473684210526,
+            "min": 78,
+            "p50": 232,
+            "p90": 366,
+            "max": 389
+          },
+          "seconds": {
+            "count": 38,
+            "mean": 2636.2368421052633,
+            "min": 600,
+            "p50": 2442,
+            "p90": 4040,
+            "max": 4340
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 13,
+            "mean": 290.0769230769231,
+            "min": 222,
+            "p50": 276,
+            "p90": 365,
+            "max": 368
+          },
+          "seconds": {
+            "count": 13,
+            "mean": 3137.5384615384614,
+            "min": 2322,
+            "p50": 2960,
+            "p90": 4020,
+            "max": 4080
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "id": "base-auto",
+        "name": "Lv2 自动·零加成",
+        "gym": 2,
+        "mode": "auto",
+        "endurance": 0,
+        "recovery": 0,
+        "automation": 0,
+        "equipment": 0,
+        "kit": false
+      },
+      "config": {
+        "capacity": 20,
+        "recoverySeconds": 20,
+        "courseRecovery": 4,
+        "automaticSeconds": 2,
+        "projectInvestment": 0,
+        "equipmentInvestment": 0,
+        "equipment": []
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 4,
+            "min": 2,
+            "p50": 4,
+            "p90": 6,
+            "max": 6
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 29.66,
+            "min": 26,
+            "p50": 30,
+            "p90": 34,
+            "max": 34
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 194.84,
+            "min": 162,
+            "p50": 182,
+            "p90": 242,
+            "max": 282
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 1267.88,
+            "min": 1130,
+            "p50": 1250,
+            "p90": 1322,
+            "max": 1362
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 4325.7,
+            "min": 4162,
+            "p50": 4342,
+            "p90": 4382,
+            "max": 4486
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 60,
+            "min": 60,
+            "p50": 60,
+            "p90": 60,
+            "max": 60
+          },
+          "tiers": [
+            18,
+            63,
+            19,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 282,
+            "min": 282,
+            "p50": 282,
+            "p90": 282,
+            "max": 282
+          },
+          "tiers": [
+            12,
+            42,
+            43,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 882,
+            "min": 882,
+            "p50": 882,
+            "p90": 882,
+            "max": 882
+          },
+          "tiers": [
+            2,
+            17,
+            64,
+            16,
+            1,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 19.27,
+            "min": 3,
+            "p50": 8,
+            "p90": 53,
+            "max": 151
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 97.96,
+            "min": 6,
+            "p50": 16,
+            "p90": 288,
+            "max": 1484
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 100,
+            "mean": 71.16,
+            "min": 17,
+            "p50": 53,
+            "p90": 149,
+            "max": 365
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 538.64,
+            "min": 34,
+            "p50": 288,
+            "p90": 1462,
+            "max": 4022
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 75,
+            "mean": 168.62666666666667,
+            "min": 43,
+            "p50": 161,
+            "p90": 284,
+            "max": 394
+          },
+          "seconds": {
+            "count": 75,
+            "mean": 1683.36,
+            "min": 168,
+            "p50": 1604,
+            "p90": 3050,
+            "max": 4370
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 38,
+            "mean": 248.39473684210526,
+            "min": 78,
+            "p50": 232,
+            "p90": 366,
+            "max": 389
+          },
+          "seconds": {
+            "count": 38,
+            "mean": 2639.7368421052633,
+            "min": 602,
+            "p50": 2446,
+            "p90": 4042,
+            "max": 4342
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 13,
+            "mean": 290.0769230769231,
+            "min": 222,
+            "p50": 276,
+            "p90": 365,
+            "max": 368
+          },
+          "seconds": {
+            "count": 13,
+            "mean": 3140.153846153846,
+            "min": 2326,
+            "p50": 2962,
+            "p90": 4022,
+            "max": 4082
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "id": "early-manual",
+        "name": "Lv2 手动·初级器材",
+        "gym": 2,
+        "mode": "manual",
+        "endurance": 1,
+        "recovery": 1,
+        "automation": 0,
+        "equipment": 0,
+        "kit": true
+      },
+      "config": {
+        "capacity": 25,
+        "recoverySeconds": 15,
+        "courseRecovery": 6,
+        "automaticSeconds": null,
+        "projectInvestment": 2,
+        "equipmentInvestment": 6,
+        "equipment": [
+          {
+            "id": "relic_017",
+            "name": "训练计时器",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 1 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_021",
+            "name": "逆境投篮骰",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 1 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_002",
+            "name": "基础投篮机",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；展示身价 +10%，同时增加品牌声望倍率（器材倍率合计最多 +50%）。"
+          },
+          {
+            "id": "relic_004",
+            "name": "矫正训练仪",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；中投成长抽取权重 +0.4（单维器材加值最多 +1.5）。"
+          }
+        ]
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 1,
+            "min": 0,
+            "p50": 1,
+            "p90": 2,
+            "max": 2
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 13.83,
+            "min": 12,
+            "p50": 14,
+            "p90": 16,
+            "max": 16
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 44.2,
+            "min": 39,
+            "p50": 44,
+            "p90": 47,
+            "max": 49
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 502.82,
+            "min": 439,
+            "p50": 499,
+            "p90": 525,
+            "max": 555
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 2032.28,
+            "min": 1941,
+            "p50": 2040,
+            "p90": 2060,
+            "max": 2117
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 29,
+            "min": 29,
+            "p50": 29,
+            "p90": 29,
+            "max": 29
+          },
+          "tiers": [
+            17,
+            67,
+            16,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 49,
+            "min": 49,
+            "p50": 49,
+            "p90": 49,
+            "max": 49
+          },
+          "tiers": [
+            10,
+            43,
+            44,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 315,
+            "min": 315,
+            "p50": 315,
+            "p90": 315,
+            "max": 315
+          },
+          "tiers": [
+            5,
+            14,
+            58,
+            23,
+            0,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 21.01,
+            "min": 3,
+            "p50": 8,
+            "p90": 39,
+            "max": 181
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 45.33,
+            "min": 2,
+            "p50": 7,
+            "p90": 38,
+            "max": 796
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 100,
+            "mean": 67.27,
+            "min": 17,
+            "p50": 52,
+            "p90": 125,
+            "max": 245
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 169.87,
+            "min": 16,
+            "p50": 51,
+            "p90": 440,
+            "max": 1160
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 84,
+            "mean": 163.13095238095238,
+            "min": 43,
+            "p50": 146,
+            "p90": 283,
+            "max": 393
+          },
+          "seconds": {
+            "count": 84,
+            "mean": 681.0833333333334,
+            "min": 42,
+            "p50": 561,
+            "p90": 1398,
+            "max": 2058
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 53,
+            "mean": 233.9245283018868,
+            "min": 101,
+            "p50": 227,
+            "p90": 339,
+            "max": 394
+          },
+          "seconds": {
+            "count": 53,
+            "mean": 1105.0377358490566,
+            "min": 316,
+            "p50": 1050,
+            "p90": 1740,
+            "max": 2059
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 20,
+            "mean": 296.6,
+            "min": 185,
+            "p50": 285,
+            "p90": 363,
+            "max": 398
+          },
+          "seconds": {
+            "count": 20,
+            "mean": 1480,
+            "min": 800,
+            "p50": 1400,
+            "p90": 1878,
+            "max": 2085
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "id": "early-auto",
+        "name": "Lv2 自动·初级器材",
+        "gym": 2,
+        "mode": "auto",
+        "endurance": 1,
+        "recovery": 1,
+        "automation": 0,
+        "equipment": 0,
+        "kit": true
+      },
+      "config": {
+        "capacity": 25,
+        "recoverySeconds": 15,
+        "courseRecovery": 6,
+        "automaticSeconds": 2,
+        "projectInvestment": 2,
+        "equipmentInvestment": 6,
+        "equipment": [
+          {
+            "id": "relic_017",
+            "name": "训练计时器",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 1 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_021",
+            "name": "逆境投篮骰",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 1 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_002",
+            "name": "基础投篮机",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；展示身价 +10%，同时增加品牌声望倍率（器材倍率合计最多 +50%）。"
+          },
+          {
+            "id": "relic_004",
+            "name": "矫正训练仪",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；中投成长抽取权重 +0.4（单维器材加值最多 +1.5）。"
+          }
+        ]
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 4,
+            "min": 2,
+            "p50": 4,
+            "p90": 6,
+            "max": 6
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 29.66,
+            "min": 26,
+            "p50": 30,
+            "p90": 34,
+            "max": 34
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 90.4,
+            "min": 80,
+            "p50": 90,
+            "p90": 96,
+            "max": 100
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 507.39,
+            "min": 445,
+            "p50": 505,
+            "p90": 527,
+            "max": 557
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 2036.76,
+            "min": 1949,
+            "p50": 2042,
+            "p90": 2067,
+            "max": 2121
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 60,
+            "min": 60,
+            "p50": 60,
+            "p90": 60,
+            "max": 60
+          },
+          "tiers": [
+            17,
+            67,
+            16,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 100,
+            "min": 100,
+            "p50": 100,
+            "p90": 100,
+            "max": 100
+          },
+          "tiers": [
+            10,
+            43,
+            44,
+            3,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 317,
+            "min": 317,
+            "p50": 317,
+            "p90": 317,
+            "max": 317
+          },
+          "tiers": [
+            5,
+            14,
+            58,
+            23,
+            0,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 21.01,
+            "min": 3,
+            "p50": 8,
+            "p90": 39,
+            "max": 181
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 57.59,
+            "min": 6,
+            "p50": 16,
+            "p90": 78,
+            "max": 799
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 100,
+            "mean": 67.27,
+            "min": 17,
+            "p50": 52,
+            "p90": 125,
+            "max": 245
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 194.92,
+            "min": 34,
+            "p50": 104,
+            "p90": 447,
+            "max": 1167
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 84,
+            "mean": 163.13095238095238,
+            "min": 43,
+            "p50": 146,
+            "p90": 283,
+            "max": 393
+          },
+          "seconds": {
+            "count": 84,
+            "mean": 689.0714285714286,
+            "min": 86,
+            "p50": 569,
+            "p90": 1403,
+            "max": 2063
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 53,
+            "mean": 233.9245283018868,
+            "min": 101,
+            "p50": 227,
+            "p90": 339,
+            "max": 394
+          },
+          "seconds": {
+            "count": 53,
+            "mean": 1108.5849056603774,
+            "min": 319,
+            "p50": 1052,
+            "p90": 1742,
+            "max": 2065
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 20,
+            "mean": 296.6,
+            "min": 185,
+            "p50": 285,
+            "p90": 363,
+            "max": 398
+          },
+          "seconds": {
+            "count": 20,
+            "mean": 1483.75,
+            "min": 807,
+            "p50": 1407,
+            "p90": 1883,
+            "max": 2087
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "id": "mid-auto",
+        "name": "Lv4 自动·中期配置",
+        "gym": 4,
+        "mode": "auto",
+        "endurance": 4,
+        "recovery": 4,
+        "automation": 3,
+        "equipment": 3,
+        "kit": true
+      },
+      "config": {
+        "capacity": 60,
+        "recoverySeconds": 12,
+        "courseRecovery": 7,
+        "automaticSeconds": 1.4,
+        "projectInvestment": 58,
+        "equipmentInvestment": 25,
+        "equipment": [
+          {
+            "id": "relic_057",
+            "name": "专业防滑手套",
+            "description": "体力恢复间隔缩短 2 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 2 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_037",
+            "name": "黄金投篮手套",
+            "description": "体力恢复间隔缩短 2 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 2 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_036",
+            "name": "适应性康复绷带",
+            "description": "体力上限 +4（器材合计最多 +20）；篮下成长抽取权重 +0.7（单维器材加值最多 +1.5）。"
+          },
+          {
+            "id": "relic_039",
+            "name": "信用逆袭徽章",
+            "description": "体力上限 +4（器材合计最多 +20）；完成合作且接取后完成至少 2 节课程，额外获得 1 券（器材合计最多 +2）。"
+          },
+          {
+            "id": "relic_060",
+            "name": "高级护具组合",
+            "description": "体力上限 +4（器材合计最多 +20）；篮下成长抽取权重 +0.7（单维器材加值最多 +1.5）。"
+          },
+          {
+            "id": "relic_034",
+            "name": "传奇伤病档案",
+            "description": "体力上限 +4（器材合计最多 +20）；展示身价 +20%，同时增加品牌声望倍率（器材倍率合计最多 +50%）。"
+          },
+          {
+            "id": "relic_038",
+            "name": "不屈斗志",
+            "description": "体力上限 +4（器材合计最多 +20）；展示身价 +20%，同时增加品牌声望倍率（器材倍率合计最多 +50%）。"
+          }
+        ]
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 2.8000000000000025,
+            "min": 1.4,
+            "p50": 2.8,
+            "p90": 4.2,
+            "max": 4.2
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 20.762000000000015,
+            "min": 18.2,
+            "p50": 21,
+            "p90": 23.8,
+            "max": 23.8
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 63.279999999999966,
+            "min": 56,
+            "p50": 63,
+            "p90": 67.2,
+            "max": 70
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 187.76799999999992,
+            "min": 173.6,
+            "p50": 187.6,
+            "p90": 193.2,
+            "max": 196
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 756.8239999999998,
+            "min": 705.8,
+            "p50": 757.4,
+            "p90": 776.4,
+            "max": 808.2
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 42,
+            "min": 42,
+            "p50": 42,
+            "p90": 42,
+            "max": 42
+          },
+          "tiers": [
+            19,
+            59,
+            22,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 70,
+            "min": 70,
+            "p50": 70,
+            "p90": 70,
+            "max": 70
+          },
+          "tiers": [
+            10,
+            50,
+            39,
+            1,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 140,
+            "min": 140,
+            "p50": 140,
+            "p90": 140,
+            "max": 140
+          },
+          "tiers": [
+            6,
+            28,
+            55,
+            11,
+            0,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 21.77,
+            "min": 3,
+            "p50": 8,
+            "p90": 49,
+            "max": 310
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 30.951999999999998,
+            "min": 4.2,
+            "p50": 11.2,
+            "p90": 68.6,
+            "max": 481.4
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 96,
+            "mean": 95.21875,
+            "min": 17,
+            "p50": 60,
+            "p90": 242,
+            "max": 361
+          },
+          "seconds": {
+            "count": 96,
+            "mean": 137.38749999999996,
+            "min": 23.8,
+            "p50": 84,
+            "p90": 338.8,
+            "max": 662.8
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 55,
+            "mean": 185.05454545454546,
+            "min": 45,
+            "p50": 180,
+            "p90": 314,
+            "max": 388
+          },
+          "seconds": {
+            "count": 55,
+            "mean": 271.79272727272723,
+            "min": 63,
+            "p50": 252,
+            "p90": 487,
+            "max": 745.4
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 23,
+            "mean": 280.5217391304348,
+            "min": 130,
+            "p50": 284,
+            "p90": 362,
+            "max": 400
+          },
+          "seconds": {
+            "count": 23,
+            "mean": 449.4434782608694,
+            "min": 182,
+            "p50": 397.6,
+            "p90": 664.2,
+            "max": 805.4
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 7,
+            "mean": 293,
+            "min": 219,
+            "p50": 299,
+            "p90": 387,
+            "max": 387
+          },
+          "seconds": {
+            "count": 7,
+            "mean": 467.19999999999993,
+            "min": 306.6,
+            "p50": 433.4,
+            "p90": 743.2,
+            "max": 743.2
+          }
+        }
+      ]
+    },
+    {
+      "profile": {
+        "id": "late-auto",
+        "name": "Lv8 自动·满级配置",
+        "gym": 8,
+        "mode": "auto",
+        "endurance": 8,
+        "recovery": 8,
+        "automation": 5,
+        "equipment": 4,
+        "kit": true
+      },
+      "config": {
+        "capacity": 80,
+        "recoverySeconds": 8,
+        "courseRecovery": 8,
+        "automaticSeconds": 1,
+        "projectInvestment": 374,
+        "equipmentInvestment": 34,
+        "equipment": [
+          {
+            "id": "relic_085",
+            "name": "持续进步训练器",
+            "description": "体力恢复间隔缩短 3 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 3 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_017",
+            "name": "训练计时器",
+            "description": "体力恢复间隔缩短 1 秒（器材合计最多缩短 4 秒）；每完成一课额外恢复 1 体力（受馆级额外恢复上限限制）。"
+          },
+          {
+            "id": "relic_075",
+            "name": "极限冒险护腕",
+            "description": "体力上限 +7（器材合计最多 +20）；完成合作且接取后完成至少 2 节课程，额外获得 2 券（器材合计最多 +2）。"
+          },
+          {
+            "id": "relic_080",
+            "name": "五维均衡训练法",
+            "description": "体力上限 +7（器材合计最多 +20）；突破成长抽取权重 +1（单维器材加值最多 +1.5）。"
+          },
+          {
+            "id": "relic_090",
+            "name": "终极防护装备",
+            "description": "体力上限 +7（器材合计最多 +20）；展示身价 +35%，同时增加品牌声望倍率（器材倍率合计最多 +50%）。"
+          }
+        ]
+      },
+      "milestones": [
+        {
+          "level": 1,
+          "shots": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 2,
+            "min": 1,
+            "p50": 2,
+            "p90": 3,
+            "max": 3
+          }
+        },
+        {
+          "level": 5,
+          "shots": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 14.83,
+            "min": 13,
+            "p50": 15,
+            "p90": 17,
+            "max": 17
+          }
+        },
+        {
+          "level": 10,
+          "shots": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 45.2,
+            "min": 40,
+            "p50": 45,
+            "p90": 48,
+            "max": 50
+          }
+        },
+        {
+          "level": 18,
+          "shots": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 134.12,
+            "min": 124,
+            "p50": 134,
+            "p90": 138,
+            "max": 140
+          }
+        },
+        {
+          "level": 30,
+          "shots": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 388.94,
+            "min": 376,
+            "p50": 389,
+            "p90": 395,
+            "max": 402
+          }
+        }
+      ],
+      "shotSnapshots": [
+        {
+          "shots": 30,
+          "levels": {
+            "count": 100,
+            "mean": 7.3,
+            "min": 7,
+            "p50": 7,
+            "p90": 8,
+            "max": 8
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 30,
+            "min": 30,
+            "p50": 30,
+            "p90": 30,
+            "max": 30
+          },
+          "tiers": [
+            25,
+            65,
+            10,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 50,
+          "levels": {
+            "count": 100,
+            "mean": 10.07,
+            "min": 10,
+            "p50": 10,
+            "p90": 10,
+            "max": 11
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 50,
+            "min": 50,
+            "p50": 50,
+            "p90": 50,
+            "max": 50
+          },
+          "tiers": [
+            15,
+            53,
+            32,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "shots": 100,
+          "levels": {
+            "count": 100,
+            "mean": 15.01,
+            "min": 15,
+            "p50": 15,
+            "p90": 15,
+            "max": 16
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 100,
+            "min": 100,
+            "p50": 100,
+            "p90": 100,
+            "max": 100
+          },
+          "tiers": [
+            3,
+            33,
+            57,
+            7,
+            0,
+            0
+          ]
+        }
+      ],
+      "templateAttainmentByLevel30": [
+        {
+          "tier": 1,
+          "shots": {
+            "count": 100,
+            "mean": 25.26,
+            "min": 3,
+            "p50": 9,
+            "p90": 81,
+            "max": 283
+          },
+          "seconds": {
+            "count": 100,
+            "mean": 25.26,
+            "min": 3,
+            "p50": 9,
+            "p90": 81,
+            "max": 283
+          }
+        },
+        {
+          "tier": 2,
+          "shots": {
+            "count": 99,
+            "mean": 95.33333333333333,
+            "min": 18,
+            "p50": 81,
+            "p90": 183,
+            "max": 357
+          },
+          "seconds": {
+            "count": 99,
+            "mean": 95.33333333333333,
+            "min": 18,
+            "p50": 81,
+            "p90": 183,
+            "max": 357
+          }
+        },
+        {
+          "tier": 3,
+          "shots": {
+            "count": 64,
+            "mean": 185.734375,
+            "min": 64,
+            "p50": 150,
+            "p90": 327,
+            "max": 390
+          },
+          "seconds": {
+            "count": 64,
+            "mean": 185.734375,
+            "min": 64,
+            "p50": 150,
+            "p90": 327,
+            "max": 390
+          }
+        },
+        {
+          "tier": 4,
+          "shots": {
+            "count": 34,
+            "mean": 284.79411764705884,
+            "min": 110,
+            "p50": 308,
+            "p90": 384,
+            "max": 394
+          },
+          "seconds": {
+            "count": 34,
+            "mean": 284.79411764705884,
+            "min": 110,
+            "p50": 308,
+            "p90": 384,
+            "max": 394
+          }
+        },
+        {
+          "tier": 5,
+          "shots": {
+            "count": 10,
+            "mean": 290.2,
+            "min": 130,
+            "p50": 283,
+            "p90": 386,
+            "max": 392
+          },
+          "seconds": {
+            "count": 10,
+            "mean": 290.2,
+            "min": 130,
+            "p50": 283,
+            "p90": 386,
+            "max": 392
+          }
+        }
+      ]
+    }
+  ],
+  "individualEquipment": [
+    {
+      "id": "relic_001",
+      "name": "伤病保险",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_002",
+      "name": "基础投篮机",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_003",
+      "name": "护膝绑带",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1260,
+      "effects": {
+        "stamina": 2,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_004",
+      "name": "矫正训练仪",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": "mid",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_006",
+      "name": "训练营补贴",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_008",
+      "name": "心理辅导手册",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": "drive",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_009",
+      "name": "球探认证章",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_010",
+      "name": "明星训练师徽章",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_011",
+      "name": "节奏训练带",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_012",
+      "name": "幸运护腕",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": "inside",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_013",
+      "name": "康复补偿协议",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_014",
+      "name": "冥想训练垫",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1260,
+      "effects": {
+        "stamina": 2,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_017",
+      "name": "训练计时器",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 988,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_019",
+      "name": "动作校正板",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_024",
+      "name": "冷静剂",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": "three",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_026",
+      "name": "伤后调整腕表",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_030",
+      "name": "专业护踝",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1260,
+      "effects": {
+        "stamina": 2,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_005",
+      "name": "里程奖碑",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_007",
+      "name": "新人首训课",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_015",
+      "name": "镇静呼吸器",
+      "unlockLevel": 1,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1260,
+      "effects": {
+        "stamina": 2,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_018",
+      "name": "节奏匹配器",
+      "unlockLevel": 1,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_021",
+      "name": "逆境投篮骰",
+      "unlockLevel": 2,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 988,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_022",
+      "name": "专注节拍器",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_023",
+      "name": "比赛阅读眼镜",
+      "unlockLevel": 2,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_027",
+      "name": "连胜庆功绳",
+      "unlockLevel": 2,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_028",
+      "name": "传承笔记",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1260,
+      "effects": {
+        "stamina": 2,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "mid",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_029",
+      "name": "伤病价值评估表",
+      "unlockLevel": 2,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_032",
+      "name": "投篮节奏带",
+      "unlockLevel": 2,
+      "price": 1,
+      "shotsTo18": 137,
+      "secondsTo18": 1235,
+      "effects": {
+        "stamina": 0,
+        "recovery": 1,
+        "valuePercent": 0,
+        "focusKey": "drive",
+        "focusPower": 0.4,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_033",
+      "name": "负重背心",
+      "unlockLevel": 2,
+      "price": 2,
+      "shotsTo18": 137,
+      "secondsTo18": 1040,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 10,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 1,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_020",
+      "name": "重伤理赔协议",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": "defense",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_036",
+      "name": "适应性康复绷带",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "inside",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_037",
+      "name": "黄金投篮手套",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_041",
+      "name": "蓄力投篮指导",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_043",
+      "name": "训练器材优惠券",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_046",
+      "name": "绝佳表现奖金",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_048",
+      "name": "开场热身项链",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": "three",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_056",
+      "name": "月度伤病豁免卡",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "drive",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_057",
+      "name": "专业防滑手套",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_058",
+      "name": "高阶球探报告",
+      "unlockLevel": 4,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_060",
+      "name": "高级护具组合",
+      "unlockLevel": 4,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "inside",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_063",
+      "name": "巅峰时刻计时器",
+      "unlockLevel": 4,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_064",
+      "name": "投篮表现奖励器",
+      "unlockLevel": 4,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": "handle",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_066",
+      "name": "还款优惠协议",
+      "unlockLevel": 4,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_068",
+      "name": "准时还款积分卡",
+      "unlockLevel": 4,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": "defense",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_069",
+      "name": "连投估值放大器",
+      "unlockLevel": 5,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 780,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_072",
+      "name": "火热延时表",
+      "unlockLevel": 5,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": "three",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_073",
+      "name": "大师投篮设备",
+      "unlockLevel": 5,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_074",
+      "name": "招生扩展许可",
+      "unlockLevel": 5,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_083",
+      "name": "训练营声望基金",
+      "unlockLevel": 6,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_091",
+      "name": "长期招生许可证",
+      "unlockLevel": 7,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_034",
+      "name": "传奇伤病档案",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_035",
+      "name": "损失补偿基金",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_038",
+      "name": "不屈斗志",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_039",
+      "name": "信用逆袭徽章",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_040",
+      "name": "逐步热身计划",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": "handle",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_042",
+      "name": "连续得分指导",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_045",
+      "name": "器材回收凭证",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 780,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_047",
+      "name": "逆境突破指南",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1220,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_049",
+      "name": "反弹训练器",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_050",
+      "name": "招生口碑认证",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_051",
+      "name": "黄金手感印记",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_052",
+      "name": "完美出手校准器",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": "mid",
+        "focusPower": 0.7,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_053",
+      "name": "被动成长课程",
+      "unlockLevel": 3,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_054",
+      "name": "多样化训练计划",
+      "unlockLevel": 3,
+      "price": 3,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_055",
+      "name": "伤后不退训练法",
+      "unlockLevel": 3,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_059",
+      "name": "投篮动作记忆器",
+      "unlockLevel": 4,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_061",
+      "name": "回响投篮机",
+      "unlockLevel": 4,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 702,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_062",
+      "name": "抗伤护腰",
+      "unlockLevel": 4,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_065",
+      "name": "伤病经验档案",
+      "unlockLevel": 4,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 700,
+      "effects": {
+        "stamina": 4,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 2,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_067",
+      "name": "王牌招生推荐信",
+      "unlockLevel": 4,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_070",
+      "name": "终场加练铃",
+      "unlockLevel": 5,
+      "price": 4,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 20,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_071",
+      "name": "高阶投篮视镜",
+      "unlockLevel": 5,
+      "price": 5,
+      "shotsTo18": 137,
+      "secondsTo18": 1170,
+      "effects": {
+        "stamina": 0,
+        "recovery": 2,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 1
+      }
+    },
+    {
+      "id": "relic_075",
+      "name": "极限冒险护腕",
+      "unlockLevel": 5,
+      "price": 8,
+      "shotsTo18": 137,
+      "secondsTo18": 1160,
+      "effects": {
+        "stamina": 7,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 2
+      }
+    },
+    {
+      "id": "relic_077",
+      "name": "信用紧急保障",
+      "unlockLevel": 5,
+      "price": 10,
+      "shotsTo18": 137,
+      "secondsTo18": 387,
+      "effects": {
+        "stamina": 7,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_079",
+      "name": "顶级运动医疗险",
+      "unlockLevel": 5,
+      "price": 12,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 2
+      }
+    },
+    {
+      "id": "relic_080",
+      "name": "五维均衡训练法",
+      "unlockLevel": 5,
+      "price": 8,
+      "shotsTo18": 137,
+      "secondsTo18": 1160,
+      "effects": {
+        "stamina": 7,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "drive",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_082",
+      "name": "采购网络扩展合同",
+      "unlockLevel": 5,
+      "price": 10,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_086",
+      "name": "低强度理财计划",
+      "unlockLevel": 6,
+      "price": 9,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_087",
+      "name": "巅峰投篮核心",
+      "unlockLevel": 6,
+      "price": 10,
+      "shotsTo18": 137,
+      "secondsTo18": 1105,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 2
+      }
+    },
+    {
+      "id": "relic_088",
+      "name": "超频训练机",
+      "unlockLevel": 6,
+      "price": 11,
+      "shotsTo18": 137,
+      "secondsTo18": 1105,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": "handle",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_089",
+      "name": "超额还款返利",
+      "unlockLevel": 6,
+      "price": 12,
+      "shotsTo18": 137,
+      "secondsTo18": 527,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_090",
+      "name": "终极防护装备",
+      "unlockLevel": 6,
+      "price": 8,
+      "shotsTo18": 137,
+      "secondsTo18": 1160,
+      "effects": {
+        "stamina": 7,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_092",
+      "name": "高阶明星代言",
+      "unlockLevel": 7,
+      "price": 10,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": "defense",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_093",
+      "name": "双生球员计划",
+      "unlockLevel": 7,
+      "price": 11,
+      "shotsTo18": 137,
+      "secondsTo18": 449,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_095",
+      "name": "持久火热训练带",
+      "unlockLevel": 7,
+      "price": 8,
+      "shotsTo18": 137,
+      "secondsTo18": 1105,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 2
+      }
+    },
+    {
+      "id": "relic_096",
+      "name": "超级巨星经纪合同",
+      "unlockLevel": 8,
+      "price": 9,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": "three",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_097",
+      "name": "传奇投篮骰",
+      "unlockLevel": 8,
+      "price": 10,
+      "shotsTo18": 137,
+      "secondsTo18": 449,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_098",
+      "name": "金牌训练师终身协议",
+      "unlockLevel": 8,
+      "price": 11,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_076",
+      "name": "冠军训练传承书",
+      "unlockLevel": 5,
+      "price": 9,
+      "shotsTo18": 137,
+      "secondsTo18": 1160,
+      "effects": {
+        "stamina": 7,
+        "recovery": 0,
+        "valuePercent": 0,
+        "focusKey": "mid",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_078",
+      "name": "耐心积蓄器",
+      "unlockLevel": 5,
+      "price": 11,
+      "shotsTo18": 137,
+      "secondsTo18": 1105,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_081",
+      "name": "训练结果复刻镜",
+      "unlockLevel": 5,
+      "price": 9,
+      "shotsTo18": 137,
+      "secondsTo18": 527,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_084",
+      "name": "伤病缓冲核心",
+      "unlockLevel": 6,
+      "price": 12,
+      "shotsTo18": 137,
+      "secondsTo18": 1105,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": "inside",
+        "focusPower": 1,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_085",
+      "name": "持续进步训练器",
+      "unlockLevel": 6,
+      "price": 8,
+      "shotsTo18": 137,
+      "secondsTo18": 449,
+      "effects": {
+        "stamina": 0,
+        "recovery": 3,
+        "valuePercent": 0,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 3,
+        "cooperationBonus": 0
+      }
+    },
+    {
+      "id": "relic_094",
+      "name": "伤病补招合同",
+      "unlockLevel": 7,
+      "price": 12,
+      "shotsTo18": 137,
+      "secondsTo18": 1300,
+      "effects": {
+        "stamina": 0,
+        "recovery": 0,
+        "valuePercent": 35,
+        "focusKey": null,
+        "focusPower": 0,
+        "courseRecovery": 0,
+        "cooperationBonus": 0
+      }
+    }
+  ],
+  "parallelTraining": [
+    {
+      "count": 1,
+      "gym": 8,
+      "sampleSize": 25,
+      "targetLevel": 10,
+      "automaticSeconds": 2,
+      "seconds": {
+        "count": 25,
+        "mean": 198.96,
+        "min": 166,
+        "p50": 182,
+        "p90": 242,
+        "max": 282
+      },
+      "totalShots": {
+        "count": 25,
+        "mean": 45.52,
+        "min": 42,
+        "p50": 45,
+        "p90": 48,
+        "max": 50
+      }
+    },
+    {
+      "count": 2,
+      "gym": 8,
+      "sampleSize": 25,
+      "targetLevel": 10,
+      "automaticSeconds": 2,
+      "seconds": {
+        "count": 25,
+        "mean": 204.96,
+        "min": 168,
+        "p50": 202,
+        "p90": 242,
+        "max": 242
+      },
+      "totalShots": {
+        "count": 25,
+        "mean": 90.36,
+        "min": 84,
+        "p50": 90,
+        "p90": 94,
+        "max": 95
+      }
+    },
+    {
+      "count": 4,
+      "gym": 8,
+      "sampleSize": 25,
+      "targetLevel": 10,
+      "automaticSeconds": 2,
+      "seconds": {
+        "count": 25,
+        "mean": 217.04,
+        "min": 170,
+        "p50": 222,
+        "p90": 242,
+        "max": 282
+      },
+      "totalShots": {
+        "count": 25,
+        "mean": 180.24,
+        "min": 171,
+        "p50": 180,
+        "p90": 185,
+        "max": 191
+      }
+    },
+    {
+      "count": 8,
+      "gym": 8,
+      "sampleSize": 25,
+      "targetLevel": 10,
+      "automaticSeconds": 2,
+      "seconds": {
+        "count": 25,
+        "mean": 243.6,
+        "min": 202,
+        "p50": 242,
+        "p90": 262,
+        "max": 282
+      },
+      "totalShots": {
+        "count": 25,
+        "mean": 360.04,
+        "min": 350,
+        "p50": 360,
+        "p90": 364,
+        "max": 373
+      }
+    }
+  ]
+}
