@@ -192,6 +192,7 @@ describe('gym save boundaries', () => {
     const alumnus = {...state.player!, recommendedAt: 1_000, rewardCredits: 18, rewardFame: 300, finalValue: '5000'};
     expect(decodeGym(envelope({...state, player: null, alumni: [alumnus]}))?.alumni[0].rewardCredits).toBe(18);
     expect(decodeGym(envelope({...state, player: null, alumni: [{...alumnus, rewardCredits: 27}]}))?.alumni[0].rewardCredits).toBe(27);
-    expect(decodeGym(envelope({...state, player: null, alumni: [{...alumnus, rewardCredits: 28}]}))).toBeNull();
+    expect(decodeGym(envelope({...state, player: null, alumni: [{...alumnus, rewardCredits: 33}]}))?.alumni[0].rewardCredits).toBe(33);
+    expect(decodeGym(envelope({...state, player: null, alumni: [{...alumnus, rewardCredits: 34}]}))).toBeNull();
   });
 });

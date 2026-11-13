@@ -61,6 +61,8 @@ function fixture(profile: Profile, seed: number): GymState {
 }
 
 function finalizeFixture(state: GymState) {
+  state.purchasePrices = Object.fromEntries(state.ownedEquipment.map(id => [id,
+    state.purchasePrices[id] ?? equipmentCatalog.find(item => item.id === id)!.price]));
   const required = Math.max(0, ...state.ownedEquipment.map(id => equipmentCatalog.find(item => item.id === id)!.requiredTemplates));
   for (const template of templateRules.slice(0, required)) state.collection[template.id] ??= {firstAt: epoch, highestRating: 0, highestValue: '0'};
   for (const id of state.ownedEquipment) state.collectedEquipment[id] ??= {firstAt: epoch};
@@ -116,7 +118,7 @@ if (process.env.GYM_BALANCE_VALIDATE_ONLY === '1') {
     state.player!.stamina = staminaMax(state);
     finalizeFixture(state);
   }
-  console.log('All six profiles and 94 single-item fixtures pass production save validation.');
+  console.log(`All six profiles and ${equipmentCatalog.length} single-item fixtures pass production save validation.`);
   process.exit(0);
 }
 // Renewal equation: expected additional shots for remaining XP, including overshoot.

@@ -63,7 +63,7 @@ export default function GymHome() {
    <section className="home-controls">
     <div className="home-career-actions">
      <button className="art-button home-new-game" aria-label={store.hasSave ? '开始新球馆' : '开设训练馆'} aria-busy={busy} disabled={busy} onClick={() => store.hasSave ? setPanel('start') : void start()}><img src={assetUrl(`art/home/${store.hasSave ? 'button-new-career' : 'button-new-game'}.png`)} alt=""/></button>
-     {store.hasSave && <button className="art-button home-continue has-progress" aria-label="继续经营" onClick={() => {void store.tick(); setPlaying(true);}}>
+     {store.hasSave && <button className="art-button home-continue has-progress" aria-label="继续经营" onClick={() => setPlaying(true)}>
       <GameIcon name="folder"/><strong>继续经营</strong><span className="home-save-progress"><span>球馆 Lv.{store.state.gymLevel}</span><span>赞助券 {store.state.credits}</span></span><span className="continue-chevron" aria-hidden="true">›</span>
      </button>}
     </div>
@@ -80,7 +80,7 @@ export default function GymHome() {
     {panel === 'settings' && <div className="gym-settings">
      <label><span>游戏音效</span><input type="checkbox" checked={sound} onChange={event => {setSound(event.target.checked); saveSoundEnabled(event.target.checked);}}/></label>
      <label><span>减少动态效果</span><input type="checkbox" checked={reduced} onChange={event => changeReduced(event.target.checked)}/></label>
-     <h3>训练说明</h3><p>每次投篮消耗 1 体力，手动冷却 1 秒，只训练当前选中的球员。训练获得经验，经验槽升满后升级并增加属性。</p><p>维持 30% 获得 8 经验、成功 60% 获得 12 经验、大成功 10% 获得 20 经验。每级需求可点击训练页的经验槽查看。</p><p>训练位数等于球馆等级。Lv.2 免费开放每人独立自动训练，基础 2 秒/球，可升级自动项目提速。到球员名册选人、招募或启停自动。</p><p>先选专项训练计划与可选的赞助合作。每 10 球完成一课并恢复体力，完整课程提高推荐时的培养声望；培养加券同时检查当前等级和模板档次，合作达标另奖券与声望。</p><p>推荐球员签约可获得赞助券与声望。球馆项目和器材由在训球员共享，空位可免费招募新人。</p><p className="gym-muted">自动仅在训练馆页面可见时进行。离线期间恢复体力，不补投篮；排行榜将在后续版本开放。</p>
+     <h3>训练说明</h3><p>每次投篮消耗 1 体力，手动冷却 1 秒，只训练当前选中的球员。训练获得经验，经验槽升满后升级并增加属性。</p><p>维持 30% 获得基础 8 经验、成功 60% 获得基础 12 经验、大成功 10% 获得基础 20 经验。每级需求可点击训练页的经验槽查看。</p><p>训练位数等于球馆等级。Lv.2 同时免费开放每人独立自动与离线训练，基础 2 秒/球。自动项目每级缩短 0.2 秒，并使每次自动投篮额外获得 1 经验，在线离线均生效。到球员名册选人、招募或启停自动。</p><p>先选专项训练计划与可选的赞助合作。每 10 球完成一课并恢复体力，完整课程提高推荐时的培养声望；培养加券同时检查当前等级和模板档次，合作达标另奖券与声望。按模板和奖金节点推荐，不必每人都练到99级。</p><p>推荐球员签约可获得赞助券与声望。新购器材有空位时自动放入球馆生效，满位时选择替换；旧件进入仓库，可换回或按记录购价半价出售。球馆项目和馆内器材由在训球员共享，空位可免费招募新人。</p><p className="gym-muted">离开时，开启自动的球员会继续按体力、馆内器材与课程规则训练；离线基础上限 30分钟，项目依次提升至45、60、90、120、180分钟。超时仅恢复体力，回馆自动结算；不会自动推荐或招募。排行榜将在后续版本开放。</p>
     </div>}
    </div>
   </ComicDialog>}

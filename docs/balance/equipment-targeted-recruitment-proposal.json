@@ -1,0 +1,5694 @@
+{
+  "schema": 1,
+  "status": "proposal-scenario-only-not-implemented",
+  "date": "2026-11-13",
+  "proposalName": "精选招生",
+  "rules": {
+    "unlockGymLevel": 6,
+    "feeCoupons": 36,
+    "ordinaryRecruitmentRemainsFree": true,
+    "heightPreferencesRemainExisting": [
+      "any",
+      "guard",
+      "forward",
+      "center"
+    ],
+    "exactHeightSelection": false,
+    "directionChoices": [
+      {
+        "id": "shooting",
+        "name": "投射",
+        "guaranteedStats": [
+          "three",
+          "mid"
+        ]
+      },
+      {
+        "id": "finishing",
+        "name": "持球",
+        "guaranteedStats": [
+          "drive",
+          "handle"
+        ]
+      },
+      {
+        "id": "interior",
+        "name": "内线",
+        "guaranteedStats": [
+          "inside",
+          "defense"
+        ]
+      }
+    ],
+    "selectedStatBaseRangeBeforeRecruitmentProject": [
+      46,
+      48
+    ],
+    "ordinaryStatBaseRangeBeforeRecruitmentProject": [
+      24,
+      48
+    ],
+    "allStatsReceiveExistingRecruitmentProjectBonus": true,
+    "otherStatsRemainNormallyRandom": true,
+    "innateGrowthBiasUnchanged": true,
+    "noGuaranteedTemplate": true,
+    "noExperienceCurveChange": true,
+    "noExtraLevelUpAttributePoints": true,
+    "noRecurringOrOfflineCharge": true,
+    "cancelOrFullRosterOrFailedSaveMustNotCharge": true,
+    "noRefundOnOrdinaryRecommendationOrUntrainedDiscard": true,
+    "creationAndFeeCommitAtomically": true,
+    "preserveAlreadyHighSelectedBirthStats": true
+  },
+  "mathematicalGuarantees": {
+    "maximumRecommendationCredits": 33,
+    "feeCoupons": 36,
+    "minimumNetConsumptionPerPaidPlayer": 3,
+    "maximumNetConsumptionPerPaidPlayer": 36,
+    "identity": "paid-player net consumption = 36 - this player actual recommendation credits",
+    "scope": "A single paid recruit lifecycle only; aggregate wallet may still grow from free players, other income or low adoption.",
+    "futureRewardChangesRequireRecheckingFeeFloor": true
+  },
+  "samplingModel": {
+    "source": "engine recruit(): 24 + recruitment project level + floor(random(stream)*25)",
+    "probabilityModel": "Ideal uniform independent ordinary-base rolls; the recorded 128-seed paired shadow uses an explicit deterministic 9/8/8 selected-base mapping, not a production randomizer.",
+    "ordinaryProbabilityForBothSelectedBaseStatsAtLeast46": {
+      "fraction": "9/625",
+      "value": 0.0144
+    },
+    "expectedFreeCandidatesForBothAtLeast46": 69.44444444444444,
+    "expectedRecruitPlusDiscardScreeningCommands": 137.88888888888889,
+    "expectedRecruitPlusAllRecommendationCommandsIncludingFinalGraduate": 138.88888888888889,
+    "ordinaryMeanBaseAttribute": 36,
+    "selectedMeanBaseAttribute": 47,
+    "meanTotalStartingAttributeIncreaseForTwoSelectedStats": 22,
+    "note": "Guarantee is before the existing recruitment-project bonus. At project6 the paid pair is52-54, not46-48; free range is30-54. No improvement in future growth bias is assumed.",
+    "shadowEvidence": "selected-recruitment-shadow.json"
+  },
+  "budgetScenario": {
+    "source": "docs/balance/equipment-v3-journey.json",
+    "policies": [
+      "balanced",
+      "supply",
+      "business"
+    ],
+    "sampleSize": 96,
+    "policySamples": 32,
+    "fullEquipmentCatalogPrice": 306,
+    "fullProjectCost": 504,
+    "reserveCoupons": 100,
+    "permanentCompletionAssumption": "Buy every currently unowned equipment item, even previously sold lower grades, and finish every permanent project at current prices before budgeting the proposal.",
+    "prepaidCountFormula": "max(0, floor((balanceAfterPermanentCompletion - 100)/36))",
+    "noFutureRecommendationIncomeUsedForPrepayment": true,
+    "capacityNote": "This is the number of fee payments financially affordable in sequence. It does not permit preordering or simultaneous recruits beyond actual vacant slots; current gym8 capacity remains8.",
+    "uptakeNote": "Hypothetical voluntary purchase capacity using real historical balances, not player adoption or new paid-player income measurements.",
+    "allPoliciesCombined": {
+      "afterPermanentBalance": {
+        "n": 96,
+        "mean": 610.3645833333334,
+        "p10": 563,
+        "p50": 606,
+        "p90": 667,
+        "min": 545,
+        "max": 721
+      },
+      "prepaidCount": {
+        "n": 96,
+        "mean": 13.666666666666668,
+        "p10": 12,
+        "p50": 14,
+        "p90": 15,
+        "min": 12,
+        "max": 17
+      },
+      "prepaidCost": {
+        "n": 96,
+        "mean": 492,
+        "p10": 432,
+        "p50": 504,
+        "p90": 540,
+        "min": 432,
+        "max": 612
+      },
+      "afterPrepaymentBalance": {
+        "n": 96,
+        "mean": 118.36458333333334,
+        "p10": 102,
+        "p50": 121,
+        "p90": 133,
+        "min": 100,
+        "max": 135
+      }
+    },
+    "groups": [
+      {
+        "policy": "balanced",
+        "sampleSize": 32,
+        "balanceAtGym8": {
+          "n": 32,
+          "mean": 1140.15625,
+          "p10": 1097,
+          "p50": 1136,
+          "p90": 1190,
+          "min": 1073,
+          "max": 1218
+        },
+        "remainingPermanentCost": {
+          "n": 32,
+          "mean": 528.25,
+          "p10": 528,
+          "p50": 528,
+          "p90": 528,
+          "min": 528,
+          "max": 532
+        },
+        "afterPermanentBalance": {
+          "n": 32,
+          "mean": 611.90625,
+          "p10": 569,
+          "p50": 608,
+          "p90": 662,
+          "min": 545,
+          "max": 686
+        },
+        "prepaidCount": {
+          "n": 32,
+          "mean": 13.78125,
+          "p10": 13,
+          "p50": 14,
+          "p90": 15,
+          "min": 12,
+          "max": 16
+        },
+        "prepaidCost": {
+          "n": 32,
+          "mean": 496.125,
+          "p10": 468,
+          "p50": 504,
+          "p90": 540,
+          "min": 432,
+          "max": 576
+        },
+        "afterPrepaymentBalance": {
+          "n": 32,
+          "mean": 115.78125,
+          "p10": 101,
+          "p50": 113,
+          "p90": 131,
+          "min": 100,
+          "max": 134
+        },
+        "assumedReturnScenarios": [
+          {
+            "meanReturnPerPlayerAssumption": 12.45,
+            "netConsumptionPerPlayer": 23.55,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 324.5484375,
+              "p10": 306.15,
+              "p50": 329.7,
+              "p90": 353.25,
+              "min": 282.6,
+              "max": 376.8
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 287.3578125,
+              "p10": 264.85,
+              "p50": 287.3,
+              "p90": 308.3,
+              "min": 262.4,
+              "max": 313.75
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 18,
+            "netConsumptionPerPlayer": 18,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 248.0625,
+              "p10": 234,
+              "p50": 252,
+              "p90": 270,
+              "min": 216,
+              "max": 288
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 363.84375,
+              "p10": 336,
+              "p50": 365,
+              "p90": 388,
+              "min": 329,
+              "max": 398
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 24,
+            "netConsumptionPerPlayer": 12,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 165.375,
+              "p10": 156,
+              "p50": 168,
+              "p90": 180,
+              "min": 144,
+              "max": 192
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 446.53125,
+              "p10": 414,
+              "p50": 443,
+              "p90": 482,
+              "min": 401,
+              "max": 494
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 33,
+            "netConsumptionPerPlayer": 3,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 41.34375,
+              "p10": 39,
+              "p50": 42,
+              "p90": 45,
+              "min": 36,
+              "max": 48
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 570.5625,
+              "p10": 530,
+              "p50": 566,
+              "p90": 617,
+              "min": 509,
+              "max": 638
+            }
+          }
+        ],
+        "cases": [
+          {
+            "seed": 1,
+            "balanceAtGym8": 1164,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 636,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 132,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 306.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 384
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 468
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 594
+              }
+            ]
+          },
+          {
+            "seed": 2,
+            "balanceAtGym8": 1127,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 599,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 131,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 292.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 365
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 443
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 560
+              }
+            ]
+          },
+          {
+            "seed": 3,
+            "balanceAtGym8": 1153,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 625,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 295.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 373
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 457
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 583
+              }
+            ]
+          },
+          {
+            "seed": 4,
+            "balanceAtGym8": 1099,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 571,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 103,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 264.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 337
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 415
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 532
+              }
+            ]
+          },
+          {
+            "seed": 5,
+            "balanceAtGym8": 1097,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 569,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 101,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 262.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 335
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 413
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 530
+              }
+            ]
+          },
+          {
+            "seed": 6,
+            "balanceAtGym8": 1145,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 617,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 113,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 287.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 365
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 449
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 575
+              }
+            ]
+          },
+          {
+            "seed": 7,
+            "balanceAtGym8": 1161,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 633,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 129,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 303.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 381
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 465
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 591
+              }
+            ]
+          },
+          {
+            "seed": 8,
+            "balanceAtGym8": 1169,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 641,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 101,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 287.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 371
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 461
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 596
+              }
+            ]
+          },
+          {
+            "seed": 9,
+            "balanceAtGym8": 1156,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 628,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 124,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 298.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 376
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 460
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 586
+              }
+            ]
+          },
+          {
+            "seed": 10,
+            "balanceAtGym8": 1101,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 573,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 105,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 266.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 339
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 417
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 534
+              }
+            ]
+          },
+          {
+            "seed": 11,
+            "balanceAtGym8": 1174,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 646,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 106,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 292.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 376
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 466
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 601
+              }
+            ]
+          },
+          {
+            "seed": 12,
+            "balanceAtGym8": 1166,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 638,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 134,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 308.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 386
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 470
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 596
+              }
+            ]
+          },
+          {
+            "seed": 13,
+            "balanceAtGym8": 1190,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 662,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 122,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 308.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 392
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 482
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 617
+              }
+            ]
+          },
+          {
+            "seed": 14,
+            "balanceAtGym8": 1113,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 585,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 117,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 278.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 351
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 429
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 546
+              }
+            ]
+          },
+          {
+            "seed": 15,
+            "balanceAtGym8": 1199,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 667,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 127,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 313.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 397
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 487
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 622
+              }
+            ]
+          },
+          {
+            "seed": 16,
+            "balanceAtGym8": 1133,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 605,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 101,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 275.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 353
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 437
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 563
+              }
+            ]
+          },
+          {
+            "seed": 17,
+            "balanceAtGym8": 1073,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 545,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 113,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 262.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 329
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 401
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 509
+              }
+            ]
+          },
+          {
+            "seed": 18,
+            "balanceAtGym8": 1178,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 650,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 110,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 296.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 380
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 470
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 605
+              }
+            ]
+          },
+          {
+            "seed": 19,
+            "balanceAtGym8": 1204,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 676,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 100,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 299.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 388
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 484
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 628
+              }
+            ]
+          },
+          {
+            "seed": 20,
+            "balanceAtGym8": 1092,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 564,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 132,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 281.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 348
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 420
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 528
+              }
+            ]
+          },
+          {
+            "seed": 21,
+            "balanceAtGym8": 1080,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 552,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 120,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 269.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 336
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 408
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 516
+              }
+            ]
+          },
+          {
+            "seed": 22,
+            "balanceAtGym8": 1108,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 580,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 112,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 273.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 346
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 424
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 541
+              }
+            ]
+          },
+          {
+            "seed": 23,
+            "balanceAtGym8": 1218,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 686,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 110,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 309.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 398
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 494
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 638
+              }
+            ]
+          },
+          {
+            "seed": 24,
+            "balanceAtGym8": 1136,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 608,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 104,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 278.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 356
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 440
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 566
+              }
+            ]
+          },
+          {
+            "seed": 25,
+            "balanceAtGym8": 1113,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 585,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 117,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 278.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 351
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 429
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 546
+              }
+            ]
+          },
+          {
+            "seed": 26,
+            "balanceAtGym8": 1120,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 592,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 124,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 285.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 358
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 436
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 553
+              }
+            ]
+          },
+          {
+            "seed": 27,
+            "balanceAtGym8": 1098,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 570,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 102,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 263.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 336
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 414
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 531
+              }
+            ]
+          },
+          {
+            "seed": 28,
+            "balanceAtGym8": 1107,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 579,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 111,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 272.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 345
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 423
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 540
+              }
+            ]
+          },
+          {
+            "seed": 29,
+            "balanceAtGym8": 1153,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 625,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 295.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 373
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 457
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 583
+              }
+            ]
+          },
+          {
+            "seed": 30,
+            "balanceAtGym8": 1163,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 635,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 131,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 305.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 383
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 467
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 593
+              }
+            ]
+          },
+          {
+            "seed": 31,
+            "balanceAtGym8": 1135,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 607,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 103,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 277.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 355
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 439
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 565
+              }
+            ]
+          },
+          {
+            "seed": 32,
+            "balanceAtGym8": 1160,
+            "remainingPermanentCost": 528,
+            "afterPermanentBalance": 632,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 128,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 302.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 380
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 464
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 590
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "policy": "supply",
+        "sampleSize": 32,
+        "balanceAtGym8": {
+          "n": 32,
+          "mean": 1104,
+          "p10": 1059,
+          "p50": 1098,
+          "p90": 1146,
+          "min": 1055,
+          "max": 1206
+        },
+        "remainingPermanentCost": {
+          "n": 32,
+          "mean": 497,
+          "p10": 497,
+          "p50": 497,
+          "p90": 497,
+          "min": 497,
+          "max": 497
+        },
+        "afterPermanentBalance": {
+          "n": 32,
+          "mean": 607,
+          "p10": 562,
+          "p50": 601,
+          "p90": 649,
+          "min": 558,
+          "max": 709
+        },
+        "prepaidCount": {
+          "n": 32,
+          "mean": 13.5,
+          "p10": 12,
+          "p50": 13,
+          "p90": 15,
+          "min": 12,
+          "max": 16
+        },
+        "prepaidCost": {
+          "n": 32,
+          "mean": 486,
+          "p10": 432,
+          "p50": 468,
+          "p90": 540,
+          "min": 432,
+          "max": 576
+        },
+        "afterPrepaymentBalance": {
+          "n": 32,
+          "mean": 121,
+          "p10": 106,
+          "p50": 121,
+          "p90": 134,
+          "min": 100,
+          "max": 135
+        },
+        "assumedReturnScenarios": [
+          {
+            "meanReturnPerPlayerAssumption": 12.45,
+            "netConsumptionPerPlayer": 23.55,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 317.925,
+              "p10": 282.6,
+              "p50": 306.15,
+              "p90": 353.25,
+              "min": 282.6,
+              "max": 376.8
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 289.075,
+              "p10": 275.85,
+              "p50": 286.85,
+              "p90": 308.3,
+              "min": 267.85,
+              "max": 332.2
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 18,
+            "netConsumptionPerPlayer": 18,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 243,
+              "p10": 216,
+              "p50": 234,
+              "p90": 270,
+              "min": 216,
+              "max": 288
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 364,
+              "p10": 343,
+              "p50": 362,
+              "p90": 387,
+              "min": 340,
+              "max": 421
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 24,
+            "netConsumptionPerPlayer": 12,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 162,
+              "p10": 144,
+              "p50": 156,
+              "p90": 180,
+              "min": 144,
+              "max": 192
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 445,
+              "p10": 418,
+              "p50": 444,
+              "p90": 471,
+              "min": 414,
+              "max": 517
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 33,
+            "netConsumptionPerPlayer": 3,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 40.5,
+              "p10": 36,
+              "p50": 39,
+              "p90": 45,
+              "min": 36,
+              "max": 48
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 566.5,
+              "p10": 526,
+              "p50": 562,
+              "p90": 604,
+              "min": 522,
+              "max": 661
+            }
+          }
+        ],
+        "cases": [
+          {
+            "seed": 1,
+            "balanceAtGym8": 1136,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 639,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 135,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 309.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 387
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 471
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 597
+              }
+            ]
+          },
+          {
+            "seed": 2,
+            "balanceAtGym8": 1059,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 562,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 130,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 279.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 346
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 418
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 526
+              }
+            ]
+          },
+          {
+            "seed": 3,
+            "balanceAtGym8": 1117,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 620,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 116,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 290.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 368
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 452
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 578
+              }
+            ]
+          },
+          {
+            "seed": 4,
+            "balanceAtGym8": 1059,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 562,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 130,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 279.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 346
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 418
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 526
+              }
+            ]
+          },
+          {
+            "seed": 5,
+            "balanceAtGym8": 1086,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 589,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 282.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 355
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 433
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 550
+              }
+            ]
+          },
+          {
+            "seed": 6,
+            "balanceAtGym8": 1111,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 614,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 110,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 284.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 362
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 446
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 572
+              }
+            ]
+          },
+          {
+            "seed": 7,
+            "balanceAtGym8": 1146,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 649,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 109,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 295.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 379
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 469
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 604
+              }
+            ]
+          },
+          {
+            "seed": 8,
+            "balanceAtGym8": 1191,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 694,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 118,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 317.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 406
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 502
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 646
+              }
+            ]
+          },
+          {
+            "seed": 9,
+            "balanceAtGym8": 1090,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 593,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 125,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 286.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 359
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 437
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 554
+              }
+            ]
+          },
+          {
+            "seed": 10,
+            "balanceAtGym8": 1071,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 574,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 106,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 267.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 340
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 418
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 535
+              }
+            ]
+          },
+          {
+            "seed": 11,
+            "balanceAtGym8": 1129,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 632,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 128,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 302.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 380
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 464
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 590
+              }
+            ]
+          },
+          {
+            "seed": 12,
+            "balanceAtGym8": 1100,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 603,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 135,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 296.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 369
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 447
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 564
+              }
+            ]
+          },
+          {
+            "seed": 13,
+            "balanceAtGym8": 1141,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 644,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 104,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 290.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 374
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 464
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 599
+              }
+            ]
+          },
+          {
+            "seed": 14,
+            "balanceAtGym8": 1060,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 563,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 131,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 280.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 347
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 419
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 527
+              }
+            ]
+          },
+          {
+            "seed": 15,
+            "balanceAtGym8": 1143,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 646,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 106,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 292.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 376
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 466
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 601
+              }
+            ]
+          },
+          {
+            "seed": 16,
+            "balanceAtGym8": 1117,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 620,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 116,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 290.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 368
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 452
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 578
+              }
+            ]
+          },
+          {
+            "seed": 17,
+            "balanceAtGym8": 1079,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 582,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 114,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 275.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 348
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 426
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 543
+              }
+            ]
+          },
+          {
+            "seed": 18,
+            "balanceAtGym8": 1135,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 638,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 134,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 308.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 386
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 470
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 596
+              }
+            ]
+          },
+          {
+            "seed": 19,
+            "balanceAtGym8": 1206,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 709,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 133,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 332.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 421
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 517
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 661
+              }
+            ]
+          },
+          {
+            "seed": 20,
+            "balanceAtGym8": 1057,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 560,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 128,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 277.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 344
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 416
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 524
+              }
+            ]
+          },
+          {
+            "seed": 21,
+            "balanceAtGym8": 1079,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 582,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 114,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 275.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 348
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 426
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 543
+              }
+            ]
+          },
+          {
+            "seed": 22,
+            "balanceAtGym8": 1072,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 575,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 107,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 268.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 341
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 419
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 536
+              }
+            ]
+          },
+          {
+            "seed": 23,
+            "balanceAtGym8": 1173,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 676,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 100,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 299.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 388
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 484
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 628
+              }
+            ]
+          },
+          {
+            "seed": 24,
+            "balanceAtGym8": 1060,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 563,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 131,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 280.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 347
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 419
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 527
+              }
+            ]
+          },
+          {
+            "seed": 25,
+            "balanceAtGym8": 1055,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 558,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 126,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 275.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 342
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 414
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 522
+              }
+            ]
+          },
+          {
+            "seed": 26,
+            "balanceAtGym8": 1098,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 601,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 133,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 294.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 367
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 445
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 562
+              }
+            ]
+          },
+          {
+            "seed": 27,
+            "balanceAtGym8": 1056,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 559,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 127,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 276.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 343
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 415
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 523
+              }
+            ]
+          },
+          {
+            "seed": 28,
+            "balanceAtGym8": 1094,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 597,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 129,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 290.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 363
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 441
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 558
+              }
+            ]
+          },
+          {
+            "seed": 29,
+            "balanceAtGym8": 1086,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 589,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 282.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 355
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 433
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 550
+              }
+            ]
+          },
+          {
+            "seed": 30,
+            "balanceAtGym8": 1099,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 602,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 134,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 295.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 368
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 446
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 563
+              }
+            ]
+          },
+          {
+            "seed": 31,
+            "balanceAtGym8": 1109,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 612,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 108,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 282.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 360
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 444
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 570
+              }
+            ]
+          },
+          {
+            "seed": 32,
+            "balanceAtGym8": 1114,
+            "remainingPermanentCost": 497,
+            "afterPermanentBalance": 617,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 113,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 287.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 365
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 449
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 575
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "policy": "business",
+        "sampleSize": 32,
+        "balanceAtGym8": {
+          "n": 32,
+          "mean": 1144.1875,
+          "p10": 1097,
+          "p50": 1138,
+          "p90": 1199,
+          "min": 1080,
+          "max": 1253
+        },
+        "remainingPermanentCost": {
+          "n": 32,
+          "mean": 532,
+          "p10": 532,
+          "p50": 532,
+          "p90": 532,
+          "min": 532,
+          "max": 532
+        },
+        "afterPermanentBalance": {
+          "n": 32,
+          "mean": 612.1875,
+          "p10": 565,
+          "p50": 606,
+          "p90": 667,
+          "min": 548,
+          "max": 721
+        },
+        "prepaidCount": {
+          "n": 32,
+          "mean": 13.71875,
+          "p10": 12,
+          "p50": 14,
+          "p90": 15,
+          "min": 12,
+          "max": 17
+        },
+        "prepaidCost": {
+          "n": 32,
+          "mean": 493.875,
+          "p10": 432,
+          "p50": 504,
+          "p90": 540,
+          "min": 432,
+          "max": 612
+        },
+        "afterPrepaymentBalance": {
+          "n": 32,
+          "mean": 118.3125,
+          "p10": 102,
+          "p50": 121,
+          "p90": 132,
+          "min": 100,
+          "max": 135
+        },
+        "assumedReturnScenarios": [
+          {
+            "meanReturnPerPlayerAssumption": 12.45,
+            "netConsumptionPerPlayer": 23.55,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 323.0765625,
+              "p10": 282.6,
+              "p50": 329.7,
+              "p90": 353.25,
+              "min": 282.6,
+              "max": 400.35
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 289.1109375,
+              "p10": 266.85,
+              "p50": 287.85,
+              "p90": 309.2,
+              "min": 262.85,
+              "max": 320.65
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 18,
+            "netConsumptionPerPlayer": 18,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 246.9375,
+              "p10": 216,
+              "p50": 252,
+              "p90": 270,
+              "min": 216,
+              "max": 306
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 365.25,
+              "p10": 339,
+              "p50": 360,
+              "p90": 392,
+              "min": 332,
+              "max": 415
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 24,
+            "netConsumptionPerPlayer": 12,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 164.625,
+              "p10": 144,
+              "p50": 168,
+              "p90": 180,
+              "min": 144,
+              "max": 204
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 447.5625,
+              "p10": 415,
+              "p50": 440,
+              "p90": 484,
+              "min": 404,
+              "max": 517
+            }
+          },
+          {
+            "meanReturnPerPlayerAssumption": 33,
+            "netConsumptionPerPlayer": 3,
+            "expectedBatchNetConsumption": {
+              "n": 32,
+              "mean": 41.15625,
+              "p10": 36,
+              "p50": 42,
+              "p90": 45,
+              "min": 36,
+              "max": 51
+            },
+            "expectedBalanceAfterOneBatch": {
+              "n": 32,
+              "mean": 571.03125,
+              "p10": 529,
+              "p50": 564,
+              "p90": 622,
+              "min": 512,
+              "max": 670
+            }
+          }
+        ],
+        "cases": [
+          {
+            "seed": 1,
+            "balanceAtGym8": 1169,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 637,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 133,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 307.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 385
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 469
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 595
+              }
+            ]
+          },
+          {
+            "seed": 2,
+            "balanceAtGym8": 1131,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 599,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 131,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 292.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 365
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 443
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 560
+              }
+            ]
+          },
+          {
+            "seed": 3,
+            "balanceAtGym8": 1157,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 625,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 295.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 373
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 457
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 583
+              }
+            ]
+          },
+          {
+            "seed": 4,
+            "balanceAtGym8": 1128,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 596,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 128,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 289.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 362
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 440
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 557
+              }
+            ]
+          },
+          {
+            "seed": 5,
+            "balanceAtGym8": 1101,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 569,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 101,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 262.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 335
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 413
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 530
+              }
+            ]
+          },
+          {
+            "seed": 6,
+            "balanceAtGym8": 1253,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 721,
+            "reservedCoupons": 100,
+            "prepaidCount": 17,
+            "prepaidCost": 612,
+            "afterPrepaymentBalance": 109,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 400.35,
+                "expectedBalanceAfterOneBatch": 320.65
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 306,
+                "expectedBalanceAfterOneBatch": 415
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 204,
+                "expectedBalanceAfterOneBatch": 517
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 51,
+                "expectedBalanceAfterOneBatch": 670
+              }
+            ]
+          },
+          {
+            "seed": 7,
+            "balanceAtGym8": 1165,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 633,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 129,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 303.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 381
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 465
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 591
+              }
+            ]
+          },
+          {
+            "seed": 8,
+            "balanceAtGym8": 1171,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 639,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 135,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 309.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 387
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 471
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 597
+              }
+            ]
+          },
+          {
+            "seed": 9,
+            "balanceAtGym8": 1160,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 628,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 124,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 298.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 376
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 460
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 586
+              }
+            ]
+          },
+          {
+            "seed": 10,
+            "balanceAtGym8": 1105,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 573,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 105,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 266.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 339
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 417
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 534
+              }
+            ]
+          },
+          {
+            "seed": 11,
+            "balanceAtGym8": 1125,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 593,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 125,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 286.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 359
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 437
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 554
+              }
+            ]
+          },
+          {
+            "seed": 12,
+            "balanceAtGym8": 1126,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 594,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 126,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 287.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 360
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 438
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 555
+              }
+            ]
+          },
+          {
+            "seed": 13,
+            "balanceAtGym8": 1194,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 662,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 122,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 308.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 392
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 482
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 617
+              }
+            ]
+          },
+          {
+            "seed": 14,
+            "balanceAtGym8": 1097,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 565,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 133,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 282.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 349
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 421
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 529
+              }
+            ]
+          },
+          {
+            "seed": 15,
+            "balanceAtGym8": 1199,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 667,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 127,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 313.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 397
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 487
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 622
+              }
+            ]
+          },
+          {
+            "seed": 16,
+            "balanceAtGym8": 1138,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 606,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 102,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 276.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 354
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 438
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 564
+              }
+            ]
+          },
+          {
+            "seed": 17,
+            "balanceAtGym8": 1091,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 559,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 127,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 276.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 343
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 415
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 523
+              }
+            ]
+          },
+          {
+            "seed": 18,
+            "balanceAtGym8": 1182,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 650,
+            "reservedCoupons": 100,
+            "prepaidCount": 15,
+            "prepaidCost": 540,
+            "afterPrepaymentBalance": 110,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 353.25,
+                "expectedBalanceAfterOneBatch": 296.75
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 270,
+                "expectedBalanceAfterOneBatch": 380
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 180,
+                "expectedBalanceAfterOneBatch": 470
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 45,
+                "expectedBalanceAfterOneBatch": 605
+              }
+            ]
+          },
+          {
+            "seed": 19,
+            "balanceAtGym8": 1208,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 676,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 100,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 299.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 388
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 484
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 628
+              }
+            ]
+          },
+          {
+            "seed": 20,
+            "balanceAtGym8": 1096,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 564,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 132,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 281.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 348
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 420
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 528
+              }
+            ]
+          },
+          {
+            "seed": 21,
+            "balanceAtGym8": 1080,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 548,
+            "reservedCoupons": 100,
+            "prepaidCount": 12,
+            "prepaidCost": 432,
+            "afterPrepaymentBalance": 116,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 282.6,
+                "expectedBalanceAfterOneBatch": 265.4
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 216,
+                "expectedBalanceAfterOneBatch": 332
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 144,
+                "expectedBalanceAfterOneBatch": 404
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 36,
+                "expectedBalanceAfterOneBatch": 512
+              }
+            ]
+          },
+          {
+            "seed": 22,
+            "balanceAtGym8": 1112,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 580,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 112,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 273.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 346
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 424
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 541
+              }
+            ]
+          },
+          {
+            "seed": 23,
+            "balanceAtGym8": 1218,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 686,
+            "reservedCoupons": 100,
+            "prepaidCount": 16,
+            "prepaidCost": 576,
+            "afterPrepaymentBalance": 110,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 376.8,
+                "expectedBalanceAfterOneBatch": 309.2
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 288,
+                "expectedBalanceAfterOneBatch": 398
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 192,
+                "expectedBalanceAfterOneBatch": 494
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 48,
+                "expectedBalanceAfterOneBatch": 638
+              }
+            ]
+          },
+          {
+            "seed": 24,
+            "balanceAtGym8": 1140,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 608,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 104,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 278.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 356
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 440
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 566
+              }
+            ]
+          },
+          {
+            "seed": 25,
+            "balanceAtGym8": 1117,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 585,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 117,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 278.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 351
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 429
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 546
+              }
+            ]
+          },
+          {
+            "seed": 26,
+            "balanceAtGym8": 1124,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 592,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 124,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 285.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 358
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 436
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 553
+              }
+            ]
+          },
+          {
+            "seed": 27,
+            "balanceAtGym8": 1101,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 569,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 101,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 262.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 335
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 413
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 530
+              }
+            ]
+          },
+          {
+            "seed": 28,
+            "balanceAtGym8": 1126,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 594,
+            "reservedCoupons": 100,
+            "prepaidCount": 13,
+            "prepaidCost": 468,
+            "afterPrepaymentBalance": 126,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 306.15000000000003,
+                "expectedBalanceAfterOneBatch": 287.84999999999997
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 234,
+                "expectedBalanceAfterOneBatch": 360
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 156,
+                "expectedBalanceAfterOneBatch": 438
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 39,
+                "expectedBalanceAfterOneBatch": 555
+              }
+            ]
+          },
+          {
+            "seed": 29,
+            "balanceAtGym8": 1157,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 625,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 121,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 295.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 373
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 457
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 583
+              }
+            ]
+          },
+          {
+            "seed": 30,
+            "balanceAtGym8": 1140,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 608,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 104,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 278.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 356
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 440
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 566
+              }
+            ]
+          },
+          {
+            "seed": 31,
+            "balanceAtGym8": 1139,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 607,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 103,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 277.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 355
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 439
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 565
+              }
+            ]
+          },
+          {
+            "seed": 32,
+            "balanceAtGym8": 1164,
+            "remainingPermanentCost": 532,
+            "afterPermanentBalance": 632,
+            "reservedCoupons": 100,
+            "prepaidCount": 14,
+            "prepaidCost": 504,
+            "afterPrepaymentBalance": 128,
+            "currentVacantTrainingSlots": 2,
+            "assumedReturns": [
+              {
+                "meanReturnPerPlayerAssumption": 12.45,
+                "netConsumptionPerPlayer": 23.55,
+                "expectedBatchNetConsumption": 329.7,
+                "expectedBalanceAfterOneBatch": 302.3
+              },
+              {
+                "meanReturnPerPlayerAssumption": 18,
+                "netConsumptionPerPlayer": 18,
+                "expectedBatchNetConsumption": 252,
+                "expectedBalanceAfterOneBatch": 380
+              },
+              {
+                "meanReturnPerPlayerAssumption": 24,
+                "netConsumptionPerPlayer": 12,
+                "expectedBatchNetConsumption": 168,
+                "expectedBalanceAfterOneBatch": 464
+              },
+              {
+                "meanReturnPerPlayerAssumption": 33,
+                "netConsumptionPerPlayer": 3,
+                "expectedBatchNetConsumption": 42,
+                "expectedBalanceAfterOneBatch": 590
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "assumedReturnScenarios": [
+    {
+      "meanReturnPerPlayerAssumption": 12.45,
+      "assumptionStatus": "not measured for selected recruits",
+      "netConsumptionPerPlayer": 23.55,
+      "netConsumptionFractionOfFee": 0.6541666666666667,
+      "all96ExpectedBatchNetConsumption": {
+        "n": 96,
+        "mean": 321.85,
+        "p10": 282.6,
+        "p50": 329.7,
+        "p90": 353.25,
+        "min": 282.6,
+        "max": 400.35
+      },
+      "all96ExpectedBalanceAfterOneBatch": {
+        "n": 96,
+        "mean": 288.51458333333335,
+        "p10": 267.85,
+        "p50": 287.3,
+        "p90": 308.75,
+        "min": 262.4,
+        "max": 332.2
+      }
+    },
+    {
+      "meanReturnPerPlayerAssumption": 18,
+      "assumptionStatus": "not measured for selected recruits",
+      "netConsumptionPerPlayer": 18,
+      "netConsumptionFractionOfFee": 0.5,
+      "all96ExpectedBatchNetConsumption": {
+        "n": 96,
+        "mean": 246,
+        "p10": 216,
+        "p50": 252,
+        "p90": 270,
+        "min": 216,
+        "max": 306
+      },
+      "all96ExpectedBalanceAfterOneBatch": {
+        "n": 96,
+        "mean": 364.36458333333337,
+        "p10": 339,
+        "p50": 362,
+        "p90": 388,
+        "min": 329,
+        "max": 421
+      }
+    },
+    {
+      "meanReturnPerPlayerAssumption": 24,
+      "assumptionStatus": "not measured for selected recruits",
+      "netConsumptionPerPlayer": 12,
+      "netConsumptionFractionOfFee": 0.3333333333333333,
+      "all96ExpectedBatchNetConsumption": {
+        "n": 96,
+        "mean": 164,
+        "p10": 144,
+        "p50": 168,
+        "p90": 180,
+        "min": 144,
+        "max": 204
+      },
+      "all96ExpectedBalanceAfterOneBatch": {
+        "n": 96,
+        "mean": 446.36458333333337,
+        "p10": 415,
+        "p50": 441,
+        "p90": 484,
+        "min": 401,
+        "max": 517
+      }
+    },
+    {
+      "meanReturnPerPlayerAssumption": 33,
+      "assumptionStatus": "not measured for selected recruits",
+      "netConsumptionPerPlayer": 3,
+      "netConsumptionFractionOfFee": 0.08333333333333333,
+      "all96ExpectedBatchNetConsumption": {
+        "n": 96,
+        "mean": 41,
+        "p10": 36,
+        "p50": 42,
+        "p90": 45,
+        "min": 36,
+        "max": 51
+      },
+      "all96ExpectedBalanceAfterOneBatch": {
+        "n": 96,
+        "mean": 569.3645833333334,
+        "p10": 527,
+        "p50": 564,
+        "p90": 622,
+        "min": 509,
+        "max": 670
+      }
+    }
+  ],
+  "rejectedExactHeightOnlyAlternative": {
+    "reason": "Existing free position preferences already cover most template height intervals; exact centimeters give no direct similarity bonus in the current matcher.",
+    "totalTemplates": 119,
+    "freePreferenceGuaranteedHeightEligibility": 107,
+    "legendTemplates": 19,
+    "freePreferenceGuaranteedLegendHeightEligibility": 18,
+    "largestExpectedFreeRecruitsForHeightEligibility": 1.5714285714285714,
+    "heightRows": [
+      {
+        "id": "caruso",
+        "name": "亚历克斯·卡鲁索",
+        "tier": "rotation",
+        "height": [
+          185,
+          201
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 0.6363636363636364,
+        "expectedFreeRecruits": 1.5714285714285714
+      },
+      {
+        "id": "beverley",
+        "name": "帕特里克·贝弗利",
+        "tier": "rotation",
+        "height": [
+          178,
+          193
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.9411764705882353,
+        "expectedFreeRecruits": 1.0625
+      },
+      {
+        "id": "duncan-robinson",
+        "name": "邓肯·罗宾逊",
+        "tier": "rotation",
+        "height": [
+          190,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "seth-curry",
+        "name": "塞斯·库里",
+        "tier": "rotation",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "tucker",
+        "name": "PJ·塔克",
+        "tier": "rotation",
+        "height": [
+          190,
+          208
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "mcgee",
+        "name": "贾维尔·麦基",
+        "tier": "rotation",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "conley",
+        "name": "迈克·康利",
+        "tier": "starter",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "mccollum",
+        "name": "CJ·麦科勒姆",
+        "tier": "starter",
+        "height": [
+          180,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.8823529411764706,
+        "expectedFreeRecruits": 1.1333333333333333
+      },
+      {
+        "id": "brook-lopez",
+        "name": "布鲁克·洛佩斯",
+        "tier": "starter",
+        "height": [
+          205,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "capela",
+        "name": "克林特·卡佩拉",
+        "tier": "starter",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "gordon",
+        "name": "阿隆·戈登",
+        "tier": "starter",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "harris",
+        "name": "托拜厄斯·哈里斯",
+        "tier": "starter",
+        "height": [
+          190,
+          210
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "irving",
+        "name": "凯里·欧文",
+        "tier": "star",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "paul-george",
+        "name": "保罗·乔治",
+        "tier": "star",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "butler",
+        "name": "吉米·巴特勒",
+        "tier": "star",
+        "height": [
+          190,
+          211
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "thompson",
+        "name": "克莱·汤普森",
+        "tier": "star",
+        "height": [
+          188,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "draymond",
+        "name": "德雷蒙德·格林",
+        "tier": "star",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "gobert",
+        "name": "鲁迪·戈贝尔",
+        "tier": "star",
+        "height": [
+          205,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "nash",
+        "name": "史蒂夫·纳什",
+        "tier": "superstar",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "bryant",
+        "name": "科比·布莱恩特",
+        "tier": "legend",
+        "height": [
+          185,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "durant",
+        "name": "凯文·杜兰特",
+        "tier": "legend",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "leonard",
+        "name": "科怀·伦纳德",
+        "tier": "superstar",
+        "height": [
+          190,
+          211
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "antetokounmpo",
+        "name": "扬尼斯·阿德托昆博",
+        "tier": "superstar",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jokic",
+        "name": "尼古拉·约基奇",
+        "tier": "superstar",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "curry",
+        "name": "斯蒂芬·库里",
+        "tier": "legend",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jordan",
+        "name": "迈克尔·乔丹",
+        "tier": "legend",
+        "height": [
+          185,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "lebron",
+        "name": "勒布朗·詹姆斯",
+        "tier": "legend",
+        "height": [
+          193,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "magic",
+        "name": "魔术师·约翰逊",
+        "tier": "legend",
+        "height": [
+          195,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "duncan",
+        "name": "蒂姆·邓肯",
+        "tier": "legend",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "oneal",
+        "name": "沙奎尔·奥尼尔",
+        "tier": "legend",
+        "height": [
+          205,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "korver",
+        "name": "凯尔·科沃尔",
+        "tier": "rotation",
+        "height": [
+          188,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "redick",
+        "name": "JJ·雷迪克",
+        "tier": "rotation",
+        "height": [
+          180,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.8823529411764706,
+        "expectedFreeRecruits": 1.1333333333333333
+      },
+      {
+        "id": "tony-allen",
+        "name": "托尼·阿伦",
+        "tier": "rotation",
+        "height": [
+          185,
+          201
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 0.6363636363636364,
+        "expectedFreeRecruits": 1.5714285714285714
+      },
+      {
+        "id": "battier",
+        "name": "肖恩·巴蒂尔",
+        "tier": "rotation",
+        "height": [
+          193,
+          212
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "bowen",
+        "name": "布鲁斯·鲍文",
+        "tier": "rotation",
+        "height": [
+          188,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "patty-mills",
+        "name": "帕蒂·米尔斯",
+        "tier": "rotation",
+        "height": [
+          178,
+          192
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.8823529411764706,
+        "expectedFreeRecruits": 1.1333333333333333
+      },
+      {
+        "id": "dell-curry",
+        "name": "戴尔·库里",
+        "tier": "rotation",
+        "height": [
+          183,
+          202
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 0.7272727272727273,
+        "expectedFreeRecruits": 1.375
+      },
+      {
+        "id": "livingston",
+        "name": "肖恩·利文斯顿",
+        "tier": "rotation",
+        "height": [
+          190,
+          209
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "haslem",
+        "name": "犹多尼斯·哈斯勒姆",
+        "tier": "rotation",
+        "height": [
+          195,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "birdman",
+        "name": "克里斯·安德森",
+        "tier": "rotation",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "steven-adams",
+        "name": "史蒂文·亚当斯",
+        "tier": "rotation",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "danny-green",
+        "name": "丹尼·格林",
+        "tier": "rotation",
+        "height": [
+          185,
+          205
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "joe-harris",
+        "name": "乔·哈里斯",
+        "tier": "rotation",
+        "height": [
+          188,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jose-calderon",
+        "name": "何塞·卡尔德隆",
+        "tier": "rotation",
+        "height": [
+          178,
+          199
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jrue",
+        "name": "朱·霍勒迪",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "rondo",
+        "name": "拉简·隆多",
+        "tier": "starter",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "rubio",
+        "name": "里基·卢比奥",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "lowry",
+        "name": "凯尔·洛瑞",
+        "tier": "starter",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "kemba",
+        "name": "肯巴·沃克",
+        "tier": "starter",
+        "height": [
+          178,
+          193
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.9411764705882353,
+        "expectedFreeRecruits": 1.0625
+      },
+      {
+        "id": "lou-williams",
+        "name": "路易斯·威廉姆斯",
+        "tier": "starter",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jason-terry",
+        "name": "杰森·特里",
+        "tier": "starter",
+        "height": [
+          178,
+          199
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "ariza",
+        "name": "特雷沃·阿里扎",
+        "tier": "starter",
+        "height": [
+          193,
+          212
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "iguodala",
+        "name": "安德烈·伊戈达拉",
+        "tier": "starter",
+        "height": [
+          190,
+          210
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "shawn-marion",
+        "name": "肖恩·马里昂",
+        "tier": "starter",
+        "height": [
+          193,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "millsap",
+        "name": "保罗·米尔萨普",
+        "tier": "starter",
+        "height": [
+          193,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "ibaka",
+        "name": "赛尔吉·伊巴卡",
+        "tier": "starter",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "deandre-jordan",
+        "name": "德安德烈·乔丹",
+        "tier": "starter",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "valanciunas",
+        "name": "约纳斯·瓦兰丘纳斯",
+        "tier": "starter",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "trae",
+        "name": "特雷·杨",
+        "tier": "star",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "derrick-rose",
+        "name": "德里克·罗斯",
+        "tier": "star",
+        "height": [
+          178,
+          199
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "tony-parker",
+        "name": "托尼·帕克",
+        "tier": "star",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "gilbert-arenas",
+        "name": "吉尔伯特·阿里纳斯",
+        "tier": "star",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "booker",
+        "name": "德文·布克",
+        "tier": "star",
+        "height": [
+          185,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "donovan-mitchell",
+        "name": "多诺万·米切尔",
+        "tier": "star",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "bradley-beal",
+        "name": "布拉德利·比尔",
+        "tier": "star",
+        "height": [
+          183,
+          204
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 0.9090909090909091,
+        "expectedFreeRecruits": 1.1
+      },
+      {
+        "id": "derozan",
+        "name": "德马尔·德罗赞",
+        "tier": "star",
+        "height": [
+          188,
+          210
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "grant-hill",
+        "name": "格兰特·希尔",
+        "tier": "star",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "peja",
+        "name": "佩贾·斯托亚科维奇",
+        "tier": "star",
+        "height": [
+          195,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "kevin-love",
+        "name": "凯文·乐福",
+        "tier": "star",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "aldridge",
+        "name": "拉马库斯·阿尔德里奇",
+        "tier": "star",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "chris-bosh",
+        "name": "克里斯·波什",
+        "tier": "star",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "ben-wallace",
+        "name": "本·华莱士",
+        "tier": "star",
+        "height": [
+          195,
+          215
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "lillard",
+        "name": "达米安·利拉德",
+        "tier": "superstar",
+        "height": [
+          178,
+          199
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "chris-paul",
+        "name": "克里斯·保罗",
+        "tier": "superstar",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "westbrook",
+        "name": "拉塞尔·威斯布鲁克",
+        "tier": "superstar",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "harden",
+        "name": "詹姆斯·哈登",
+        "tier": "superstar",
+        "height": [
+          183,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "wade",
+        "name": "德维恩·韦德",
+        "tier": "superstar",
+        "height": [
+          183,
+          205
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "iverson",
+        "name": "阿伦·艾弗森",
+        "tier": "superstar",
+        "height": [
+          178,
+          193
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.9411764705882353,
+        "expectedFreeRecruits": 1.0625
+      },
+      {
+        "id": "mcgrady",
+        "name": "特雷西·麦克格雷迪",
+        "tier": "superstar",
+        "height": [
+          190,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "vince-carter",
+        "name": "文斯·卡特",
+        "tier": "superstar",
+        "height": [
+          185,
+          208
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "paul-pierce",
+        "name": "保罗·皮尔斯",
+        "tier": "superstar",
+        "height": [
+          190,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "carmelo",
+        "name": "卡梅隆·安东尼",
+        "tier": "superstar",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "nowitzki",
+        "name": "德克·诺维茨基",
+        "tier": "superstar",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "pau-gasol",
+        "name": "保罗·加索尔",
+        "tier": "star",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "embiid",
+        "name": "乔尔·恩比德",
+        "tier": "superstar",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "anthony-davis",
+        "name": "安东尼·戴维斯",
+        "tier": "superstar",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "oscar",
+        "name": "奥斯卡·罗伯特森",
+        "tier": "legend",
+        "height": [
+          178,
+          204
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "isiah",
+        "name": "伊赛亚·托马斯",
+        "tier": "legend",
+        "height": [
+          178,
+          195
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "stockton",
+        "name": "约翰·斯托克顿",
+        "tier": "legend",
+        "height": [
+          178,
+          198
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jerry-west",
+        "name": "杰里·韦斯特",
+        "tier": "legend",
+        "height": [
+          180,
+          203
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 0.8823529411764706,
+        "expectedFreeRecruits": 1.1333333333333333
+      },
+      {
+        "id": "ray-allen",
+        "name": "雷·阿伦",
+        "tier": "superstar",
+        "height": [
+          183,
+          207
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "reggie-miller",
+        "name": "雷吉·米勒",
+        "tier": "superstar",
+        "height": [
+          190,
+          211
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "bird",
+        "name": "拉里·伯德",
+        "tier": "legend",
+        "height": [
+          195,
+          215
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "erving",
+        "name": "朱利叶斯·欧文",
+        "tier": "legend",
+        "height": [
+          190,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "pippen",
+        "name": "斯科蒂·皮蓬",
+        "tier": "superstar",
+        "height": [
+          193,
+          214
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "garnett",
+        "name": "凯文·加内特",
+        "tier": "legend",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "karl-malone",
+        "name": "卡尔·马龙",
+        "tier": "legend",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "hakeem",
+        "name": "哈基姆·奥拉朱旺",
+        "tier": "legend",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "kareem",
+        "name": "卡里姆·阿卜杜尔贾巴尔",
+        "tier": "legend",
+        "height": [
+          205,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "wilt",
+        "name": "威尔特·张伯伦",
+        "tier": "legend",
+        "height": [
+          205,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "shannon-brown",
+        "name": "香农·布朗",
+        "tier": "rotation",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "corey-maggette",
+        "name": "科里·马盖蒂",
+        "tier": "starter",
+        "height": [
+          185,
+          210
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "monta-ellis",
+        "name": "蒙塔·埃利斯",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "al-jefferson",
+        "name": "艾尔·杰弗森",
+        "tier": "star",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "andre-miller",
+        "name": "安德烈·米勒",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "steve-francis",
+        "name": "史蒂夫·弗朗西斯",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "boris-diaw",
+        "name": "鲍里斯·迪奥",
+        "tier": "starter",
+        "height": [
+          193,
+          213
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "greg-monroe",
+        "name": "格雷格·门罗",
+        "tier": "starter",
+        "height": [
+          203,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "lamar-odom",
+        "name": "拉马尔·奥多姆",
+        "tier": "starter",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "hedo-turkoglu",
+        "name": "希度·特科格鲁",
+        "tier": "starter",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "toni-kukoc",
+        "name": "托尼·库科奇",
+        "tier": "starter",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "rashard-lewis",
+        "name": "拉沙德·刘易斯",
+        "tier": "starter",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "michael-beasley",
+        "name": "迈克尔·比斯利",
+        "tier": "starter",
+        "height": [
+          193,
+          218
+        ],
+        "bestFreePreference": "forward",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "amare-stoudemire",
+        "name": "阿玛雷·斯塔德迈尔",
+        "tier": "star",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "joakim-noah",
+        "name": "乔金·诺阿",
+        "tier": "star",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "porzingis",
+        "name": "克里斯塔普斯·波尔津吉斯",
+        "tier": "star",
+        "height": [
+          208,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 0.8461538461538461,
+        "expectedFreeRecruits": 1.1818181818181819
+      },
+      {
+        "id": "gallinari",
+        "name": "达尼罗·加里纳利",
+        "tier": "starter",
+        "height": [
+          198,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "jonathan-isaac",
+        "name": "乔纳森·艾萨克",
+        "tier": "starter",
+        "height": [
+          200,
+          218
+        ],
+        "bestFreePreference": "center",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      },
+      {
+        "id": "eric-gordon",
+        "name": "埃里克·戈登",
+        "tier": "starter",
+        "height": [
+          178,
+          201
+        ],
+        "bestFreePreference": "guard",
+        "freeHeightPassProbability": 1,
+        "expectedFreeRecruits": 1
+      }
+    ]
+  },
+  "risksAndRequiredValidation": [
+    "Birth quality improves within the existing range; this is not a guarantee of a chosen real-player template or a claim that every selected player is better for all targets.",
+    "The22-point expected starting increase can improve template access, but may increase99-stat saturation and reduce net-growth-based fame at the same finished stats; shadow testing must measure growth waste and fame as well as tiers and time.",
+    "Higher starting stats do not alter innate growth bias, height eligibility, template stability rules or experience requirements.",
+    "Free repeated screening still exists. The paid option monetizes avoided screening and targeted starting quality; actual willingness to buy has not been measured.",
+    "If the earned-template retention rule selects an earlier same-tier player, better stats alone may not unlock the desired missing template; test target-template identities, not only highest tier.",
+    "A cost above the current33-credit ceiling prevents direct coupon arbitrage for this paid recruit, but does not prove that aggregate late-game currency stops accumulating.",
+    "12.45/18/24/33 are transparent repayment assumptions. Only actual controlled paid-versus-free growth experiments can estimate the selected-recruit return distribution.",
+    "36 must be rechecked if future template, training, cooperation or equipment rewards raise the maximum recommendation above33."
+  ]
+}

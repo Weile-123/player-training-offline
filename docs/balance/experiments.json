@@ -1,7 +1,11 @@
 {
-  "date": "2026-11-12",
+  "date": "2026-11-13",
   "currentBalanceVersion": 3,
   "currentBaseStamina": 20,
+  "currentEquipmentPricingVersion": 5,
+  "currentEquipmentCatalogVersion": 3,
+  "offlineRulesVersion": 2,
+  "currentEconomyVersion": 5,
   "experiments": [
     {
       "file": "baseline-v1.json",
@@ -47,8 +51,8 @@
     },
     {
       "file": "gym-balance.json",
-      "purpose": "Current 20-stamina balance, six preconfigured gear scenarios",
-      "status": "current",
+      "purpose": "20-stamina calibration before the November 13 equipment repricing; XP and fixed gear effects are unchanged, recorded costs are historical",
+      "status": "historical-prices",
       "balanceVersion": 3,
       "baseStamina": 20,
       "sampleSize": 100,
@@ -56,8 +60,8 @@
     },
     {
       "file": "economy-current.json",
-      "purpose": "Current 20-stamina economy, five from-zero investment policies",
-      "status": "current",
+      "purpose": "20-stamina economy before the November 13 equipment repricing and offline project release",
+      "status": "historical",
       "balanceVersion": 3,
       "baseStamina": 20,
       "sampleSize": 10,
@@ -68,7 +72,7 @@
     {
       "file": "economy-endgame-v3.json",
       "purpose": "Single-seed from-zero legal-action proof that gym level 8 and its quality gates are reachable",
-      "status": "current-reachability-proof",
+      "status": "historical-prices-reachability-proof",
       "balanceVersion": 3,
       "baseStamina": 20,
       "sampleSize": 1,
@@ -79,17 +83,132 @@
     {
       "file": "endgame-completion-v3.json",
       "purpose": "Legal-action completion audit from the earned gym-8 save: all 94 equipment, five available project caps and eight individual automatic trainees",
-      "status": "current-completion-proof",
+      "status": "historical-prices-completion-proof",
       "baseStamina": 20,
       "sampleSize": 1,
       "source": "Same seed-1 endgame save; no injected currency or additional recommendation income"
+    },
+    {
+      "file": "equipment-pricing-v4.json",
+      "purpose": "Complete 94-item effects, duplication groups and strength-based old/new coupon prices",
+      "status": "historical-full-94-item-catalog",
+      "equipmentPricingVersion": 4,
+      "reproduction": "Historical full catalog; current export now writes equipment-deduplicated.json"
+    },
+    {
+      "file": "equipment-deduplicated.json",
+      "purpose": "Historical V2 44-item catalog before full V3 rewrite",
+      "status": "historical-before-equipment-v3",
+      "equipmentCatalogVersion": 2,
+      "reproduction": "Frozen V2 snapshot; current exporter writes equipment-v3-catalog.json"
+    },
+    {
+      "file": "economy-equipment-v4.json",
+      "purpose": "Current equipment prices, unchanged rewards, five continuous-management online policies; no offline income",
+      "status": "historical-v4-online-policy-baseline",
+      "baseStamina": 20,
+      "sampleSize": 10,
+      "policies": 5,
+      "horizonSeconds": 3600,
+      "reproduction": "Historical V4 parameters; changing the output label does not restore old rewards, automatic XP or installation semantics"
+    },
+    {
+      "file": "automatic-efficiency-v5.json",
+      "purpose": "Actual per-shot automatic XP benefit under constrained and mature supply, six project levels",
+      "status": "historical-before-equipment-v3",
+      "offlineRulesVersion": 2,
+      "reproduction": "node scripts/run-gym-reward-comparison.mjs efficiency"
+    },
+    {
+      "file": "economy-v5-control-auto.json",
+      "purpose": "Old rewards and basic-cooperation fame, current automatic XP and buy-install semantics",
+      "status": "historical-before-equipment-v3",
+      "policies": 8,
+      "sampleSize": 10,
+      "horizonSeconds": 3600,
+      "reproduction": "node scripts/run-gym-reward-comparison.mjs with GYM_ECONOMY_SEEDS=10, GYM_ECONOMY_SECONDS=3600, GYM_ECONOMY_REWARD_PROFILE=v4-control and GYM_ECONOMY_LABEL=v5-control-auto"
+    },
+    {
+      "file": "economy-v5-reward-auto.json",
+      "purpose": "Current four reward milestones, basic-cooperation fame10, current automatic XP and buy-install semantics",
+      "status": "historical-before-equipment-v3",
+      "policies": 8,
+      "sampleSize": 10,
+      "horizonSeconds": 3600,
+      "reproduction": "node scripts/run-gym-reward-comparison.mjs with GYM_ECONOMY_SEEDS=10, GYM_ECONOMY_SECONDS=3600, GYM_ECONOMY_REWARD_PROFILE=current and GYM_ECONOMY_LABEL=v5-reward-auto"
+    },
+    {
+      "file": "equipment-review-current44.json",
+      "purpose": "Historical controlled V2 equipment review before V3 rewrite",
+      "status": "historical",
+      "equipmentCatalogVersion": 2
+    },
+    {
+      "file": "equipment-v3-catalog.json",
+      "purpose": "Current 35-item library with paired original-game names/art, stable logical IDs, unchanged costs/effects",
+      "status": "current-catalog",
+      "equipmentCatalogVersion": 3,
+      "reproduction": "node scripts/export-gym-equipment.mjs",
+      "artVersion": 1
+    },
+    {
+      "file": "equipment-v3-balance.json",
+      "purpose": "Current V3 staged supply, constrained budgets, level/template nodes, six specialization pairs and business-equipment eligibility",
+      "status": "current-staged-equipment",
+      "equipmentCatalogVersion": 3,
+      "sampleSize": 64,
+      "growthTraces": 3008,
+      "actualSimulatedShots": 1522948,
+      "reproduction": "EQUIPMENT_BALANCE_SEEDS=64 node scripts/run-gym-equipment-balance-v3.mjs"
+    },
+    {
+      "file": "equipment-v3-offline-saturation.json",
+      "purpose": "Current V3 extra offline-duration value versus early level-99 saturation",
+      "status": "current-offline-saturation",
+      "equipmentCatalogVersion": 3,
+      "sampleSize": 16,
+      "settlements": 128,
+      "actualSimulatedShots": 303588,
+      "reproduction": "node scripts/run-gym-equipment-balance-v3.mjs offline"
+    },
+    {
+      "file": "equipment-v3-journey.json",
+      "purpose": "Current V3 legal from-zero continuous management, 4 investment heuristics, integer-brand and full-course cooperation eligibility",
+      "status": "current-from-zero",
+      "equipmentCatalogVersion": 3,
+      "sampleSize": 32,
+      "policies": 4,
+      "horizonSeconds": 86400,
+      "reproduction": "GYM_JOURNEY_SEEDS=32 node scripts/run-gym-equipment-v3-journey.mjs"
+    },
+    {
+      "file": "equipment-targeted-recruitment-proposal.json",
+      "purpose": "Proposal-only 36-coupon selected recruitment: payment capacity from 96 actual endgame balances, mathematical payout bound and assumption scenarios",
+      "status": "proposal-not-implemented",
+      "sampleSize": 96,
+      "financialTransactionImplemented": false
+    },
+    {
+      "file": "selected-recruitment-shadow.json",
+      "purpose": "Controlled proposal-only shadow of high-birth direction stats using original engine, 128 paired seeds × 3 plans; no fee transaction",
+      "status": "proposal-shadow-not-implemented",
+      "sampleSize": 128,
+      "plans": 3,
+      "traces": 768,
+      "actualSimulatedShots": 208776,
+      "financialTransactionImplemented": false
     }
   ],
   "notes": [
     "balanceVersion 3 adds the 20-stamina save migration; the version does not distinguish every historical economic experiment.",
-    "The current economy dataset contains 50 one-hour trajectories. The endgame proof is one additional trajectory, not a population completion-time estimate.",
+    "V4 repricing has 50 historical one-hour trajectories. Current V5 has two paired groups of eight policies and ten seeds, 160 one-hour trajectories total. The old-price endgame proof is not a current population completion-time estimate.",
     "The completion audit continues the same endgame trajectory and is not an independent sample.",
     "Instant management requires active play; it is not unattended automatic revenue.",
-    "Raw settled payouts and unclaimed active-player valuations are separate."
-  ]
+    "Raw settled payouts and unclaimed active-player valuations are separate.",
+    "V3 full equipment rewrite supersedes V2 44-item and V4/V5 old-equipment economic outputs; new staged fixtures do not measure acquisition time.",
+    "V3 primary and offline saturation tests total 1,826,536 real shots excluding smoke/rechecks and from-zero journeys.",
+    "From-zero milestone time statistics exclude non-attainers; 19 of 32 no-equipment runs were right-censored at 24 hours, not counted as successful completions.",
+    "Original name/art reuse changes presentation only; the V3 balance fingerprint and 306-coupon prices are unchanged. Selected recruitment is a separate unimplemented proposal; its shadow results are not included in current-game balance counts."
+  ],
+  "currentEquipmentArtVersion": 1
 }

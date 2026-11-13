@@ -1,0 +1,153 @@
+{
+  "date": "2026-11-13",
+  "source": "actual-offline-training-engine",
+  "seed": 17,
+  "note": "Preconfigured single-player supply fixtures, not from-zero acquisition; same RNG per comparison. No recommendation/income.",
+  "formula": "automatic XP per valid shot = base outcome XP + automatic project level; manual unchanged",
+  "samples": [
+    {
+      "supply": "base",
+      "automaticLevel": 0,
+      "intervalMs": 2000,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 1984,
+      "halfHourLevel": 20,
+      "expectedXpPerShot": 11.6
+    },
+    {
+      "supply": "base",
+      "automaticLevel": 1,
+      "intervalMs": 1800,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 2161,
+      "halfHourLevel": 21,
+      "expectedXpPerShot": 12.6
+    },
+    {
+      "supply": "base",
+      "automaticLevel": 2,
+      "intervalMs": 1600,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 2338,
+      "halfHourLevel": 22,
+      "expectedXpPerShot": 13.6
+    },
+    {
+      "supply": "base",
+      "automaticLevel": 3,
+      "intervalMs": 1400,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 2515,
+      "halfHourLevel": 22,
+      "expectedXpPerShot": 14.6
+    },
+    {
+      "supply": "base",
+      "automaticLevel": 4,
+      "intervalMs": 1200,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 2692,
+      "halfHourLevel": 23,
+      "expectedXpPerShot": 15.6
+    },
+    {
+      "supply": "base",
+      "automaticLevel": 5,
+      "intervalMs": 1000,
+      "capacity": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "halfHourShots": 177,
+      "halfHourExperience": 2869,
+      "halfHourLevel": 24,
+      "expectedXpPerShot": 16.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 0,
+      "intervalMs": 2000,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 900,
+      "halfHourExperience": 10408,
+      "halfHourLevel": 43,
+      "expectedXpPerShot": 11.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 1,
+      "intervalMs": 1800,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 1000,
+      "halfHourExperience": 12584,
+      "halfHourLevel": 47,
+      "expectedXpPerShot": 12.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 2,
+      "intervalMs": 1600,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 1125,
+      "halfHourExperience": 15290,
+      "halfHourLevel": 51,
+      "expectedXpPerShot": 13.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 3,
+      "intervalMs": 1400,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 1285,
+      "halfHourExperience": 18791,
+      "halfHourLevel": 55,
+      "expectedXpPerShot": 14.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 4,
+      "intervalMs": 1200,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 1485,
+      "halfHourExperience": 23204,
+      "halfHourLevel": 60,
+      "expectedXpPerShot": 15.6
+    },
+    {
+      "supply": "mature",
+      "automaticLevel": 5,
+      "intervalMs": 1000,
+      "capacity": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 8,
+      "halfHourShots": 1487,
+      "halfHourExperience": 24723,
+      "halfHourLevel": 62,
+      "expectedXpPerShot": 16.6
+    }
+  ]
+}

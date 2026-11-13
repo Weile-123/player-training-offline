@@ -1,0 +1,1660 @@
+{
+  "note": "Controlled preconfigured level0 single-player supply tests, not from-zero acquisition time; no income/no recommendation during catch-up",
+  "profiles": [
+    {
+      "config": {
+        "gym": 2,
+        "projects": {
+          "endurance": 0,
+          "recovery": 0,
+          "recruitment": 0,
+          "equipment": 0,
+          "automation": 0,
+          "offline": 0
+        },
+        "gears": [],
+        "cap": 20,
+        "recoverySeconds": 20,
+        "courseRecovery": 4,
+        "autoSeconds": 2
+      },
+      "table": [
+        {
+          "hours": 0.5,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 20,
+              "shots": 177,
+              "stats": {
+                "three": 49,
+                "mid": 99,
+                "drive": 52,
+                "inside": 66,
+                "handle": 81,
+                "defense": 61
+              },
+              "fullStats": 1,
+              "statSum": 408,
+              "template": "andre-miller",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 1800000
+        },
+        {
+          "hours": 1,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 27,
+              "shots": 327,
+              "stats": {
+                "three": 54,
+                "mid": 99,
+                "drive": 56,
+                "inside": 85,
+                "handle": 94,
+                "defense": 66
+              },
+              "fullStats": 1,
+              "statSum": 454,
+              "template": "andre-miller",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 3600000
+        },
+        {
+          "hours": 2,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 37,
+              "shots": 627,
+              "stats": {
+                "three": 57,
+                "mid": 99,
+                "drive": 59,
+                "inside": 99,
+                "handle": 99,
+                "defense": 79
+              },
+              "fullStats": 3,
+              "statSum": 492,
+              "template": "chris-paul",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 7200000
+        },
+        {
+          "hours": 4,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 49,
+              "shots": 1227,
+              "stats": {
+                "three": 65,
+                "mid": 99,
+                "drive": 66,
+                "inside": 99,
+                "handle": 99,
+                "defense": 88
+              },
+              "fullStats": 3,
+              "statSum": 516,
+              "template": "chris-paul",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 14400000
+        },
+        {
+          "hours": 8,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 65,
+              "shots": 2427,
+              "stats": {
+                "three": 81,
+                "mid": 99,
+                "drive": 80,
+                "inside": 99,
+                "handle": 99,
+                "defense": 94
+              },
+              "fullStats": 3,
+              "statSum": 552,
+              "template": "jerry-west",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 28800000
+        },
+        {
+          "hours": 12,
+          "players": [
+            {
+              "id": "gym-p1",
+              "level": 77,
+              "shots": 3627,
+              "stats": {
+                "three": 83,
+                "mid": 99,
+                "drive": 87,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 4,
+              "statSum": 566,
+              "template": "jerry-west",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 43200000
+        }
+      ],
+      "milestones": {
+        "marks": {
+          "gym-p1": {
+            "full4": {
+              "seconds": 34848,
+              "level": 71,
+              "shots": 2933
+            },
+            "full5": null,
+            "full6": null,
+            "l25": {
+              "seconds": 2862,
+              "shots": 267,
+              "fullStats": 1,
+              "stats": {
+                "three": 52,
+                "mid": 99,
+                "drive": 55,
+                "inside": 78,
+                "handle": 89,
+                "defense": 65
+              }
+            },
+            "l30": {
+              "seconds": 4342,
+              "shots": 389,
+              "fullStats": 2,
+              "stats": {
+                "three": 55,
+                "mid": 99,
+                "drive": 58,
+                "inside": 91,
+                "handle": 99,
+                "defense": 69
+              }
+            },
+            "l50": {
+              "seconds": 14564,
+              "shots": 1241,
+              "fullStats": 3,
+              "stats": {
+                "three": 67,
+                "mid": 99,
+                "drive": 66,
+                "inside": 99,
+                "handle": 99,
+                "defense": 89
+              }
+            },
+            "l99": null,
+            "zeroGrowthLevels": 9
+          }
+        },
+        "final": [
+          {
+            "id": "gym-p1",
+            "level": 77,
+            "shots": 3627,
+            "stats": {
+              "three": 83,
+              "mid": 99,
+              "drive": 87,
+              "inside": 99,
+              "handle": 99,
+              "defense": 99
+            },
+            "fullStats": 4,
+            "statSum": 566,
+            "template": "jerry-west",
+            "auto": true,
+            "stamina": 0
+          }
+        ],
+        "total": 3627
+      }
+    },
+    {
+      "config": {
+        "gym": 6,
+        "projects": {
+          "endurance": 6,
+          "recovery": 6,
+          "recruitment": 5,
+          "equipment": 4,
+          "automation": 5,
+          "offline": 5
+        },
+        "gears": [
+          "relic_085",
+          "relic_017",
+          "relic_075",
+          "relic_080",
+          "relic_090"
+        ],
+        "cap": 70,
+        "recoverySeconds": 10,
+        "courseRecovery": 8,
+        "autoSeconds": 1
+      },
+      "table": [
+        {
+          "hours": 0.5,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 49,
+              "shots": 1209,
+              "stats": {
+                "three": 99,
+                "mid": 89,
+                "drive": 99,
+                "inside": 99,
+                "handle": 97,
+                "defense": 99
+              },
+              "fullStats": 4,
+              "statSum": 582,
+              "template": "erving",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 1800000
+        },
+        {
+          "hours": 1,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 62,
+              "shots": 2109,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 3600000
+        },
+        {
+          "hours": 2,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 79,
+              "shots": 3909,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 7200000
+        },
+        {
+          "hours": 4,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 70
+            }
+          ],
+          "creditedMs": 14400000
+        },
+        {
+          "hours": 8,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 70
+            }
+          ],
+          "creditedMs": 28800000
+        },
+        {
+          "hours": 12,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 70
+            }
+          ],
+          "creditedMs": 43200000
+        }
+      ],
+      "milestones": {
+        "marks": {
+          "gym-p2": {
+            "full4": {
+              "seconds": 1643,
+              "level": 48,
+              "shots": 1132
+            },
+            "full5": {
+              "seconds": 2106,
+              "level": 52,
+              "shots": 1365
+            },
+            "full6": {
+              "seconds": 3401,
+              "level": 61,
+              "shots": 2010
+            },
+            "l25": {
+              "seconds": 267,
+              "shots": 267,
+              "fullStats": 1,
+              "stats": {
+                "three": 84,
+                "mid": 72,
+                "drive": 99,
+                "inside": 67,
+                "handle": 64,
+                "defense": 70
+              }
+            },
+            "l30": {
+              "seconds": 389,
+              "shots": 389,
+              "fullStats": 1,
+              "stats": {
+                "three": 88,
+                "mid": 73,
+                "drive": 99,
+                "inside": 75,
+                "handle": 70,
+                "defense": 77
+              }
+            },
+            "l50": {
+              "seconds": 1862,
+              "shots": 1241,
+              "fullStats": 4,
+              "stats": {
+                "three": 99,
+                "mid": 89,
+                "drive": 99,
+                "inside": 99,
+                "handle": 97,
+                "defense": 99
+              }
+            },
+            "l99": {
+              "seconds": 12969,
+              "shots": 6798,
+              "fullStats": 6,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              }
+            },
+            "zeroGrowthLevels": 40
+          }
+        },
+        "final": [
+          {
+            "id": "gym-p2",
+            "level": 99,
+            "shots": 6798,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 99,
+              "handle": 99,
+              "defense": 99
+            },
+            "fullStats": 6,
+            "statSum": 594,
+            "template": "erving",
+            "auto": false,
+            "stamina": 0
+          }
+        ],
+        "total": 6798
+      }
+    },
+    {
+      "config": {
+        "gym": 8,
+        "projects": {
+          "endurance": 8,
+          "recovery": 8,
+          "recruitment": 6,
+          "equipment": 4,
+          "automation": 5,
+          "offline": 5
+        },
+        "gears": [
+          "relic_085",
+          "relic_017",
+          "relic_075",
+          "relic_080",
+          "relic_090"
+        ],
+        "cap": 80,
+        "recoverySeconds": 8,
+        "courseRecovery": 8,
+        "autoSeconds": 1
+      },
+      "table": [
+        {
+          "hours": 0.5,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 53,
+              "shots": 1487,
+              "stats": {
+                "three": 99,
+                "mid": 92,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 5,
+              "statSum": 587,
+              "template": "erving",
+              "auto": true,
+              "stamina": 1
+            }
+          ],
+          "creditedMs": 1800000
+        },
+        {
+          "hours": 1,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 67,
+              "shots": 2609,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 3600000
+        },
+        {
+          "hours": 2,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 86,
+              "shots": 4859,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": true,
+              "stamina": 0
+            }
+          ],
+          "creditedMs": 7200000
+        },
+        {
+          "hours": 4,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 80
+            }
+          ],
+          "creditedMs": 14400000
+        },
+        {
+          "hours": 8,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 80
+            }
+          ],
+          "creditedMs": 28800000
+        },
+        {
+          "hours": 12,
+          "players": [
+            {
+              "id": "gym-p2",
+              "level": 99,
+              "shots": 6798,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              },
+              "fullStats": 6,
+              "statSum": 594,
+              "template": "erving",
+              "auto": false,
+              "stamina": 80
+            }
+          ],
+          "creditedMs": 43200000
+        }
+      ],
+      "milestones": {
+        "marks": {
+          "gym-p2": {
+            "full4": {
+              "seconds": 1141,
+              "level": 47,
+              "shots": 1074
+            },
+            "full5": {
+              "seconds": 1508,
+              "level": 51,
+              "shots": 1303
+            },
+            "full6": {
+              "seconds": 2515,
+              "level": 60,
+              "shots": 1932
+            },
+            "l25": {
+              "seconds": 267,
+              "shots": 267,
+              "fullStats": 1,
+              "stats": {
+                "three": 85,
+                "mid": 73,
+                "drive": 99,
+                "inside": 68,
+                "handle": 65,
+                "defense": 71
+              }
+            },
+            "l30": {
+              "seconds": 389,
+              "shots": 389,
+              "fullStats": 1,
+              "stats": {
+                "three": 89,
+                "mid": 74,
+                "drive": 99,
+                "inside": 76,
+                "handle": 71,
+                "defense": 78
+              }
+            },
+            "l50": {
+              "seconds": 1410,
+              "shots": 1241,
+              "fullStats": 4,
+              "stats": {
+                "three": 99,
+                "mid": 90,
+                "drive": 99,
+                "inside": 99,
+                "handle": 98,
+                "defense": 99
+              }
+            },
+            "l99": {
+              "seconds": 10297,
+              "shots": 6798,
+              "fullStats": 6,
+              "stats": {
+                "three": 99,
+                "mid": 99,
+                "drive": 99,
+                "inside": 99,
+                "handle": 99,
+                "defense": 99
+              }
+            },
+            "zeroGrowthLevels": 42
+          }
+        },
+        "final": [
+          {
+            "id": "gym-p2",
+            "level": 99,
+            "shots": 6798,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 99,
+              "handle": 99,
+              "defense": 99
+            },
+            "fullStats": 6,
+            "statSum": 594,
+            "template": "erving",
+            "auto": false,
+            "stamina": 1
+          }
+        ],
+        "total": 6798
+      }
+    }
+  ],
+  "tenSeedG6": [
+    {
+      "seed": 1,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 1209,
+            "level": 44,
+            "shots": 918
+          },
+          "full5": {
+            "seconds": 10882,
+            "level": 93,
+            "shots": 5751
+          },
+          "full6": null,
+          "l25": {
+            "seconds": 265,
+            "shots": 265,
+            "fullStats": 1,
+            "stats": {
+              "three": 81,
+              "mid": 46,
+              "drive": 99,
+              "inside": 85,
+              "handle": 48,
+              "defense": 78
+            }
+          },
+          "l30": {
+            "seconds": 392,
+            "shots": 392,
+            "fullStats": 1,
+            "stats": {
+              "three": 85,
+              "mid": 54,
+              "drive": 99,
+              "inside": 96,
+              "handle": 52,
+              "defense": 84
+            }
+          },
+          "l50": {
+            "seconds": 1851,
+            "shots": 1239,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 68,
+              "drive": 99,
+              "inside": 99,
+              "handle": 71,
+              "defense": 99
+            }
+          },
+          "l99": {
+            "seconds": 12948,
+            "shots": 6787,
+            "fullStats": 5,
+            "stats": {
+              "three": 99,
+              "mid": 91,
+              "drive": 99,
+              "inside": 99,
+              "handle": 99,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 16
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6787,
+          "stats": {
+            "three": 99,
+            "mid": 91,
+            "drive": 99,
+            "inside": 99,
+            "handle": 99,
+            "defense": 99
+          },
+          "fullStats": 5,
+          "statSum": 586,
+          "template": "stockton",
+          "auto": false,
+          "stamina": 1
+        }
+      ],
+      "total": 6787
+    },
+    {
+      "seed": 2,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 1831,
+            "level": 50,
+            "shots": 1229
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 263,
+            "shots": 263,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 63,
+              "drive": 99,
+              "inside": 77,
+              "handle": 40,
+              "defense": 69
+            }
+          },
+          "l30": {
+            "seconds": 385,
+            "shots": 385,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 64,
+              "drive": 99,
+              "inside": 82,
+              "handle": 42,
+              "defense": 76
+            }
+          },
+          "l50": {
+            "seconds": 1831,
+            "shots": 1229,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 73,
+              "drive": 99,
+              "inside": 99,
+              "handle": 46,
+              "defense": 99
+            }
+          },
+          "l99": {
+            "seconds": 12987,
+            "shots": 6806,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 96,
+              "drive": 99,
+              "inside": 99,
+              "handle": 68,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 20
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6806,
+          "stats": {
+            "three": 99,
+            "mid": 96,
+            "drive": 99,
+            "inside": 99,
+            "handle": 68,
+            "defense": 99
+          },
+          "fullStats": 4,
+          "statSum": 560,
+          "template": "jordan",
+          "auto": false,
+          "stamina": 2
+        }
+      ],
+      "total": 6806
+    },
+    {
+      "seed": 3,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 1522,
+            "level": 47,
+            "shots": 1071
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 262,
+            "shots": 262,
+            "fullStats": 1,
+            "stats": {
+              "three": 58,
+              "mid": 81,
+              "drive": 99,
+              "inside": 69,
+              "handle": 58,
+              "defense": 69
+            }
+          },
+          "l30": {
+            "seconds": 385,
+            "shots": 385,
+            "fullStats": 1,
+            "stats": {
+              "three": 59,
+              "mid": 91,
+              "drive": 99,
+              "inside": 80,
+              "handle": 61,
+              "defense": 77
+            }
+          },
+          "l50": {
+            "seconds": 1851,
+            "shots": 1239,
+            "fullStats": 4,
+            "stats": {
+              "three": 66,
+              "mid": 99,
+              "drive": 99,
+              "inside": 99,
+              "handle": 69,
+              "defense": 99
+            }
+          },
+          "l99": {
+            "seconds": 12967,
+            "shots": 6796,
+            "fullStats": 4,
+            "stats": {
+              "three": 83,
+              "mid": 99,
+              "drive": 99,
+              "inside": 99,
+              "handle": 88,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 24
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6796,
+          "stats": {
+            "three": 83,
+            "mid": 99,
+            "drive": 99,
+            "inside": 99,
+            "handle": 88,
+            "defense": 99
+          },
+          "fullStats": 4,
+          "statSum": 567,
+          "template": "jordan",
+          "auto": false,
+          "stamina": 2
+        }
+      ],
+      "total": 6796
+    },
+    {
+      "seed": 4,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 7501,
+            "level": 81,
+            "shots": 4060
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 273,
+            "shots": 273,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 78,
+              "drive": 99,
+              "inside": 59,
+              "handle": 68,
+              "defense": 48
+            }
+          },
+          "l30": {
+            "seconds": 400,
+            "shots": 400,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 85,
+              "drive": 99,
+              "inside": 61,
+              "handle": 71,
+              "defense": 49
+            }
+          },
+          "l50": {
+            "seconds": 1903,
+            "shots": 1262,
+            "fullStats": 3,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 67,
+              "handle": 82,
+              "defense": 59
+            }
+          },
+          "l99": {
+            "seconds": 12965,
+            "shots": 6794,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 87,
+              "handle": 99,
+              "defense": 71
+            }
+          },
+          "zeroGrowthLevels": 25
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6794,
+          "stats": {
+            "three": 99,
+            "mid": 99,
+            "drive": 99,
+            "inside": 87,
+            "handle": 99,
+            "defense": 71
+          },
+          "fullStats": 4,
+          "statSum": 554,
+          "template": "bryant",
+          "auto": false,
+          "stamina": 4
+        }
+      ],
+      "total": 6794
+    },
+    {
+      "seed": 5,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 478,
+            "level": 33,
+            "shots": 478
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 262,
+            "shots": 262,
+            "fullStats": 1,
+            "stats": {
+              "three": 86,
+              "mid": 40,
+              "drive": 99,
+              "inside": 84,
+              "handle": 63,
+              "defense": 84
+            }
+          },
+          "l30": {
+            "seconds": 389,
+            "shots": 389,
+            "fullStats": 1,
+            "stats": {
+              "three": 97,
+              "mid": 43,
+              "drive": 99,
+              "inside": 93,
+              "handle": 67,
+              "defense": 94
+            }
+          },
+          "l50": {
+            "seconds": 1867,
+            "shots": 1246,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 55,
+              "drive": 99,
+              "inside": 99,
+              "handle": 71,
+              "defense": 99
+            }
+          },
+          "l99": {
+            "seconds": 13024,
+            "shots": 6823,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 75,
+              "drive": 99,
+              "inside": 99,
+              "handle": 89,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 31
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6823,
+          "stats": {
+            "three": 99,
+            "mid": 75,
+            "drive": 99,
+            "inside": 99,
+            "handle": 89,
+            "defense": 99
+          },
+          "fullStats": 4,
+          "statSum": 560,
+          "template": "vince-carter",
+          "auto": false,
+          "stamina": 5
+        }
+      ],
+      "total": 6823
+    },
+    {
+      "seed": 6,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 3586,
+            "level": 62,
+            "shots": 2105
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 255,
+            "shots": 255,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 83,
+              "drive": 99,
+              "inside": 65,
+              "handle": 65,
+              "defense": 60
+            }
+          },
+          "l30": {
+            "seconds": 381,
+            "shots": 381,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 88,
+              "drive": 99,
+              "inside": 67,
+              "handle": 72,
+              "defense": 63
+            }
+          },
+          "l50": {
+            "seconds": 1888,
+            "shots": 1257,
+            "fullStats": 3,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 77,
+              "handle": 88,
+              "defense": 72
+            }
+          },
+          "l99": {
+            "seconds": 13123,
+            "shots": 6872,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 98,
+              "handle": 99,
+              "defense": 89
+            }
+          },
+          "zeroGrowthLevels": 18
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6872,
+          "stats": {
+            "three": 99,
+            "mid": 99,
+            "drive": 99,
+            "inside": 98,
+            "handle": 99,
+            "defense": 89
+          },
+          "fullStats": 4,
+          "statSum": 583,
+          "template": "curry",
+          "auto": false,
+          "stamina": 6
+        }
+      ],
+      "total": 6872
+    },
+    {
+      "seed": 7,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 11564,
+            "level": 95,
+            "shots": 6093
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 262,
+            "shots": 262,
+            "fullStats": 2,
+            "stats": {
+              "three": 76,
+              "mid": 99,
+              "drive": 99,
+              "inside": 63,
+              "handle": 44,
+              "defense": 58
+            }
+          },
+          "l30": {
+            "seconds": 386,
+            "shots": 386,
+            "fullStats": 2,
+            "stats": {
+              "three": 81,
+              "mid": 99,
+              "drive": 99,
+              "inside": 66,
+              "handle": 45,
+              "defense": 62
+            }
+          },
+          "l50": {
+            "seconds": 1827,
+            "shots": 1226,
+            "fullStats": 3,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 75,
+              "handle": 49,
+              "defense": 68
+            }
+          },
+          "l99": {
+            "seconds": 12931,
+            "shots": 6779,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 95,
+              "handle": 66,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 16
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6779,
+          "stats": {
+            "three": 99,
+            "mid": 99,
+            "drive": 99,
+            "inside": 95,
+            "handle": 66,
+            "defense": 99
+          },
+          "fullStats": 4,
+          "statSum": 557,
+          "template": "gilbert-arenas",
+          "auto": false,
+          "stamina": 0
+        }
+      ],
+      "total": 6779
+    },
+    {
+      "seed": 8,
+      "marks": {
+        "gym-p2": {
+          "full4": null,
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 262,
+            "shots": 262,
+            "fullStats": 1,
+            "stats": {
+              "three": 63,
+              "mid": 49,
+              "drive": 99,
+              "inside": 79,
+              "handle": 48,
+              "defense": 47
+            }
+          },
+          "l30": {
+            "seconds": 391,
+            "shots": 391,
+            "fullStats": 1,
+            "stats": {
+              "three": 66,
+              "mid": 53,
+              "drive": 99,
+              "inside": 90,
+              "handle": 50,
+              "defense": 50
+            }
+          },
+          "l50": {
+            "seconds": 1864,
+            "shots": 1243,
+            "fullStats": 2,
+            "stats": {
+              "three": 73,
+              "mid": 63,
+              "drive": 99,
+              "inside": 99,
+              "handle": 61,
+              "defense": 64
+            }
+          },
+          "l99": {
+            "seconds": 12986,
+            "shots": 6805,
+            "fullStats": 3,
+            "stats": {
+              "three": 99,
+              "mid": 91,
+              "drive": 99,
+              "inside": 99,
+              "handle": 86,
+              "defense": 89
+            }
+          },
+          "zeroGrowthLevels": 4
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6805,
+          "stats": {
+            "three": 99,
+            "mid": 91,
+            "drive": 99,
+            "inside": 99,
+            "handle": 86,
+            "defense": 89
+          },
+          "fullStats": 3,
+          "statSum": 563,
+          "template": "karl-malone",
+          "auto": false,
+          "stamina": 3
+        }
+      ],
+      "total": 6805
+    },
+    {
+      "seed": 9,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 4589,
+            "level": 68,
+            "shots": 2608
+          },
+          "full5": null,
+          "full6": null,
+          "l25": {
+            "seconds": 251,
+            "shots": 251,
+            "fullStats": 2,
+            "stats": {
+              "three": 75,
+              "mid": 65,
+              "drive": 99,
+              "inside": 99,
+              "handle": 53,
+              "defense": 61
+            }
+          },
+          "l30": {
+            "seconds": 376,
+            "shots": 376,
+            "fullStats": 2,
+            "stats": {
+              "three": 80,
+              "mid": 66,
+              "drive": 99,
+              "inside": 99,
+              "handle": 59,
+              "defense": 65
+            }
+          },
+          "l50": {
+            "seconds": 1831,
+            "shots": 1229,
+            "fullStats": 3,
+            "stats": {
+              "three": 99,
+              "mid": 74,
+              "drive": 99,
+              "inside": 99,
+              "handle": 74,
+              "defense": 74
+            }
+          },
+          "l99": {
+            "seconds": 13005,
+            "shots": 6814,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 93,
+              "drive": 99,
+              "inside": 99,
+              "handle": 99,
+              "defense": 93
+            }
+          },
+          "zeroGrowthLevels": 15
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6814,
+          "stats": {
+            "three": 99,
+            "mid": 93,
+            "drive": 99,
+            "inside": 99,
+            "handle": 99,
+            "defense": 93
+          },
+          "fullStats": 4,
+          "statSum": 582,
+          "template": "oneal",
+          "auto": false,
+          "stamina": 4
+        }
+      ],
+      "total": 6814
+    },
+    {
+      "seed": 10,
+      "marks": {
+        "gym-p2": {
+          "full4": {
+            "seconds": 543,
+            "level": 35,
+            "shots": 543
+          },
+          "full5": {
+            "seconds": 4981,
+            "level": 70,
+            "shots": 2800
+          },
+          "full6": null,
+          "l25": {
+            "seconds": 262,
+            "shots": 262,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 80,
+              "drive": 99,
+              "inside": 59,
+              "handle": 81,
+              "defense": 72
+            }
+          },
+          "l30": {
+            "seconds": 387,
+            "shots": 387,
+            "fullStats": 2,
+            "stats": {
+              "three": 99,
+              "mid": 89,
+              "drive": 99,
+              "inside": 60,
+              "handle": 85,
+              "defense": 77
+            }
+          },
+          "l50": {
+            "seconds": 1843,
+            "shots": 1232,
+            "fullStats": 4,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 65,
+              "handle": 99,
+              "defense": 87
+            }
+          },
+          "l99": {
+            "seconds": 12905,
+            "shots": 6764,
+            "fullStats": 5,
+            "stats": {
+              "three": 99,
+              "mid": 99,
+              "drive": 99,
+              "inside": 83,
+              "handle": 99,
+              "defense": 99
+            }
+          },
+          "zeroGrowthLevels": 31
+        }
+      },
+      "final": [
+        {
+          "id": "gym-p2",
+          "level": 99,
+          "shots": 6764,
+          "stats": {
+            "three": 99,
+            "mid": 99,
+            "drive": 99,
+            "inside": 83,
+            "handle": 99,
+            "defense": 99
+          },
+          "fullStats": 5,
+          "statSum": 578,
+          "template": "curry",
+          "auto": false,
+          "stamina": 4
+        }
+      ],
+      "total": 6764
+    }
+  ]
+}

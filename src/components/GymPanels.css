@@ -175,6 +175,21 @@
 .game-screen .gym-panel .gm-reward-breakdown dd { flex: none; margin: 0; padding: 0; border: 0; color: #8f3025; font-weight: 900; }
 .gm-equipment-benefits { display: grid; gap: 5px; }
 .gm-equipment-benefits > p { padding-left: 8px; border-left: 2px solid #b69256; }
+.gm-offline-players { display: grid; gap: 9px; }
+.gm-offline-report .gm-metrics dd { font-size: 23px; overflow-wrap: anywhere; }
+.gm-offline-report .gm-section-heading strong { color: #9c3225; white-space: nowrap; }
+.gm-training-advice { margin-block: 12px; }
+.gm-training-advice .gm-section-heading strong { font-size: 12px; color: #285449; }
+.gm-training-advice.is-compact { margin: 8px 10px; padding: 10px; font-size: 12px; }
+.gm-training-advice.is-compact h4 { font-size: 13px; }
+.gm-training-advice.is-compact p { margin: 0; }
+.gm-remaining-value { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.gm-replace-label { display: grid; gap: 8px; }
+.gm-replace-label select { width: 100%; padding: 10px; border: 2px solid #294550; background: #fff5db; font: inherit; color: #153541; }
+.gm-project-forecast { padding-top: 8px; border-top: 1px solid #ccb88b; }
+.gm-warehouse-actions { flex-wrap: wrap; }
+.gm-warehouse-actions > p { flex-basis: 100%; }
+.gm-warehouse-actions > .gm-button { flex: 1; }
 
 @media (max-width: 360px) {
   .gm-product { grid-template-columns: 56px minmax(0,1fr); gap: 6px 8px; }

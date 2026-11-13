@@ -3,6 +3,7 @@ import {createGymStore} from './gymStore';
 import {gymSaveKeys, readGym, writeGym, type GymStorage} from './game/gym/save';
 import {hash} from './game/contract/random';
 import {dispatchGym, newGym, recommendation} from './game/gym/engine';
+import {legacyOfflineLimitMs, settleOfflineGym} from './game/gym/offline';
 
 function setup() {
   const data = new Map<string, string>();
@@ -18,10 +19,10 @@ function setup() {
   return {data, storage, clock: () => time, advance: (ms: number) => { time += ms; }, fail: (value: boolean) => { failMain = value; }};
 }
 
-async function trainedStore(context: ReturnType<typeof setup>) {
+async function trainedStore(context: ReturnType<typeof setup>, minimumCredits = 0) {
   const store = createGymStore(context.storage, 17, context.clock);
   await store.getState().start();
-  for (let i = 0; i < 3_000 && !store.getState().state.player?.templateId; i++) {
+  for (let i = 0; i < 3_000 && (!store.getState().state.player?.templateId || recommendation(store.getState().state).credits < minimumCredits); i++) {
     if (store.getState().state.player!.stamina < 1) context.advance(20_000);
     const result = await store.getState().act({type: 'train', id: store.getState().state.player!.id});
     expect(result.error).toBeUndefined();
@@ -90,7 +91,7 @@ describe('online multi-player training commits', () => {
     expect(saved.bench[0].stamina).toBe(19);
   });
 
-  it('does not replay missed automatic shots on reload or flush', async () => {
+  it('settles capped offline shots on resume and never awards the same absence twice', async () => {
     const context = setup();
     const state = {...newGym(context.clock(), 17), gymLevel: 2};
     writeGym(context.storage, state);
@@ -101,10 +102,13 @@ describe('online multi-player training commits', () => {
     expect(resumed.getState().state.player!.shots).toBe(0);
     await resumed.getState().flush();
     expect(readGym(context.storage).state!.player!.shots).toBe(0);
-    await resumed.getState().tick();
-    expect(readGym(context.storage).state!.player!.shots).toBe(1);
-    await resumed.getState().tick();
-    expect(readGym(context.storage).state!.player!.shots).toBe(1);
+    await resumed.getState().resume();
+    const settled = readGym(context.storage).state!;
+    expect(settled.player!.shots).toBeGreaterThan(1);
+    expect(resumed.getState().pendingOfflineReport).toMatchObject({capped: true, capMs: 1_800_000});
+    expect(settled.updatedAt).toBe(context.clock());
+    await Promise.all([resumed.getState().resume(), resumed.getState().tick()]);
+    expect(readGym(context.storage).state!.player!.shots).toBe(settled.player!.shots);
   });
 
   it('keeps an automatic shot uncommitted when saving fails and allows one retry', async () => {
@@ -215,11 +219,12 @@ describe('gym store commits', () => {
 
   it('retains permanent collections when starting a new gym', async () => {
     const context = setup();
-    const store = await trainedStore(context);
+    const store = await trainedStore(context, 2);
     const collection = store.getState().state.collection;
     await store.getState().act({type: 'recommend', id: store.getState().state.player!.id});
-    await store.getState().act({type: 'buy-equipment', id: 'relic_002'});
+    expect((await store.getState().act({type: 'buy-equipment', id: 'relic_002'})).error).toBeUndefined();
     const collected = store.getState().state.collectedEquipment;
+    expect(collected).toHaveProperty('relic_002');
     const reset = await store.getState().start();
     expect(reset.error).toBeUndefined();
     expect(reset.state.collection).toEqual(collection);
@@ -304,5 +309,113 @@ describe('gym store commits', () => {
     expect(saved.fame).toBe(expected.fame);
     expect(saved.cooperation).toBeUndefined();
     expect(saved.player).toBeNull();
+  });
+});
+
+describe('offline training settlement commits', () => {
+  function automated(context: ReturnType<typeof setup>) {
+    const state = {...newGym(context.clock(), 17), gymLevel: 2};
+    state.player!.autoEnabled = true;
+    state.player!.nextShotAt = context.clock() + 2_000;
+    writeGym(context.storage, state);
+    return state;
+  }
+
+  it('commits one catch-up across two tabs and preserves training after a failed write', async () => {
+    const context = setup();
+    automated(context);
+    const first = createGymStore(context.storage, 17, context.clock);
+    const second = createGymStore(context.storage, 17, context.clock);
+    context.advance(60_000);
+    context.fail(true);
+    expect((await first.getState().resume()).error).toBe('save-failed');
+    expect(first.getState().pendingOfflineReport).toBeNull();
+    expect(first.getState().isSuspended).toBe(true);
+    expect(readGym(context.storage).state!.player!.shots).toBe(0);
+    context.fail(false);
+    await Promise.all([first.getState().resume(), second.getState().resume()]);
+    const saved = readGym(context.storage).state!;
+    expect(saved.player!.shots).toBe(30);
+    expect([first, second].filter(store => store.getState().pendingOfflineReport !== null)).toHaveLength(1);
+    const reloaded = createGymStore(context.storage, 17, context.clock);
+    await reloaded.getState().resume();
+    expect(readGym(context.storage).state!.player!.shots).toBe(30);
+  });
+
+  it('keeps the first absence anchor through duplicate suspend callbacks', async () => {
+    const context = setup();
+    automated(context);
+    const store = createGymStore(context.storage, 17, context.clock);
+    await store.getState().resume();
+    await store.getState().suspend();
+    const leftAt = readGym(context.storage).state!.updatedAt;
+    context.advance(60_000);
+    await store.getState().flush();
+    expect(readGym(context.storage).state!.updatedAt).toBe(leftAt);
+    await store.getState().resume();
+    expect(store.getState().state.player!.shots).toBe(30);
+    expect(store.getState().isSuspended).toBe(false);
+    store.getState().dismissOfflineReport();
+    expect(store.getState().pendingOfflineReport).toBeNull();
+  });
+
+  it('establishes a new baseline for pre-offline saves without retroactive shots', async () => {
+    const context = setup();
+    const state = automated(context);
+    delete state.offlineRulesVersion;
+    writeGym(context.storage, state);
+    context.advance(86_400_000);
+    const store = createGymStore(context.storage, 17, context.clock);
+    await store.getState().resume();
+    expect(store.getState().state).toMatchObject({offlineRulesVersion: 2, updatedAt: context.clock()});
+    expect(store.getState().state.player!.shots).toBe(0);
+    expect(store.getState().pendingOfflineReport).toBeNull();
+    await store.getState().suspend();
+    context.advance(60_000);
+    await store.getState().resume();
+    expect(store.getState().state.player!.shots).toBe(31);
+  });
+
+  it('catches up after device sleep even if no visibility event was dispatched', async () => {
+    const context = setup();
+    automated(context);
+    const store = createGymStore(context.storage, 17, context.clock);
+    await store.getState().resume();
+    context.advance(60_000);
+    await store.getState().tick();
+    expect(store.getState().state.player!.shots).toBe(30);
+    expect(store.getState().pendingOfflineReport?.totalShots).toBe(30);
+  });
+
+  it('settles using the old limit before buying a longer absence window', async () => {
+    const context = setup();
+    const state = automated(context);
+    state.credits = 10;
+    writeGym(context.storage, state);
+    const store = createGymStore(context.storage, 17, context.clock);
+    context.advance(3_600_000);
+    const upgraded = await store.getState().act({type: 'upgrade-project', id: 'offline'});
+    expect(upgraded.error).toBeUndefined();
+    expect(upgraded.state.projects.offline).toBe(1);
+    expect(store.getState().pendingOfflineReport).toMatchObject({capMs: 1_800_000, creditedMs: 1_800_000, capped: true});
+    const shots = upgraded.state.player!.shots;
+    await store.getState().resume();
+    expect(store.getState().state.player!.shots).toBe(shots);
+  });
+
+  it('settles an existing v1 absence at its original cap and XP before adopting new efficiency', async () => {
+    const context = setup();
+    const state = automated(context);
+    state.offlineRulesVersion = 1;
+    state.projects.automation = 1;
+    state.projects.offline = 1;
+    writeGym(context.storage, state);
+    context.advance(3_600_000);
+    const expected = settleOfflineGym(state, context.clock(), legacyOfflineLimitMs(state)).state;
+    const store = createGymStore(context.storage, 17, context.clock);
+    await store.getState().resume();
+    const actual = readGym(context.storage).state!;
+    expect(actual).toEqual({...expected, offlineRulesVersion: 2});
+    expect(store.getState().pendingOfflineReport?.creditedMs).toBe(3_600_000);
   });
 });

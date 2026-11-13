@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState, useSyncExternalStore, type CSSProperties} from 'react';
 import {useGym} from '../gymStore';
-import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, requiredExperience, shotExperience, staminaMax, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
+import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, requiredExperience, shotExperience, staminaMax, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
 import {templateById} from '../game/templates';
 import {match, templateRules} from '../game/contract/templates';
 import {overallRating} from '../game/matching';
@@ -24,7 +24,9 @@ import {ShotScene} from './ShotScene';
 import {ShotStatusPop} from './ShotStatusPop';
 import {ShootButton} from './ShootButton';
 import {GymScoreboard, GymStamina} from './GymStatus';
-import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel} from './GymPanels';
+import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel, offlineDuration} from './GymPanels';
+import {offlineLimitMs} from '../game/gym/offline';
+import {trainingGuidance} from '../game/gym/guidance';
 import './TrainingLayout.css';
 import '../equipment-status.css';
 import './GymGame.css';
@@ -115,34 +117,48 @@ export default function GymGame({onHome}: {onHome: () => void}) {
  useEffect(() => {
   let disposed = false;
   let ticking = false;
+  let needsResume = true;
   let lastAdvance = 0;
-  const advance = () => {
+  const advance = async () => {
    if (disposed || document.visibilityState !== 'visible' || ticking) return;
    const current = useGym.getState();
    const automatic = [current.state.player, ...current.state.bench].some(entry => entry?.autoEnabled);
    const now = Date.now();
-   if (now - lastAdvance < (automatic ? 200 : 1000)) return;
+   if (!needsResume && !current.isSuspended && now - lastAdvance < (automatic ? 200 : 1000)) return;
    lastAdvance = now;
    ticking = true;
-   const previous = current.state;
-   void current.tick().then(result => {if (!disposed) resultPresenter.current(result, previous);}).catch(() => {}).finally(() => {ticking = false;});
+   try {
+    if (needsResume || current.isSuspended) {
+     needsResume = false;
+     const resumed = await current.resume();
+     if (resumed.error) {needsResume = true; return;}
+     // Resume saves one aggregate report. Do not replay offline shot animations.
+     if (disposed || document.visibilityState !== 'visible') return;
+    }
+    const active = useGym.getState();
+    const previous = active.state;
+    const result = await active.tick();
+    if (!disposed && document.visibilityState === 'visible') resultPresenter.current(result, previous);
+   } catch {needsResume = true;}
+   finally {ticking = false;}
   };
   const timer = setInterval(advance, 200);
-  const save = () => {void useGym.getState().flush();};
+  const save = () => {needsResume = true; void useGym.getState().suspend();};
+  const visibility = () => {if (document.visibilityState === 'hidden') save(); else void advance();};
   window.addEventListener('focus', advance);
   window.addEventListener('pagehide', save);
-  document.addEventListener('visibilitychange', advance);
-  advance();
+  document.addEventListener('visibilitychange', visibility);
+  void advance();
   return () => {
    disposed = true;
    clearInterval(timer);
    window.removeEventListener('focus', advance);
    window.removeEventListener('pagehide', save);
-   document.removeEventListener('visibilitychange', advance);
+   document.removeEventListener('visibilitychange', visibility);
    save();
   };
  }, []);
- useEffect(() => {if (viewport.current) viewport.current.inert = panel !== null;}, [panel]);
+ useEffect(() => {if (viewport.current) viewport.current.inert = panel !== null || !!store.pendingOfflineReport;}, [panel, store.pendingOfflineReport]);
  useEffect(() => {setFeedback(null); setShots([]);}, [player?.id]);
  useEffect(() => {
   if (!notice) return;
@@ -220,6 +236,8 @@ export default function GymGame({onHome}: {onHome: () => void}) {
  const cooperationShots = cooperation.requirements[0];
  const experienceRequired = requiredExperience(player?.level ?? 0);
  const atCap = !!player && player.level >= playerLevelCap;
+ const guidance = trainingGuidance(state);
+ const offlineHint = state.gymLevel < 2 ? '离线训练将在球馆 Lv.2 开放，基础上限 30分钟。' : `离开或关闭页面后，仅开启自动的球员继续按体力、器材、专项和课程规则训练，每次最多结算 ${offlineDuration(offlineLimitMs(state))}，超出部分仅恢复体力。可升级离线课表延长上限。`;
 
  return <main className={`game-screen contract-game training-layout gym-game${reduced ? ' reduce-motion' : ''}`} aria-label="篮球训练馆" style={{'--game-max-width': `${visual.gameMaxWidthPx}px`, '--shoot-button-scale': visual.shootButtonScale} as CSSProperties}>
   <div className="game-viewport" ref={viewport}>
@@ -254,6 +272,7 @@ export default function GymGame({onHome}: {onHome: () => void}) {
      <span className="equipment-status-mini charge"><span>本课训练</span><b>{training.shots}/10 球</b></span>
      <span className="equipment-status-mini"><span>复盘恢复</span><b>最多 +{training.nextRecovery}</b></span>
      <small>已完成 {training.completedCourses} 课 · {atCap ? '等级已满' : player.autoEnabled ? `自动 ${automaticIntervalMs(state) / 1000}秒/球` : '手动 1秒/球'}</small>
+     {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
     </button>}
     {(store.actionError || notice) && <div className="contract-status" role="status">{store.actionError || notice}</div>}
     {!player && <div className="gym-empty-court"><div><h2>下一位新星，等你发掘</h2><p>当前球馆有 {state.gymLevel} 个训练位，新人带着满体力入馆。</p>{state.gymLevel >= 2 && <select aria-label="新人身高偏好" value={preference} onChange={event => setPreference(event.target.value as typeof preference)}><option value="any">不限身高</option><option value="guard">后卫型 178–194 cm</option><option value="forward">锋线型 195–205 cm</option><option value="center">内线型 206–218 cm</option></select>}<button className="primary" disabled={busy} onClick={() => onAction({type: 'recruit', preference})}>免费招募下一位</button></div></div>}
@@ -284,15 +303,16 @@ export default function GymGame({onHome}: {onHome: () => void}) {
     {panel === 'club' && <GymClubPanel state={state} onAction={onAction}/>}
     {panel === 'training' && <GymTrainingPanel key={player?.id} state={state} onAction={onAction}/>}
     {panel === 'cooperation' && <GymCooperationPanel key={player?.id} state={state} onAction={onAction}/>}
-    {panel === 'shop' && <GymShopPanel state={state} onAction={onAction}/>}
-    {panel === 'inventory' && <><GymInventoryPanel state={state} onAction={onAction}/><button className="secondary inventory-home-button" onClick={onHome}><GameIcon name="home"/>保存并返回首页</button></>}
+    {panel === 'shop' && <GymShopPanel state={state} onAction={onAction} busy={busy}/>}
+    {panel === 'inventory' && <><GymInventoryPanel state={state} onAction={onAction} busy={busy}/><button className="secondary inventory-home-button" onClick={onHome}><GameIcon name="home"/>保存并返回首页</button></>}
     {panel === 'recommend' && <GymRecommendPanel state={state} onAction={onAction} onClose={() => setPanel(null)}/>}
     {panel === 'alumni' && <GymAlumniPanel state={state} onAction={onAction}/>}
     {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} onAlumni={() => setPanel('alumni')}/>}
     {panel === 'collection' && <GymCollectionPanel state={state} onAction={onAction}/>}
     {panel === 'player' && player && <PlayerGoals player={player} onTraining={() => setPanel('training')}/>}
-    {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>维持 30% 获得 {shotExperience('hold')} 经验，成功 60% 获得 {shotExperience('success')} 经验，大成功 10% 获得 {shotExperience('great')} 经验。剩余经验会保留到下一级。</p><p>只有升级时获得属性成长机会，天赋、训练专项与已启用器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>自动仅在训练馆页面可见时进行，离开或关闭页面后不补投篮。每 10 球完成一课，推荐时按培养成果与合作结算奖励。</p></>}
+    {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>当前模式：维持 30% 获得 {trainingShotExperience(state, 'hold')} 经验，成功 60% 获得 {trainingShotExperience(state, 'success')} 经验，大成功 10% 获得 {trainingShotExperience(state, 'great')} 经验。剩余经验会保留到下一级。</p><p>手动基础为8／12／20经验；自动项目每级使每次自动投篮额外 +1 经验，在线与离线共同生效。只有升级时获得属性成长机会，天赋、训练专项与馆内器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动与离线训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>{offlineHint}每 10 球完成一课，推荐时按培养成果与合作结算奖励。训练计划与推荐面板可查看下一奖金节点、模板缺口和预计训练时间。</p></>}
    </div>
   </div></ComicDialog>}
+  {store.pendingOfflineReport && <GymOfflineReport report={store.pendingOfflineReport} onClose={store.dismissOfflineReport}/>}
  </main>;
 }

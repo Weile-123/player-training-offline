@@ -1,6 +1,7 @@
 import {create} from 'zustand';
 import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recoverySeconds, type GymAction, type GymResult, type GymState} from './game/gym/engine';
 import {gymSaveKeys, readGym, writeGym, type GymStorage} from './game/gym/save';
+import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
 
 const lockName = 'gym-management-v1.writer';
 const queues = new WeakMap<GymStorage, Promise<unknown>>();
@@ -58,6 +59,11 @@ export type GymStore = {
   hasSave: boolean;
   actionError: string;
   saveMessage: string;
+  isSuspended: boolean;
+  pendingOfflineReport: OfflineTrainingReport | null;
+  resume: () => Promise<GymResult>;
+  suspend: () => Promise<void>;
+  dismissOfflineReport: () => void;
   start: () => Promise<GymResult>;
   act: (action: GymAction) => Promise<GymResult>;
   tick: () => Promise<GymResult>;
@@ -83,7 +89,7 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
       return {state: get().state, events: [], error};
     };
 
-    const run = async (action?: GymAction, restart = false, automatic = false): Promise<GymResult> => {
+    const run = async (action?: GymAction, restart = false, automatic = false, resuming = false, suspending = false): Promise<GymResult> => {
       const requested = get();
       try {
         return await exclusive(storage, () => {
@@ -93,22 +99,29 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
           const minimumTime = current.state ? current.state.updatedAt + (restart ? 1 : 0) : requested.state.updatedAt;
           const time = Math.max(now(), minimumTime);
           let result: GymResult;
+          let offlineReport: OfflineTrainingReport | undefined;
+          let resumed = false;
           if (restart) {
             const state = newGym(time, typeof seed === 'number' ? seed : seed());
             if (current.state) {
               state.collection = {...current.state.collection};
               state.collectedEquipment = {...current.state.collectedEquipment};
+              if (current.state.legacyEquipmentCollection) state.legacyEquipmentCollection = {...current.state.legacyEquipmentCollection};
             }
             result = {state, events: []};
           } else {
             const base = current.state!;
+            // Duplicate pagehide/unmount callbacks must not move the absence
+            // anchor forward and silently consume time that has not been trained.
+            if (suspending && get().isSuspended) return {state: base, events: []};
             // Rebase ordinary changes on the latest committed state. A queued
             // action from an older gym must not modify a newly started game.
             if (action && (base.createdAt !== requested.state.createdAt || base.seed !== requested.state.seed || base.revision < requested.state.revision)) {
               set({state: base, hasSave: true});
               return fail('gym-changed', '球馆已在其他页面更新，请查看当前进度后重试。');
             }
-            if (automatic && !action && current.source === 'main' && time - base.updatedAt < 1_000) {
+            resumed = resuming || (!suspending && get().isSuspended) || time - base.updatedAt >= 10_000;
+            if (!base.pendingLegacyEquipmentEffects && !resumed && automatic && !action && current.source === 'main' && time - base.updatedAt < 1_000) {
               const elapsed = time - base.updatedAt;
               const interval = recoverySeconds(base) * 1_000;
               const due = activePlayers(base).some(player => player.autoEnabled && player.level < playerLevelCap
@@ -120,9 +133,17 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
                 return {state: base, events: []};
               }
             }
-            const advanced = advanceGym(base, time);
+            // Older saves did not accrue offline shots. Establish the new
+            // baseline once, retaining recovery without awarding past training.
+            // A catalog migration settles the already elapsed absence with the
+            // saved old effects before an action can install or use new gear.
+            // Pre-offline saves still receive recovery only, never past shots.
+            const settlement = (resumed && base.offlineRulesVersion) || base.pendingLegacyEquipmentEffects ? settleOfflineGym(base, time,
+              !base.offlineRulesVersion ? 0 : base.offlineRulesVersion === 1 ? legacyOfflineLimitMs(base) : undefined) : undefined;
+            const advanced = {...(settlement?.state ?? advanceGym(base, time)), offlineRulesVersion: 2 as const};
+            if (settlement?.report && time - base.updatedAt >= 5_000 && settlement.report.totalShots > 0) offlineReport = settlement.report;
             result = action ? dispatchGym(advanced, advanced.revision, action, time)
-              : automatic ? dispatchGym(advanced, advanced.revision, {type: 'auto-step'}, time) : {state: advanced, events: []};
+              : automatic && !resumed ? dispatchGym(advanced, advanced.revision, {type: 'auto-step'}, time) : {state: advanced, events: []};
             if (result.state === base && current.source === 'main') {
               set({state: base, hasSave: true, actionError: result.error ?? ''});
               return result;
@@ -131,6 +152,8 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
           const saved = writeGym(storage, result.state);
           if (!saved.ok) return fail('save-failed', saveFailure);
           set({state: result.state, hasSave: true, actionError: result.error ?? (automatic && get().actionError !== saveFailure ? get().actionError : ''),
+            isSuspended: suspending ? true : restart || resumed ? false : get().isSuspended,
+            pendingOfflineReport: restart ? null : offlineReport ?? get().pendingOfflineReport,
             saveMessage: saved.backupOk ? '已自动保存' : '进度已保存，备份暂不可用。'});
           return result;
         });
@@ -142,15 +165,16 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
     };
 
     return {
-      state: initial, hasSave: !!loaded.state, actionError: '',
+      state: initial, hasSave: !!loaded.state, actionError: '', isSuspended: true, pendingOfflineReport: null,
       saveMessage: loaded.error === 'storage-unavailable' ? saveFailure : loaded.error ? '存档校验失败，原数据已保留，可重新开始。'
         : loaded.source === 'backup' ? '已读取备份存档。' : '',
       start: () => run(undefined, true),
       act: action => run(action),
-      // Visible gameplay calls tick. Loading a save and flush only restore stamina;
-      // auto-step never replays missed shots from time spent outside the game.
       tick: () => run(undefined, false, true),
-      flush: async () => { if (get().hasSave) await run(); },
+      resume: () => run(undefined, false, false, true),
+      dismissOfflineReport: () => set({pendingOfflineReport: null}),
+      suspend: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
+      flush: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
     };
   });
 

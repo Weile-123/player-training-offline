@@ -6,9 +6,9 @@ export type TrainingPlan = {id: TrainingPlanId; name: string; focusKeys: readonl
 
 export const trainingPlans: readonly TrainingPlan[] = [
   {id: 'balanced', name: '基础训练', focusKeys: [], description: '沿用球员原固有成长偏好。'},
-  {id: 'shooting', name: '投射专项', focusKeys: ['three', 'mid'], description: '提高三分与中投的成长抽取权重。'},
-  {id: 'finishing', name: '持球突破', focusKeys: ['drive', 'handle'], description: '提高突破与控球的成长抽取权重。'},
-  {id: 'interior', name: '内线防守', focusKeys: ['inside', 'defense'], description: '提高篮下与防守的成长抽取权重。'},
+  {id: 'shooting', name: '投射专项', focusKeys: ['three', 'mid'], description: '升级时更容易提升三分与中投。'},
+  {id: 'finishing', name: '持球突破', focusKeys: ['drive', 'handle'], description: '升级时更容易提升突破与控球。'},
+  {id: 'interior', name: '内线防守', focusKeys: ['inside', 'defense'], description: '升级时更容易提升篮下与防守。'},
 ];
 
 export function trainingBias(bias: Stats, planId: TrainingPlanId, focus: Stats): Stats {

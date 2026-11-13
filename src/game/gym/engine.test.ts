@@ -3,6 +3,7 @@ import {statKeys, type Stats} from '../types';
 import {templateRules, grow, match} from '../contract/templates';
 import {random} from '../contract/random';
 import {shopCatalog} from '../contract/commerce';
+import {legacyEquipmentCatalog} from './catalog';
 import {
   activePlayers, advanceGym, automaticIntervalMs, autoTrainingSeconds, cooperationOffers, cooperationStatus, courseRecoveryCap, dispatchGym, effectiveTrainingBias, equipmentCapacity, equipmentCatalog, equipmentEffects, equipmentOffer, gymLevels, gymUpgrade,
   newGym, playerValue, projectCap, projectCost, projectOffer, projects, recommendation, recoverySeconds,
@@ -219,14 +220,14 @@ describe('stamina and recovery boundaries', () => {
     expect(advanceGym(endurance, start + 9499).player!.stamina).toBe(10);
     expect(advanceGym(endurance, start + 9500).player!.stamina).toBe(11);
 
-    const owned = {...newGym(start), ownedEquipment: ['relic_003']};
-    const equipped = act(owned, {type: 'equip', id: 'relic_003'});
-    expect(staminaMax(equipped)).toBe(22);
+    const owned = {...newGym(start), ownedEquipment: ['relic_014']};
+    const equipped = act(owned, {type: 'equip', id: 'relic_014'});
+    expect(staminaMax(equipped)).toBe(24);
     expect(equipped.player!.stamina).toBe(20);
-    equipped.player!.stamina = 22;
-    const removed = act(equipped, {type: 'unequip', id: 'relic_003'});
+    equipped.player!.stamina = 24;
+    const removed = act(equipped, {type: 'unequip', id: 'relic_014'});
     expect(removed.player!.stamina).toBe(20);
-    expect(act(removed, {type: 'equip', id: 'relic_003'}).player!.stamina).toBe(20);
+    expect(act(removed, {type: 'equip', id: 'relic_014'}).player!.stamina).toBe(20);
   });
 
   it('buys a drink for one credit, caps actual recovery and refuses a full-stamina use', () => {
@@ -363,13 +364,14 @@ describe('recommendation, enrollment and gym progression', () => {
 });
 
 describe('fixed P0 equipment and project economy', () => {
-  it('has all 94 original enabled IDs and positive usable effects', () => {
-    expect(equipmentCatalog.map(item => item.id)).toEqual(shopCatalog.map(item => item.id));
-    expect(new Set(equipmentCatalog.map(item => item.id)).size).toBe(94);
+  it('reuses original resource IDs with explicit positive V3 effects', () => {
+    expect(legacyEquipmentCatalog.map(item => item.id)).toEqual(shopCatalog.map(item => item.id));
+    expect(new Set(equipmentCatalog.map(item => item.id)).size).toBe(35);
+    expect(new Set(equipmentCatalog.map(item => JSON.stringify(item.effects))).size).toBe(35);
     for (const item of equipmentCatalog) {
-      expect(item.name).toBe(shopCatalog.find(original => original.id === item.id)!.name);
+      expect(shopCatalog.some(original => original.id === item.id)).toBe(true);
       expect(item.price).toBeGreaterThan(0);
-      expect(item.effects.stamina + item.effects.recovery + item.effects.valuePercent).toBeGreaterThan(0);
+      expect(Object.values(item.effects).some(value => typeof value === 'number' && value > 0)).toBe(true);
     }
   });
 
@@ -404,17 +406,19 @@ describe('fixed P0 equipment and project economy', () => {
 
   it('deduplicates the permanent warehouse, enforces slots and preserves collections when unequipped', () => {
     let gym = {...newGym(start), credits: 1000, gymLevel: 8};
-    const items = equipmentCatalog.filter(item => item.requiredTemplates === 0).slice(0, 5);
-    for (const item of items) gym = act(gym, {type: 'buy-equipment', id: item.id});
+    const items = equipmentCatalog.filter(item => item.grade === 1).slice(0, 5);
+    for (const item of items.slice(0, 4)) gym = act(gym, {type: 'buy-equipment', id: item.id});
+    expect(gym.equippedEquipment).toEqual(items.slice(0, 4).map(item => item.id));
+    expect(dispatchGym(gym, gym.revision, {type: 'buy-equipment', id: items[4].id}, start).state).toBe(gym);
+    gym = act(gym, {type: 'buy-equipment', id: items[4].id, replaceId: items[0].id});
     expect(gym.ownedEquipment).toHaveLength(5);
     const duplicate = dispatchGym(gym, gym.revision, {type: 'buy-equipment', id: items[0].id}, start);
     expect(duplicate.state).toBe(gym);
     expect(equipmentOffer(gym, items[0].id)).toMatchObject({owned: true, price: null});
-    for (const item of items.slice(0, 4)) gym = act(gym, {type: 'equip', id: item.id});
-    expect(dispatchGym(gym, gym.revision, {type: 'equip', id: items[4].id}, start).state).toBe(gym);
+    expect(dispatchGym(gym, gym.revision, {type: 'equip', id: items[0].id}, start).state).toBe(gym);
     gym = act(gym, {type: 'upgrade-project', id: 'equipment'});
     expect(equipmentCapacity(gym)).toBe(5);
-    gym = act(gym, {type: 'equip', id: items[4].id});
+    gym = act(gym, {type: 'equip', id: items[0].id});
     const removed = act(gym, {type: 'unequip', id: items[0].id});
     expect(removed.ownedEquipment).toEqual(gym.ownedEquipment);
     expect(removed.collectedEquipment).toEqual(gym.collectedEquipment);
@@ -508,9 +512,8 @@ describe('specialist training and courses', () => {
   });
 
   it('keeps base course recovery at four and limits equipment bonuses by gym level in actual shots', () => {
-    const expectedExtra = [1, 2, 2, 3, 3, 4, 4, 4];
-    const gear = equipmentCatalog.filter(item => item.effects.courseRecovery > 0).slice(0, 4).map(item => item.id);
-    expect(gear.reduce((total, id) => total + equipmentCatalog.find(item => item.id === id)!.effects.courseRecovery, 0)).toBeGreaterThanOrEqual(4);
+    const expectedExtra = [1, 1, 2, 2, 2, 3, 3, 3];
+    const gear = equipmentCatalog.filter(item => item.family === 'course' && item.grade === 3).map(item => item.id);
     for (let gymLevel = 1; gymLevel <= 8; gymLevel++) {
       const gym = withOutcome({...newGym(start, gymLevel), gymLevel}, 'hold');
       expect(trainingStatus(gym).nextRecovery).toBe(4);
@@ -529,7 +532,7 @@ describe('specialist training and courses', () => {
       expect(result.events.find(event => event.type === 'course-completed')!.restoredStamina).toBe(4 + expectedExtra[gymLevel - 1]);
       expect(dispatchGym(result.state, result.state.revision, {type: 'train', id: gym.player!.id}, start).state).toBe(result.state);
     }
-    expect(equipmentCatalog.filter(item => item.effects.courseRecovery > 0).every(item => item.description.includes('受馆级额外恢复上限限制'))).toBe(true);
+    expect(equipmentCatalog.filter(item => item.effects.courseRecovery > 0).every(item => item.description.includes('受馆级上限限制'))).toBe(true);
   });
 
   it('adds level-and-template training bonuses and floors the combined course and brand fame multiplier once', () => {
@@ -538,19 +541,21 @@ describe('specialist training and courses', () => {
     gym.player!.level = gym.player!.peakLevel = 25;
     gym.player!.training.completedCourses = 6;
     gym.player!.shots = 60;
+    gym.player!.equipmentTraining = {brandShots: 60, brandTotal: 3_000, cooperationCourses: [0, 0], cooperationCourseShots: [0, 0]};
     gym.player!.stats = Object.fromEntries(statKeys.map(key => [key, gym.player!.entryStats[key] + 17])) as Stats;
     gym.ownedEquipment = equipmentCatalog.filter(item => item.effects.valuePercent > 0).map(item => item.id);
     gym.equippedEquipment = [...gym.ownedEquipment];
-    expect(recommendation(gym.player)).toMatchObject({credits: 17, baseCredits: 5, trainingCredits: 12, rawFame: 61, baseFame: 97});
-    expect(recommendation(gym)).toMatchObject({credits: 17, fame: 128, rawFame: 61, baseFame: 128, cooperationFame: 0});
+    expect(recommendation(gym.player)).toMatchObject({credits: 23, baseCredits: 5, trainingCredits: 18, rawFame: 61, baseFame: 97});
+    expect(recommendation(gym)).toMatchObject({credits: 23, fame: 128, rawFame: 61, baseFame: 128, cooperationFame: 0});
     const result = act(gym, {type: 'recommend', id: gym.player!.id});
-    expect(result.credits).toBe(17);
+    expect(result.credits).toBe(23);
     expect(result.fame).toBe(128);
   });
 
   it.each([
-    [9, 5, 0], [10, 1, 0], [10, 2, 2], [17, 5, 2], [18, 2, 2],
-    [18, 3, 6], [24, 5, 6], [25, 3, 6], [25, 4, 12], [99, 5, 12],
+    [9, 5, 0], [10, 1, 0], [10, 2, 3], [14, 5, 3], [15, 2, 3],
+    [15, 3, 7], [19, 5, 7], [20, 3, 7], [20, 4, 12], [24, 5, 12],
+    [25, 4, 12], [25, 5, 18], [99, 5, 18],
   ])('awards only the highest qualifying actual level and tier at Lv%i, tier %i', (level, tier, expected) => {
     const gym = newGym(start, 38);
     gym.player!.level = level;
@@ -561,7 +566,7 @@ describe('specialist training and courses', () => {
     expect(recommendation(gym)).toMatchObject({baseCredits: tier, trainingCredits: expected, credits: tier + expected});
     gym.player!.training.completedCourses = 100;
     expect(recommendation(gym).trainingCredits).toBe(expected);
-    expect(trainingCreditMilestones).toEqual([{level: 10, tier: 2, credits: 2}, {level: 18, tier: 3, credits: 6}, {level: 25, tier: 4, credits: 12}]);
+    expect(trainingCreditMilestones).toEqual([{level: 10, tier: 2, credits: 3}, {level: 15, tier: 3, credits: 7}, {level: 20, tier: 4, credits: 12}, {level: 25, tier: 5, credits: 18}]);
   });
 });
 
@@ -589,7 +594,7 @@ describe('optional sponsorship cooperation', () => {
     gym.player!.peakLevel = 20;
     gym.player!.templateId = templateRules.find(template => template.tier === 'starter')!.id;
     gym.player!.stats = Object.fromEntries(statKeys.map(key => [key, 60])) as Stats;
-    gym.ownedEquipment = ['relic_003', 'relic_007'];
+    gym.ownedEquipment = ['relic_079'];
     gym.equippedEquipment = [...gym.ownedEquipment];
     const offer = cooperationOffers(gym)[0];
     gym = act(gym, {type: 'accept-cooperation', id: offer.id, playerId: gym.player!.id});
@@ -601,8 +606,10 @@ describe('optional sponsorship cooperation', () => {
       if (shot === 0) expect(cooperationStatus(gym).complete).toBe(false);
       expect(result.events.some(event => event.type === 'cooperation-ready')).toBe(shot === 9);
     }
-    expect(cooperationStatus(gym)).toMatchObject({complete: true, equipmentCredits: 0, rewardCredits: 1, rewardFame: 20});
-    const another = act(withOutcome(gym, 'hold'), {type: 'train', id: gym.player!.id}, start + 10_000);
+    expect(cooperationStatus(gym)).toMatchObject({complete: true, equipmentCredits: 0, rewardCredits: 1, rewardFame: 10});
+    let another = act(withOutcome(gym, 'hold'), {type: 'train', id: gym.player!.id}, start + 10_000);
+    expect(cooperationStatus(another).equipmentCredits).toBe(0); // The course already at 9/10 when accepted was not a full equipped course.
+    for (let shot = 11; shot <= 20; shot++) another = act(withOutcome(another, 'hold'), {type: 'train', id: another.player!.id}, start + shot * 1000);
     expect(cooperationStatus(another)).toMatchObject({complete: true, equipmentCredits: 2, rewardCredits: 3});
     const preview = recommendation(another);
     expect(preview.cooperationCredits).toBe(3);
@@ -649,7 +656,7 @@ describe('optional sponsorship cooperation', () => {
     expect(dispatchGym(next, next.revision, {type: 'accept-cooperation', id: offer.id, playerId: gym.player!.id}, start).state).toBe(next);
   });
 
-  it('caps the largest combined coupon payout at twenty-seven even with multiple cooperation equipment items', () => {
+  it('caps the largest combined coupon payout at thirty-three with earned cooperation equipment eligibility', () => {
     const gym = newGym(start, 22);
     gym.gymLevel = 5;
     gym.player!.enteredGymLevel = 5;
@@ -658,14 +665,15 @@ describe('optional sponsorship cooperation', () => {
     gym.player!.stats = Object.fromEntries(statKeys.map(key => [key, 99])) as Stats;
     gym.player!.training.completedCourses = 6;
     gym.player!.shots = 60;
-    gym.ownedEquipment = equipmentCatalog.filter(item => item.effects.cooperationBonus > 0).slice(0, 4).map(item => item.id);
+    gym.ownedEquipment = ['relic_079'];
     gym.equippedEquipment = [...gym.ownedEquipment];
     gym.player!.cooperation = {id: cooperationOffers(gym)[2].id, playerId: gym.player!.id, acceptedShots: 0, acceptedCourses: 0};
+    gym.player!.equipmentTraining.cooperationCourses = [2, 2];
     expect(cooperationStatus(gym)).toMatchObject({complete: true, rewardCredits: 10, equipmentCredits: 2});
-    expect(recommendation(gym)).toMatchObject({credits: 27, baseCredits: 5, trainingCredits: 12, cooperationCredits: 10});
+    expect(recommendation(gym)).toMatchObject({credits: 33, baseCredits: 5, trainingCredits: 18, cooperationCredits: 10});
     const result = act(gym, {type: 'recommend', id: gym.player!.id});
-    expect(result.credits).toBe(27);
-    expect(result.alumni[0].rewardCredits).toBe(27);
+    expect(result.credits).toBe(33);
+    expect(result.alumni[0].rewardCredits).toBe(33);
   });
 });
 

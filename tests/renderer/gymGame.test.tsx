@@ -11,8 +11,10 @@ const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStor
 vi.mock('../../src/gymStore', async () => {
   const {create} = await import('zustand');
   const {dispatchGym, newGym} = await import('../../src/game/gym/engine');
+  const {settleOfflineGym} = await import('../../src/game/gym/offline');
   const store = create<GymStore>((set, get) => ({
     state: newGym(1_800_000_000_000, 21), hasSave: true, actionError: '', saveMessage: '',
+    isSuspended: false, pendingOfflineReport: null,
     start: async () => ({state: get().state, events: []}),
     act: async action => {
       harness.actions.push(action);
@@ -25,7 +27,15 @@ vi.mock('../../src/gymStore', async () => {
       set({state: result.state});
       return result;
     },
-    flush: async () => {},
+    resume: async () => {
+      if (!get().isSuspended) return {state: get().state, events: []};
+      const result = settleOfflineGym(get().state, Date.now());
+      set({state: result.state, isSuspended: false, pendingOfflineReport: result.report && result.report.totalShots > 0 && result.report.elapsedMs >= 5000 ? result.report : null});
+      return {state: result.state, events: []};
+    },
+    suspend: async () => {set({isSuspended: true});},
+    flush: async () => {set({isSuspended: true});},
+    dismissOfflineReport: () => set({pendingOfflineReport: null}),
   }));
   harness.store = store;
   return {useGym: store};
@@ -54,7 +64,7 @@ beforeEach(() => {
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {frames.set(++frameId, callback); return frameId;});
   vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
   harness.actions = [];
-  harness.store!.setState({state: newGym(at, 21), actionError: ''});
+  harness.store!.setState({state: newGym(at, 21), actionError: '', isSuspended: false, pendingOfflineReport: null});
 });
 afterEach(() => {
   if (root) act(() => root!.unmount());
@@ -191,7 +201,7 @@ it('restores the live course card after a short automatic course-completion noti
   expect(document.querySelector('.contract-status')).toBeNull();
 });
 
-it('runs independent automatic switches at the actual upgraded interval and pauses when hidden', async () => {
+it('runs independent automatic switches and settles the enabled athlete once after returning from the background', async () => {
   const [firstId, secondId] = await twoPlayers();
   await act(async () => harness.store!.setState({state: {...state(), projects: {...state().projects, automation: 1}}}));
   for (const id of [firstId, secondId]) {
@@ -216,9 +226,19 @@ it('runs independent automatic switches at the actual upgraded interval and paus
   expect(player(firstId).shots).toBe(2);
   expect(player(secondId).shots).toBe(2);
   visibility = 'hidden';
+  await act(async () => document.dispatchEvent(new Event('visibilitychange')));
   await advance(20_000);
   expect(player(secondId).shots).toBe(2);
   visibility = 'visible';
-  await advance(200);
-  expect(player(secondId).shots).toBe(3);
+  await act(async () => document.dispatchEvent(new Event('visibilitychange')));
+  expect(player(firstId).shots).toBe(2);
+  expect(player(secondId).shots).toBe(13);
+  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('离线训练报告');
+  expect(document.querySelector('.gm-offline-report')?.textContent).toContain('11 球');
+  const settled = player(secondId).shots;
+  await act(async () => window.dispatchEvent(new Event('focus')));
+  expect(player(secondId).shots).toBe(settled);
+  await press('继续培养');
+  expect(harness.store!.getState().pendingOfflineReport).toBeNull();
+  expect(document.querySelector('.gm-offline-report')).toBeNull();
 });

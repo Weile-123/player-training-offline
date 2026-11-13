@@ -13,8 +13,9 @@ if (!Number.isInteger(sampleSize) || sampleSize < 1 || sampleSize > 200 || !Numb
   throw new Error('Invalid economy sample settings');
 if (stopAtGym !== null && (!Number.isInteger(stopAtGym) || stopAtGym < 1 || stopAtGym > 8)) throw new Error('Invalid target gym level');
 const start = 1_800_000_000_000;
-type Policy = 'short30' | 'level18' | 'level30' | 'mixed' | 'staged';
-const allPolicies: Policy[] = ['short30', 'level18', 'level30', 'mixed', 'staged'];
+type Policy = 'short30' | 'level18' | 'level30' | 'mixed' | 'staged' | 'bonus10' | 'bonus15' | 'milestone';
+type Target = 'short30' | 'level18' | 'level30' | 'bonus10' | 'bonus15' | 'bonus20' | 'bonus25';
+const allPolicies: Policy[] = ['short30', 'level18', 'level30', 'mixed', 'staged', 'bonus10', 'bonus15', 'milestone'];
 const selectedPolicy = process.env.GYM_ECONOMY_POLICY;
 if (selectedPolicy && !allPolicies.includes(selectedPolicy as Policy)) throw new Error('Unknown economy policy');
 const policies = selectedPolicy ? [selectedPolicy as Policy] : allPolicies;
@@ -42,9 +43,12 @@ function simulate(policy: Policy, seed: number) {
   let firstPurchase: number | null = null;
   const purchases: {seconds: number; type: string; id: string; cost: number}[] = [];
   const samples: any[] = [];
-  const targets = new Map<string, 'short30' | 'level18' | 'level30'>();
-  let assigned = 0;
+  const targets = new Map<string, Target>();
   let actions = 0;
+  let managementActions = 0;
+  let manualTrainActions = 0;
+  let automaticStepActions = 0;
+  const actionCounts: Record<string, number> = {};
   let lastInvestmentKey = '';
   let beforeTargetUpgrade: GymState | null = null;
   const reachedTarget = () => stopAtGym !== null && state.gymLevel >= stopAtGym;
@@ -53,6 +57,10 @@ function simulate(policy: Policy, seed: number) {
     const result = dispatchGym(state, state.revision, action, now);
     if (result.error) throw new Error(policy + ': ' + action.type + ': ' + result.error);
     actions++;
+    actionCounts[action.type] = (actionCounts[action.type] ?? 0) + 1;
+    if (action.type === 'train') manualTrainActions++;
+    else if (action.type === 'auto-step') automaticStepActions++;
+    else managementActions++;
     state = result.state;
     if (exportSaves && action.type === 'upgrade-gym' && reachedTarget()) beforeTargetUpgrade = beforeCommand;
     totalShots += result.events.filter(event => event.type === 'trained').length;
@@ -61,9 +69,10 @@ function simulate(policy: Policy, seed: number) {
   const assign = () => {
     for (const player of activePlayers(state)) if (!targets.has(player.id)) {
       const deepCount = activePlayers(state).filter(entry => targets.get(entry.id) === 'level30').length;
-      const target = state.gymLevel < 2 ? 'short30' : policy === 'mixed'
+      const target: Target = state.gymLevel < 2 ? 'short30' : policy === 'mixed'
         ? deepCount < Math.ceil(state.gymLevel / 3) ? 'level30' : 'short30'
-        : policy === 'staged' ? state.gymLevel >= 3 && deepCount < Math.ceil(state.gymLevel / 3) ? 'level30' : 'level18' : policy;
+        : policy === 'staged' ? state.gymLevel >= 3 && deepCount < Math.ceil(state.gymLevel / 3) ? 'level30' : 'level18'
+        : policy === 'milestone' ? state.gymLevel < 3 ? 'bonus10' : state.gymLevel < 4 ? 'bonus15' : state.gymLevel < 5 ? 'bonus20' : 'bonus25' : policy;
       targets.set(player.id, target);
       if (player.id !== state.player!.id) command({type: 'select-player', id: player.id});
       command({type: 'accept-cooperation', id: cooperationOffers(state)[0].id, playerId: player.id});
@@ -72,8 +81,12 @@ function simulate(policy: Policy, seed: number) {
   };
   const ready = (id: string) => {
     const player = activePlayers(state).find(player => player.id === id)!;
-    const target = targets.get(id)!;
-    return target === 'short30' ? player.shots >= 30 : player.level >= (target === 'level18' ? 18 : 30);
+    const target = targets.get(id);
+    if (!target) return false;
+    if (target === 'short30') return player.shots >= 30;
+    if (target === 'level18' || target === 'level30') return player.level >= (target === 'level18' ? 18 : 30);
+    const [level, tier] = {bonus10: [10, 2], bonus15: [15, 3], bonus20: [20, 4], bonus25: [25, 5]}[target];
+    return player.level === 99 || player.level >= level && recommendation(state, player).tier >= tier;
   };
   const resourceScore = (candidate: GymState) => {
     const effects = equipmentEffects(candidate);
@@ -107,9 +120,7 @@ function simulate(policy: Policy, seed: number) {
             gain: resourceScore({...state, ownedEquipment: [...state.ownedEquipment, item.id], equippedEquipment: [...state.equippedEquipment.filter(id => id !== removed), item.id]}) - resourceScore(state)})))
           .filter(entry => entry.gain > 0).sort((a, b) => b.gain / b.item.price - a.gain / a.item.price || a.item.id.localeCompare(b.item.id))[0];
         if (equipment) {
-          command({type: 'buy-equipment', id: equipment.item.id});
-          if (equipment.removed) command({type: 'unequip', id: equipment.removed});
-          command({type: 'equip', id: equipment.item.id});
+          command({type: 'buy-equipment', id: equipment.item.id, ...(equipment.removed ? {replaceId: equipment.removed} : {})});
           purchases.push({seconds: (now - start) / 1000, type: 'equipment', id: equipment.item.id, cost: before - state.credits});
           bought = true;
         }
@@ -147,6 +158,7 @@ function simulate(policy: Policy, seed: number) {
     const alumni = state.alumni;
     const tiers = [0, 1, 2, 3, 4, 5].map(tier => alumni.filter(player => tierNames.indexOf(templateById(player.templateId)?.tier ?? '') + 1 === tier).length);
     return {seconds, shots: totalShots, recommendations: alumni.length, tiers, grossCredits: state.credits + spent,
+      managementActions, manualTrainActions, automaticStepActions, actionCounts: {...actionCounts},
       credits: state.credits, spent, fame: state.fame, gymLevel: state.gymLevel, collection: Object.keys(state.collection).length,
       active: activePlayers(state).length, projects: {...state.projects}, equipment: [...state.equippedEquipment],
       averageRecommendedLevel: alumni.length ? alumni.reduce((sum, player) => sum + player.level, 0) / alumni.length : 0,
@@ -182,7 +194,7 @@ function simulate(policy: Policy, seed: number) {
   if (gross !== state.credits + spent || state.fame !== state.alumni.reduce((sum, player) => sum + player.rewardFame, 0)) throw new Error('Economy ledger mismatch');
   const stoppedAtSeconds = (now - start) / 1000;
   if (exportSaves) exportedStates = {beforeUpgrade: beforeTargetUpgrade, final: state};
-  return {seed, firstGym, firstPurchase, purchases, actions, samples, stoppedAtSeconds,
+  return {seed, firstGym, firstPurchase, purchases, actions, managementActions, manualTrainActions, automaticStepActions, actionCounts, samples, stoppedAtSeconds,
     reachedTarget: reachedTarget(), finalSnapshot: snapshot(stoppedAtSeconds)};
 }
 
@@ -193,7 +205,7 @@ for (const policy of policies) {
   results.push({policy, runs, checkpoints: checkpoints.flatMap(seconds => {
     const samples = runs.flatMap(run => run.samples.filter(sample => sample.seconds === seconds));
     if (!samples.length) return [];
-    return [{seconds, sampleSize: samples.length, ...Object.fromEntries(['shots', 'recommendations', 'grossCredits', 'credits', 'spent', 'fame', 'gymLevel', 'collection', 'averageRecommendedLevel', 'pendingCredits', 'pendingFame'].map(key => [key, summary(samples.map(sample => sample[key]))])),
+    return [{seconds, sampleSize: samples.length, ...Object.fromEntries(['shots', 'recommendations', 'grossCredits', 'credits', 'spent', 'fame', 'gymLevel', 'collection', 'averageRecommendedLevel', 'pendingCredits', 'pendingFame', 'managementActions', 'manualTrainActions', 'automaticStepActions'].map(key => [key, summary(samples.map(sample => sample[key]))])),
       legends: summary(samples.map(sample => sample.tiers[5]))}];
   }), gym2: {attained: runs.filter(run => run.firstGym[2] !== undefined).length,
     seconds: runs.some(run => run.firstGym[2] !== undefined) ? summary(runs.flatMap(run => run.firstGym[2] === undefined ? [] : [run.firstGym[2]])) : null}});
@@ -213,7 +225,10 @@ const output = join(process.cwd(), 'docs/balance');
 await mkdir(output, {recursive: true});
 const suffix = process.env.GYM_ECONOMY_LABEL ?? 'current';
 if (!/^[a-z0-9-]+$/.test(suffix)) throw new Error('Invalid output label');
-const parameters = {baseStamina: staminaMax(newGym(start, 1)), trainingCreditMilestones, projectCosts: Object.fromEntries(projects.filter(project => project.available)
+const parameters = {baseStamina: staminaMax(newGym(start, 1)), rewardProfile: process.env.GYM_ECONOMY_REWARD_PROFILE ?? 'current',
+  automaticExperience: 'base-outcome-XP + automation-project-level, only when autoEnabled and offlineRulesVersion=2',
+  trainingCreditMilestones, basicCooperationFame: cooperationOffers(newGym(start, 1))[0].fame,
+  projectCosts: Object.fromEntries(projects.filter(project => project.available)
   .map(project => [project.id, Array.from({length: project.maxLevel}, (_, i) => projectCost(project.id, i + 1))])),
   extraCourseRecoveryCaps: Array.from({length: 8}, (_, i) => courseRecoveryCap({...newGym(start, 1), gymLevel: i + 1}))};
 await writeFile(join(output, 'economy-' + suffix + '.json'), JSON.stringify({schema: 1, balanceVersion: newGym(start, 1).balanceVersion, sampleSize, horizonSeconds, stopAtGym, parameters,
@@ -221,5 +236,6 @@ await writeFile(join(output, 'economy-' + suffix + '.json'), JSON.stringify({sch
 console.log(JSON.stringify(results.map(result => ({policy: result.policy, gym2: result.gym2,
   reachedTarget: result.runs.filter(run => run.reachedTarget).length,
   stoppedAtSeconds: summary(result.runs.map(run => run.stoppedAtSeconds)),
-  final: Object.fromEntries(['grossCredits', 'spent', 'fame', 'gymLevel', 'recommendations', 'legends'].map(key => [key,
-    summary(result.runs.map(run => key === 'legends' ? run.finalSnapshot.tiers[5] : run.finalSnapshot[key])).mean]))})), null, 2));
+  final: Object.fromEntries((['grossCredits', 'spent', 'fame', 'gymLevel', 'recommendations', 'legends'] as const).map(key => [key,
+    summary(result.runs.map(run => key === 'legends' ? run.finalSnapshot.tiers[5] : run.finalSnapshot[key])).mean])),
+  managementActions: summary(result.runs.map(run => run.managementActions)).mean})), null, 2));

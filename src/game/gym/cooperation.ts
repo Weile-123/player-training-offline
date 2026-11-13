@@ -20,7 +20,7 @@ export function buildCooperationOffers(state: GymState, player: GymPlayer | null
   const pair = pairs[hash(`${state.seed}:${player.id}:cooperation`) % pairs.length];
   const basic: CooperationOffer = {id: prefixes + 'basic', kind: 'basic', name: '基础培养合作',
     description: '接取后完成 10 次训练、1 节课程，并培养到替补及以上。', requiredShots: 10, requiredCourses: 1,
-    requiredTier: 1, focusKeys: [], requiredAttribute: 0, credits: 1, fame: 20};
+    requiredTier: 1, focusKeys: [], requiredAttribute: 0, credits: 1, fame: 10};
   const specialist: CooperationOffer = {id: prefixes + 'specialist', kind: 'specialist', name: '专项培养合作',
     description: '接取后完成 20 次训练、2 节课程，达到首发及以上，并满足两项专项能力。', requiredShots: 20, requiredCourses: 2,
     requiredTier: 2, focusKeys: pair, requiredAttribute: 65, credits: 3, fame: 55};

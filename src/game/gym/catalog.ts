@@ -1,5 +1,10 @@
 import {shopCatalog, type Rarity} from '../contract/commerce';
-import {statKeys, type StatKey} from '../types';
+import {type StatKey} from '../types';
+import {type LegacyEquipmentEffects} from './equipmentLegacy';
+import {equipmentArtIds} from './equipmentArt';
+export {equipmentArtVersion} from './equipmentArt';
+export {legacyEquipmentCatalog, previousEquipmentCatalog, equipmentCanonicalIds, removedEquipmentCatalog,
+  legacyEquipmentPrice} from './equipmentLegacy';
 
 export type ProjectId = 'endurance' | 'recovery' | 'recruitment' | 'equipment' | 'automation' | 'offline';
 export type Project = {id: ProjectId; name: string; unlockLevel: number; maxLevel: number; basePrice: number; description: string; available: boolean};
@@ -9,16 +14,20 @@ export const projects: readonly Project[] = [
   {id: 'recovery', name: '恢复护理', unlockLevel: 1, maxLevel: 8, basePrice: 1, description: '每级将恢复 1 点体力所需时间缩短 1 秒。', available: true},
   {id: 'recruitment', name: '招生培养', unlockLevel: 2, maxLevel: 6, basePrice: 2, description: '每级使下一名新人出生六维各增加 1 点。', available: true},
   {id: 'equipment', name: '器械管理', unlockLevel: 2, maxLevel: 4, basePrice: 2, description: '每级增加 1 个器材启用槽。', available: true},
-  {id: 'automation', name: '自动训练', unlockLevel: 2, maxLevel: 5, basePrice: 3, description: '球馆 2 级免费解锁在线自动训练，基础每 2 秒一球；项目每级缩短 0.2 秒，最低 1 秒。离线不补投。', available: true},
-  {id: 'offline', name: '离线课表', unlockLevel: 4, maxLevel: 5, basePrice: 4, description: '后续版本开放离线训练，当前离线仅恢复体力。', available: false},
+  {id: 'automation', name: '自动训练', unlockLevel: 2, maxLevel: 5, basePrice: 3, description: '球馆 2 级免费解锁在线与离线自动训练。项目每级使每球经验额外 +1，并缩短出手间隔 0.2 秒，最低 1 秒；体力不足仍需恢复。', available: true},
+  {id: 'offline', name: '离线课表', unlockLevel: 2, maxLevel: 5, basePrice: 2, description: '球馆 2 级免费获得 30 分钟离线训练；项目依次提升至 45、60、90、120、180 分钟。超时只恢复体力，仅训练开启自动的球员。', available: true},
 ];
 
 /** Cumulative training coupons; both actual level and actual template tier are required. */
 export const trainingCreditMilestones = [
-  {level: 10, tier: 2, credits: 2},
-  {level: 18, tier: 3, credits: 6},
-  {level: 25, tier: 4, credits: 12},
+  {level: 10, tier: 2, credits: 3},
+  {level: 15, tier: 3, credits: 7},
+  {level: 20, tier: 4, credits: 12},
+  {level: 25, tier: 5, credits: 18},
 ] as const;
+
+/** Legendary base + highest training milestone + legendary cooperation + equipment. */
+export const maximumRecommendationCredits = 33;
 
 export type GymLevel = {level: number; name: string; fame: number; requiredRecommendations: number; requiredTier: number; requiredLegends: number; requiredTemplates: number};
 export const gymLevels: readonly GymLevel[] = [
@@ -32,44 +41,79 @@ export const gymLevels: readonly GymLevel[] = [
   {level: 8, name: '传奇篮球学院', fame: 18000, requiredRecommendations: 0, requiredTier: 0, requiredLegends: 15, requiredTemplates: 25},
 ];
 
-export type EquipmentEffects = {
-  stamina: number; recovery: number; valuePercent: number; focusKey: StatKey | null; focusPower: number;
-  courseRecovery: number; cooperationBonus: number;
+export type EquipmentEffects = LegacyEquipmentEffects & {
+  experience: number; automationExperience: number; offlineMinutes: number;
 };
-export type GymEquipment = {id: string; name: string; rarity: Rarity; unlockLevel: number; price: number; effects: EquipmentEffects; description: string; requiredTemplates: number};
-
-// Preserve each item's capacity, recovery and display-value effects while adding an active training or business use.
-const recoveryIds = new Set([2, 4, 7, 11, 12, 17, 18, 19, 21, 22, 23, 26, 27, 32, 37, 40, 41, 42, 48, 49, 51, 52, 53, 55, 57, 59, 61, 62, 63, 70, 71, 72, 73, 78, 84, 85, 87, 88, 93, 95, 97]);
-const valueIds = new Set([1, 5, 6, 8, 9, 10, 13, 20, 24, 29, 33, 35, 43, 45, 46, 50, 54, 58, 64, 66, 67, 68, 69, 74, 79, 81, 82, 83, 86, 89, 91, 92, 94, 96, 98]);
-const tierBudget = {
-  common: {stamina: 2, recovery: 1, valuePercent: 10},
-  rare: {stamina: 4, recovery: 2, valuePercent: 20},
-  legendary: {stamina: 7, recovery: 3, valuePercent: 35},
+export type EquipmentFamily = 'capacity' | 'recovery' | 'course' | 'experience' | 'automation' | 'offline'
+  | 'brand' | 'cooperation' | `focus-${StatKey}`;
+export const equipmentFamilyLabels: Record<EquipmentFamily, string> = {
+  capacity: '体力储备', recovery: '自然恢复', course: '课后恢复', experience: '训练经验',
+  automation: '自动训练', offline: '离线课表', brand: '球馆品牌', cooperation: '培养合作',
+  'focus-three': '三分专项', 'focus-mid': '中投专项', 'focus-drive': '突破专项',
+  'focus-inside': '篮下专项', 'focus-handle': '控球专项', 'focus-defense': '防守专项',
 };
+export type GymEquipment = {
+  id: string; artId: string; name: string; family: EquipmentFamily; grade: 1 | 2 | 3; rarity: Rarity;
+  unlockLevel: number; price: number; effects: EquipmentEffects; description: string; requiredTemplates: number;
+};
+export const equipmentCatalogVersion = 3 as const;
+const statLabels: Record<StatKey, string> = {three: '三分', mid: '中投', drive: '突破', inside: '篮下', handle: '控球', defense: '防守'};
+const emptyEffects: EquipmentEffects = {stamina: 0, recovery: 0, valuePercent: 0, focusKey: null, focusPower: 0,
+  courseRecovery: 0, cooperationBonus: 0, experience: 0, automationExperience: 0, offlineMinutes: 0};
+const originalEquipmentById = new Map(shopCatalog.map(item => [item.id, item]));
 
-export const equipmentCatalog: readonly GymEquipment[] = shopCatalog.map(item => {
-  const number = Number(item.id.slice(6));
-  const budget = tierBudget[item.rarity];
-  const effects: EquipmentEffects = {stamina: 0, recovery: 0, valuePercent: 0, focusKey: null, focusPower: 0, courseRecovery: 0, cooperationBonus: 0};
-  if (recoveryIds.has(number)) effects.recovery = budget.recovery;
-  else if (valueIds.has(number)) effects.valuePercent = budget.valuePercent;
-  else effects.stamina = budget.stamina;
-  if (number % 4 === 0) {
-    effects.focusKey = statKeys[Math.floor(number / 4) % statKeys.length];
-    effects.focusPower = item.rarity === 'common' ? .4 : item.rarity === 'rare' ? .7 : 1;
-  } else if (number % 4 === 1) effects.courseRecovery = item.rarity === 'common' ? 1 : item.rarity === 'rare' ? 2 : 3;
-  else if (number % 4 === 2) effects.valuePercent = Math.max(effects.valuePercent, budget.valuePercent);
-  else effects.cooperationBonus = item.rarity === 'legendary' ? 2 : 1;
-  const unlockLevel = Math.min(8, Math.max(item.rarity === 'legendary' ? 5 : item.rarity === 'rare' ? 3 : 1, item.month - 1));
-  const price = item.rarity === 'common' ? 1 + number % 2 : item.rarity === 'rare' ? 3 + number % 3 : 8 + number % 5;
-  const descriptions: string[] = [];
-  if (effects.stamina) descriptions.push(`体力上限 +${effects.stamina}（器材合计最多 +20）`);
-  if (effects.recovery) descriptions.push(`体力恢复间隔缩短 ${effects.recovery} 秒（器材合计最多缩短 4 秒）`);
-  if (effects.valuePercent) descriptions.push(`展示身价 +${effects.valuePercent}%，同时增加品牌声望倍率（器材倍率合计最多 +50%）`);
-  if (effects.focusKey) descriptions.push(`${{three: '三分', mid: '中投', drive: '突破', inside: '篮下', handle: '控球', defense: '防守'}[effects.focusKey]}成长抽取权重 +${effects.focusPower}（单维器材加值最多 +1.5）`);
-  if (effects.courseRecovery) descriptions.push(`每完成一课额外恢复 ${effects.courseRecovery} 体力（受馆级额外恢复上限限制）`);
-  if (effects.cooperationBonus) descriptions.push(`完成合作且接取后完成至少 2 节课程，额外获得 ${effects.cooperationBonus} 券（器材合计最多 +2）`);
-  const description = descriptions.join('；') + '。';
-  return {id: item.id, name: item.name, rarity: item.rarity, unlockLevel, price, effects, description,
-    requiredTemplates: item.locked ? Math.min(35, unlockLevel * 4) : 0};
-});
+function equipment(id: number, family: EquipmentFamily, grade: 1 | 2 | 3,
+  unlockLevel: number, price: number, effects: Partial<EquipmentEffects>, requiredTemplates = 0): GymEquipment {
+  const logicalId = `relic_${String(id).padStart(3, '0')}`;
+  const artId = equipmentArtIds[logicalId];
+  const original = originalEquipmentById.get(artId);
+  if (!original) throw new Error(`Missing original equipment artwork/name pair: ${logicalId}`);
+  const e = {...emptyEffects, ...effects};
+  const text: string[] = [];
+  if (e.stamina) text.push(`全体球员体力上限 +${e.stamina}（换入不会补满体力）`);
+  if (e.recovery) text.push(`自然恢复每点体力所需时间缩短 ${e.recovery} 秒`);
+  if (e.courseRecovery) text.push(`每完成 10 球课程额外恢复 ${e.courseRecovery} 点体力（受馆级上限限制）`);
+  if (e.experience) text.push(`每次有效投篮额外 +${e.experience} 经验，手动、在线自动及离线均生效`);
+  if (e.automationExperience) text.push(`自动投篮每球额外 +${e.automationExperience} 经验，在线与离线相同`);
+  if (e.offlineMinutes) text.push(`离线可结算训练时长 +${e.offlineMinutes} 分钟（项目与器材合计最多 4 小时，不提高每球经验）`);
+  if (e.valuePercent) text.push(`培养品牌 +${e.valuePercent}%，按训练期间均值计入培养声望；当前展示身价 +${e.valuePercent}%，不增加赞助券`);
+  if (e.cooperationBonus) text.push(`接取合作后启用本档器材完成至少 2 个完整课程（每课 10 球），达标推荐额外 +${e.cooperationBonus} 券，取得的资格不会因换下而消失`);
+  if (e.focusKey) text.push(`${statLabels[e.focusKey]}成长倾向 +${e.focusPower}，升级时更容易提升此属性，不增加每次升级的总属性点数；该属性满 99 后取消额外倾向`);
+  return {id: logicalId, artId, name: original.name, family, grade,
+    rarity: grade === 1 ? 'common' : grade === 2 ? 'rare' : 'legendary', unlockLevel, price,
+    effects: e, description: text.join('；') + '。同类仅启用一件。', requiredTemplates};
+}
+
+/** Persistent logical IDs keep existing assets; presentation is selected independently from original-game pairs. */
+export const equipmentCatalog: readonly GymEquipment[] = [
+  equipment(14, 'capacity', 1, 1, 2, {stamina: 4}),
+  equipment(34, 'capacity', 2, 3, 6, {stamina: 10}),
+  equipment(90, 'capacity', 3, 6, 12, {stamina: 20}, 8),
+  equipment(2, 'recovery', 1, 1, 3, {recovery: 1}),
+  equipment(42, 'recovery', 2, 3, 8, {recovery: 2}),
+  equipment(78, 'recovery', 3, 6, 20, {recovery: 4}, 8),
+  equipment(17, 'course', 1, 1, 5, {courseRecovery: 1}),
+  equipment(37, 'course', 2, 3, 12, {courseRecovery: 2}),
+  equipment(85, 'course', 3, 6, 24, {courseRecovery: 3}, 8),
+  equipment(6, 'experience', 1, 1, 4, {experience: 1}),
+  equipment(46, 'experience', 2, 3, 10, {experience: 2}),
+  equipment(81, 'experience', 3, 6, 20, {experience: 3}, 8),
+  equipment(7, 'automation', 1, 2, 3, {automationExperience: 1}),
+  equipment(51, 'automation', 2, 4, 8, {automationExperience: 2}),
+  equipment(87, 'automation', 3, 6, 16, {automationExperience: 3}, 8),
+  equipment(28, 'offline', 1, 2, 2, {offlineMinutes: 15}),
+  equipment(65, 'offline', 2, 4, 6, {offlineMinutes: 30}),
+  equipment(77, 'offline', 3, 6, 14, {offlineMinutes: 60}, 8),
+  equipment(1, 'brand', 1, 1, 2, {valuePercent: 10}),
+  equipment(45, 'brand', 2, 3, 6, {valuePercent: 25}),
+  equipment(82, 'brand', 3, 6, 14, {valuePercent: 50}, 8),
+  equipment(3, 'cooperation', 1, 2, 5, {cooperationBonus: 1}),
+  equipment(79, 'cooperation', 3, 5, 14, {cooperationBonus: 2}, 8),
+  ...([
+    ['three', 24, 96], ['mid', 4, 76], ['drive', 8, 80],
+    ['inside', 12, 84], ['handle', 40, 88], ['defense', 20, 92],
+  ] as const).flatMap(([key, basic, advanced]) => [
+    equipment(basic, `focus-${key}`, 1, 2, 3, {focusKey: key, focusPower: .4}),
+    equipment(advanced, `focus-${key}`, 3, 5, 12, {focusKey: key, focusPower: 1.2}, 8),
+  ]),
+];

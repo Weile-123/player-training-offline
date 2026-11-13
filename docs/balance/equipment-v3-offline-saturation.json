@@ -1,0 +1,2382 @@
+{
+  "metadata": {
+    "generatedAt": "2026-11-13T08:07:17.335Z",
+    "sampleSize": 16,
+    "cases": 8,
+    "settlements": 128,
+    "actualShots": 303588,
+    "elapsedSeconds": 9.193,
+    "assumptions": [
+      "Synthetic G6/G8 stages, same real recruits and RNG seeds for each paired kit",
+      "Capacity/recovery/course/universalXP/autoXP highest-grade kit",
+      "Equipment project fixed at its local maximum to isolate an added sixth item; no drinks or recommendations",
+      "Four-hour absence; compare no offline equipment against highest +60-minute item; report stops at level99"
+    ]
+  },
+  "cases": [
+    {
+      "gym": 6,
+      "profile": "typical",
+      "withOffline": false,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12680,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12732,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12700,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12564,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12696,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12680,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12764,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12656,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12844,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12712,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12724,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12696,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12668,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12712,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12792,
+          "level": 47,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 647,
+          "xp": 12732,
+          "level": 47,
+          "stoppedAtMinutes": null
+        }
+      ],
+      "summary": {
+        "meanShots": 647,
+        "meanXp": 12709.5,
+        "meanLevel": 47,
+        "reached99": 0,
+        "meanStoppedAtMinutes": null,
+        "minStoppedAtMinutes": null,
+        "maxStoppedAtMinutes": null
+      }
+    },
+    {
+      "gym": 6,
+      "profile": "typical",
+      "withOffline": true,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087",
+        "relic_077"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32368,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32464,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32412,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32236,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32228,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32224,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32484,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32396,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32556,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32524,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32396,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32352,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32264,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32112,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32540,
+          "level": 69,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 2,
+            "recovery": 4,
+            "recruitment": 2,
+            "equipment": 4,
+            "automation": 2,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1647,
+          "xp": 32272,
+          "level": 69,
+          "stoppedAtMinutes": null
+        }
+      ],
+      "summary": {
+        "meanShots": 1647,
+        "meanXp": 32364.25,
+        "meanLevel": 69,
+        "reached99": 0,
+        "meanStoppedAtMinutes": null,
+        "minStoppedAtMinutes": null,
+        "maxStoppedAtMinutes": null
+      }
+    },
+    {
+      "gym": 6,
+      "profile": "maximum",
+      "withOffline": false,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.56666666666666
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.53333333333333
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.56666666666666
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3485,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.58333333333334
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.5
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3513,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 165.05
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3475,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.08333333333334
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3486,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.6
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3489,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.83333333333334
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.53333333333333
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3495,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.08333333333334
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3491,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.01666666666668
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3492,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.03333333333333
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3505,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.58333333333334
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3478,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.16666666666666
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.5
+        }
+      ],
+      "summary": {
+        "meanShots": 3490.0625,
+        "meanXp": 78920,
+        "meanLevel": 99,
+        "reached99": 16,
+        "meanStoppedAtMinutes": 163.88958333333332,
+        "minStoppedAtMinutes": 163.08333333333334,
+        "maxStoppedAtMinutes": 165.05
+      }
+    },
+    {
+      "gym": 6,
+      "profile": "maximum",
+      "withOffline": true,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087",
+        "relic_077"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.56666666666666
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.53333333333333
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.56666666666666
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3485,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.58333333333334
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.5
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3513,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 165.05
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3475,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.08333333333334
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3486,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.6
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3489,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.83333333333334
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.53333333333333
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3495,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.08333333333334
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3491,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.01666666666668
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3492,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.03333333333333
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3505,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.58333333333334
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3478,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 163.16666666666666
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 6,
+            "recovery": 6,
+            "recruitment": 5,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 164.5
+        }
+      ],
+      "summary": {
+        "meanShots": 3490.0625,
+        "meanXp": 78920,
+        "meanLevel": 99,
+        "reached99": 16,
+        "meanStoppedAtMinutes": 163.88958333333332,
+        "minStoppedAtMinutes": 163.08333333333334,
+        "maxStoppedAtMinutes": 165.05
+      }
+    },
+    {
+      "gym": 8,
+      "profile": "typical",
+      "withOffline": false,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15620,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15712,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15660,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15492,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15628,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15604,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15820,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15680,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15820,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15664,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15724,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15672,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15656,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15676,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15724,
+          "level": 51,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 30,
+          "creditedMinutes": 30,
+          "shots": 760,
+          "xp": 15668,
+          "level": 51,
+          "stoppedAtMinutes": null
+        }
+      ],
+      "summary": {
+        "meanShots": 760,
+        "meanXp": 15676.25,
+        "meanLevel": 51,
+        "reached99": 0,
+        "meanStoppedAtMinutes": null,
+        "minStoppedAtMinutes": null,
+        "maxStoppedAtMinutes": null
+      }
+    },
+    {
+      "gym": 8,
+      "profile": "typical",
+      "withOffline": true,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087",
+        "relic_077"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40536,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40640,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40580,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40376,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40352,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40300,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40500,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40420,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40640,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40556,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40476,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40388,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40336,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40220,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40676,
+          "level": 76,
+          "stoppedAtMinutes": null
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 3,
+            "recovery": 6,
+            "recruitment": 3,
+            "equipment": 4,
+            "automation": 3,
+            "offline": 0
+          },
+          "capMinutes": 90,
+          "creditedMinutes": 90,
+          "shots": 1960,
+          "xp": 40276,
+          "level": 76,
+          "stoppedAtMinutes": null
+        }
+      ],
+      "summary": {
+        "meanShots": 1960,
+        "meanXp": 40454.5,
+        "meanLevel": 76,
+        "reached99": 0,
+        "meanStoppedAtMinutes": null,
+        "minStoppedAtMinutes": null,
+        "maxStoppedAtMinutes": null
+      }
+    },
+    {
+      "gym": 8,
+      "profile": "maximum",
+      "withOffline": false,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.53333333333333
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.5
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.53333333333333
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3485,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.55
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.26666666666668
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3513,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.71666666666667
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3475,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.15
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3486,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.56666666666666
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3489,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.73333333333332
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.5
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3495,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.95
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3491,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.88333333333333
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3492,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.9
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3505,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.35
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3478,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.2
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 180,
+          "creditedMinutes": 180,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.26666666666668
+        }
+      ],
+      "summary": {
+        "meanShots": 3490.0625,
+        "meanXp": 78920,
+        "meanLevel": 99,
+        "reached99": 16,
+        "meanStoppedAtMinutes": 129.7875,
+        "minStoppedAtMinutes": 129.15,
+        "maxStoppedAtMinutes": 130.71666666666667
+      }
+    },
+    {
+      "gym": 8,
+      "profile": "maximum",
+      "withOffline": true,
+      "ids": [
+        "relic_090",
+        "relic_078",
+        "relic_085",
+        "relic_081",
+        "relic_087",
+        "relic_077"
+      ],
+      "runs": [
+        {
+          "seed": 1,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.53333333333333
+        },
+        {
+          "seed": 2,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.5
+        },
+        {
+          "seed": 3,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3484,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.53333333333333
+        },
+        {
+          "seed": 4,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3485,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.55
+        },
+        {
+          "seed": 5,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.26666666666668
+        },
+        {
+          "seed": 6,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3513,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.71666666666667
+        },
+        {
+          "seed": 7,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3475,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.15
+        },
+        {
+          "seed": 8,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3486,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.56666666666666
+        },
+        {
+          "seed": 9,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3489,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.73333333333332
+        },
+        {
+          "seed": 10,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3482,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.5
+        },
+        {
+          "seed": 11,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3495,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.95
+        },
+        {
+          "seed": 12,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3491,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.88333333333333
+        },
+        {
+          "seed": 13,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3492,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.9
+        },
+        {
+          "seed": 14,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3505,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.35
+        },
+        {
+          "seed": 15,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3478,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 129.2
+        },
+        {
+          "seed": 16,
+          "projects": {
+            "endurance": 8,
+            "recovery": 8,
+            "recruitment": 6,
+            "equipment": 4,
+            "automation": 5,
+            "offline": 5
+          },
+          "capMinutes": 240,
+          "creditedMinutes": 240,
+          "shots": 3500,
+          "xp": 78920,
+          "level": 99,
+          "stoppedAtMinutes": 130.26666666666668
+        }
+      ],
+      "summary": {
+        "meanShots": 3490.0625,
+        "meanXp": 78920,
+        "meanLevel": 99,
+        "reached99": 16,
+        "meanStoppedAtMinutes": 129.7875,
+        "minStoppedAtMinutes": 129.15,
+        "maxStoppedAtMinutes": 130.71666666666667
+      }
+    }
+  ]
+}

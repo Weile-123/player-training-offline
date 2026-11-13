@@ -62,6 +62,8 @@ it('chooses a specialization and completes a real ten-shot course with immediate
   await mount(GymTrainingPanel, newGym(at, 11));
   expect(document.body.textContent).toContain('天赋倾向');
   expect(document.body.textContent).toContain('当前成长倾向');
+  expect(document.body.textContent).toContain('升级总属性点数不变');
+  expect(document.querySelector('.gm-use-note')!.textContent).not.toContain('成长抽取权重');
   await press(buttonWithin(card('.gm-plan-card', '投射专项'), '选择此计划'));
   expect(latest.player!.training.planId).toBe('shooting');
   await shoot(10);
@@ -74,12 +76,14 @@ it('chooses a specialization and completes a real ten-shot course with immediate
   expect(document.querySelector('.gm-plan-summary')?.textContent).toContain('器材额外恢复上限 +1');
 });
 
-it.each([[1, 1, 5], [3, 2, 6], [4, 3, 7], [6, 4, 8]])('shows and applies the gym level %s course recovery limit', async (gymLevel, extraCap, totalRecovery) => {
+it.each([[1, 1, 5], [2, 1, 5], [3, 2, 6], [4, 2, 6], [5, 2, 6], [6, 3, 7], [7, 3, 7], [8, 3, 7]])('shows and applies the gym level %s course recovery limit with one legal course-family item', async (gymLevel, extraCap, totalRecovery) => {
   const state = newGym(at, 16);
   state.gymLevel = gymLevel;
-  const equipment = equipmentCatalog.filter(item => item.effects.courseRecovery > 0).sort((first, second) => second.effects.courseRecovery - first.effects.courseRecovery).slice(0, 2);
-  state.ownedEquipment = equipment.map(item => item.id);
+  const equipment = equipmentCatalog.filter(item => item.effects.courseRecovery > 0 && item.unlockLevel <= gymLevel).sort((first, second) => second.effects.courseRecovery - first.effects.courseRecovery)[0];
+  state.ownedEquipment = [equipment.id];
   state.equippedEquipment = [...state.ownedEquipment];
+  state.purchasePrices = {[equipment.id]: equipment.price};
+  state.collection = Object.fromEntries(templateRules.slice(0, equipment.requiredTemplates).map(template => [template.id, {firstAt: at, highestRating: 50, highestValue: '320'}]));
   state.player!.stamina = 10;
   state.player!.shots = 9;
   state.player!.training.shots = 9;
@@ -127,7 +131,7 @@ it('starts cooperation at acceptance and pays the completed bonus only through r
   expect(latest.credits).toBe(0);
   const reward = recommendation(latest);
   expect(reward.cooperationCredits).toBe(1);
-  expect(reward.cooperationFame).toBe(20);
+  expect(reward.cooperationFame).toBe(10);
   const completed = latest;
   await mount(GymRecommendPanel, completed);
   expect(document.body.textContent).toContain('合作奖励 · 已达标');
@@ -166,11 +170,14 @@ it('shows new equipment purposes in real detail dialogs and exposes the expanded
   expect(filters).toContain('课程恢复');
   expect(filters).toContain('合作奖励');
   expect(filters).toContain('身价与品牌');
+  expect(filters).toContain('每球经验');
+  expect(filters).toContain('自动经验');
+  expect(filters).toContain('离线时长');
   const item = equipmentCatalog.find(entry => entry.effects.courseRecovery > 0)!;
   await press(buttonWithin(card('.gm-product', item.name), '器材详情'));
   const detail = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '器材档案')!;
-  expect(detail.textContent).toContain('每完成一课额外恢复');
+  expect(detail.textContent).toContain('每完成 10 球课程额外恢复');
   expect(detail.textContent).toContain('每课恢复');
-  expect(detail.textContent).toContain('球馆 Lv.8 的器材额外恢复上限 +4');
+  expect(detail.textContent).toContain('球馆 Lv.8 的器材额外恢复上限 +3');
   expect(detail.textContent).not.toMatch(/推荐券数保持原档位|成功权重|交付|信用|经费/);
 });

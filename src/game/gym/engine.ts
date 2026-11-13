@@ -5,12 +5,12 @@ import {hash, random, stream, type Stream} from '../contract/random';
 import {ledger, type Ledger} from '../contract/money';
 import {grow, match, shape} from '../contract/templates';
 import {cloneData} from '../../utils/cloneData';
-import {equipmentCatalog, gymLevels, projects, trainingCreditMilestones, type ProjectId} from './catalog';
+import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLevels, projects, trainingCreditMilestones, type GymEquipment, type ProjectId} from './catalog';
 import {trainingBias, trainingPlans, type TrainingPlanId, type TrainingProgress} from './training';
 import {buildCooperationOffers, type Cooperation, type CooperationStatus} from './cooperation';
 import {playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
 
-export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones} from './catalog';
+export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits} from './catalog';
 export {trainingPlans} from './training';
 export type {TrainingPlanId, TrainingProgress} from './training';
 export type {Cooperation, CooperationOffer, CooperationStatus} from './cooperation';
@@ -22,6 +22,11 @@ export type GymPlayer = {
   templateId: string | null; highestTier: TemplateTier | null; shots: number;
   book: Ledger; stamina: number; recoveryMs: number; enteredGymLevel: number; training: TrainingProgress;
   experience: number; nextShotAt: number; autoEnabled: boolean; cooperation: Cooperation | null;
+  equipmentTraining: {brandTotal: number; brandShots: number; cooperationCourses: [number, number]; cooperationCourseShots: [number, number]};
+};
+export type EquipmentBonuses = {
+  stamina: number; recovery: number; valuePercent: number; focus: Stats; courseRecovery: number; cooperationBonus: number;
+  experience: number; automationExperience: number; offlineMinutes: number;
 };
 export type Recommendation = {
   credits: number; fame: number; growth: number; tier: number; tierId: TemplateTier | null; tierName: string;
@@ -29,9 +34,15 @@ export type Recommendation = {
 };
 export type GymAlumnus = GymPlayer & {recommendedAt: number; rewardCredits: number; rewardFame: number; finalValue: string};
 export type GymState = {
+  equipmentCatalogVersion?: 1 | 2 | 3;
+  /** Migration-only snapshot: consumed once before newly rewritten effects can accrue. */
+  pendingLegacyEquipmentEffects?: EquipmentBonuses;
+  legacyEquipmentCollection?: Record<string, {firstAt: number}>;
+  /** Absent on pre-offline saves; establish a fresh clock baseline before accruing shots. */
+  offlineRulesVersion?: 1 | 2;
   kind: 'gym-management'; version: 1; balanceVersion: 3; seed: number; revision: number; createdAt: number; updatedAt: number; nextPlayer: number;
   player: GymPlayer | null; bench: GymPlayer[]; credits: number; fame: number; gymLevel: number; projects: Record<ProjectId, number>;
-  ownedEquipment: string[]; equippedEquipment: string[]; inventory: {drink: number};
+  ownedEquipment: string[]; equippedEquipment: string[]; purchasePrices: Record<string, number>; inventory: {drink: number};
   collection: Record<string, {firstAt: number; highestRating: number; highestValue: string}>;
   collectedEquipment: Record<string, {firstAt: number}>; alumni: GymAlumnus[];
   rng: {recruits: Stream; economy: Stream; attributes: Stream};
@@ -42,7 +53,8 @@ export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
   | {type: 'train' | 'recommend' | 'use-drink'; id: string}
   | {type: 'recruit'; preference?: HeightPreference}
-  | {type: 'buy-equipment' | 'equip' | 'unequip' | 'upgrade-project'; id: string}
+  | {type: 'buy-equipment' | 'equip'; id: string; replaceId?: string}
+  | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
   | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string}
   | {type: 'accept-cooperation'; id: string; playerId: string}
   | {type: 'abandon-cooperation'; playerId: string}
@@ -68,39 +80,57 @@ export function autoTrainingSeconds(state: GymState): number {
   return automaticIntervalMs(state) / 1_000;
 }
 
+/** Each automatic project level adds one deterministic XP to a valid auto shot. */
+export function trainingShotExperience(state: GymState, outcome: TrainingOutcome, player: GymPlayer | null = state.player): number {
+  const equipment = equipmentEffects(state);
+  return shotExperience(outcome) + equipment.experience
+    + (player?.autoEnabled ? equipment.automationExperience + (state.offlineRulesVersion === 2 ? state.projects.automation : 0) : 0);
+}
+
 export function activePlayers(state: GymState): GymPlayer[] {
   return state.player ? [state.player, ...state.bench] : [...state.bench];
 }
 
 /** Maximum equipment bonus; the four-point base course recovery is separate. */
 export function courseRecoveryCap(state: GymState): number {
-  return [1, 2, 2, 3, 3, 4, 4, 4][state.gymLevel - 1] ?? 1;
+  return [1, 1, 2, 2, 2, 3, 3, 3][state.gymLevel - 1] ?? 1;
 }
 const tierIds: readonly (TemplateTier | null)[] = [null, 'rotation', 'starter', 'star', 'superstar', 'legend'];
 const tierNames = ['待发掘', '替补', '首发', '全明星', '巨星', '传奇'];
 const catalogById = new Map(equipmentCatalog.map(item => [item.id, item]));
+const legacyCatalogById = new Map(legacyEquipmentCatalog.map(item => [item.id, item]));
 const projectById = new Map(projects.map(project => [project.id as string, project]));
 const rating = (stats: Stats) => statKeys.reduce((sum, key) => sum + stats[key], 0) / statKeys.length;
 const validTime = (now: number) => Number.isSafeInteger(now) && now >= 0;
 
-export function equipmentEffects(state: GymState) {
-  const effects = state.equippedEquipment.reduce((effects, id) => {
+export function equipmentEffects(state: GymState): EquipmentBonuses {
+  if (state.pendingLegacyEquipmentEffects) return {...state.pendingLegacyEquipmentEffects, focus: {...state.pendingLegacyEquipmentEffects.focus}};
+  const families = new Map<string, GymEquipment>();
+  for (const id of state.equippedEquipment) {
     const item = state.ownedEquipment.includes(id) ? catalogById.get(id) : undefined;
-    if (item) {
+    const previous = item && families.get(item.family);
+    if (item && (!previous || item.grade > previous.grade)) families.set(item.family, item);
+  }
+  const effects = [...families.values()].reduce((effects, item) => {
       effects.stamina += item.effects.stamina;
       effects.recovery += item.effects.recovery;
       effects.valuePercent += item.effects.valuePercent;
       if (item.effects.focusKey) effects.focus[item.effects.focusKey] += item.effects.focusPower;
       effects.courseRecovery += item.effects.courseRecovery;
       effects.cooperationBonus += item.effects.cooperationBonus;
-    }
+      effects.experience += item.effects.experience;
+      effects.automationExperience += item.effects.automationExperience;
+      effects.offlineMinutes += item.effects.offlineMinutes;
     return effects;
   }, {stamina: 0, recovery: 0, valuePercent: 0, focus: Object.fromEntries(statKeys.map(key => [key, 0])) as Stats,
-    courseRecovery: 0, cooperationBonus: 0});
+    courseRecovery: 0, cooperationBonus: 0, experience: 0, automationExperience: 0, offlineMinutes: 0});
   effects.stamina = Math.min(20, effects.stamina);
   effects.recovery = Math.min(4, effects.recovery);
   effects.courseRecovery = Math.min(courseRecoveryCap(state), effects.courseRecovery);
   effects.cooperationBonus = Math.min(2, effects.cooperationBonus);
+  effects.experience = Math.min(3, effects.experience);
+  effects.automationExperience = Math.min(3, effects.automationExperience);
+  effects.offlineMinutes = Math.min(60, effects.offlineMinutes);
   for (const key of statKeys) effects.focus[key] = Math.min(1.5, effects.focus[key]);
   return effects;
 }
@@ -117,13 +147,55 @@ export function equipmentCapacity(state: GymState): number {
   return Math.min(8, 4 + state.projects.equipment);
 }
 
+/** Old saves did not record payment. Use the pre-repricing baseline, never the raised shop price. */
+export function legacyEquipmentPurchasePrice(id: string): number {
+  const item = legacyCatalogById.get(id);
+  if (!item) return 0;
+  const number = Number(id.slice(6));
+  return item.rarity === 'common' ? 1 + number % 2 : item.rarity === 'rare' ? 3 + number % 3 : 8 + number % 5;
+}
+
+export function warehouseEquipment(state: GymState): string[] {
+  return state.ownedEquipment.filter(id => !state.equippedEquipment.includes(id));
+}
+
+export function equipmentSaleValue(state: GymState, id: string): number {
+  if (!state.ownedEquipment.includes(id)) return 0;
+  return Math.floor((state.purchasePrices?.[id] ?? legacyEquipmentPurchasePrice(id)) / 2);
+}
+
+export function equippedFamilyEquipment(state: GymState, itemId: string): GymEquipment | undefined {
+  const family = catalogById.get(itemId)?.family;
+  return family ? state.equippedEquipment.map(id => catalogById.get(id)).find(item => item?.family === family && item.id !== itemId) : undefined;
+}
+
+function installationError(state: GymState, itemId: string, replaceId?: string): string | null {
+  if (replaceId !== undefined && !state.equippedEquipment.includes(replaceId)) return '被替换的器材已不在馆内，请重新选择';
+  const familyItem = equippedFamilyEquipment(state, itemId);
+  if (familyItem && replaceId !== familyItem.id) return '同类器材仅能启用一件，请选择替换同类器材，旧件进入仓库';
+  if (replaceId === undefined && state.equippedEquipment.length >= equipmentCapacity(state)) return '馆内器材已满，请选择一件替换入仓库';
+  return null;
+}
+
+function installEquipment(state: GymState, id: string, replaceId: string | undefined, events: GymEvent[]) {
+  if (replaceId !== undefined) {
+    state.equippedEquipment = state.equippedEquipment.filter(active => active !== replaceId);
+    events.push({type: 'unequipped', id: replaceId});
+  }
+  state.equippedEquipment.push(id);
+  events.push({type: 'equipped', id});
+}
+
 export function playerValue(state: GymState, player: GymPlayer | null = state.player): string {
   if (!player) return '0';
   return (320n * BigInt(player.level + 1) ** 3n * BigInt(100 + equipmentEffects(state).valuePercent) / 100n).toString();
 }
 
 export function effectiveTrainingBias(state: GymState, player: GymPlayer | null = state.player): Stats {
-  return player ? trainingBias(player.bias, player.training.planId, equipmentEffects(state).focus)
+  const focus = equipmentEffects(state).focus;
+  // Extra specialization must not increase wasted draws once that attribute is full.
+  if (player && !state.pendingLegacyEquipmentEffects) for (const key of statKeys) if (player.stats[key] >= 99) focus[key] = 0;
+  return player ? trainingBias(player.bias, player.training.planId, focus)
     : Object.fromEntries(statKeys.map(key => [key, 0])) as Stats;
 }
 
@@ -150,7 +222,8 @@ export function cooperationStatus(state: GymState, player: GymPlayer | null = st
     ...offer.focusKeys.map(key => ({label: statLabels[key], current: player.stats[key], required: offer.requiredAttribute, met: player.stats[key] >= offer.requiredAttribute})),
   ];
   const complete = requirements.every(requirement => requirement.met);
-  const equipmentCredits = complete && newCourses >= 2 ? equipmentEffects(state).cooperationBonus : 0;
+  const eligible = player.equipmentTraining.cooperationCourses;
+  const equipmentCredits = complete ? eligible[1] >= 2 ? 2 : eligible[0] >= 2 ? 1 : 0 : 0;
   return {offer, requirements, complete, rewardCredits: offer.credits + equipmentCredits, rewardFame: offer.fame, equipmentCredits};
 }
 
@@ -166,8 +239,13 @@ export function recommendation(source: GymPlayer | GymState | null, selected?: G
     player && player.level >= milestone.level && tier >= milestone.tier ? milestone.credits : earned, 0);
   const state = source && 'kind' in source ? source : null;
   const rawFame = Math.floor(growth * (tier + 1) / 10);
-  const brand = state ? Math.min(50, equipmentEffects(state).valuePercent) : 0;
-  const baseFame = Math.floor(rawFame * (100 + Math.min(60, courses * 10) + brand) / 100);
+  const coursePercent = 100 + Math.min(60, courses * 10);
+  const brandShots = state && player ? player.equipmentTraining.brandShots : 0;
+  const brandTotal = state && player ? player.equipmentTraining.brandTotal : 0;
+  // Keep the historical average rational until the final floor (81 shots / 1260 brand must not lose one fame).
+  const baseFame = brandShots ? Number(BigInt(rawFame)
+    * (BigInt(coursePercent) * BigInt(brandShots) + BigInt(brandTotal)) / (100n * BigInt(brandShots)))
+    : Math.floor(rawFame * coursePercent / 100);
   const cooperation = state && player ? cooperationStatus(state, player) : null;
   const cooperationCredits = cooperation?.complete ? cooperation.rewardCredits : 0;
   const cooperationFame = cooperation?.complete ? cooperation.rewardFame : 0;
@@ -254,15 +332,15 @@ function recruit(state: GymState, preference: HeightPreference): GymPlayer {
     lastStyle: shape(stats), matchSeed: hash(`${state.seed}:${id}`), level: 0, peakLevel: 0, templateId: null,
     highestTier: null, shots: 0, book: ledger(), stamina: staminaMax(state), recoveryMs: 0, enteredGymLevel: state.gymLevel,
     training: {planId: 'balanced', shots: 0, completedCourses: 0}, experience: 0, nextShotAt: state.updatedAt,
-    autoEnabled: false, cooperation: null};
+    autoEnabled: false, cooperation: null, equipmentTraining: {brandTotal: 0, brandShots: 0, cooperationCourses: [0, 0], cooperationCourseShots: [0, 0]}};
 }
 
 export function newGym(now: number, seed = 1): GymState {
   if (!validTime(now) || !Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) throw new Error('球馆初始化参数无效');
-  const state: GymState = {kind: 'gym-management', version: 1, balanceVersion: 3, seed, revision: 0, createdAt: now, updatedAt: now, nextPlayer: 1,
+  const state: GymState = {kind: 'gym-management', version: 1, balanceVersion: 3, equipmentCatalogVersion, offlineRulesVersion: 2, seed, revision: 0, createdAt: now, updatedAt: now, nextPlayer: 1,
     player: null, bench: [], credits: 0, fame: 0, gymLevel: 1,
     projects: {endurance: 0, recovery: 0, recruitment: 0, equipment: 0, automation: 0, offline: 0},
-    ownedEquipment: [], equippedEquipment: [], inventory: {drink: 0}, collection: {}, collectedEquipment: {}, alumni: [],
+    ownedEquipment: [], equippedEquipment: [], purchasePrices: {}, inventory: {drink: 0}, collection: {}, collectedEquipment: {}, alumni: [],
     rng: {recruits: stream(seed, 'recruits'), economy: stream(seed, 'economy'), attributes: stream(seed, 'attributes')}};
   state.player = recruit(state, 'any');
   return state;
@@ -298,6 +376,15 @@ function reconcileRecovery(before: GymState, after: GymState) {
   }
 }
 
+/** Finish a one-time legacy replay without refilling stamina or preserving an old recovery speed. */
+export function finishEquipmentMigration(state: GymState): GymState {
+  if (!state.pendingLegacyEquipmentEffects) return state;
+  const next = cloneData(state);
+  delete next.pendingLegacyEquipmentEffects;
+  reconcileRecovery(state, next);
+  return next;
+}
+
 function rememberPlayer(state: GymState, events: GymEvent[], player: GymPlayer | null = state.player) {
   if (!player?.templateId) return;
   const previous = state.collection[player.templateId];
@@ -311,11 +398,17 @@ function rememberPlayer(state: GymState, events: GymEvent[], player: GymPlayer |
 }
 
 /** A valid shot always earns XP; only a level gained consumes attribute RNG. */
-function trainPlayer(state: GymState, player: GymPlayer, now: number, events: GymEvent[]) {
+export function trainPlayer(state: GymState, player: GymPlayer, now: number, events: GymEvent[], reuseMatching = false) {
   const cooperationWasComplete = cooperationStatus(state, player).complete;
   const roll = random(state.rng.economy);
   const outcome: TrainingOutcome = roll < .3 ? 'hold' : roll < .9 ? 'success' : 'great';
-  const experienceGain = shotExperience(outcome);
+  const experienceGain = trainingShotExperience(state, outcome, player);
+  const equipment = equipmentEffects(state);
+  player.equipmentTraining.brandShots++;
+  player.equipmentTraining.brandTotal += Math.min(50, equipment.valuePercent);
+  if (player.cooperation) for (let tier = 1; tier <= 2; tier++) if (equipment.cooperationBonus >= tier) {
+    player.equipmentTraining.cooperationCourseShots[tier - 1]++;
+  }
   const before = player.level;
   const previousStats = {...player.stats};
   const previousTemplate = player.templateId;
@@ -335,16 +428,27 @@ function trainPlayer(state: GymState, player: GymPlayer, now: number, events: Gy
   if (player.training.shots === 10) {
     player.training.shots = 0;
     player.training.completedCourses++;
+    if (player.cooperation) {
+      for (let tier = 1; tier <= 2; tier++) if (player.equipmentTraining.cooperationCourseShots[tier - 1] === 10) {
+        player.equipmentTraining.cooperationCourses[tier - 1] = Math.min(2, player.equipmentTraining.cooperationCourses[tier - 1] + 1);
+      }
+    }
+    player.equipmentTraining.cooperationCourseShots = [0, 0];
     restoredStamina = Math.min(trainingStatus(state, player).nextRecovery, staminaMax(state) - player.stamina);
     player.stamina += restoredStamina;
     if (player.stamina === staminaMax(state)) player.recoveryMs = 0;
   }
   player.nextShotAt = now + (player.autoEnabled ? automaticIntervalMs(state) : shotCooldownMs);
   if (player.level === playerLevelCap) player.autoEnabled = false;
-  const matched = match(player);
-  player.templateId = matched.templateId;
-  player.lastStyle = matched.lastStyle;
-  if (tierIds.indexOf(matched.tier) > tierIds.indexOf(player.highestTier)) player.highestTier = matched.tier;
+  // Offline replay may reuse this athlete's preceding result when no matching
+  // input changed. Every first shot and every level/stat gain still calls the
+  // original matcher; regular dispatch always takes the uncached path.
+  if (!reuseMatching || levelGain > 0) {
+    const matched = match(player);
+    player.templateId = matched.templateId;
+    player.lastStyle = matched.lastStyle;
+    if (tierIds.indexOf(matched.tier) > tierIds.indexOf(player.highestTier)) player.highestTier = matched.tier;
+  }
   const changes = Object.fromEntries(statKeys.map(key => [key, player.stats[key] - previousStats[key]])) as Stats;
   events.push({type: 'trained', playerId: player.id, outcome, changes, levelGain, experienceGain});
   if (restoredStamina !== null) events.push({type: 'course-completed', playerId: player.id, restoredStamina});
@@ -435,6 +539,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (player.training.planId === action.id) return fail('当前已使用该训练计划');
       player.training.planId = action.id;
       player.training.shots = 0;
+      player.equipmentTraining.cooperationCourseShots = [0, 0];
       events.push({type: 'training-plan-changed', playerId: player.id, id: action.id});
       break;
     }
@@ -443,6 +548,8 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (!cooperationOffers(next).some(offer => offer.id === action.id)) return fail('合作目标已变化，请重新选择');
       if (player.cooperation?.id === action.id) return fail('该合作已在进行');
       player.cooperation = {id: action.id, playerId: player.id, acceptedShots: player.shots, acceptedCourses: player.training.completedCourses};
+      player.equipmentTraining.cooperationCourses = [0, 0];
+      player.equipmentTraining.cooperationCourseShots = [0, 0];
       events.push({type: 'cooperation-accepted', playerId: player.id, id: action.id});
       break;
     }
@@ -450,6 +557,8 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
       if (!player.cooperation) return fail('当前没有进行中的合作');
       player.cooperation = null;
+      player.equipmentTraining.cooperationCourses = [0, 0];
+      player.equipmentTraining.cooperationCourseShots = [0, 0];
       events.push({type: 'cooperation-abandoned', playerId: player.id});
       break;
     }
@@ -457,20 +566,26 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       const offer = equipmentOffer(next, action.id);
       if (offer.price === null) return fail(offer.reason ?? '器材暂不可购');
       if (next.credits < offer.price) return fail('赞助券不足');
+      const invalidInstallation = installationError(next, action.id, action.replaceId);
+      if (invalidInstallation) return fail(invalidInstallation);
       next.credits -= offer.price;
       next.ownedEquipment.push(action.id);
+      next.purchasePrices[action.id] = offer.price;
       next.collectedEquipment[action.id] ??= {firstAt: now};
       events.push({type: 'equipment-bought', id: action.id});
+      installEquipment(next, action.id, action.replaceId, events);
+      reconcileRecovery(timed, next);
+      for (const trainee of activePlayers(next)) rememberPlayer(next, events, trainee);
       break;
     }
     case 'equip': {
       if (!catalogById.has(action.id) || !next.ownedEquipment.includes(action.id)) return fail('请先获得该器材');
-      if (next.equippedEquipment.includes(action.id)) return fail('该器材已启用');
-      if (next.equippedEquipment.length >= equipmentCapacity(next)) return fail('器材启用槽已满，请先停用一件');
-      next.equippedEquipment.push(action.id);
+      if (next.equippedEquipment.includes(action.id)) return fail('该器材已在馆内生效');
+      const invalidInstallation = installationError(next, action.id, action.replaceId);
+      if (invalidInstallation) return fail(invalidInstallation);
+      installEquipment(next, action.id, action.replaceId, events);
       reconcileRecovery(timed, next);
       for (const trainee of activePlayers(next)) rememberPlayer(next, events, trainee);
-      events.push({type: 'equipped', id: action.id});
       break;
     }
     case 'unequip': {
@@ -478,6 +593,17 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       next.equippedEquipment = next.equippedEquipment.filter(id => id !== action.id);
       reconcileRecovery(timed, next);
       events.push({type: 'unequipped', id: action.id});
+      break;
+    }
+    case 'sell-equipment': {
+      if (!catalogById.has(action.id) || !next.ownedEquipment.includes(action.id)) return fail('仓库中已没有该器材');
+      if (next.equippedEquipment.includes(action.id)) return fail('馆内生效的器材不能直接出售，请先替换入仓库');
+      const refund = equipmentSaleValue(next, action.id);
+      if (!Number.isSafeInteger(next.credits + refund)) return fail('赞助券已达到数值上限');
+      next.ownedEquipment = next.ownedEquipment.filter(id => id !== action.id);
+      delete next.purchasePrices[action.id];
+      next.credits += refund;
+      events.push({type: 'equipment-sold', id: action.id, credits: refund});
       break;
     }
     case 'buy-drink': {
