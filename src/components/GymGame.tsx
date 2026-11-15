@@ -1,8 +1,7 @@
 import {useEffect, useRef, useState, useSyncExternalStore, type CSSProperties} from 'react';
 import {useGym} from '../gymStore';
-import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, requiredExperience, shotExperience, staminaMax, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
+import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotExperience, staminaMax, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
 import {templateById} from '../game/templates';
-import {match, templateRules} from '../game/contract/templates';
 import {overallRating} from '../game/matching';
 import {statKeys, type Player} from '../game/types';
 import {statLabels} from '../game/config';
@@ -27,15 +26,14 @@ import {GymScoreboard, GymStamina} from './GymStatus';
 import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel, offlineDuration} from './GymPanels';
 import {offlineLimitMs} from '../game/gym/offline';
 import {trainingGuidance} from '../game/gym/guidance';
+import {GymRecruitmentControls} from './GymRecruitmentControls';
 import './TrainingLayout.css';
 import '../equipment-status.css';
 import './GymGame.css';
 
 type Panel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'collection' | 'experience' | 'player' | 'training' | 'cooperation' | null;
-const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材与背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', collection: '收藏图鉴', experience: '训练经验', player: '球员与模板目标', training: '训练计划', cooperation: '赞助合作'};
+const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材与背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', collection: '收藏图鉴', experience: '训练经验', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
 const outcomeLabels = {hold: '维持', success: '成功', great: '大成功'};
-const tierNames = ['待发掘', '替补', '首发', '全明星', '巨星', '传奇'];
-const tierIds = ['rotation', 'starter', 'star', 'superstar', 'legend'];
 const supplyIds = ['item_005', 'item_001', 'item_002', 'item_003', 'item_004'] as const;
 
 function displayedPlayer(player: GymPlayer): Player {
@@ -50,46 +48,15 @@ function formatValue(value: string) {
  return `${Number(amount / 10000000000n) / 100}万亿`;
 }
 
-function PlayerGoals({player, onTraining}: {player: GymPlayer; onTraining: () => void}) {
+function PlayerDetails({player, onTraining}: {player: GymPlayer; onTraining: () => void}) {
  const current = templateById(player.templateId);
- const currentTier = current ? tierIds.indexOf(current.tier) : -1;
- const diagnostic = match(player);
- const reasons = (row: typeof diagnostic.rows[number]) => {
-  const rule = templateRules.find(template => template.id === row.id);
-  const descriptions: Record<string, string> = {
-   height: `身高不符：需要 ${row.height[0]}–${row.height[1]} cm，当前 ${player.height} cm`,
-   level: `历史最高等级不足：需要 Lv.${row.minLevel}，当前 Lv.${player.peakLevel}`,
-   core: `核心属性不足：${row.gaps.filter(gap => gap.gap > 0).map(gap => `${statLabels[gap.key]} ${gap.actual}/${gap.required}`).join('、')}`,
-   aptitude: `能力覆盖不足：当前 ${(row.score * 100).toFixed(1)}%，需要 ${(row.threshold * 100).toFixed(0)}%`,
-   'rating-floor': `综合评分不足：当前 ${overallRating(player.stats).toFixed(1)}，需要 ${rule?.ratingFloor ?? '达标'}`,
-   'stat-floor': `单项属性下限不足：${statKeys.filter(key => player.stats[key] < (rule?.statFloor ?? 0)).map(key => `${statLabels[key]} ${player.stats[key]}/${rule?.statFloor}`).join('、')}`,
-   'specialist-entry': '已符合专长匹配通道',
-   'earned-appearance': '已获得此模板，保留历史外观',
-   'lower-tier': '已有更高档候选，此模板暂不优先',
-   stability: '保留当前稳定模板',
-   rank: '其他候选匹配更优',
-  };
-  return row.reasons.map(reason => descriptions[reason] ?? '尚有其他匹配条件未满足').join('；');
- };
- const candidates = diagnostic.rows
-  .filter(row => tierIds.indexOf(row.tier) > currentTier)
-  .sort((a, b) => Number(a.reasons.includes('height')) - Number(b.reasons.includes('height')) || a.minLevel - b.minLevel || a.gaps.reduce((sum, item) => sum + item.gap, 0) - b.gaps.reduce((sum, item) => sum + item.gap, 0))
-  .slice(0, 8);
- const retained = diagnostic.rows.find(row => row.id === player.templateId && row.reasons.includes('earned-appearance'));
- return <div className="gym-player-goals">
+ return <div className="gym-panel gm-stack" aria-label="当前球员资料">
   <h3>{player.name} · {player.height} cm</h3>
   <p>训练 Lv.{player.level} · 已投篮 {player.shots} 次 · 当前模板 {current?.name ?? '待发掘'}</p>
-  <p className="gym-muted">按原版身高、等级、核心能力与风格规则匹配。经验升满后升级并检查模板。</p>
-  {retained && <p className="gym-muted">{reasons(retained)}</p>}
-  <button className="secondary" onClick={onTraining}>调整训练计划，补强目标能力</button>
-  <h3>{currentTier === 4 ? '已获得传奇模板' : '下一档模板目标'}</h3>
-  {candidates.map(row => <article className="gym-goal-card" key={row.id}>
-   <strong>{row.name} <small>{tierNames[tierIds.indexOf(row.tier) + 1]}</small></strong>
-   <p>等级 {player.peakLevel}/{row.minLevel} · 身高 {row.height[0]}–{row.height[1]} cm · 能力覆盖 {(row.score * 100).toFixed(1)}% / {(row.threshold * 100).toFixed(0)}% · 风格相似度 {(row.styleScore * 100).toFixed(1)}%</p>
-   <div>{row.gaps.map(gap => <span key={gap.key} className={gap.gap ? '' : 'is-met'}>{statLabels[gap.key]} {gap.actual}/{gap.required}</span>)}</div>
-   <p className="gym-muted">{row.eligible ? '基础条件已满足。' : ''}{reasons(row) || '已满足此模板的匹配条件。'}</p>
-  </article>)}
-  {!candidates.length && <p>可继续培养当前球员，或推荐签约后选择不同身高的新人，收集其他球星模板。</p>}
+  <p>综合评分 {overallRating(player.stats).toFixed(1)}</p>
+  <dl className="gm-metrics">{statKeys.map(key => <div key={key}><dt>{statLabels[key]}</dt><dd>{player.stats[key]}</dd></div>)}</dl>
+  <button className="secondary" onClick={onTraining}>查看训练计划与培养记录</button>
+  {player.level >= playerLevelCap && <p className="gym-muted">球员已达到 Lv.{playerLevelCap} 训练上限，可核对成果后推荐签约。</p>}
  </div>;
 }
 
@@ -102,7 +69,6 @@ export default function GymGame({onHome}: {onHome: () => void}) {
  const [feedback, setFeedback] = useState<ShotFeedback | null>(null);
  const [shots, setShots] = useState<ShotFeedback[]>([]);
  const [notice, setNotice] = useState('');
- const [preference, setPreference] = useState<'any' | 'guard' | 'forward' | 'center'>('any');
  const busyRef = useRef(false);
  const sequence = useRef(0);
  const resultPresenter = useRef<(result: GymResult, previous: GymState) => void>(() => {});
@@ -190,7 +156,7 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    const old = [previous.player, ...previous.bench].find(entry => entry?.id === next.id);
    const before = cooperationStatus(previous, old ?? null);
    const after = cooperationStatus(result.state, next);
-   if (!before.complete && after.complete) setNotice(`合作目标达成 · 推荐签约可额外获得 ${after.rewardCredits} 券`);
+   if (!before.complete && after.complete) setNotice(recommendationPayout(result.state, next).repeatTemplate ? `合作目标达成 · 声望照常，重复模板推荐合计 ${postgameRepeatTemplateCredits} 券` : `合作目标达成 · 推荐签约可额外获得 ${after.rewardCredits} 券`);
   }
  };
 
@@ -206,12 +172,12 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    resultPresenter.current(result, previous);
    if (action.type === 'recommend') {
     const reward = result.events.find(event => event.type === 'recommended');
-    setNotice(`推荐成功 · 赞助券 +${reward?.credits ?? 0} · 声望 +${reward?.fame ?? 0}`);
+    setNotice(`推荐成功 · 赞助券 +${reward?.credits ?? 0} · 声望 +${reward?.fame ?? 0}${reward?.repeatTemplate ? ' · 重复模板奖励' : reward?.isFirstPostgameRecommendation ? ' · 模板首次推荐奖励' : ''}`);
     setPanel(null);
     setFeedback(null);
     setShots([]);
    }
-   if (action.type === 'recruit') {setFeedback(null); setShots([]);}
+   if (action.type === 'recruit') {setFeedback(null); setShots([]); setNotice(action.mode === 'selected' ? '精选新人已入馆，可选择训练计划并开始培养' : '新人已入馆，可以开始培养');}
    if (action.type === 'select-player') {setPanel(null); setFeedback(null); setShots([]);}
    if (action.type === 'set-training-plan') {
     setPanel(null);
@@ -272,10 +238,10 @@ export default function GymGame({onHome}: {onHome: () => void}) {
      <span className="equipment-status-mini charge"><span>本课训练</span><b>{training.shots}/10 球</b></span>
      <span className="equipment-status-mini"><span>复盘恢复</span><b>最多 +{training.nextRecovery}</b></span>
      <small>已完成 {training.completedCourses} 课 · {atCap ? '等级已满' : player.autoEnabled ? `自动 ${automaticIntervalMs(state) / 1000}秒/球` : '手动 1秒/球'}</small>
-     {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
+     {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : recommendationPayout(state).repeatTemplate ? `重复模板推荐合计 ${postgameRepeatTemplateCredits} 券，声望照常` : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
     </button>}
     {(store.actionError || notice) && <div className="contract-status" role="status">{store.actionError || notice}</div>}
-    {!player && <div className="gym-empty-court"><div><h2>下一位新星，等你发掘</h2><p>当前球馆有 {state.gymLevel} 个训练位，新人带着满体力入馆。</p>{state.gymLevel >= 2 && <select aria-label="新人身高偏好" value={preference} onChange={event => setPreference(event.target.value as typeof preference)}><option value="any">不限身高</option><option value="guard">后卫型 178–194 cm</option><option value="forward">锋线型 195–205 cm</option><option value="center">内线型 206–218 cm</option></select>}<button className="primary" disabled={busy} onClick={() => onAction({type: 'recruit', preference})}>免费招募下一位</button></div></div>}
+    {!player && <div className="gym-empty-court"><div><h2>下一位新星，等你发掘</h2><GymRecruitmentControls state={state} onAction={onAction} busy={busy} emptyCourt/></div></div>}
    </section>
    <footer className="game-dock contract-clean-dock"><div className="dock-canvas">
     <div className="consumable-bar"><div className="consumable-grid" role="group" aria-label="一次性物品，固定五格">
@@ -283,7 +249,7 @@ export default function GymGame({onHome}: {onHome: () => void}) {
       const item = itemCatalog.find(entry => entry.id === id)!;
       const available = id === 'item_005';
       const quantity = available ? state.inventory.drink : 0;
-      return <button key={id} className="consumable-slot" disabled={!available || !player || quantity < 1 || player.stamina >= capacity || busy} title={available ? '恢复 10 点体力' : `${item.name} · 后续开放`} aria-label={available ? `使用运动饮料，数量${quantity}` : `${item.name}，后续开放`} onClick={() => {if (player && available) onAction({type: 'use-drink', id: player.id});}}><img className="consumable-icon" src={assetUrl(`art/consumables/${item.icon}.png`)} alt="" aria-hidden="true" draggable={false}/><span><strong>{item.shortName}</strong><b>×{quantity}</b></span></button>;
+      return <button key={id} className="consumable-slot" disabled={!available || !player || atCap || quantity < 1 || player.stamina >= capacity || busy} title={available ? atCap ? '球员已满级，饮料留给其他球员使用' : '恢复 10 点体力' : `${item.name} · 后续开放`} aria-label={available ? `使用运动饮料，数量${quantity}${atCap ? '，球员已满级不可使用' : ''}` : `${item.name}，后续开放`} onClick={() => {if (player && available && !atCap) onAction({type: 'use-drink', id: player.id});}}><img className="consumable-icon" src={assetUrl(`art/consumables/${item.icon}.png`)} alt="" aria-hidden="true" draggable={false}/><span><strong>{item.shortName}</strong><b>×{quantity}</b></span></button>;
      })}
     </div></div>
     <div className="dock-side dock-side-left">
@@ -306,11 +272,11 @@ export default function GymGame({onHome}: {onHome: () => void}) {
     {panel === 'shop' && <GymShopPanel state={state} onAction={onAction} busy={busy}/>}
     {panel === 'inventory' && <><GymInventoryPanel state={state} onAction={onAction} busy={busy}/><button className="secondary inventory-home-button" onClick={onHome}><GameIcon name="home"/>保存并返回首页</button></>}
     {panel === 'recommend' && <GymRecommendPanel state={state} onAction={onAction} onClose={() => setPanel(null)}/>}
-    {panel === 'alumni' && <GymAlumniPanel state={state} onAction={onAction}/>}
-    {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} onAlumni={() => setPanel('alumni')}/>}
-    {panel === 'collection' && <GymCollectionPanel state={state} onAction={onAction}/>}
-    {panel === 'player' && player && <PlayerGoals player={player} onTraining={() => setPanel('training')}/>}
-    {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>当前模式：维持 30% 获得 {trainingShotExperience(state, 'hold')} 经验，成功 60% 获得 {trainingShotExperience(state, 'success')} 经验，大成功 10% 获得 {trainingShotExperience(state, 'great')} 经验。剩余经验会保留到下一级。</p><p>手动基础为8／12／20经验；自动项目每级使每次自动投篮额外 +1 经验，在线与离线共同生效。只有升级时获得属性成长机会，天赋、训练专项与馆内器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动与离线训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>{offlineHint}每 10 球完成一课，推荐时按培养成果与合作结算奖励。训练计划与推荐面板可查看下一奖金节点、模板缺口和预计训练时间。</p></>}
+    {panel === 'alumni' && <GymAlumniPanel state={state} onAction={onAction} loadAlumni={store.loadAlumni}/>}
+    {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} busy={busy} onAlumni={() => setPanel('alumni')}/>}
+    {panel === 'collection' && <GymCollectionPanel state={state} onAction={onAction} busy={busy}/>}
+    {panel === 'player' && player && <PlayerDetails player={player} onTraining={() => setPanel('training')}/>}
+    {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>当前模式：维持 30% 获得 {trainingShotExperience(state, 'hold')} 经验，成功 60% 获得 {trainingShotExperience(state, 'success')} 经验，大成功 10% 获得 {trainingShotExperience(state, 'great')} 经验。剩余经验会保留到下一级。</p><p>手动基础为8／12／20经验；自动项目每级使每次自动投篮额外 +1 经验，在线与离线共同生效。只有升级时获得属性成长机会，天赋、训练专项与馆内器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动与离线训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>{offlineHint}每 10 球完成一课，推荐时按培养成果与合作结算奖励。训练计划与推荐面板可查看培养奖金条件和预计训练时间。</p></>}
    </div>
   </div></ComicDialog>}
   {store.pendingOfflineReport && <GymOfflineReport report={store.pendingOfflineReport} onClose={store.dismissOfflineReport}/>}

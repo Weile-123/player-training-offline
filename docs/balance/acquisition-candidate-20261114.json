@@ -1,0 +1,9 @@
+{
+  "status": "experimental-only-not-applied-to-game",
+  "equipment": {"relic_078":30,"relic_085":36},
+  "gates": {"relic_078":7,"relic_085":8,"relic_081":7},
+  "projectPrices": {
+    "endurance":[1,2,3,5,7,10,14,20],
+    "recruitment":[2,4,7,10,14,20]
+  }
+}

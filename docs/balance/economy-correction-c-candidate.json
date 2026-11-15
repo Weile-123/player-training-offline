@@ -1,0 +1,5 @@
+{
+  "status":"experiment-only",
+  "trainingCredits":[2,4,6,9],
+  "equipment":{"relic_042":10,"relic_078":40,"relic_037":16,"relic_085":60,"relic_046":12,"relic_081":24,"relic_051":10,"relic_087":20,"relic_082":18}
+}

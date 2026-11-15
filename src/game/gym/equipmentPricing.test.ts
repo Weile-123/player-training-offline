@@ -18,7 +18,7 @@ describe('explicit V3 equipment progression', () => {
       expect(art.has(item.artId), `${item.id}: reusable original art`).toBe(true);
       expect(item.name, `${item.id}: original name/image pair`).toBe(shopCatalog.find(original => original.id === item.artId)!.name);
       expect(item.price).toBeGreaterThan(0);
-      expect(item.price).toBeLessThanOrEqual(24);
+      expect(item.price).toBeLessThanOrEqual(36);
       expect(item.requiredTemplates).toBeLessThanOrEqual(8);
     }
   });
@@ -58,6 +58,6 @@ describe('explicit V3 equipment progression', () => {
     expect(starters.length).toBeGreaterThanOrEqual(4);
     expect(starters.some(item => item.price === 2)).toBe(true);
     expect(starters.every(item => item.requiredTemplates === 0)).toBe(true);
-    expect(equipmentCatalog.reduce((sum, item) => sum + item.price, 0)).toBe(306);
+    expect(equipmentCatalog.reduce((sum, item) => sum + item.price, 0)).toBe(328);
   });
 });

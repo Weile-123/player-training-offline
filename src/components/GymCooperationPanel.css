@@ -1,0 +1,25 @@
+.gm-cooperation-panel { gap: 9px; }
+.gm-cooperation-panel > .gm-section-heading { align-items: center; }
+.gm-cooperation-panel > .gm-section-heading h3 { font-size: 16px; }
+.gm-cooperation-panel .gm-cooperation-list { gap: 8px; }
+.gm-cooperation-panel .gm-cooperation { gap: 7px; padding: 9px 10px; border-left-width: 3px; }
+.gm-cooperation-panel .gm-cooperation-reward { display: flex; justify-content: space-between; gap: 4px 8px; flex-wrap: wrap; padding: 0; border: 0; background: transparent; font-size: 12px; }
+.gm-cooperation-panel .gm-cooperation-conditions { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+.gm-cooperation-condition { display: grid; gap: 2px; min-width: 0; padding: 5px 6px; border: 1px solid #ceb98d; background: #f4e4bd; font-size: 11px; line-height: 1.35; }
+.gm-cooperation-condition > span { color: #746044; }
+.gm-cooperation-condition b { color: #883b2d; font-size: 12px; overflow-wrap: anywhere; }
+.gm-cooperation-condition.is-met { background: #e3e8ce; border-color: #a0af87; }
+.gm-cooperation-condition.is-met b { color: #35624c; }
+.gm-cooperation-panel .gm-cooperation > .gm-button { min-height: 34px; padding-block: 5px; }
+.gm-cooperation-notice, .gm-cooperation-repeat { padding: 7px 9px; border-left: 3px solid #aa6850; background: #f1ddbf; color: #75422d; font-size: 12px; }
+.gm-cooperation-status { color: #765a36; font-size: 12px; }
+.gm-cooperation-equipment { display: grid; gap: 5px; padding: 9px 10px; border: 1px solid #b7a279; background: #efe3c2; font-size: 12px; }
+.gm-cooperation-equipment .gm-section-heading h4 { font-size: 13px; }
+.gm-cooperation-earned { color: #37604b; font-size: 12px; }
+.gm-cooperation-panel .gm-cooperation-abandon { justify-self: end; min-height: 26px; }
+.gm-cooperation-rules > section + section { padding-top: 12px; border-top: 1px solid #c9b48a; }
+.gym-panel.gm-cooperation-rules h3 { font-size: 15px; }
+.gm-cooperation-bonus-table { width: 100%; border-collapse: collapse; text-align: left; font-size: 12px; }
+.gm-cooperation-bonus-table th, .gm-cooperation-bonus-table td { padding: 6px 5px; border-bottom: 1px solid #cdb98e; }
+.gm-cooperation-bonus-table th { color: #66523c; font-weight: 700; }
+.gm-cooperation-bonus-table td:not(:first-child) { color: #943526; white-space: nowrap; }

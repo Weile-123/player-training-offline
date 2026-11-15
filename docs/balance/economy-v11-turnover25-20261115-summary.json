@@ -1,0 +1,715 @@
+{
+  "date": "2026-11-15",
+  "economyVersion": 11,
+  "partial": false,
+  "baseline": {
+    "frozenAt": "2026-11-15T10:52:13.638Z",
+    "engineMode": "production-v11",
+    "output": "D:\\project\\player-training-offline\\.tmp\\v11-production-engine-28828.mjs",
+    "hashes": {
+      "src/game/gym/engine.ts": "be5d0a4eecc7c94ba96f00e8dec2377c275bf1262d2d0bcc338d7ed6b9ccdd55",
+      "src/game/gym/catalog.ts": "55afec5563bb84db2a391efd8bb24822e77b87f35cc1dd787a682aab495f6c90",
+      "src/game/gym/save.ts": "565c09267a3befa1299ef9ca6d99cac242cb7edb287eb7f21fb71e9195c56f19",
+      "src/game/gym/history.ts": "7c5a6c442b96d4b433b50ed9420c81f7c7b3ee7691525751848d28997466e6f5",
+      "src/game/gym/selectedRecruitment.ts": "75aec9e15bf64c06749bfc7ba75af9ca5f11bb4f5bebe37628c936e410230985",
+      "src/game/gym/training.ts": "992ef4a9a7561a6d98453af81e633556025d8d848e5d6789599df874fba88e2f",
+      "src/game/templates.ts": "8dd64cb80c67c3e3a778268336439c1998922bfeb688d7892bd32fe6b15f8281"
+    }
+  },
+  "sourceHashMatchesCurrentFiles": {
+    "src/game/gym/engine.ts": true,
+    "src/game/gym/catalog.ts": true,
+    "src/game/gym/save.ts": true,
+    "src/game/gym/history.ts": true,
+    "src/game/gym/selectedRecruitment.ts": true,
+    "src/game/gym/training.ts": true,
+    "src/game/templates.ts": true
+  },
+  "policy": "turnover25",
+  "source": ".tmp/v11-turnover25-production.json",
+  "assumptions": [
+    "Frozen current production engine, real growth/RNG/matching and actual recommendationPayout; independent seen ledger checks every recommendation from gym1 onward.",
+    "From-zero careers start newGym with zero coupons; free recruitment, no injected templates/cash or post-settlement balance changes.",
+    "Player turnover policy turnover25: gym1 after30 shots, gym2 Lv10+starter, gym3 Lv15+star, gym4 Lv20+super; later Lv25 regardless of tier (or Lv99 terminal). Investment uses an explicit approximate heuristic, not an optimal policy.",
+    "Construction purchases use actual prices, gates, replacements and earned balances; recorded first-template IDs carry through upgrades, compaction and post-build branches.",
+    "Continuous online instant management is a pressure test, not a casual player calendar-time or hourly-income promise.",
+    "Free and half-selected flows clone each real fully paid state; sequential recruit RNG diverges and they are not identical-birth controlled pairs.",
+    "Controlled laboratory fixtures alone provision8 coupons, gym8/max infrastructure and an empty roster; they test birth improvement and transaction value, not from-zero affordability.",
+    "Controlled pairs share pre-recruit RNG and non-direction birth stats, height, bias and matchSeed;0..2 selected recruit-stream draws are verified. No artificial growth/templates are used.",
+    "Controlled recommendations are previously unseen templates in each fresh lab state; they are not an unlimited normal-reward income claim."
+  ],
+  "rule": "All gym levels share a template recommendation counter: first normal, repeats1, unmatched0; gym upgrades do not reset; no cash adjustment.",
+  "selectedAdmissionEconomics": {
+    "price": 8,
+    "repeatRecommendationCredits": 1,
+    "repeatSelectedNetCost": 7
+  },
+  "execution": {
+    "fromZeroRuns": 2,
+    "completedBuilds": 2,
+    "fullBuildFlows": 0,
+    "progressionShots": 80900,
+    "flowShots": 0,
+    "controlledAthletes": 0,
+    "controlledShots": 0
+  },
+  "progression": [
+    {
+      "seed": 1,
+      "complete": true,
+      "seconds": 12186,
+      "horizonHours": 48,
+      "gymLevel": 8,
+      "remainingPermanentCost": 0,
+      "grossCredits": 1239,
+      "actualSpent": 1237,
+      "constructionSpent": 510,
+      "credits": 2,
+      "shots": 39519,
+      "templates": 108,
+      "recommendations": 269,
+      "firstGym8": {
+        "seconds": 11131.866,
+        "credits": 112,
+        "remainingPermanentCost": 288
+      },
+      "recommendedTemplateCount": 79,
+      "funding": {
+        "firstNormal": {
+          "recommendations": 79,
+          "credits": 1049
+        },
+        "repeats": {
+          "recommendations": 190,
+          "credits": 190
+        },
+        "unmatchedRecommendations": 0,
+        "firstNormalByTier": {
+          "rotation": {
+            "templates": 4,
+            "credits": 4
+          },
+          "starter": {
+            "templates": 22,
+            "credits": 110
+          },
+          "star": {
+            "templates": 23,
+            "credits": 235
+          },
+          "superstar": {
+            "templates": 19,
+            "credits": 346
+          },
+          "legend": {
+            "templates": 11,
+            "credits": 354
+          }
+        },
+        "stages": [
+          {
+            "gymLevel": 1,
+            "startSeconds": 0,
+            "endSeconds": 139,
+            "durationSeconds": 139,
+            "recommendedPlayers": 4,
+            "firstRecommendations": 4,
+            "repeatRecommendations": 0,
+            "actualIncome": 4,
+            "spending": 2,
+            "cashAfterEntering": 0,
+            "cashAtStageEnd": 2,
+            "templatesAfterEntering": 0
+          },
+          {
+            "gymLevel": 2,
+            "startSeconds": 139,
+            "endSeconds": 1178.312,
+            "durationSeconds": 1039.312,
+            "recommendedPlayers": 12,
+            "firstRecommendations": 10,
+            "repeatRecommendations": 2,
+            "actualIncome": 62,
+            "spending": 38,
+            "cashAfterEntering": 2,
+            "cashAtStageEnd": 26,
+            "templatesAfterEntering": 4
+          },
+          {
+            "gymLevel": 3,
+            "startSeconds": 1178.312,
+            "endSeconds": 2852.6,
+            "durationSeconds": 1674.288,
+            "recommendedPlayers": 18,
+            "firstRecommendations": 15,
+            "repeatRecommendations": 3,
+            "actualIncome": 161,
+            "spending": 84,
+            "cashAfterEntering": 26,
+            "cashAtStageEnd": 103,
+            "templatesAfterEntering": 22
+          },
+          {
+            "gymLevel": 4,
+            "startSeconds": 2852.6,
+            "endSeconds": 5610.6,
+            "durationSeconds": 2758.0000000000005,
+            "recommendedPlayers": 8,
+            "firstRecommendations": 6,
+            "repeatRecommendations": 2,
+            "actualIncome": 128,
+            "spending": 89,
+            "cashAfterEntering": 103,
+            "cashAtStageEnd": 142,
+            "templatesAfterEntering": 46
+          },
+          {
+            "gymLevel": 5,
+            "startSeconds": 5610.6,
+            "endSeconds": 6917.4,
+            "durationSeconds": 1306.7999999999993,
+            "recommendedPlayers": 20,
+            "firstRecommendations": 12,
+            "repeatRecommendations": 8,
+            "actualIncome": 201,
+            "spending": 140,
+            "cashAfterEntering": 142,
+            "cashAtStageEnd": 203,
+            "templatesAfterEntering": 60
+          },
+          {
+            "gymLevel": 6,
+            "startSeconds": 6917.4,
+            "endSeconds": 9490.89,
+            "durationSeconds": 2573.49,
+            "recommendedPlayers": 74,
+            "firstRecommendations": 17,
+            "repeatRecommendations": 57,
+            "actualIncome": 280,
+            "spending": 257,
+            "cashAfterEntering": 203,
+            "cashAtStageEnd": 226,
+            "templatesAfterEntering": 77
+          },
+          {
+            "gymLevel": 7,
+            "startSeconds": 9490.89,
+            "endSeconds": 11131.866,
+            "durationSeconds": 1640.9760000000006,
+            "recommendedPlayers": 73,
+            "firstRecommendations": 9,
+            "repeatRecommendations": 64,
+            "actualIncome": 225,
+            "spending": 339,
+            "cashAfterEntering": 226,
+            "cashAtStageEnd": 112,
+            "templatesAfterEntering": 94
+          },
+          {
+            "gymLevel": 8,
+            "startSeconds": 11131.866,
+            "endSeconds": 12186,
+            "durationSeconds": 1054.134,
+            "recommendedPlayers": 60,
+            "firstRecommendations": 6,
+            "repeatRecommendations": 54,
+            "actualIncome": 178,
+            "spending": 288,
+            "cashAfterEntering": 112,
+            "cashAtStageEnd": 2,
+            "templatesAfterEntering": 102
+          }
+        ],
+        "timeAfterGym8": {
+          "seconds": 1054.134,
+          "fractionOfConstructionTime": 0.08650369276218611
+        },
+        "lastTenPermanentTransactions": [
+          {
+            "seconds": 11486.4,
+            "type": "buy-equipment",
+            "amount": -6,
+            "id": "relic_065",
+            "cost": 6,
+            "gymBefore": 8,
+            "name": "巅峰时刻计时器",
+            "family": "offline",
+            "intervalSincePreviousPermanentSeconds": 107.39999999999964
+          },
+          {
+            "seconds": 11635.4,
+            "type": "buy-equipment",
+            "amount": -36,
+            "id": "relic_085",
+            "cost": 36,
+            "gymBefore": 8,
+            "name": "持续进步训练器",
+            "family": "course",
+            "intervalSincePreviousPermanentSeconds": 149
+          },
+          {
+            "seconds": 11759.4,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_096",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "黄金投篮手套",
+            "family": "focus-three",
+            "intervalSincePreviousPermanentSeconds": 124
+          },
+          {
+            "seconds": 11808.866,
+            "type": "buy-equipment",
+            "amount": -14,
+            "id": "relic_077",
+            "cost": 14,
+            "gymBefore": 8,
+            "name": "火热延时表",
+            "family": "offline",
+            "intervalSincePreviousPermanentSeconds": 49.46600000000035
+          },
+          {
+            "seconds": 11934.89,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_076",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "完美出手校准器",
+            "family": "focus-mid",
+            "intervalSincePreviousPermanentSeconds": 126.02399999999943
+          },
+          {
+            "seconds": 11946.866,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_080",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "逆境突破指南",
+            "family": "focus-drive",
+            "intervalSincePreviousPermanentSeconds": 11.976000000000568
+          },
+          {
+            "seconds": 12072.89,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_084",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "反弹训练器",
+            "family": "focus-inside",
+            "intervalSincePreviousPermanentSeconds": 126.02399999999943
+          },
+          {
+            "seconds": 12082.866,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_088",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "专业防滑手套",
+            "family": "focus-handle",
+            "intervalSincePreviousPermanentSeconds": 9.976000000000568
+          },
+          {
+            "seconds": 12186,
+            "type": "upgrade-project",
+            "amount": -21,
+            "id": "offline",
+            "cost": 21,
+            "gymBefore": 8,
+            "projectLevel": 5,
+            "intervalSincePreviousPermanentSeconds": 103.13400000000001
+          },
+          {
+            "seconds": 12186,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_092",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "高级护具组合",
+            "family": "focus-defense",
+            "intervalSincePreviousPermanentSeconds": 0
+          }
+        ],
+        "highRecoveryInvestments": [
+          {
+            "seconds": 9490.89,
+            "type": "buy-equipment",
+            "amount": -30,
+            "id": "relic_078",
+            "cost": 30,
+            "gymBefore": 7,
+            "name": "耐心积蓄器",
+            "family": "recovery",
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 9490.89,
+            "type": "upgrade-project",
+            "amount": -35,
+            "id": "recovery",
+            "cost": 35,
+            "gymBefore": 7,
+            "projectLevel": 7,
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 11131.866,
+            "type": "upgrade-project",
+            "amount": -62,
+            "id": "recovery",
+            "cost": 62,
+            "gymBefore": 8,
+            "projectLevel": 8,
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 11635.4,
+            "type": "buy-equipment",
+            "amount": -36,
+            "id": "relic_085",
+            "cost": 36,
+            "gymBefore": 8,
+            "name": "持续进步训练器",
+            "family": "course",
+            "intervalSincePreviousPermanentSeconds": 149
+          }
+        ],
+        "timingNote": "Transaction times and gaps describe this policy order, not causal attribution of total waiting time to one purchase."
+      }
+    },
+    {
+      "seed": 2,
+      "complete": true,
+      "seconds": 16801.147,
+      "horizonHours": 48,
+      "gymLevel": 8,
+      "remainingPermanentCost": 0,
+      "grossCredits": 1237,
+      "actualSpent": 1237,
+      "constructionSpent": 510,
+      "credits": 0,
+      "shots": 41381,
+      "templates": 108,
+      "recommendations": 271,
+      "firstGym8": {
+        "seconds": 15168.147,
+        "credits": 37,
+        "remainingPermanentCost": 290
+      },
+      "recommendedTemplateCount": 76,
+      "funding": {
+        "firstNormal": {
+          "recommendations": 76,
+          "credits": 1042
+        },
+        "repeats": {
+          "recommendations": 195,
+          "credits": 195
+        },
+        "unmatchedRecommendations": 0,
+        "firstNormalByTier": {
+          "rotation": {
+            "templates": 2,
+            "credits": 2
+          },
+          "starter": {
+            "templates": 25,
+            "credits": 119
+          },
+          "star": {
+            "templates": 20,
+            "credits": 205
+          },
+          "superstar": {
+            "templates": 15,
+            "credits": 262
+          },
+          "legend": {
+            "templates": 14,
+            "credits": 454
+          }
+        },
+        "stages": [
+          {
+            "gymLevel": 1,
+            "startSeconds": 0,
+            "endSeconds": 100,
+            "durationSeconds": 100,
+            "recommendedPlayers": 3,
+            "firstRecommendations": 3,
+            "repeatRecommendations": 0,
+            "actualIncome": 5,
+            "spending": 2,
+            "cashAfterEntering": 0,
+            "cashAtStageEnd": 3,
+            "templatesAfterEntering": 0
+          },
+          {
+            "gymLevel": 2,
+            "startSeconds": 100,
+            "endSeconds": 4516.2,
+            "durationSeconds": 4416.2,
+            "recommendedPlayers": 28,
+            "firstRecommendations": 17,
+            "repeatRecommendations": 11,
+            "actualIncome": 106,
+            "spending": 38,
+            "cashAfterEntering": 3,
+            "cashAtStageEnd": 71,
+            "templatesAfterEntering": 5
+          },
+          {
+            "gymLevel": 3,
+            "startSeconds": 4516.2,
+            "endSeconds": 6900.6,
+            "durationSeconds": 2384.4000000000005,
+            "recommendedPlayers": 3,
+            "firstRecommendations": 3,
+            "repeatRecommendations": 0,
+            "actualIncome": 45,
+            "spending": 82,
+            "cashAfterEntering": 71,
+            "cashAtStageEnd": 34,
+            "templatesAfterEntering": 34
+          },
+          {
+            "gymLevel": 4,
+            "startSeconds": 6900.6,
+            "endSeconds": 10265.454,
+            "durationSeconds": 3364.8539999999994,
+            "recommendedPlayers": 3,
+            "firstRecommendations": 3,
+            "repeatRecommendations": 0,
+            "actualIncome": 63,
+            "spending": 89,
+            "cashAfterEntering": 34,
+            "cashAtStageEnd": 8,
+            "templatesAfterEntering": 38
+          },
+          {
+            "gymLevel": 5,
+            "startSeconds": 10265.454,
+            "endSeconds": 11284.254,
+            "durationSeconds": 1018.8000000000011,
+            "recommendedPlayers": 11,
+            "firstRecommendations": 7,
+            "repeatRecommendations": 4,
+            "actualIncome": 137,
+            "spending": 140,
+            "cashAfterEntering": 8,
+            "cashAtStageEnd": 5,
+            "templatesAfterEntering": 45
+          },
+          {
+            "gymLevel": 6,
+            "startSeconds": 11284.254,
+            "endSeconds": 14096.654,
+            "durationSeconds": 2812.3999999999996,
+            "recommendedPlayers": 94,
+            "firstRecommendations": 27,
+            "repeatRecommendations": 67,
+            "actualIncome": 442,
+            "spending": 257,
+            "cashAfterEntering": 5,
+            "cashAtStageEnd": 190,
+            "templatesAfterEntering": 56
+          },
+          {
+            "gymLevel": 7,
+            "startSeconds": 14096.654,
+            "endSeconds": 15168.147,
+            "durationSeconds": 1071.4930000000004,
+            "recommendedPlayers": 44,
+            "firstRecommendations": 8,
+            "repeatRecommendations": 36,
+            "actualIncome": 186,
+            "spending": 339,
+            "cashAfterEntering": 190,
+            "cashAtStageEnd": 37,
+            "templatesAfterEntering": 89
+          },
+          {
+            "gymLevel": 8,
+            "startSeconds": 15168.147,
+            "endSeconds": 16801.147,
+            "durationSeconds": 1633,
+            "recommendedPlayers": 85,
+            "firstRecommendations": 8,
+            "repeatRecommendations": 77,
+            "actualIncome": 253,
+            "spending": 290,
+            "cashAfterEntering": 37,
+            "cashAtStageEnd": 0,
+            "templatesAfterEntering": 101
+          }
+        ],
+        "timeAfterGym8": {
+          "seconds": 1633,
+          "fractionOfConstructionTime": 0.09719574502859835
+        },
+        "lastTenPermanentTransactions": [
+          {
+            "seconds": 15588.654,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_096",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "黄金投篮手套",
+            "family": "focus-three",
+            "intervalSincePreviousPermanentSeconds": 138
+          },
+          {
+            "seconds": 15788.609,
+            "type": "buy-equipment",
+            "amount": -36,
+            "id": "relic_085",
+            "cost": 36,
+            "gymBefore": 8,
+            "name": "持续进步训练器",
+            "family": "course",
+            "intervalSincePreviousPermanentSeconds": 199.95499999999993
+          },
+          {
+            "seconds": 15920.609,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_076",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "完美出手校准器",
+            "family": "focus-mid",
+            "intervalSincePreviousPermanentSeconds": 132
+          },
+          {
+            "seconds": 16129.654,
+            "type": "upgrade-project",
+            "amount": -21,
+            "id": "offline",
+            "cost": 21,
+            "gymBefore": 8,
+            "projectLevel": 5,
+            "intervalSincePreviousPermanentSeconds": 209.04500000000007
+          },
+          {
+            "seconds": 16129.654,
+            "type": "buy-equipment",
+            "amount": -14,
+            "id": "relic_077",
+            "cost": 14,
+            "gymBefore": 8,
+            "name": "火热延时表",
+            "family": "offline",
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 16254.147,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_080",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "逆境突破指南",
+            "family": "focus-drive",
+            "intervalSincePreviousPermanentSeconds": 124.4930000000004
+          },
+          {
+            "seconds": 16405.654,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_084",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "反弹训练器",
+            "family": "focus-inside",
+            "intervalSincePreviousPermanentSeconds": 151.5069999999978
+          },
+          {
+            "seconds": 16596.609,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_088",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "专业防滑手套",
+            "family": "focus-handle",
+            "intervalSincePreviousPermanentSeconds": 190.95500000000175
+          },
+          {
+            "seconds": 16596.609,
+            "type": "buy-equipment",
+            "amount": -12,
+            "id": "relic_092",
+            "cost": 12,
+            "gymBefore": 8,
+            "name": "高级护具组合",
+            "family": "focus-defense",
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 16801.147,
+            "type": "upgrade-project",
+            "amount": -62,
+            "id": "recovery",
+            "cost": 62,
+            "gymBefore": 8,
+            "projectLevel": 8,
+            "intervalSincePreviousPermanentSeconds": 204.53800000000047
+          }
+        ],
+        "highRecoveryInvestments": [
+          {
+            "seconds": 14096.654,
+            "type": "buy-equipment",
+            "amount": -30,
+            "id": "relic_078",
+            "cost": 30,
+            "gymBefore": 7,
+            "name": "耐心积蓄器",
+            "family": "recovery",
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 14096.654,
+            "type": "upgrade-project",
+            "amount": -35,
+            "id": "recovery",
+            "cost": 35,
+            "gymBefore": 7,
+            "projectLevel": 7,
+            "intervalSincePreviousPermanentSeconds": 0
+          },
+          {
+            "seconds": 15788.609,
+            "type": "buy-equipment",
+            "amount": -36,
+            "id": "relic_085",
+            "cost": 36,
+            "gymBefore": 8,
+            "name": "持续进步训练器",
+            "family": "course",
+            "intervalSincePreviousPermanentSeconds": 199.95499999999993
+          },
+          {
+            "seconds": 16801.147,
+            "type": "upgrade-project",
+            "amount": -62,
+            "id": "recovery",
+            "cost": 62,
+            "gymBefore": 8,
+            "projectLevel": 8,
+            "intervalSincePreviousPermanentSeconds": 204.53800000000047
+          }
+        ],
+        "timingNote": "Transaction times and gaps describe this policy order, not causal attribution of total waiting time to one purchase."
+      }
+    }
+  ],
+  "flows": [],
+  "controlled": []
+}

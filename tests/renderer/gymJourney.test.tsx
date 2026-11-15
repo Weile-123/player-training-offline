@@ -72,6 +72,7 @@ async function mount(initial?: GymState) {
   }
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<GymHome/>));
+  await act(async () => {await harness.store!.getState().hydrate();});
 }
 function buttonWithin(scope: ParentNode, label: string) {
   const buttons = [...scope.querySelectorAll<HTMLButtonElement>('button')];
@@ -89,12 +90,21 @@ async function press(label: string, scope: ParentNode = document) {
       await completed;
     }
   });
+  await settlePending();
+}
+async function settlePending() {
+  let completed: Promise<unknown> | null = null;
+  while (harness.pending && harness.pending !== completed) {
+    completed = harness.pending;
+    await act(async () => {await completed;});
+  }
 }
 async function advance(milliseconds: number) {
   await act(async () => {await vi.advanceTimersByTimeAsync(milliseconds);});
   const pending = [...frames.values()];
   frames.clear();
   await act(async () => pending.forEach(callback => callback(Date.now())));
+  await settlePending();
 }
 function card(selector: string, heading: string) {
   const result = [...document.querySelectorAll<HTMLElement>(selector)].find(element => element.querySelector('h4')?.textContent === heading);
@@ -119,7 +129,7 @@ it('starts at home, completes a course, chooses a plan and cooperation, recommen
   expect(state().player!.training.completedCourses).toBe(1);
   expect(state().player!.stamina).toBe(14);
   await press('选择训练计划');
-  await press('选择此计划', card('.gm-plan-card', '持球突破'));
+  await press('选用', card('.gm-plan-card', '持球突破'));
   expect(state().player!.training.planId).toBe('finishing');
   await press('赞助合作');
   await press('接取合作', card('.gm-cooperation', '基础培养合作'));
@@ -197,6 +207,7 @@ it('uses shop, inventory and projects before upgrading the gym and filling its s
   const switches = [...document.querySelectorAll<HTMLButtonElement>('[role="switch"]')];
   expect(switches).toHaveLength(2);
   await act(async () => switches[1].click());
+  await settlePending();
   expect(state().player!.autoEnabled).toBe(false);
   expect(state().bench[0].autoEnabled).toBe(true);
   await advance(2_000);

@@ -7,7 +7,7 @@ import {equipmentCatalog, equipmentFamilyLabels, type EquipmentEffects} from '..
 import {templateRules} from '../../src/game/contract/templates';
 import {ComicDialog} from '../../src/components/ComicDialog';
 import {productImagePath} from '../../src/components/ProductImage';
-import {GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymShopPanel, type GymPanelProps} from '../../src/components/GymPanels';
+import {GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymShopPanel, TrainingAdvice, type GymPanelProps} from '../../src/components/GymPanels';
 import {offlineLimitMs, type OfflineTrainingReport} from '../../src/game/gym/offline';
 
 const at = 1_800_000_000_000;
@@ -22,7 +22,7 @@ afterEach(() => {
   root = null;
 });
 
-async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState) {
+async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState, busy = false) {
   let time = initial.updatedAt;
   function Scene() {
     const [state, setState] = useState(initial);
@@ -33,7 +33,7 @@ async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState) {
       actionError = result.error;
       setState(result.state);
     };
-    return <ComicDialog title="经营面板" onClose={() => {}}><Panel state={state} onAction={onAction} onClose={() => {}}/></ComicDialog>;
+    return <ComicDialog title="经营面板" onClose={() => {}}><Panel state={state} onAction={onAction} onClose={() => {}} busy={busy}/></ComicDialog>;
   }
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<Scene/>));
@@ -61,6 +61,8 @@ function equipmentFor(effect: keyof EquipmentEffects, grade = 1) {
   return item!;
 }
 
+function TrainingAdvicePanel({state}: GymPanelProps) {return <TrainingAdvice state={state}/>;}
+
 function own(state: GymState, installed: string[], warehouse: string[] = []) {
   state.ownedEquipment = [...installed, ...warehouse];
   state.equippedEquipment = [...installed];
@@ -84,6 +86,95 @@ async function filterShop(label: string, value: string) {
     select.dispatchEvent(new Event('change', {bubbles: true}));
   });
 }
+
+it('unloads a sole active capacity item with a cancellable preview, then reinstalls and sells from the warehouse', async () => {
+  const state = newGym(at, 11), item = equipmentFor('stamina');
+  own(state, [item.id]); state.player!.stamina = 24;
+  await mount(GymInventoryPanel, state);
+  await press(buttonWithin(product(item.name), '移入仓库'));
+  expect(document.body.textContent).toContain('移出球馆后体力上限 24 → 20，当前体力 24 → 20');
+  expect(document.body.textContent).toContain('再次放入不会补回体力');
+  expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeTruthy();
+  await press(buttonWithin(document, '保留馆内器材'));
+  expect(actions).toEqual([]);
+  expect(latest.player!.stamina).toBe(24);
+  await press(buttonWithin(product(item.name), '移入仓库'));
+  const confirm = buttonWithin(document, '确认移入仓库');
+  await act(async () => {confirm.click(); confirm.click();});
+  expect(actions).toEqual([{type: 'unequip', id: item.id}]);
+  expect(latest.equippedEquipment).toEqual([]);
+  expect(latest.ownedEquipment).toEqual([item.id]);
+  expect(latest.player!.stamina).toBe(20);
+  expect(latest.credits).toBe(0);
+  await press(buttonWithin(product(item.name), '放入球馆'));
+  expect(latest.equippedEquipment).toEqual([item.id]);
+  expect(latest.player!.stamina).toBe(20);
+  await press(buttonWithin(product(item.name), '移入仓库'));
+  await press(buttonWithin(document, '确认移入仓库'));
+  await press(buttonWithin(product(item.name), '半价出售'));
+  await press(buttonWithin(document, '确认出售'));
+  expect(latest.credits).toBe(1);
+  expect(latest.ownedEquipment).toEqual([]);
+  expect(latest.collectedEquipment[item.id]).toBeTruthy();
+  expect(actionError).toBeUndefined();
+});
+
+it('keeps unload controls disabled while an inventory operation is busy', async () => {
+  const state = newGym(at, 11), item = equipmentFor('stamina'); own(state, [item.id]);
+  await mount(GymInventoryPanel, state, true);
+  const unload = buttonWithin(product(item.name), '移入仓库');
+  expect(unload.disabled).toBe(true);
+  await press(unload);
+  expect(actions).toEqual([]);
+  expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+});
+
+it('calculates optional training comparisons only after opening the equipment detail', async () => {
+  const state = newGym(at, 11); state.credits = 20;
+  const item = equipmentFor('experience');
+  await mount(GymShopPanel, state);
+  expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  await press(buttonWithin(product(item.name), '器材详情'));
+  const comparison = document.querySelector('[aria-label="器材培养耗时对比"]')!;
+  expect(comparison.querySelectorAll('[data-forecast-level]')).toHaveLength(2);
+  expect(comparison.textContent).toContain('到 Lv.25');
+  expect(comparison.textContent).toContain('到 Lv.99');
+  expect(comparison.textContent).toContain('不保证模板');
+  expect(comparison.textContent).toContain('沿用现有体力');
+  expect(actions).toEqual([]);
+});
+
+it.each([25, 99])('does not quote a finished training target in level-%s equipment details', async level => {
+  const state = newGym(at, 11); state.player!.level = state.player!.peakLevel = level;
+  const item = equipmentFor('experience');
+  await mount(GymShopPanel, state);
+  await press(buttonWithin(product(item.name), '器材详情'));
+  const comparison = document.querySelector('[aria-label="器材培养耗时对比"]')!;
+  expect(comparison.querySelector('[data-forecast-level="25"]')).toBeNull();
+  expect(comparison.querySelector('[data-forecast-level="99"]') !== null).toBe(level < 99);
+  if (level === 99) expect(comparison.textContent).toContain('当前球员已满级，训练已结束');
+  expect(actions).toEqual([]);
+});
+
+it('opens project time comparisons on demand and retains the real charged upgrade flow', async () => {
+  const state = newGym(at, 11); state.credits = 10;
+  state.player!.stamina = 0; state.player!.recoveryMs = 9_500;
+  await mount(GymClubPanel, state);
+  const card = [...document.querySelectorAll<HTMLElement>('.gm-project')].find(item => item.querySelector('h4')?.textContent === '恢复护理')!;
+  expect(document.querySelector('[aria-label="项目培养耗时对比"]')).toBeNull();
+  await press(buttonWithin(card, '查看培养耗时对比'));
+  const comparison = document.querySelector('[aria-label="项目培养耗时对比"]')!;
+  expect(comparison.querySelectorAll('[data-forecast-level]')).toHaveLength(2);
+  expect(comparison.textContent).toContain('项目升一级后');
+  expect(actions).toEqual([]);
+  expect(latest.player!.stamina).toBe(0);
+  await press(buttonWithin(card, '升级 · 1 券'));
+  expect(latest.projects.recovery).toBe(1);
+  expect(latest.credits).toBe(9);
+  expect(latest.player!.stamina).toBe(0);
+  expect(latest.player!.recoveryMs).toBeLessThan(9_500);
+  expect(actionError).toBeUndefined();
+});
 
 it('buys a permanent item directly into the gym without refilling stamina or a second activation', async () => {
   const state = newGym(at, 11);
@@ -348,16 +439,22 @@ it.each([false, true])('shows the active cooperation-equipment course progress w
   if (complete) player.templateId = templateRules.find(template => template.tier === 'rotation')!.id;
   await mount(GymCooperationPanel, state);
   const progress = document.querySelector('[aria-label="合作器材培养进度"]')!;
-  expect(progress.textContent).toContain('本档器材已完成 1/2 完整课程');
-  expect(progress.textContent).toContain('当前课实际启用 3/10 球');
-  expect(progress.textContent).toContain('需完整10球均启用才计一课');
-  expect(progress.textContent).toContain('还差 1 整课取得额外 1 券训练资格');
-  expect(progress.textContent).toContain('合作达标后推荐领取');
-  if (complete) expect(progress.textContent).toContain('合作已达标');
+  expect(progress.textContent).toContain('完整课程 1/2');
+  expect(progress.textContent).toContain('本课启用 3/10 球');
+  expect(progress.textContent).not.toContain('资格已保留');
+  if (complete) expect(progress.textContent).toContain('合作已达标，器材还差1整课');
   else {
     expect(progress.textContent).not.toContain('合作已达标');
     expect(document.querySelector('[role="status"]')!.textContent).not.toContain('推荐时额外获得');
   }
+  const before = structuredClone(latest);
+  await press(document.querySelector<HTMLButtonElement>('[aria-label="查看合作说明"]')!);
+  const rules = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '合作说明')!;
+  expect(rules.textContent).toContain('每课10球都须启用');
+  expect(rules.textContent).toContain('完成2个完整课程');
+  expect(rules.textContent).toContain('合作达标后推荐领取');
+  await press(rules.querySelector<HTMLButtonElement>('[aria-label="关闭面板"]')!);
+  expect(latest).toEqual(before);
   expect(actions).toEqual([]);
 });
 
@@ -374,8 +471,8 @@ it('explains why a partly equipped current course will not count as a full equip
   player.cooperation = {id: cooperationOffers(state).find(offer => offer.kind === 'basic')!.id, playerId: player.id, acceptedShots: 0, acceptedCourses: 0};
   await mount(GymCooperationPanel, state);
   const progress = document.querySelector('[aria-label="合作器材培养进度"]')!;
-  expect(progress.textContent).toContain('本课已有未启用本档器材的投篮，本课不计完整课程');
-  expect(progress.textContent).toContain('当前课实际启用 3/10 球');
+  expect(progress.textContent).toContain('本课非完整器材课程，下课起重新累计');
+  expect(progress.textContent).toContain('本课启用 3/10 球');
   expect(actions).toEqual([]);
 });
 
@@ -390,10 +487,12 @@ it('shows retained cooperation-equipment eligibility after removing gear while k
   player.cooperation = {id: cooperationOffers(state).find(offer => offer.kind === 'basic')!.id, playerId: player.id, acceptedShots: 0, acceptedCourses: 0};
   await mount(GymCooperationPanel, state);
   const progress = document.querySelector('[aria-label="合作器材培养进度"]')!;
-  expect(progress.textContent).toContain('已保留额外 2 券训练资格，合作达标后推荐领取');
-  expect(progress.textContent).toContain('换下器材不会丢失');
-  expect(progress.textContent).not.toContain('本档器材已完成');
+  expect(progress.textContent).toContain('已保留额外 2 券资格，合作达标后推荐领取');
+  expect(progress.textContent).not.toContain('完整课程');
   expect(document.querySelector('[role="status"]')!.textContent).not.toContain('推荐时额外获得');
+  await press(document.querySelector<HTMLButtonElement>('[aria-label="查看合作说明"]')!);
+  const rules = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '合作说明')!;
+  expect(rules.textContent).toContain('取得的资格不会因换下器材消失');
   expect(actions).toEqual([]);
 });
 
@@ -492,11 +591,18 @@ it.each([false, true])('confirms the displayed recommendation reward and archive
     state.player!.level = 18;
     state.player!.peakLevel = 18;
     state.player!.highestTier = 'legend';
+  } else {
+    state.player!.cooperation = {id: cooperationOffers(state)[0].id, playerId: state.player!.id,
+      acceptedShots: state.player!.shots, acceptedCourses: state.player!.training.completedCourses};
   }
   const id = state.player!.id;
   await mount(GymRecommendPanel, state);
   const confirm = buttonWithin(document, '确认推荐');
   expect(confirm.textContent).toContain(legendary ? '+12 券' : '+0 券');
+  if (!legendary) {
+    expect(document.body.textContent).toContain('未匹配模板，本次0券');
+    expect(document.body.textContent).toContain('未达标，推荐后结束');
+  }
   expect(document.querySelector('.gym-panel')!.textContent).not.toMatch(/交付|经费|信用/);
   await press(confirm);
   expect(latest.player).toBeNull();
@@ -517,6 +623,8 @@ it.each([
   const template = templateRules.find(entry => entry.tier === tier)!;
   Object.assign(state.player!, {level, peakLevel: level, templateId: template.id, height: template.height[0], stats: {...template.stats}});
   await mount(GymRecommendPanel, state);
+  expect(document.querySelector('.gm-reward-breakdown')).toBeNull();
+  await press(buttonWithin(document, '查看结算明细'));
   const row = [...document.querySelectorAll<HTMLElement>('.gm-reward-breakdown > div')].find(item => item.textContent?.includes('培养加奖'))!;
   expect(row.textContent).toContain(`Lv.${level}`);
   expect(row.textContent).toContain(`+${bonus} 券`);
@@ -573,7 +681,7 @@ it('explains the missing actual template after the next bonus level is reached w
   const state = newGym(at, 31);
   const template = templateRules.find(item => item.tier === 'starter')!;
   Object.assign(state.player!, {level: 15, peakLevel: 15, templateId: template.id, height: template.height[0], stats: {...template.stats}});
-  await mount(GymRecommendPanel, state);
+  await mount(TrainingAdvicePanel, state);
   const advice = document.querySelector('.gm-training-advice')!;
   expect(advice.textContent).toContain('当前培养奖金 +3 券');
   expect(advice.textContent).toContain('下一档：Lv.15＋全明星');
@@ -588,7 +696,7 @@ it('shows that a maxed athlete has no further attribute or training-bonus value 
   const template = templateRules.find(item => item.tier === 'legend')!;
   Object.assign(state.player!, {level: 25, peakLevel: 25, templateId: template.id, height: template.height[0]});
   state.player!.stats = {three: 99, mid: 99, drive: 99, inside: 99, handle: 99, defense: 99};
-  await mount(GymRecommendPanel, state);
+  await mount(TrainingAdvicePanel, state);
   const advice = document.querySelector('.gm-training-advice')!;
   expect(advice.textContent).toContain('已达到最高培养奖金');
   expect(advice.textContent).toContain('继续训练不会增加属性');
@@ -602,7 +710,7 @@ it('does not label a level-99 starter as having reached the highest training bon
   const state = newGym(at, 31);
   const template = templateRules.find(item => item.tier === 'starter')!;
   Object.assign(state.player!, {level: 99, peakLevel: 99, templateId: template.id, height: template.height[0], stats: {...template.stats}});
-  await mount(GymRecommendPanel, state);
+  await mount(TrainingAdvicePanel, state);
   const advice = document.querySelector('.gm-training-advice')!;
   expect(advice.textContent).toContain('按当前实际模板结算培养奖金 3 券');
   expect(advice.textContent).toContain('无法继续训练提升');

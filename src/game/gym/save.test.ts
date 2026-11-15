@@ -15,6 +15,17 @@ function storage() {
 }
 
 describe('gym save boundaries', () => {
+  it('roundtrips collection hints and validates archived progress counters without scanning old records', () => {
+    const state = newGym(1_000, 17);
+    state.collectionGoalId = 'template-not-in-catalog';
+    expect(validGym(state)).toBe(false);
+    state.collectionGoalId = null;
+    state.alumniArchive = {id: '1000-17', count: 250, effectiveCount: 120, legendCount: 5, bestTier: 5};
+    expect(decodeGym(encodeGym(state))).toEqual(state);
+    for (const fields of [{count: -1}, {effectiveCount: 251}, {legendCount: 121}, {bestTier: 6}, {id: '../unsafe'}, {bestTier: 4}, {legendCount: 0}]) {
+      expect(validGym({...state, alumniArchive: {...state.alumniArchive, ...fields}})).toBe(false);
+    }
+  });
   it('roundtrips the independent namespace and restores the latest backup', () => {
     const {port, data} = storage();
     data.set('player-training.contract.v2', 'old-contract');

@@ -5,15 +5,17 @@ import {hash, random, stream, type Stream} from '../contract/random';
 import {ledger, type Ledger} from '../contract/money';
 import {grow, match, shape} from '../contract/templates';
 import {cloneData} from '../../utils/cloneData';
-import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLevels, projects, trainingCreditMilestones, type GymEquipment, type ProjectId} from './catalog';
+import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLevels, projects, trainingCreditMilestones, selectedRecruitmentPrice, selectedRecruitmentUnlockLevel, postgameRepeatTemplateCredits, type GymEquipment, type ProjectId} from './catalog';
+import {isSelectedRecruitmentDirection, selectedRecruitmentBase, type SelectedRecruitmentDirection} from './selectedRecruitment';
 import {trainingBias, trainingPlans, type TrainingPlanId, type TrainingProgress} from './training';
 import {buildCooperationOffers, type Cooperation, type CooperationStatus} from './cooperation';
 import {playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
 
-export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits} from './catalog';
+export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
 export {trainingPlans} from './training';
 export type {TrainingPlanId, TrainingProgress} from './training';
 export type {Cooperation, CooperationOffer, CooperationStatus} from './cooperation';
+export type {SelectedRecruitmentDirection} from './selectedRecruitment';
 export {playerLevelCap, requiredExperience, experienceForLevel, shotExperience} from './progression';
 
 export type GymPlayer = {
@@ -32,7 +34,14 @@ export type Recommendation = {
   credits: number; fame: number; growth: number; tier: number; tierId: TemplateTier | null; tierName: string;
   baseCredits: number; trainingCredits: number; cooperationCredits: number; rawFame: number; baseFame: number; cooperationFame: number;
 };
+/** Credits are the payout; component bonuses remain the unchanged theoretical amounts. */
+export type RecommendationPayout = Recommendation & {
+  /** Legacy event name; now means the first recommendation at any gym level. */
+  rawCredits: number; withheldCredits: number; repeatTemplate: boolean; isFirstPostgameRecommendation: boolean;
+};
 export type GymAlumnus = GymPlayer & {recommendedAt: number; rewardCredits: number; rewardFame: number; finalValue: string};
+/** Counts only older records moved out of the bounded recent alumni array. */
+export type GymAlumniArchive = {id: string; count: number; effectiveCount: number; legendCount: number; bestTier: number};
 export type GymState = {
   equipmentCatalogVersion?: 1 | 2 | 3;
   /** Migration-only snapshot: consumed once before newly rewritten effects can accrue. */
@@ -45,6 +54,13 @@ export type GymState = {
   ownedEquipment: string[]; equippedEquipment: string[]; purchasePrices: Record<string, number>; inventory: {drink: number};
   collection: Record<string, {firstAt: number; highestRating: number; highestValue: string}>;
   collectedEquipment: Record<string, {firstAt: number}>; alumni: GymAlumnus[];
+  alumniArchive?: GymAlumniArchive;
+  /** Retired hint field retained for old saves; no longer used by gameplay. */
+  collectionGoalId?: string | null;
+  /** Version 11 marks the one-time union of old counters and actual alumni final templates. */
+  recommendationRulesVersion?: 11;
+  /** Legacy field name retained for compatibility; counts recommendations at every gym level. */
+  postgameRecommendedTemplates?: string[];
   rng: {recruits: Stream; economy: Stream; attributes: Stream};
   /** Read only by save migration; new games keep timing and cooperation on each player. */
   nextShotAt?: number; cooperation?: Cooperation | null;
@@ -52,7 +68,7 @@ export type GymState = {
 export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
   | {type: 'train' | 'recommend' | 'use-drink'; id: string}
-  | {type: 'recruit'; preference?: HeightPreference}
+  | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number}
   | {type: 'buy-equipment' | 'equip'; id: string; replaceId?: string}
   | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
   | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string}
@@ -61,10 +77,12 @@ export type GymAction =
   | {type: 'select-player'; id: string}
   | {type: 'set-auto'; id: string; enabled: boolean}
   | {type: 'auto-step'}
-  | {type: 'buy-drink' | 'upgrade-gym'};
+  | {type: 'buy-drink'}
+  | {type: 'upgrade-gym'; targetLevel?: number};
 export type GymEvent = {
   type: string; id?: string; playerId?: string; outcome?: 'hold' | 'success' | 'great';
   changes?: Stats; levelGain?: number; experienceGain?: number; templateId?: string; credits?: number; fame?: number; restoredStamina?: number;
+  rawCredits?: number; withheldCredits?: number; repeatTemplate?: boolean; isFirstPostgameRecommendation?: boolean;
 };
 export type GymResult = {state: GymState; events: GymEvent[]; error?: string};
 
@@ -253,9 +271,37 @@ export function recommendation(source: GymPlayer | GymState | null, selected?: G
     baseCredits: tier, trainingCredits, cooperationCredits, rawFame, baseFame, cooperationFame};
 }
 
+/** Old hot records can provide preview evidence until the history transaction also reads the cold archive. */
+export function recommendedTemplateIds(state: GymState): string[] {
+  if (state.recommendationRulesVersion === 11) return state.postgameRecommendedTemplates ?? [];
+  const ids = new Set(state.postgameRecommendedTemplates ?? []);
+  for (const player of state.alumni) if (player.templateId && templateById(player.templateId)) ids.add(player.templateId);
+  return [...ids];
+}
+
+/** Called once in the same transaction as the historical evidence read; never infers recommendations from collection. */
+export function initializeRecommendationRecords(state: GymState, archivedIds: Iterable<string> = []): GymState {
+  if (state.recommendationRulesVersion === 11) return state;
+  const ids = new Set(recommendedTemplateIds(state));
+  for (const id of archivedIds) if (templateById(id)) ids.add(id);
+  return {...state, recommendationRulesVersion: 11, postgameRecommendedTemplates: [...ids]};
+}
+
+/** Apply the all-level per-template repeat reward without changing theory, qualifications or fame. */
+export function recommendationPayout(state: GymState, player: GymPlayer | null = state.player): RecommendationPayout {
+  const raw = recommendation(state, player);
+  const eligible = !!player?.templateId && raw.tierId !== null;
+  const repeatTemplate = eligible && recommendedTemplateIds(state).includes(player!.templateId!);
+  const isFirstPostgameRecommendation = eligible && !repeatTemplate;
+  const credits = repeatTemplate ? postgameRepeatTemplateCredits : raw.credits;
+  return {...raw, credits, rawCredits: raw.credits, withheldCredits: raw.credits - credits, repeatTemplate, isFirstPostgameRecommendation};
+}
+
 export function projectCost(id: string, nextLevel: number): number {
   const project = projectById.get(id);
   if (!project || !Number.isInteger(nextLevel) || nextLevel < 1 || nextLevel > project.maxLevel) throw new Error('项目等级无效');
+  const explicitPrice = project.prices?.[nextLevel - 1];
+  if (explicitPrice !== undefined) return explicitPrice;
   const denominator = 5 ** (nextLevel - 1);
   const numerator = project.basePrice * 9 ** (nextLevel - 1);
   return Math.floor((numerator + denominator - 1) / denominator);
@@ -290,28 +336,44 @@ export function equipmentOffer(state: GymState, id: string) {
   return {owned, price: reason || !item ? null : item.price, reason};
 }
 
+export function alumniCount(state: GymState): number {
+  return state.alumni.length + (state.alumniArchive?.count ?? 0);
+}
+
+export function alumniProgress(state: GymState) {
+  let effectiveCount = state.alumniArchive?.effectiveCount ?? 0;
+  let legendCount = state.alumniArchive?.legendCount ?? 0;
+  let bestTier = state.alumniArchive?.bestTier ?? 0;
+  for (const player of state.alumni) {
+    const reward = recommendation(player);
+    if (reward.growth <= 0 || reward.tier < 1) continue;
+    effectiveCount++;
+    if (reward.tier === 5) legendCount++;
+    bestTier = Math.max(bestTier, reward.tier);
+  }
+  return {total: alumniCount(state), effectiveCount, legendCount, bestTier};
+}
+
 export function gymUpgrade(state: GymState) {
   const level = gymLevels[state.gymLevel] ?? null;
-  const effective = state.alumni.filter(player => {
-    const reward = recommendation(player);
-    return reward.growth > 0 && reward.tier >= 1;
-  });
-  const bestTier = Math.max(0, ...effective.map(player => recommendation(player).tier));
-  const legends = effective.filter(player => recommendation(player).tier === 5).length;
+  const progress = alumniProgress(state);
   const requirements: {label: string; current: number; required: number; met: boolean}[] = [];
   const add = (label: string, current: number, required: number) => {
     if (required) requirements.push({label, current, required, met: current >= required});
   };
   if (level) {
     add('累计声望', state.fame, level.fame);
-    add('有效推荐', effective.length, level.requiredRecommendations);
-    add(`最高推荐档次（${tierNames[level.requiredTier]}及以上）`, bestTier, level.requiredTier);
-    add('传奇推荐人数', legends, level.requiredLegends);
+    add('有效推荐', progress.effectiveCount, level.requiredRecommendations);
+    add(`最高推荐档次（${tierNames[level.requiredTier]}及以上）`, progress.bestTier, level.requiredTier);
+    add('传奇推荐人数', progress.legendCount, level.requiredLegends);
     add('球星模板收藏', Object.keys(state.collection).length, level.requiredTemplates);
   }
-  const canUpgrade = !!level && requirements.every(requirement => requirement.met);
-  const reason = !level ? '球馆已达到最高等级' : canUpgrade ? '' : '声望或培养成果尚未达标';
-  return {level, requirements, canUpgrade, reason};
+  const progressMet = !!level && requirements.every(requirement => requirement.met);
+  const price = level?.upgradePrice ?? 0;
+  if (level) add('扩建赞助券', state.credits, price);
+  const canUpgrade = progressMet && state.credits >= price;
+  const reason = !level ? '球馆已达到最高等级' : canUpgrade ? '' : !progressMet ? '声望或培养成果尚未达标' : `赞助券不足，还差 ${price - state.credits} 券`;
+  return {level, price, requirements, canUpgrade, reason};
 }
 
 export function gymLevelRequirements(state: GymState): string[] {
@@ -319,13 +381,15 @@ export function gymLevelRequirements(state: GymState): string[] {
     .map(requirement => `${requirement.label} ${requirement.current}/${requirement.required}`);
 }
 
-function recruit(state: GymState, preference: HeightPreference): GymPlayer {
+function recruit(state: GymState, preference: HeightPreference, direction?: SelectedRecruitmentDirection): GymPlayer {
   const source = state.rng.recruits;
-  const stats = Object.fromEntries(statKeys.map(key => [key, 24 + state.projects.recruitment + Math.floor(random(source) * 25)])) as Stats;
+  let baseStats = Object.fromEntries(statKeys.map(key => [key, 24 + Math.floor(random(source) * 25)])) as Stats;
   const bias = Object.fromEntries(statKeys.map(key => [key, random(source) ** 3])) as Stats;
   const ranges = {any: [178, 218], guard: [178, 194], forward: [195, 205], center: [206, 218]};
   const [low, high] = ranges[preference];
   const height = low + Math.floor(random(source) * (high - low + 1));
+  if (direction) baseStats = selectedRecruitmentBase(baseStats, direction, source);
+  const stats = Object.fromEntries(statKeys.map(key => [key, baseStats[key] + state.projects.recruitment])) as Stats;
   const sequence = state.nextPlayer++;
   const id = `gym-p${sequence}`;
   return {id, name: `新秀 ${sequence}`, enteredAt: state.updatedAt, height, stats, entryStats: {...stats}, bias,
@@ -340,7 +404,7 @@ export function newGym(now: number, seed = 1): GymState {
   const state: GymState = {kind: 'gym-management', version: 1, balanceVersion: 3, equipmentCatalogVersion, offlineRulesVersion: 2, seed, revision: 0, createdAt: now, updatedAt: now, nextPlayer: 1,
     player: null, bench: [], credits: 0, fame: 0, gymLevel: 1,
     projects: {endurance: 0, recovery: 0, recruitment: 0, equipment: 0, automation: 0, offline: 0},
-    ownedEquipment: [], equippedEquipment: [], purchasePrices: {}, inventory: {drink: 0}, collection: {}, collectedEquipment: {}, alumni: [],
+    ownedEquipment: [], equippedEquipment: [], purchasePrices: {}, inventory: {drink: 0}, collection: {}, collectedEquipment: {}, alumni: [], recommendationRulesVersion: 11, postgameRecommendedTemplates: [],
     rng: {recruits: stream(seed, 'recruits'), economy: stream(seed, 'economy'), attributes: stream(seed, 'attributes')}};
   state.player = recruit(state, 'any');
   return state;
@@ -512,25 +576,45 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
     }
     case 'recommend': {
       if (!player || action.id !== player.id) return fail('当前球员已变化，无法重复推荐');
-      const reward = recommendation(next, player);
+      if (next.recommendationRulesVersion !== 11 && next.alumniArchive?.count) return fail('推荐记录尚未恢复，请重新进入球馆后重试');
+      const reward = recommendationPayout(next, player);
       if (!Number.isSafeInteger(next.credits + reward.credits) || !Number.isSafeInteger(next.fame + reward.fame)) return fail('经营记录已达到数值上限');
+      if (next.recommendationRulesVersion !== 11) {
+        const initialized = initializeRecommendationRecords(next);
+        next.recommendationRulesVersion = initialized.recommendationRulesVersion;
+        next.postgameRecommendedTemplates = initialized.postgameRecommendedTemplates;
+      }
+      if (reward.isFirstPostgameRecommendation) next.postgameRecommendedTemplates = [...(next.postgameRecommendedTemplates ?? []), player.templateId!];
       next.alumni.push({...player, recommendedAt: now, rewardCredits: reward.credits, rewardFame: reward.fame, finalValue: playerValue(next, player)});
       next.credits += reward.credits;
       next.fame += reward.fame;
       next.player = next.bench.shift() ?? null;
-      events.push({type: 'recommended', playerId: player.id, credits: reward.credits, fame: reward.fame});
+      events.push({type: 'recommended', playerId: player.id, credits: reward.credits, fame: reward.fame,
+        rawCredits: reward.rawCredits, withheldCredits: reward.withheldCredits,
+        repeatTemplate: reward.repeatTemplate, isFirstPostgameRecommendation: reward.isFirstPostgameRecommendation});
       break;
     }
     case 'recruit': {
+      if (action.mode !== undefined && action.mode !== 'selected') return fail('招生方式无效');
+      if (action.expectedNextPlayer !== undefined && (!Number.isSafeInteger(action.expectedNextPlayer) || action.expectedNextPlayer !== next.nextPlayer)) return fail('招生名单已变化，请重新确认');
       if (activePlayers(next).length >= next.gymLevel) return fail('训练位已满，升级球馆或推荐一名球员后再招募');
       const preference = action.preference ?? 'any';
       if (!['any', 'guard', 'forward', 'center'].includes(preference)) return fail('身高偏好无效');
       if (preference !== 'any' && next.gymLevel < 2) return fail('球馆 2 级开放身高偏好');
-      const trainee = recruit(next, preference);
+      const selected = action.mode === 'selected';
+      if (selected && action.expectedNextPlayer === undefined) return fail('请重新确认精选招生名单');
+      if (selected && !isSelectedRecruitmentDirection(action.direction)) return fail('精选方向无效');
+      if (!selected && action.direction !== undefined) return fail('免费招生无需选择精选方向');
+      if (selected && next.gymLevel < selectedRecruitmentUnlockLevel) return fail(`球馆 ${selectedRecruitmentUnlockLevel} 级开放精选招生`);
+      if (selected && next.credits < selectedRecruitmentPrice) return fail('赞助券不足');
+      if (!Number.isSafeInteger(next.nextPlayer + 1)) return fail('招生记录已达到数值上限');
+      const trainee = recruit(next, preference, selected ? action.direction : undefined);
+      if (selected) next.credits -= selectedRecruitmentPrice;
       trainee.nextShotAt = Math.max(trainee.nextShotAt, now + shotCooldownMs);
       if (player) next.bench.push(trainee);
       else next.player = trainee;
       events.push({type: 'recruited', playerId: trainee.id});
+      if (selected) events.push({type: 'selected-recruited', playerId: trainee.id, id: action.direction, credits: selectedRecruitmentPrice});
       break;
     }
     case 'set-training-plan': {
@@ -547,6 +631,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
       if (!cooperationOffers(next).some(offer => offer.id === action.id)) return fail('合作目标已变化，请重新选择');
       if (player.cooperation?.id === action.id) return fail('该合作已在进行');
+      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限，无法新接或更换合作`);
       player.cooperation = {id: action.id, playerId: player.id, acceptedShots: player.shots, acceptedCourses: player.training.completedCourses};
       player.equipmentTraining.cooperationCourses = [0, 0];
       player.equipmentTraining.cooperationCourseShots = [0, 0];
@@ -616,6 +701,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
     }
     case 'use-drink': {
       if (!player || action.id !== player.id) return fail('当前球员已变化，请重新选择');
+      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限，无需使用运动饮料`);
       if (!next.inventory.drink) return fail('运动饮料已用完');
       if (player.stamina >= staminaMax(next)) return fail('当前体力已满');
       next.inventory.drink--;
@@ -636,8 +722,10 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       break;
     }
     case 'upgrade-gym': {
+      if (action.targetLevel !== undefined && action.targetLevel !== next.gymLevel + 1) return fail('球馆已变化，请重新确认扩建');
       const offer = gymUpgrade(next);
       if (!offer.canUpgrade || !offer.level) return fail(offer.reason);
+      next.credits -= offer.price;
       next.gymLevel = offer.level.level;
       events.push({type: 'gym-upgraded', id: String(next.gymLevel)});
       break;

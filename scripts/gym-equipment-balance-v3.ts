@@ -6,21 +6,22 @@ import {createHash} from 'node:crypto';
 import {
   activePlayers, advanceGym, automaticIntervalMs, cooperationOffers, dispatchGym, equipmentCapacity,
   equipmentEffects, equipmentOffer, experienceForLevel, gymLevels, newGym, playerLevelCap, projectCap,
-  recommendation, recoverySeconds, staminaMax, trainPlayer, trainingShotExperience,
+  recommendation, recommendationPayout, recoverySeconds, staminaMax, trainPlayer, trainingShotExperience,
   type GymAction, type GymEvent, type GymState,
 } from '../src/game/gym/engine';
-import {equipmentCatalog, equipmentCatalogVersion, type GymEquipment, type ProjectId} from '../src/game/gym/catalog';
+import {equipmentCatalog, equipmentCatalogVersion, gymEconomyVersion, type GymEquipment, type ProjectId} from '../src/game/gym/catalog';
 import {estimateShotTime} from '../src/game/gym/forecast';
 import {offlineLimitMs, settleOfflineGym} from '../src/game/gym/offline';
 import {nbaTemplates} from '../src/game/templates';
 import {statKeys} from '../src/game/types';
+import {validGym} from '../src/game/gym/save';
 
 const start = 1_800_000_000_000;
 const startedAt = Date.now();
 const seeds = Number(process.env.EQUIPMENT_BALANCE_SEEDS ?? 64);
 const phase = process.env.EQUIPMENT_BALANCE_PHASE ?? 'full';
-const output = process.env.EQUIPMENT_BALANCE_OUTPUT ?? 'docs/balance/equipment-v3-balance.json';
-const selectedGyms = (process.env.EQUIPMENT_BALANCE_GYMS ?? '1,2,3,5,6,8').split(',').map(Number);
+const output = process.env.EQUIPMENT_BALANCE_OUTPUT ?? `docs/balance/equipment-v3-balance-economy-v${gymEconomyVersion}.json`;
+const selectedGyms = (process.env.EQUIPMENT_BALANCE_GYMS ?? '1,2,3,5,6,7,8').split(',').map(Number);
 if (!Number.isInteger(seeds) || seeds < 1 || seeds > 256 || !['full', 'supply', 'growth'].includes(phase)
   || selectedGyms.some(g => !Number.isInteger(g) || g < 1 || g > 8)) throw Error('Invalid equipment experiment settings');
 const levels = [10, 15, 20, 25] as const;
@@ -62,9 +63,15 @@ function make(f: Fixture, ids: readonly string[] = [], seed = 1, players = 1, pl
       : id === 'offline' ? 0 : Math.min(cap, Math.floor((f.gym-1)/2));
   }
   state.collection = Object.fromEntries(nbaTemplates.slice(0,templateCount(f)).map(t=>[t.id,{firstAt:start,highestRating:0,highestValue:'0'}]));
+  for(const id of ids) {
+    if(!byId.has(id)) throw Error('Unknown fixture equipment '+id);
+    const offer=equipmentOffer(state,id);
+    if(offer.price===null) throw Error(`Locked fixture equipment ${id} at G${f.gym}: ${offer.reason}`);
+  }
   if (ids.length > equipmentCapacity(state) || new Set(ids.map(id => family(byId.get(id)!))).size !== ids.length) throw Error('Invalid fixture equipment slots/families');
   state.ownedEquipment = [...ids]; state.equippedEquipment = [...ids];
   state.purchasePrices = Object.fromEntries(ids.map(id=>[id,byId.get(id)!.price]));
+  state.collectedEquipment = Object.fromEntries(ids.map(id=>[id,{firstAt:start}]));
   // Use the real recruiter after project setup, rather than retrofitting entry stats.
   state.player = null;
   for(let i=0;i<players;i++) state=command(state,{type:'recruit'});
@@ -76,6 +83,7 @@ function make(f: Fixture, ids: readonly string[] = [], seed = 1, players = 1, pl
     p.training.planId=plan as typeof p.training.planId;
     state=command(state,{type:'accept-cooperation',id:cooperationOffers(state,p)[0].id,playerId:p.id});
   }
+  if(!validGym(state)) throw Error('Invalid equipment experiment fixture');
   return state;
 }
 const cost = (ids: readonly string[]) => ids.reduce((total,id)=>total+byId.get(id)!.price,0);
@@ -166,14 +174,14 @@ function businessLoadout(f:Fixture) {
   // Backward-compatible V2 baseline, only used before the rewrite is complete.
   return items.filter(i=>i.effects.valuePercent||i.effects.cooperationBonus).sort((a,b)=>b.effects.cooperationBonus-a.effects.cooperationBonus||b.effects.valuePercent-a.effects.valuePercent).slice(0,2).map(i=>i.id);
 }
-type Checkpoint = {level:number;shots:number;seconds:number;template:string|null;tier:number;credits:number;fame:number;growth:number;trainingCredits:number;cooperationCredits:number;manualActions:number;managementActions:number;wastedGrowth:number;stats:Record<string,number>};
+type Checkpoint = {level:number;shots:number;seconds:number;template:string|null;tier:number;credits:number;rawCredits:number;withheldCredits:number;fame:number;growth:number;trainingCredits:number;cooperationCredits:number;manualActions:number;managementActions:number;wastedGrowth:number;stats:Record<string,number>};
 function checkpoint(state:GymState,managementActions:number):Checkpoint {
   execution.recommendationProbes++;
-  const p=state.player!; const reward=recommendation(state,p);
+  const p=state.player!; const reward=recommendation(state,p), payout=recommendationPayout(state,p);
   const paid=command(state,{type:'recommend',id:p.id});
-  if(paid.credits-state.credits!==reward.credits||paid.fame-state.fame!==reward.fame) throw Error('Recommendation ledger mismatch');
+  if(paid.credits-state.credits!==payout.credits||paid.fame-state.fame!==reward.fame) throw Error('Recommendation ledger mismatch');
   return {level:p.level,shots:p.shots,seconds:(state.updatedAt-start)/1000,template:p.templateId,tier:reward.tier,
-    credits:reward.credits,fame:reward.fame,growth:reward.growth,trainingCredits:reward.trainingCredits,cooperationCredits:reward.cooperationCredits,
+    credits:payout.credits,rawCredits:reward.credits,withheldCredits:payout.withheldCredits,fame:reward.fame,growth:reward.growth,trainingCredits:reward.trainingCredits,cooperationCredits:reward.cooperationCredits,
     manualActions:p.autoEnabled?0:p.shots,managementActions,wastedGrowth:Math.max(0,p.level*10-reward.growth),stats:{...p.stats}};
 }
 function growthTrace(f:Fixture,ids:readonly string[],seed:number,offline:boolean,plan='balanced') {
@@ -205,7 +213,7 @@ function aggregateTraces(runs:ReturnType<typeof growthTrace>[]) {
     levelReached:runs.filter(r=>r.milestones[level]).length,
     tiers:[0,1,2,3,4,5].map(tier=>runs.filter(r=>r.milestones[level]?.tier===tier).length),
     stats:Object.fromEntries(statKeys.map(key=>[key,summary(runs.flatMap(r=>r.milestones[level]?[r.milestones[level].stats[key]]:[]))])),
-    ...Object.fromEntries(['shots','seconds','credits','fame','growth','trainingCredits','cooperationCredits','manualActions','managementActions','wastedGrowth'].map(key=>[key,summary(runs.flatMap(r=>r.milestones[level]?[r.milestones[level][key as keyof Checkpoint] as number]:[]))])),
+    ...Object.fromEntries(['shots','seconds','credits','rawCredits','withheldCredits','fame','growth','trainingCredits','cooperationCredits','manualActions','managementActions','wastedGrowth'].map(key=>[key,summary(runs.flatMap(r=>r.milestones[level]?[r.milestones[level][key as keyof Checkpoint] as number]:[]))])),
     qualifiedShots:summary(runs.flatMap(r=>r.qualified[level]?[r.qualified[level].shots]:[])),
     qualifiedSeconds:summary(runs.flatMap(r=>r.qualified[level]?[r.qualified[level].seconds]:[]))}));
 }
@@ -290,7 +298,7 @@ for(const gym of selectedGyms) {
 }
 if(phase!=='supply'&&selectedGyms.includes(6)) {
   const f:Fixture={gym:6,projects:'typical',collection:'all',empty:false};
-  for(const item of catalog.filter(item=>item.effects.focusKey)) {
+  for(const item of catalog.filter(item=>item.effects.focusKey&&item.unlockLevel<=f.gym&&item.requiredTemplates<=templateCount(f))) {
     const key=item.effects.focusKey!;
     const plan=key==='three'||key==='mid'?'shooting':key==='drive'||key==='handle'?'finishing':'interior';
     const sampleSize=seeds;
@@ -304,10 +312,10 @@ if(phase!=='supply'&&selectedGyms.includes(6)) {
     specialization.push({fixture:f,id:item.id,plan,summary:aggregateTraces(runs),baseline:aggregateTraces(baseline),targetAttribute,runs});
   }
 }
-const result={metadata:{generatedAt:new Date().toISOString(),elapsedSeconds:(Date.now()-startedAt)/1000,seedCount:seeds,phase,gyms:selectedGyms,catalogVersion:equipmentCatalogVersion,
+const result={metadata:{generatedAt:new Date().toISOString(),elapsedSeconds:(Date.now()-startedAt)/1000,seedCount:seeds,phase,gyms:selectedGyms,catalogVersion:equipmentCatalogVersion,economyVersion:gymEconomyVersion,
   catalogFingerprint:createHash('sha256').update(JSON.stringify(catalog.map(({id,family,grade,price,unlockLevel,requiredTemplates,effects})=>({id,family,grade,price,unlockLevel,requiredTemplates,effects})))).digest('hex'),
   fingerprintFields:['id','family','grade','price','unlockLevel','requiredTemplates','effects'],execution:{...execution,actualSimulatedShots:execution.offlineShots+execution.growthShots+execution.swapShots},
-  assumptions:['Synthetic stage fixtures; not a from-zero purchase progression','Project levels, collection counts, and initial recruit explicitly fixed per fixture','No drinks, no mid-trace equipment changes, same RNG seeds across loadouts',
+  assumptions:['Synthetic stage fixtures; not a from-zero purchase progression','credits is actual wallet payout; rawCredits is uncapped theoretical value for effect comparisons; withheldCredits is the difference','Project levels, collection counts, and initial recruit explicitly fixed per fixture','No drinks, no mid-trace equipment changes, same RNG seeds across loadouts',
     'Fixed-ball times use estimateShotTime; 30-minute shots/XP use real settleOfflineGym','Growth uses exported trainPlayer/advanceGym and original template matching; reward probes use real recommend dispatch',
     'Cooperation equipment eligibility requires ten equipped shots per qualifying course; every growth kit is worn continuously from shot zero',
     'Level checkpoints do not guarantee required template; qualified rows check both and stop searching after level 30','Management actions count recruit/cooperation/auto/plan/recommend, excluding synthetic initial purchases and UI navigation',
@@ -317,9 +325,9 @@ const result={metadata:{generatedAt:new Date().toISOString(),elapsedSeconds:(Dat
   catalogAudit,catalogSnapshot:catalog,supply:supplyResults,searches,growth,rosters,specialization,swaps};
 await mkdir(dirname(output),{recursive:true}); await writeFile(output,JSON.stringify(result,null,2)+'\n');
 const csvCell=(value:unknown)=>'"'+String(value??'').replaceAll('"','""')+'"';
-const csvRows=[['gym','projects','collection','label','paid','ids','level','seeds','reached','qualifiedBy30','shotsMean','secondsMean','creditsMean','fameMean','qualifiedShotsMean','qualifiedSecondsMean'],
+const csvRows=[['gym','projects','collection','label','paid','ids','level','seeds','reached','qualifiedBy30','shotsMean','secondsMean','actualCreditsMean','rawCreditsMean','withheldCreditsMean','fameMean','qualifiedShotsMean','qualifiedSecondsMean'],
   ...growth.flatMap(g=>g.summary.map((s:any)=>[g.fixture.gym,g.fixture.projects,g.fixture.collection,g.label,g.paid,g.ids.join('+'),s.level,s.runs,s.levelReached,s.qualified,
-    s.shots?.mean,s.seconds?.mean,s.credits?.mean,s.fame?.mean,s.qualifiedShots?.mean,s.qualifiedSeconds?.mean]))];
+    s.shots?.mean,s.seconds?.mean,s.credits?.mean,s.rawCredits?.mean,s.withheldCredits?.mean,s.fame?.mean,s.qualifiedShots?.mean,s.qualifiedSeconds?.mean]))];
 await writeFile(output.replace(/\.json$/, '-summary.csv'),'\uFEFF'+csvRows.map(row=>row.map(csvCell).join(',')).join('\r\n')+'\r\n');
 console.log(JSON.stringify({output,elapsedSeconds:result.metadata.elapsedSeconds,catalog:catalogAudit.count,totalCost:catalogAudit.totalCost,
   singleComparisons:supplyResults.reduce((n,p)=>n+p.single.length,0),searches:searches.length,enumeratedLoadouts:searches.reduce((n,p)=>n+p.evaluated,0),

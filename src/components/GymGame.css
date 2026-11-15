@@ -76,11 +76,6 @@
 .gym-empty-court select {width: 100%; margin: 0 0 10px; padding: 7px;}
 .gym-empty-court .primary {width: 100%;}
 .gym-action-pending {pointer-events: none; opacity: .8;}
-.gym-goal-card {padding: 12px; margin: 10px 0; border: 2px solid #b69a64; background: #fff6df;}
-.gym-goal-card p {font-size: 12px;}
-.gym-goal-card > div {display: flex; flex-wrap: wrap; gap: 6px;}
-.gym-goal-card > div span {padding: 3px 6px; border-radius: 3px; background: #e6d1a7; font-size: 12px;}
-.gym-goal-card .is-met {background: #c4dfbd; color: #245638;}
 .gym-muted {color: #655c48; font-size: 12px;}
 .gym-settings label {display: flex; justify-content: space-between; align-items: center; margin: 15px 0;}
 .gym-settings input {width: 22px; height: 22px; accent-color: #26785b;}

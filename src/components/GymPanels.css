@@ -107,6 +107,21 @@
 .gm-recommend-rewards span { color: #665038; font-size: 12px; font-weight: 850; }
 .gm-recommend-rewards b { color: #9e2b21; font: 900 38px/1 var(--font-number, Impact), sans-serif; }
 .gm-recommend-warning { padding: 8px 10px; color: #713e2c; background: #edcdb1; border-left: 3px solid #ad4a30; font-size: 12px; }
+.gm-recommend-panel { gap: 10px; }
+.gm-recommend-profile { position: relative; }
+.gm-recommend-panel .gm-recommend-player { padding-right: 46px; }
+.gm-recommend-help { position: absolute; top: 9px; right: 9px; }
+.gm-recommend-panel .gm-recommend-rewards > div { gap: 4px; padding: 9px 7px; }
+.gm-recommend-panel .gm-recommend-rewards b { font-size: 32px; }
+.gm-recommend-achievements { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 5px 10px; color: #6d573e; font-size: 12px; }
+.gm-recommend-achievements b { color: #234647; }
+.gm-recommend-cooperation { padding-left: 9px; border-left: 3px solid #b08d5f; color: #795239; font-size: 12px; }
+.gm-recommend-cooperation.is-complete { color: #376246; border-color: #638262; }
+.gm-recommend-details-toggle { display: flex; justify-content: space-between; width: 100%; min-height: 31px; border-top: 1px solid #c6af83; padding-top: 6px; text-decoration: none; }
+.gm-recommend-details-toggle span { font-size: 16px; line-height: 1; }
+.gm-recommend-details { padding-bottom: 3px; }
+.gm-reward-actual { padding-top: 5px; border-top: 1px solid #c6af83; font-weight: 900; }
+.gm-recommend-panel .gm-sheet-footer { gap: 7px; padding-top: 4px; }
 .gm-alumni-list { display: grid; gap: 9px; }
 .gm-alumnus { display: grid; grid-template-columns: 54px minmax(0,1fr) auto; gap: 8px; align-items: center; width: 100%; padding: 8px; border: 1px solid #a68a60; background: #f8e8c4; color: #15313b; text-align: left; }
 .gm-alumnus-image { height: 60px; width: 54px; background: #d6bd8b; overflow: hidden; }
@@ -159,6 +174,32 @@
 .gm-plan-title > span { color: #2d654b; font-size: 10px; font-weight: 900; }
 .gm-plan-targets { display: flex; flex-wrap: wrap; gap: 4px; }
 .gm-plan-targets > span { padding: 2px 5px; color: #8a3527; border: 1px solid #bd9c66; background: #f6e0ad; font-size: 11px; font-weight: 850; }
+.gm-training-panel { gap: 10px; }
+.gm-training-summary-tools { display: flex; align-items: center; gap: 8px; }
+.gm-training-help { display: inline-grid; place-items: center; flex: none; width: 32px; min-width: 32px; height: 32px; min-height: 32px; padding: 0; border: 1px solid #96784b; border-radius: 50%; background: #fff3d2; color: #76412c; font: 900 15px/1 sans-serif; }
+.gm-training-panel .gm-plan-summary { gap: 6px; }
+.gm-training-course-note { color: #624b32; font-size: 12px; }
+.gm-training-course-note strong { color: #963526; }
+.gm-training-player { gap: 7px; }
+.gm-training-tendency { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 3px 8px; color: #695239; font-size: 12px; }
+.gm-training-tendency p { display: flex; gap: 8px; }
+.gm-training-tendency b { color: #234d45; }
+.gm-training-tendency small { font-size: 11px; }
+.gm-training-panel .gm-training-plan-heading h3 { font-size: 16px; }
+.gm-training-panel .gm-plan-grid { gap: 8px; }
+.gm-training-panel .gm-plan-card { gap: 7px; padding: 9px; }
+.gm-training-panel .gm-plan-card.is-selected { padding: 8px; }
+.gm-training-panel .gm-plan-card .gm-button { min-height: 34px; padding-block: 5px; }
+.gm-training-switch-note { color: #8b3b2b; font-size: 11px; }
+.gm-training-payout { display: flex; align-items: baseline; gap: 9px; padding: 9px 10px; border-top: 1px solid #baa478; color: #5e513e; font-size: 12px; }
+.gm-training-payout strong { color: #923526; font-size: 15px; }
+.gm-training-payout small { margin-left: auto; color: #716146; font-size: 11px; }
+.gm-training-rules > section + section { padding-top: 12px; border-top: 1px solid #c9b48a; }
+.gym-panel.gm-training-rules h3 { font-size: 15px; }
+.gm-training-bonus-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
+.gm-training-bonus-table th, .gm-training-bonus-table td { padding: 6px 8px; border-bottom: 1px solid #cdb98e; }
+.gm-training-bonus-table th { color: #66523c; font-weight: 700; }
+.gm-training-bonus-table td:last-child { color: #943526; font-weight: 900; white-space: nowrap; }
 .gm-cooperation-list { display: grid; gap: 10px; }
 .gm-cooperation { display: grid; gap: 9px; padding: 11px; border: 1px solid #ac8f63; border-left: 4px solid #ab3a28; background: #f8e9c5; box-shadow: 1px 2px 0 #c7af82; }
 .gm-cooperation.is-active { border-color: #1b4c46; border-left-color: #1b4c46; background: #e8e8c9; }
@@ -190,6 +231,12 @@
 .gm-warehouse-actions { flex-wrap: wrap; }
 .gm-warehouse-actions > p { flex-basis: 100%; }
 .gm-warehouse-actions > .gm-button { flex: 1; }
+.gm-recruitment { padding: 12px; border: 1px solid #aa8d62; background: #f8eccc; color: #122733; text-align: left; }
+.gm-recruitment h3, .gm-recruitment p { margin: 0; }
+.gm-recruitment p { font-size: 12px; line-height: 1.6; }
+.gm-recruitment-modes { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.gm-recruitment-field { display: grid; gap: 5px; min-width: 0; font-size: 12px; font-weight: 800; }
+.gm-recruitment-field select { width: 100%; min-width: 0; padding: 9px 7px; border: 1px solid #294550; background: #fff5db; color: #153541; font: inherit; }
 
 @media (max-width: 360px) {
   .gm-product { grid-template-columns: 56px minmax(0,1fr); gap: 6px 8px; }

@@ -1,7 +1,7 @@
 import {mkdir, rm, writeFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {activePlayers, advanceGym, automaticIntervalMs, cooperationOffers, dispatchGym, equipmentCapacity,
-  equipmentCatalog, equipmentEffects, equipmentOffer, gymUpgrade, newGym, projectCost, projectOffer, projects, recommendation, recoverySeconds, trainingCreditMilestones, courseRecoveryCap, staminaMax,
+  equipmentCatalog, equipmentEffects, equipmentOffer, gymUpgrade, newGym, projectCost, projectOffer, projects, recommendation, recommendationPayout, recoverySeconds, trainingCreditMilestones, courseRecoveryCap, staminaMax,
   type GymAction, type GymState} from '../src/game/gym/engine';
 import {encodeGym, validGym} from '../src/game/gym/save';
 import {templateById} from '../src/game/templates';
@@ -156,16 +156,24 @@ function simulate(policy: Policy, seed: number) {
   };
   const snapshot = (seconds: number) => {
     const alumni = state.alumni;
+    const pendingPreview: GymState = {...state, postgameRecommendedTemplates: [...(state.postgameRecommendedTemplates ?? [])]};
+    const pendingPlayers = activePlayers(state).map(player => {
+      const payout = recommendationPayout(pendingPreview, player);
+      if (payout.isFirstPostgameRecommendation) pendingPreview.postgameRecommendedTemplates!.push(player.templateId!);
+      return {id: player.id, level: player.level, experience: player.experience, shots: player.shots, templateId: player.templateId,
+        rawCredits: payout.rawCredits, creditsInRecommendationOrder: payout.credits, fame: payout.fame};
+    });
+    const pendingRawCredits = pendingPlayers.reduce((sum, player) => sum + player.rawCredits, 0);
     const tiers = [0, 1, 2, 3, 4, 5].map(tier => alumni.filter(player => tierNames.indexOf(templateById(player.templateId)?.tier ?? '') + 1 === tier).length);
     return {seconds, shots: totalShots, recommendations: alumni.length, tiers, grossCredits: state.credits + spent,
       managementActions, manualTrainActions, automaticStepActions, actionCounts: {...actionCounts},
       credits: state.credits, spent, fame: state.fame, gymLevel: state.gymLevel, collection: Object.keys(state.collection).length,
       active: activePlayers(state).length, projects: {...state.projects}, equipment: [...state.equippedEquipment],
       averageRecommendedLevel: alumni.length ? alumni.reduce((sum, player) => sum + player.level, 0) / alumni.length : 0,
-      pendingCredits: activePlayers(state).reduce((sum, player) => sum + recommendation(state, player).credits, 0),
+      pendingRawCredits,
+      pendingCredits: pendingPlayers.reduce((sum, player) => sum + player.creditsInRecommendationOrder, 0),
       pendingFame: activePlayers(state).reduce((sum, player) => sum + recommendation(state, player).fame, 0),
-      pendingPlayers: activePlayers(state).map(player => ({id: player.id, level: player.level, experience: player.experience,
-        shots: player.shots, templateId: player.templateId, credits: recommendation(state, player).credits, fame: recommendation(state, player).fame}))};
+      pendingRecommendationOrder: 'selected-then-bench', pendingPlayers};
   };
   manage();
   while (now < start + horizonSeconds * 1000 && !reachedTarget()) {

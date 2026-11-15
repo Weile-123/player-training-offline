@@ -315,7 +315,7 @@ describe('recommendation, enrollment and gym progression', () => {
     expect(dispatchGym(firstEmpty, firstEmpty.revision, {type: 'recruit', preference: 'guard'}, start).state).toBe(firstEmpty);
   });
 
-  it('requires reputation and genuine recommended results, then upgrades without charging credits', () => {
+  it('opens gym two free after genuine results and charges construction for gym three', () => {
     const gym = {...newGym(start), fame: 300};
     const untrained = {...gym.player!, recommendedAt: start, rewardCredits: 0, rewardFame: 0, finalValue: '320'};
     gym.alumni = [untrained, {...untrained, id: 'empty-2'}, {...untrained, id: 'empty-3'}];
@@ -324,9 +324,9 @@ describe('recommendation, enrollment and gym progression', () => {
     expect(gymUpgrade(gym).canUpgrade).toBe(true);
     const upgraded = act(gym, {type: 'upgrade-gym'});
     expect(upgraded).toMatchObject({gymLevel: 2, fame: 300, credits: 0});
-    const star = {...upgraded, fame: 1000, alumni: [...upgraded.alumni, alumni(gym, 5, 4)]};
+    const star = {...upgraded, credits: 10, fame: 1000, alumni: [...upgraded.alumni, alumni(gym, 5, 4)]};
     expect(gymUpgrade(star).canUpgrade).toBe(true);
-    expect(act(star, {type: 'upgrade-gym'}).gymLevel).toBe(3);
+    expect(act(star, {type: 'upgrade-gym'})).toMatchObject({gymLevel: 3, credits: 0});
     expect(gymLevels.map(level => level.fame)).toEqual([0, 60, 500, 1300, 3000, 6000, 11000, 18000]);
   });
 
@@ -337,7 +337,7 @@ describe('recommendation, enrollment and gym progression', () => {
     for (const level of gymLevels.slice(1)) {
       gym = {...gym, fame: level.fame - 1};
       expect(dispatchGym(gym, gym.revision, {type: 'upgrade-gym'}, start).state).toBe(gym);
-      gym = act({...gym, fame: level.fame}, {type: 'upgrade-gym'});
+      gym = act({...gym, fame: level.fame, credits: level.upgradePrice}, {type: 'upgrade-gym'});
       expect(gym.gymLevel).toBe(level.level);
       expect(gym.credits).toBe(0);
       expect(activePlayers(gym)).toHaveLength(1);
@@ -349,7 +349,7 @@ describe('recommendation, enrollment and gym progression', () => {
 
   it.each([[5, 6000, 3, 8], [6, 11000, 8, 15], [7, 18000, 15, 25]])(
     'requires both legendary alumni and distinct templates before leaving gym %i', (gymLevel, fame, legends, templates) => {
-      const gym = {...newGym(start, 51), gymLevel, fame};
+      const gym = {...newGym(start, 51), gymLevel, fame, credits: gymLevels[gymLevel].upgradePrice};
       const collection = (count: number) => Object.fromEntries(templateRules.slice(0, count).map(template => [template.id,
         {firstAt: start, highestRating: 99, highestValue: '320000000'}]));
       gym.collection = collection(templates);
@@ -375,8 +375,9 @@ describe('fixed P0 equipment and project economy', () => {
     }
   });
 
-  it('uses exact rounded 1.8 growth project prices and unlock-relative caps while keeping future projects unpurchasable', () => {
-    expect([1, 2, 3, 4, 5, 6, 7, 8].map(level => projectCost('endurance', level))).toEqual([1, 2, 4, 6, 11, 19, 35, 62]);
+  it('uses explicit endurance prices and rounded recovery prices with unlock-relative caps while keeping future projects unpurchasable', () => {
+    expect([1, 2, 3, 4, 5, 6, 7, 8].map(level => projectCost('endurance', level))).toEqual([1, 2, 3, 5, 7, 10, 14, 20]);
+    expect([1, 2, 3, 4, 5, 6, 7, 8].map(level => projectCost('recovery', level))).toEqual([1, 2, 4, 6, 11, 19, 35, 62]);
     expect(projectCap('recruitment', 1)).toBe(0);
     expect(projectCap('recruitment', 2)).toBe(1);
     expect(projectCap('recruitment', 8)).toBe(6);
@@ -388,17 +389,17 @@ describe('fixed P0 equipment and project economy', () => {
     expect(projectOffer(newGym(start), 'endurance')).toMatchObject({level: 0, maxLevel: 1, price: 1});
   });
 
-  it('rounds each base price independently and charges the exact changed fourth-level price atomically', () => {
-    expect([1, 2, 3, 4, 5, 6].map(level => projectCost('recruitment', level))).toEqual([2, 4, 7, 12, 21, 38]);
+  it('uses the recruitment schedule and charges the exact fourth-level endurance price atomically', () => {
+    expect([1, 2, 3, 4, 5, 6].map(level => projectCost('recruitment', level))).toEqual([2, 4, 7, 10, 14, 20]);
     expect([1, 2, 3, 4, 5].map(level => projectCost('automation', level))).toEqual([3, 6, 10, 18, 32]);
     for (const project of projects) expect(projectCost(project.id, 1)).toBe(project.basePrice);
-    const gym = {...newGym(start), gymLevel: 4, credits: 5};
+    const gym = {...newGym(start), gymLevel: 4, credits: 4};
     gym.projects.endurance = 3;
-    expect(projectOffer(gym, 'endurance').price).toBe(6);
+    expect(projectOffer(gym, 'endurance').price).toBe(5);
     const denied = dispatchGym(gym, gym.revision, {type: 'upgrade-project', id: 'endurance'}, start);
     expect(denied.error).toContain('赞助券');
     expect(denied.state).toBe(gym);
-    const purchased = act({...gym, credits: 6}, {type: 'upgrade-project', id: 'endurance'});
+    const purchased = act({...gym, credits: 5}, {type: 'upgrade-project', id: 'endurance'});
     expect(purchased.credits).toBe(0);
     expect(purchased.projects.endurance).toBe(4);
     expect(purchased.player!.stamina).toBe(gym.player!.stamina);

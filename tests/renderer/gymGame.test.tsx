@@ -3,7 +3,7 @@ import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import {newGym, type GymAction, type GymState} from '../../src/game/gym/engine';
 import {templateRules} from '../../src/game/contract/templates';
-import {statKeys, type Stats} from '../../src/game/types';
+import {statKeys} from '../../src/game/types';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
 
@@ -13,7 +13,8 @@ vi.mock('../../src/gymStore', async () => {
   const {dispatchGym, newGym} = await import('../../src/game/gym/engine');
   const {settleOfflineGym} = await import('../../src/game/gym/offline');
   const store = create<GymStore>((set, get) => ({
-    state: newGym(1_800_000_000_000, 21), hasSave: true, actionError: '', saveMessage: '',
+    state: newGym(1_800_000_000_000, 21), hasSave: true, hydrating: false, hydrate: async () => {},
+    loadAlumni: async (offset = 0, limit = 20) => ({players: [...get().state.alumni].reverse().slice(offset, offset + limit), total: get().state.alumni.length}), actionError: '', saveMessage: '',
     isSuspended: false, pendingOfflineReport: null,
     start: async () => ({state: get().state, events: []}),
     act: async action => {
@@ -104,6 +105,31 @@ async function twoPlayers() {
   return [state().player!.id, state().bench[0].id];
 }
 
+it.each([98, 99])('protects the main-court drink at level %s without blocking a trainable player', async level => {
+  const initial = newGym(at, 21);
+  initial.player!.level = initial.player!.peakLevel = level;
+  initial.player!.stamina = 0; initial.inventory.drink = 1;
+  await mount(initial);
+  const drink = document.querySelector<HTMLButtonElement>('.consumable-slot[aria-label^="使用运动饮料"]')!;
+  expect(drink.disabled).toBe(level === 99);
+  if (level === 99) expect(drink.title).toContain('球员已满级');
+  await act(async () => drink.click());
+  expect(state().inventory.drink).toBe(level === 99 ? 1 : 0);
+  expect(state().player!.stamina).toBe(level === 99 ? 0 : 10);
+  expect(harness.actions.filter(action => action.type === 'use-drink')).toHaveLength(level === 99 ? 0 : 1);
+});
+
+it('shows the repeated-template payout on court rather than claiming the highest bonus was achieved', async () => {
+  const initial = newGym(at, 22);
+  initial.gymLevel = 8; initial.postgameRecommendedTemplates = ['bryant'];
+  initial.player!.templateId = 'bryant'; initial.player!.highestTier = 'legend';
+  initial.player!.level = initial.player!.peakLevel = 10;
+  await mount(initial);
+  const course = document.querySelector('.court-equipment-status')?.textContent ?? '';
+  expect(course).toContain('重复模板推荐合计 1 券');
+  expect(course).not.toContain('最高培养奖金已达成');
+});
+
 it('replaces the old probability row with experience and reports a shot before a level is earned', async () => {
   const initial = newGym(at, 21);
   initial.player!.level = 10;
@@ -167,22 +193,30 @@ it('selects a bench athlete for manual training and recommends only that selecte
   expect(document.querySelector('.gm-alumni-list')).toBeTruthy();
 });
 
-it('explains rating and individual stat floors even when visible core requirements are already met', async () => {
+it('keeps player records, training access and the album usable after template suggestions are removed', async () => {
   const initial = newGym(at, 24);
-  const target = templateRules.find(template => template.id === 'jordan')!;
-  const previous = templateRules.find(template => template.tier === 'superstar')!;
-  Object.assign(initial.player!, {level: 25, peakLevel: 99, height: target.height[0], templateId: previous.id});
-  initial.player!.stats = Object.fromEntries(statKeys.map(key => [key, target.coreMinimums[key] ?? 0])) as Stats;
+  const current = templateRules.find(template => template.id === 'bryant')!;
+  initial.collectionGoalId = 'jordan';
+  Object.assign(initial.player!, {level: 25, peakLevel: 25, height: 200, templateId: current.id});
   await mount(initial);
   const details = document.querySelector<HTMLButtonElement>('.star-template-panel')!;
   await act(async () => details.click());
-  const goal = [...document.querySelectorAll<HTMLElement>('.gym-goal-card')].find(card => card.querySelector('strong')?.textContent?.includes(target.name));
-  expect(goal).toBeTruthy();
-  expect(goal!.textContent).toContain('综合评分不足');
-  expect(goal!.textContent).toContain(`需要 ${target.ratingFloor}`);
-  expect(goal!.textContent).toContain('单项属性下限不足');
-  expect(goal!.textContent).toContain(`0/${target.statFloor}`);
-  expect([...goal!.querySelectorAll('span')].every(span => span.classList.contains('is-met'))).toBe(true);
+  const profile = document.querySelector('[aria-label="当前球员资料"]')!;
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('球员资料');
+  expect(profile.textContent).toContain(`${initial.player!.name} · 200 cm`);
+  expect(profile.textContent).toContain(`训练 Lv.25 · 已投篮 0 次 · 当前模板 ${current.name}`);
+  expect([...profile.querySelectorAll('dd')].map(item => item.textContent)).toEqual(statKeys.map(key => String(initial.player!.stats[key])));
+  expect(document.querySelector('.gym-goal-card')).toBeNull();
+  expect(document.querySelector('[aria-label="选择收藏培养目标"]')).toBeNull();
+  await press('查看训练计划与培养记录');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('训练计划');
+  await press('关闭面板');
+  await press('打开图鉴');
+  expect(document.querySelector('[aria-label="球星收藏进度"]')).toBeTruthy();
+  expect(document.querySelectorAll('.gm-album-card')).toHaveLength(templateRules.length);
+  expect(document.querySelector('[aria-label="选择收藏培养目标"]')).toBeNull();
+  expect(harness.actions).toEqual([]);
+  expect(state()).toEqual(initial);
 });
 
 it('restores the live course card after a short automatic course-completion notice', async () => {

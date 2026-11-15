@@ -1,19 +1,20 @@
 import {mkdir, writeFile} from 'node:fs/promises';
-import {join} from 'node:path';
+import {dirname, join} from 'node:path';
 import {
   activePlayers, advanceGym, cooperationOffers, dispatchGym, equipmentCapacity,
   equipmentCatalog, equipmentEffects, equipmentOffer, experienceForLevel, gymUpgrade, newGym,
   projectOffer, recoverySeconds, staminaMax, trainPlayer,
   type GymAction, type GymEvent, type GymPlayer, type GymState,
 } from '../src/game/gym/engine';
-import {equipmentCatalogVersion} from '../src/game/gym/catalog';
+import {equipmentCatalogVersion, gymEconomyVersion} from '../src/game/gym/catalog';
 import {estimateShotTime} from '../src/game/gym/forecast';
 import {validGym} from '../src/game/gym/save';
 import {templateById} from '../src/game/templates';
 
 const sampleSize = Number(process.env.GYM_JOURNEY_SEEDS ?? 32);
 const horizonSeconds = Number(process.env.GYM_JOURNEY_SECONDS ?? 86_400);
-const label = process.env.GYM_JOURNEY_LABEL ?? '';
+const label = process.env.GYM_JOURNEY_LABEL ?? `economy-v${gymEconomyVersion}`;
+const output = process.env.GYM_JOURNEY_OUTPUT ?? join('docs/balance', 'equipment-v3-journey' + (label ? '-' + label : '') + '.json');
 const start = 1_800_000_000_000;
 type Policy = 'none' | 'balanced' | 'supply' | 'business';
 const policyNames: Policy[] = ['none', 'balanced', 'supply', 'business'];
@@ -71,9 +72,15 @@ function simulate(policy: Policy, seed: number) {
   const milestones: Record<number, ReturnType<typeof snapshot>> = {};
   const transactions: {seconds: number; type: string; id: string; cost: number; replaceId?: string}[] = [];
   const command = (action: GymAction) => {
+    const beforeCredits = state.credits;
     const result = dispatchGym(state, state.revision, action, now);
     if (result.error) throw new Error(`${policy}/seed${seed}/${action.type}: ${result.error}`);
     state = result.state;
+    if (action.type === 'upgrade-gym') {
+      const cost = beforeCredits - state.credits;
+      grossSpent += cost;
+      transactions.push({seconds: (now - start) / 1_000, id: String(state.gymLevel), type: 'gym-construction', cost});
+    }
     counts[action.type] = (counts[action.type] ?? 0) + 1;
     if (action.type === 'train') {manualClicks++; totalShots += result.events.filter(e => e.type === 'trained').length;}
     else managementActions++;
@@ -240,9 +247,9 @@ for (const policy of policies) {
   await writeFile(join(process.cwd(), '.tmp/equipment-v3-journey-progress' + (label ? '-' + label : '') + '.json'),
     JSON.stringify({partial: true, sampleSize, horizonSeconds, completedPolicies: results.map(r => r.policy), results}, null, 2) + '\n');
 }
-await mkdir(join(process.cwd(), 'docs/balance'), {recursive: true});
-await writeFile(join(process.cwd(), 'docs/balance/equipment-v3-journey' + (label ? '-' + label : '') + '.json'), JSON.stringify({
-  schema: 1, equipmentCatalogVersion, source: 'actual-engine-from-zero', sampleSize, horizonSeconds,
+await mkdir(dirname(output), {recursive: true});
+await writeFile(output, JSON.stringify({
+  schema: 1, equipmentCatalogVersion, economyVersion: gymEconomyVersion, source: 'actual-engine-from-zero', sampleSize, horizonSeconds,
   assumptions: ['same-milestone-training-targets-for-all-policies', 'basic-cooperation-accepted-on-recruitment-never-switched',
     'instant-management-with-action-counts-no-human-reaction-delay', 'auto-all-athletes-from-gym2', 'continuous-online', 'no-drinks',
     'no-template-injection', 'natural-any-height-recruitment', 'balanced-training-plan', 'greedy-heuristic-not-global-optimum',

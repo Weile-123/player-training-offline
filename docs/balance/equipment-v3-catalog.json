@@ -1,12 +1,146 @@
 {
-  "date": "2026-11-13",
+  "date": "2026-11-15",
+  "economyVersion": 11,
   "version": 3,
   "artVersion": 1,
   "count": 35,
-  "total": 306,
-  "projectTotal": 504,
-  "totalWithProjects": 810,
+  "total": 328,
+  "projectTotal": 399,
+  "totalWithProjects": 727,
+  "constructionTotal": 510,
+  "totalWithConstruction": 1237,
+  "constructionSchedule": [
+    {
+      "level": 2,
+      "name": "街区训练馆",
+      "price": 0
+    },
+    {
+      "level": 3,
+      "name": "城区训练馆",
+      "price": 10
+    },
+    {
+      "level": 4,
+      "name": "区域训练中心",
+      "price": 20
+    },
+    {
+      "level": 5,
+      "name": "城市训练中心",
+      "price": 40
+    },
+    {
+      "level": 6,
+      "name": "省级训练基地",
+      "price": 80
+    },
+    {
+      "level": 7,
+      "name": "全国训练基地",
+      "price": 140
+    },
+    {
+      "level": 8,
+      "name": "传奇篮球学院",
+      "price": 220
+    }
+  ],
+  "projectSchedules": [
+    {
+      "id": "endurance",
+      "name": "耐力训练",
+      "prices": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        10,
+        14,
+        20
+      ]
+    },
+    {
+      "id": "recovery",
+      "name": "恢复护理",
+      "prices": [
+        1,
+        2,
+        4,
+        6,
+        11,
+        19,
+        35,
+        62
+      ]
+    },
+    {
+      "id": "recruitment",
+      "name": "招生培养",
+      "prices": [
+        2,
+        4,
+        7,
+        10,
+        14,
+        20
+      ]
+    },
+    {
+      "id": "equipment",
+      "name": "器械管理",
+      "prices": [
+        2,
+        4,
+        7,
+        12
+      ]
+    },
+    {
+      "id": "automation",
+      "name": "自动训练",
+      "prices": [
+        3,
+        6,
+        10,
+        18,
+        32
+      ]
+    },
+    {
+      "id": "offline",
+      "name": "离线课表",
+      "prices": [
+        2,
+        4,
+        7,
+        12,
+        21
+      ]
+    }
+  ],
   "familyCount": 14,
+  "selectedRecruitment": {
+    "price": 8,
+    "unlockLevel": 6,
+    "optional": true,
+    "baseRange": [
+      46,
+      48
+    ]
+  },
+  "recommendationCreditRule": {
+    "fromGym": 1,
+    "firstTemplate": "normal",
+    "repeatTemplateCredits": 1,
+    "unmatchedCredits": 0,
+    "countingScope": "current-gym-all-levels",
+    "upgradeResets": false,
+    "historicalRecommendationsCount": true,
+    "historicalBalancesPreserved": true,
+    "balanceCap": null
+  },
   "rules": {
     "oneActivePerFamily": true,
     "slots": [
@@ -204,8 +338,8 @@
       "family": "recovery",
       "grade": 3,
       "rarity": "legendary",
-      "unlockLevel": 6,
-      "price": 20,
+      "unlockLevel": 7,
+      "price": 30,
       "effects": {
         "stamina": 0,
         "recovery": 4,
@@ -227,7 +361,7 @@
       "previousId": "relic_042",
       "previousPrice": 8,
       "previousResale": 4,
-      "netUpgradeCost": 16,
+      "netUpgradeCost": 26,
       "effectText": "恢复间隔−4秒",
       "scope": "全体在训球员，手动/在线自动/离线",
       "purpose": "持续体力供给"
@@ -309,8 +443,8 @@
       "family": "course",
       "grade": 3,
       "rarity": "legendary",
-      "unlockLevel": 6,
-      "price": 24,
+      "unlockLevel": 8,
+      "price": 36,
       "effects": {
         "stamina": 0,
         "recovery": 0,
@@ -332,7 +466,7 @@
       "previousId": "relic_037",
       "previousPrice": 12,
       "previousResale": 6,
-      "netUpgradeCost": 18,
+      "netUpgradeCost": 30,
       "effectText": "每10球课程额外恢复+3",
       "scope": "全体在训球员，手动/在线自动/离线",
       "purpose": "长程训练返体力"
@@ -414,7 +548,7 @@
       "family": "experience",
       "grade": 3,
       "rarity": "legendary",
-      "unlockLevel": 6,
+      "unlockLevel": 7,
       "price": 20,
       "effects": {
         "stamina": 0,
@@ -778,7 +912,7 @@
         "automationExperience": 0,
         "offlineMinutes": 0
       },
-      "description": "接取合作后启用本档器材完成至少 2 个完整课程（每课 10 球），达标推荐额外 +1 券，取得的资格不会因换下而消失。同类仅启用一件。",
+      "description": "接取合作后启用本档器材完成至少 2 个完整课程（每课 10 球），达标推荐理论额外 +1 券，实际发放遵循推荐规则，取得的资格不会因换下而消失。同类仅启用一件。",
       "requiredTemplates": 0,
       "sequence": 22,
       "category": "培养合作",
@@ -813,7 +947,7 @@
         "automationExperience": 0,
         "offlineMinutes": 0
       },
-      "description": "接取合作后启用本档器材完成至少 2 个完整课程（每课 10 球），达标推荐额外 +2 券，取得的资格不会因换下而消失。同类仅启用一件。",
+      "description": "接取合作后启用本档器材完成至少 2 个完整课程（每课 10 球），达标推荐理论额外 +2 券，实际发放遵循推荐规则，取得的资格不会因换下而消失。同类仅启用一件。",
       "requiredTemplates": 8,
       "sequence": 23,
       "category": "培养合作",
@@ -1654,7 +1788,7 @@
       "oldName": "耐心积蓄器",
       "oldPrice": 17,
       "newName": "耐心积蓄器",
-      "newPrice": 20,
+      "newPrice": 30,
       "status": "重写保留",
       "artId": "relic_078",
       "newEffects": "恢复间隔−4秒"
@@ -1684,7 +1818,7 @@
       "oldName": "持续进步训练器",
       "oldPrice": 25,
       "newName": "持续进步训练器",
-      "newPrice": 24,
+      "newPrice": 36,
       "status": "重写保留",
       "artId": "relic_085",
       "newEffects": "每10球课程额外恢复+3"

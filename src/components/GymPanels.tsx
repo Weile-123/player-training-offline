@@ -1,11 +1,13 @@
-import {useRef, useState} from 'react';
+import {useEffect, useId, useMemo, useRef, useState} from 'react';
 import {statLabels} from '../game/config';
 import {templateRules, type TemplateRule} from '../game/contract/templates';
-import {equipmentCatalog, equipmentFamilyLabels, gymLevels, projects, type GymEquipment, type ProjectId} from '../game/gym/catalog';
-import {automaticIntervalMs, cooperationOffers, cooperationStatus, courseRecoveryCap, drinkPrice, drinkRecovery, effectiveTrainingBias, equipmentCapacity, equipmentEffects, equipmentOffer, equipmentSaleValue, equippedFamilyEquipment, gymUpgrade, playerLevelCap, playerValue, projectOffer, recommendation, recoverySeconds, requiredExperience, staminaMax, trainingCreditMilestones, trainingPlans, trainingStatus, type CooperationOffer, type GymAction, type GymAlumnus, type GymPlayer, type GymState, type TrainingPlanId} from '../game/gym/engine';
+import {equipmentCatalog, equipmentFamilyLabels, gymLevels, projects, postgameRepeatTemplateCredits, type GymEquipment, type ProjectId} from '../game/gym/catalog';
+import {automaticIntervalMs, cooperationStatus, courseRecoveryCap, drinkPrice, drinkRecovery, effectiveTrainingBias, equipmentCapacity, equipmentEffects, equipmentOffer, equipmentSaleValue, equippedFamilyEquipment, gymUpgrade, playerLevelCap, playerValue, projectOffer, recoverySeconds, requiredExperience, staminaMax, trainingCreditMilestones, trainingPlans, trainingStatus, type GymAction, type GymAlumnus, type GymPlayer, type GymState, type TrainingPlanId} from '../game/gym/engine';
 import {offlineLimitMs, type OfflineTrainingReport} from '../game/gym/offline';
 import {trainingGuidance} from '../game/gym/guidance';
 import {forecastTraining} from '../game/gym/forecast';
+import {equipmentTrainingComparison, previewEquipmentState, projectTrainingComparison, type EquipmentTrainingComparison} from '../game/gym/equipmentForecast';
+import {offlineUpgradeGuidance} from '../game/gym/offlineUpgradeGuidance';
 import {overallRating, tierConfig} from '../game/matching';
 import {positionLabels, templateById} from '../game/templates';
 import {statKeys, type Stats} from '../game/types';
@@ -18,6 +20,8 @@ import {GameIcon} from './GameIcon';
 import {StarPortrait, templatePortrait} from './PlayerTemplatePanel';
 import {ProductImage} from './ProductImage';
 import {SlidingTabs} from './SlidingTabs';
+import {GymRecruitmentControls} from './GymRecruitmentControls';
+import {alumniProgress, recommendationPayout} from '../game/gym/engine';
 import './GymPanels.css';
 
 export type GymPanelProps = {
@@ -25,6 +29,7 @@ export type GymPanelProps = {
   onAction: (action: GymAction) => void;
   onClose?: () => void;
   busy?: boolean;
+  loadAlumni?: (offset?: number, limit?: number) => Promise<{players: GymAlumnus[]; total: number}>;
 };
 
 const formatNumber = new Intl.NumberFormat('zh-CN', {maximumFractionDigits: 1});
@@ -35,6 +40,10 @@ const tierOrder = ['rotation', 'starter', 'star', 'superstar', 'legend'];
 const albumTemplates = [...templateRules].sort((a, b) => tierOrder.indexOf(a.tier) - tierOrder.indexOf(b.tier));
 const effectLabels = {stamina: '体力容量', recovery: '恢复护理', focusPower: '专项成长', courseRecovery: '课程恢复', experience: '每球经验', automationExperience: '自动经验', offlineMinutes: '离线时长', cooperationBonus: '合作奖励', valuePercent: '身价与品牌'};
 const recommendationTierNames = ['待发掘', '替补', '首发', '全明星', '巨星', '传奇'];
+
+function RecommendationCreditRule({state}: {state: GymState}) {
+  return <p className="gm-muted" aria-label="模板推荐奖励规则">每个模板首次推荐拥有额外奖励；之后同模板每次仅获得 {postgameRepeatTemplateCredits} 赞助券。</p>;
+}
 
 export function offlineDuration(milliseconds: number): string {
   const seconds = Math.max(0, Math.floor(milliseconds / 1000));
@@ -47,19 +56,21 @@ export function offlineDuration(milliseconds: number): string {
 export function TrainingAdvice({state, player = state.player, compact = false}: {state: GymState; player?: GymPlayer | null; compact?: boolean}) {
   const guidance = trainingGuidance(state, player);
   if (!player || !guidance) return null;
+  const payout = recommendationPayout(state, player);
   const atCap = player.level >= playerLevelCap;
   const end = guidance.allStatsMax ? null : forecastTraining(state, player);
   const next = guidance.nextBonus;
   const nextForecast = !compact && next && next.levelGap > 0 ? forecastTraining(state, player, next.level) : null;
   if (compact) return <section className="gm-training-advice gm-paper gm-stack is-compact" aria-label={`${player.name}培养建议`}>
-    <strong>培养奖金 +{guidance.currentBonus} 券{atCap ? ' · 训练已结束' : next ? ` · 下档 Lv.${next.level}＋${next.tierName}` : ' · 已达最高档'}</strong>
+    <strong>{payout.repeatTemplate ? `重复模板 · 推荐合计 ${payout.credits} 券` : `培养奖金 +${guidance.currentBonus} 券${atCap ? ' · 训练已结束' : next ? ` · 下档 Lv.${next.level}＋${next.tierName}` : ' · 已达最高档'}`}</strong>
     <p className="gm-muted">{guidance.allStatsMax ? '六维已满，可核对奖金与合作后推荐。' : end?.finished ? '等级已满，可推荐签约。' : next && next.levelGap === 0 && next.tierGap > 0 ? `等级达标，仍需匹配${next.tierName}。` : guidance.suggestion}</p>
     {end && !end.finished && <p className="gm-muted">当前配置预计约 {offlineDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}；可在节点提前推荐。</p>}
   </section>;
   return <section className={`gm-training-advice gm-paper gm-stack${compact ? ' is-compact' : ''}`} aria-label={`${player.name}培养建议`}>
-    <div className="gm-section-heading"><h4>培养节点</h4><strong>当前培养奖金 +{guidance.currentBonus} 券</strong></div>
+    <div className="gm-section-heading"><h4>培养节点</h4><strong>{payout.repeatTemplate ? `重复模板 · 推荐合计 ${payout.credits} 券` : `当前培养奖金 +${guidance.currentBonus} 券`}</strong></div>
     <p>{guidance.suggestion}</p>
-    {next ? <p className="gm-muted">下一档：Lv.{next.level}＋{next.tierName}及以上，额外奖金再增加 {next.additionalCredits} 券；{next.levelGap > 0 ? `还差 ${next.levelGap} 级` : '等级已达标'}{next.tierGap > 0 ? `，模板仍需达到${next.tierName}` : '，模板档次已达标'}。</p> : <p className="gm-inline-status">{atCap ? `训练等级已满，按当前实际模板结算培养奖金 ${guidance.currentBonus} 券，无法继续训练提升。` : '已达到最高培养奖金，继续升级不再增加培养奖金。'}</p>}
+    <RecommendationCreditRule state={state}/>
+    {payout.repeatTemplate ? <p className="gm-inline-status">当前模板已推荐过，提高培养或合作不补差额；声望与培养纪录照常。</p> : next ? <p className="gm-muted">下一档：Lv.{next.level}＋{next.tierName}及以上，额外奖金再增加 {next.additionalCredits} 券；{next.levelGap > 0 ? `还差 ${next.levelGap} 级` : '等级已达标'}{next.tierGap > 0 ? `，模板仍需达到${next.tierName}` : '，模板档次已达标'}。</p> : <p className="gm-inline-status">{atCap ? `训练等级已满，按当前实际模板结算培养奖金 ${guidance.currentBonus} 券，无法继续训练提升。` : '已达到最高培养奖金，继续升级不再增加培养奖金。'}</p>}
     {nextForecast && <p className="gm-muted">按当前配置连续{player.autoEnabled ? '自动' : '手动'}训练，约 {offlineDuration(nextForecast.estimatedMs)} 到 Lv.{next!.level}；模板仍需实际匹配，时间不是模板保证。</p>}
     {guidance.allStatsMax ? <p className="gm-recommend-warning">六维已满，继续训练不会增加属性。可核对奖金与合作后推荐签约，无需每名球员都练到99级。</p> : end?.finished ? <p className="gm-inline-status">已达到训练等级上限，可推荐签约。</p> : end && <p className="gm-muted">按当前配置连续训练，预计约 {offlineDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}（属性可能提前达到上限，可提前推荐）。{player.autoEnabled && !end.withinOfflineLimit ? '当前离线上限不足以覆盖这段训练。' : ''}</p>}
     {!compact && <><h4>继续培养的剩余价值</h4><ul className="gm-remaining-value">{guidance.remainingValue.map(value => <li key={value}>{value}</li>)}</ul><p className="gm-muted">预计时间按当前体力、器材、课程与经验概率计算，不包含停留、换装或饮料，实际结果会波动；不会自动推荐球员。</p></>}
@@ -124,24 +135,30 @@ function projectEffect(state: GymState, id: ProjectId, level: number): string {
 }
 
 export function GymClubPanel({state, onAction}: GymPanelProps) {
+  const [comparisonProject, setComparisonProject] = useState<ProjectId | null>(null);
   const current = gymLevels.find(level => level.level === state.gymLevel)!;
   const upgrade = gymUpgrade(state);
-  const forecast = forecastTraining(state);
-  const allStatsMax = trainingGuidance(state)?.allStatsMax;
+  const forecast = useMemo(() => forecastTraining(state), [state]);
+  const allStatsMax = useMemo(() => trainingGuidance(state)?.allStatsMax, [state]);
+  const offlineUpgrade = useMemo(() => offlineUpgradeGuidance(state), [state]);
   return <div className="gym-panel gm-club">
     <div className="gm-club-heading"><b className="gm-club-level">{state.gymLevel}</b><div><p className="gm-eyebrow">球馆等级</p><h3>{current.name}</h3><p className="gm-muted">{state.gymLevel} 个训练位 · 手动训练当前选中球员</p></div></div>
     <div className="gm-level-track" aria-label={`当前球馆 ${state.gymLevel} 级，最高 8 级`}>{gymLevels.map(level => <span key={level.level} className={`${level.level <= state.gymLevel ? 'is-reached' : ''} ${level.level === state.gymLevel ? 'is-current' : ''}`} title={level.name}>{level.level}</span>)}</div>
-    <dl className="gm-metrics"><div><dt>累计声望</dt><dd>{format(state.fame)}</dd></div><div><dt>已推荐球员</dt><dd>{format(state.alumni.length)}</dd></div></dl>
+    <dl className="gm-metrics"><div><dt>累计声望</dt><dd>{format(state.fame)}</dd></div><div><dt>已推荐球员</dt><dd>{format(alumniProgress(state).total)}</dd></div></dl>
     {upgrade.level ? <section className="gm-paper gm-stack" aria-label="下一球馆升级条件">
       <div className="gm-section-heading"><h4>下一馆级 · {upgrade.level.name}</h4><small>Lv.{upgrade.level.level}</small></div>
       {upgrade.requirements.map(requirement => <div className="gm-stack" key={requirement.label}>
         <div className={`gm-condition${requirement.met ? ' is-met' : ''}`}><span>{requirement.label}</span><b>{requirement.label.includes('推荐档次') ? requirement.met ? '已达成 ✓' : '尚未达成' : `${format(requirement.current)} / ${format(requirement.required)}${requirement.met ? ' ✓' : ''}`}</b></div>
         <progress className="gm-progress" value={Math.min(requirement.current, requirement.required)} max={requirement.required || 1} aria-label={requirement.label}/>
       </div>)}
-      <p className="gm-muted">晋级免费，累计声望保留。提高馆级可开放更多器材和项目等级。</p>
-      <button type="button" className="gm-button gm-primary" disabled={!upgrade.canUpgrade} onClick={() => onAction({type: 'upgrade-gym'})}>{upgrade.canUpgrade ? '免费升级球馆' : upgrade.reason ?? '尚未达到晋级条件'}</button>
+      <p className="gm-muted">{upgrade.price === 0 ? '升至球馆 Lv.2 免费，累计声望保留。' : `本次扩建花费 ${format(upgrade.price)} 券，成功升级后扣除，累计声望保留。`}升级后新增 1 个训练位，并开放更多器材和项目等级。</p>
+      {state.credits < upgrade.price
+        ? <p className="gm-recommend-warning" role="status">扩建资金还差 {format(upgrade.price - state.credits)} 券。</p>
+        : !upgrade.canUpgrade && <p className="gm-muted" role="status">{upgrade.reason || '尚未达到晋级条件'}</p>}
+      <button type="button" className="gm-button gm-primary" disabled={!upgrade.canUpgrade} onClick={() => onAction({type: 'upgrade-gym', targetLevel: upgrade.level!.level})}>{upgrade.price === 0 ? '免费升级球馆' : `升级 · ${format(upgrade.price)} 券`}</button>
     </section> : <p className="gm-inline-status">已达到当前最高馆级。继续培养球员、收集模板与器材。</p>}
     <Wallet credits={state.credits}/>
+    <RecommendationCreditRule state={state}/>
     <div className="gm-section-heading"><h3>球馆经营项目</h3><small>跨球员持续生效</small></div>
     <div className="gm-projects">{projects.map(project => {
       const offer = projectOffer(state, project.id);
@@ -151,15 +168,29 @@ export function GymClubPanel({state, onAction}: GymPanelProps) {
         <div className="gm-project-heading"><h4>{project.name}</h4><span>Lv.{offer.level} / {project.maxLevel}</span></div>
         <p className="gm-muted">{project.description}</p>
         <div className="gm-project-effects"><span>当前 · {projectEffect(state, project.id, offer.level)}</span>{project.available && offer.level < project.maxLevel && <strong>下级 · {projectEffect(state, project.id, offer.level + 1)}</strong>}</div>
+        {['endurance', 'recovery', 'automation'].includes(project.id) && offer.price !== null && <>
+          <button type="button" className="gm-info-button" aria-expanded={comparisonProject === project.id} onClick={() => setComparisonProject(comparisonProject === project.id ? null : project.id)}>{comparisonProject === project.id ? '收起培养耗时对比' : '查看培养耗时对比'}</button>
+          {comparisonProject === project.id && <ProjectTrainingPreview state={state} id={project.id}/>}
+        </>}
         {project.id === 'offline' && state.player && <p className="gm-muted gm-project-forecast">{allStatsMax ? '当前球员六维已满，可核对培养奖金与合作后推荐。' : forecast?.finished ? '当前球员已到训练等级上限，可以推荐。' : forecast ? `当前球员按现有配置连续训练，预计约 ${offlineDuration(forecast.estimatedMs)} 到 Lv.${forecast.targetLevel}。可在模板、奖金节点提前推荐。` : ''}</p>}
+        {project.id === 'offline' && offlineUpgrade && <section className="gm-stack gm-project-forecast" aria-label="离线升级收益预估">
+          <p className="gm-muted">升级花费 {offlineUpgrade.price} 券，离线训练上限 {offlineDuration(offlineUpgrade.currentLimitMs)} → {offlineDuration(offlineUpgrade.nextLimitMs)}。</p>
+          {offlineUpgrade.automaticPlayers === 0
+            ? <p className="gm-muted">当前没有开启自动的球员，离线只恢复体力；开启自动后才会训练。</p>
+            : offlineUpgrade.predictedFinishedWithinCurrent === offlineUpgrade.automaticPlayers
+              ? <p className="gm-recommend-warning">当前开启自动的 {offlineUpgrade.automaticPlayers} 名球员预计都可在现有离线上限内达到 Lv.99，延长时长不一定增加本批训练收益。</p>
+              : offlineUpgrade.predictedFinishedWithinCurrent > 0
+                ? <p className="gm-recommend-warning">当前开启自动的 {offlineUpgrade.automaticPlayers} 名球员中，{offlineUpgrade.predictedFinishedWithinCurrent} 名预计可在现有上限内达到 Lv.99；延长时长主要帮助其余球员继续训练。</p>
+                : <p className="gm-muted">当前开启自动的 {offlineUpgrade.automaticPlayers} 名球员预计尚不能在现有上限内全部练满。延长上限可增加离开较久时的训练机会。</p>}
+          <p className="gm-muted">项目永久生效，也适用于后续新人。{offlineUpgrade.hasExtensionEquipment ? '可按需要换下离线加时器材，腾出槽位。' : ''}{offlineUpgrade.automaticPlayers > 0 ? '满级时间按当前配置预估，实际经验结果会波动；不会自动推荐或补招。' : ''}</p>
+        </section>}
         <div className="gm-project-footer"><p className="gm-muted">{reason || `当前馆级最高可升至 Lv.${offer.maxLevel}`}</p><button type="button" className="gm-button gm-primary" disabled={!canBuy} onClick={() => onAction({type: 'upgrade-project', id: project.id})}>{!project.available ? '后续开放' : offer.price === null ? offer.level >= project.maxLevel ? '已升满' : '暂不可升级' : `升级 · ${offer.price} 券`}</button></div>
       </article>;
     })}</div>
   </div>;
 }
 
-export function GymRosterPanel({state, onAction, onAlumni}: GymPanelProps & {onAlumni?: () => void}) {
-  const [preference, setPreference] = useState<'any' | 'guard' | 'forward' | 'center'>('any');
+export function GymRosterPanel({state, onAction, onAlumni, busy}: GymPanelProps & {onAlumni?: () => void}) {
   const players = state.player ? [state.player, ...state.bench] : [];
   const maximum = staminaMax(state);
   const freeSeats = state.gymLevel - players.length;
@@ -177,98 +208,83 @@ export function GymRosterPanel({state, onAction, onAlumni}: GymPanelProps & {onA
         <div className="contract-actions contract-roster-actions"><button type="button" className="primary" disabled={selected} onClick={() => onAction({type: 'select-player', id: player.id})}><GameIcon name="train"/><span>{selected ? '当前选中' : '选择训练'}</span></button><button type="button" className={`secondary${player.autoEnabled ? ' signing-button' : ''}`} role="switch" aria-label={`${player.name}自动训练`} aria-checked={player.autoEnabled} disabled={state.gymLevel < 2 || capped && !player.autoEnabled} onClick={() => onAction({type: 'set-auto', id: player.id, enabled: !player.autoEnabled})}><GameIcon name="rest"/><span>{state.gymLevel < 2 ? 'Lv.2 免费解锁自动' : player.autoEnabled ? '暂停自动' : capped ? '已满级' : '开启自动'}</span></button></div>
       </article>;
     })}</div>
-    {freeSeats > 0 && <section className="gm-roster-recruit"><h3>空余 {freeSeats} 个训练位</h3><p>免费迎接新人，带着满体力入馆。</p>{state.gymLevel >= 2 && <select aria-label="名册新人身高偏好" value={preference} onChange={event => setPreference(event.target.value as typeof preference)}><option value="any">不限身高</option><option value="guard">后卫型 178–194 cm</option><option value="forward">锋线型 195–205 cm</option><option value="center">内线型 206–218 cm</option></select>}<button type="button" className="primary" onClick={() => onAction({type: 'recruit', preference})}><GameIcon name="people"/>免费招募新人</button></section>}
+    {freeSeats > 0 && <GymRecruitmentControls state={state} onAction={onAction} busy={busy}/>}
     <p className="roster-intro">{state.gymLevel < 2 ? '球馆 Lv.2 同时免费开放自动与离线训练；当前先手动培养第一位球员。' : `开启自动后该球员暂停手动投篮；离开后继续按相同体力、器材与课程规则训练，每次上限 ${offlineDuration(offlineLimitMs(state))}。体力不足时等待恢复；超时仅恢复体力，不自动推荐或招募。`}</p>
-    {onAlumni && <button type="button" className="secondary" onClick={onAlumni}><GameIcon name="career"/>查看校友档案 · {state.alumni.length} 人</button>}
+    {onAlumni && <button type="button" className="secondary" onClick={onAlumni}><GameIcon name="career"/>查看校友档案 · {alumniProgress(state).total} 人</button>}
   </div>;
 }
 
 export function GymTrainingPanel({state, onAction}: GymPanelProps) {
   const [pendingPlan, setPendingPlan] = useState<{id: TrainingPlanId; playerId: string} | null>(null);
+  const [showRules, setShowRules] = useState(false);
   const player = state.player;
   if (!player) return <div className="gym-panel gm-empty"><GameIcon name="train"/><h3>先迎接一位新人</h3><p className="gm-muted">招募球员后，可以为他选择训练计划。</p></div>;
   const progress = trainingStatus(state);
   const topDimensions = (bias: Stats) => [...statKeys].sort((first, second) => bias[second] - bias[first]).slice(0, 2).map(key => statLabels[key]).join('、');
   const effects = equipmentEffects(state);
   const equipmentFocus = statKeys.filter(key => effects.focus[key] > 0).map(key => statLabels[key]);
+  const talent = topDimensions(player.bias);
+  const tendency = topDimensions(effectiveTrainingBias(state));
+  const reward = recommendationPayout(state);
+  const atCap = player.level >= playerLevelCap;
+  const allStatsMax = statKeys.every(key => player.stats[key] >= 99);
   const selectPlan = (id: TrainingPlanId) => {
     if (id === progress.plan.id) return;
     if (progress.shots > 0) setPendingPlan({id, playerId: player.id});
     else onAction({type: 'set-training-plan', id, playerId: player.id});
   };
-  return <div className="gym-panel">
+  return <div className="gym-panel gm-training-panel">
     <section className="gm-plan-summary" aria-label="当前训练课程">
-      <div className="gm-section-heading"><div><p className="gm-eyebrow">当前计划</p><h3>{progress.plan.name}</h3></div><span className="gm-course-count">已完成 {progress.completedCourses} 课</span></div>
-      <div className="gm-condition"><span>本课有效投篮</span><b>{progress.shots} / 10 球</b></div>
+      <div className="gm-section-heading"><div><p className="gm-eyebrow">当前计划</p><h3>{progress.plan.name}</h3></div><div className="gm-training-summary-tools"><span className="gm-course-count">已完成 {progress.completedCourses} 课</span><button type="button" className="gm-training-help" aria-label="查看训练说明" title="训练说明" onClick={() => setShowRules(true)}>?</button></div></div>
+      <div className="gm-condition"><span>本课进度</span><b>{progress.shots} / 10 球</b></div>
       <progress className="gm-progress" value={progress.shots} max={10} aria-label="本课有效投篮进度"/>
-      <p>完成本课恢复 {progress.recovery} 点体力，超过体力上限的部分不计入。</p>
-      <p className="gm-muted">每课基础恢复 4 点；球馆 Lv.{state.gymLevel} 的器材额外恢复上限 +{courseRecoveryCap(state)}，当前已生效 +{effects.courseRecovery}。</p>
-      <p className="gm-muted">每 10 次有效投篮完成一课，三种训练结果均计入；冷却中或体力不足的点击不计入。</p>
+      <p className="gm-training-course-note">{atCap ? '已满级，训练已结束' : <>完课恢复 <strong>+{progress.recovery}</strong> 体力</>}</p>
     </section>
-    <section className="gm-paper gm-stack" aria-label="球员能力与成长倾向"><div className="gm-section-heading"><h4>球员能力与成长倾向</h4><small>{player.name}</small></div><PlayerStats stats={player.stats}/><p><b>天赋倾向</b> · {topDimensions(player.bias)}</p><p><b>当前成长倾向</b> · {topDimensions(effectiveTrainingBias(state))}</p><p className="gm-muted">{progress.plan.focusKeys.length ? `当前专项更容易提升${progress.plan.focusKeys.map(key => statLabels[key]).join('、')}。` : '当前基础训练沿用球员原生偏好。'}{equipmentFocus.length ? `馆内器材额外偏向${equipmentFocus.join('、')}。` : '当前没有提供专项成长倾向的器材。'}</p><p className="gm-muted">可以继续强化长处，也可以选专项补足短板；倾向不保证下一球必涨对应属性。</p></section>
-    <div className="gm-section-heading"><h3>选择培养方向</h3><small>免费切换</small></div>
+    <section className="gm-paper gm-stack gm-training-player" aria-label="球员能力与成长倾向"><div className="gm-section-heading"><h4>球员能力</h4><small>{player.name}{allStatsMax ? ' · 六维已满' : ''}</small></div><PlayerStats stats={player.stats}/><div className="gm-training-tendency"><p><span>成长偏向</span><b>{tendency}</b></p>{talent !== tendency && <small>天赋：{talent}</small>}</div></section>
+    <div className="gm-section-heading gm-training-plan-heading"><h3>训练方向</h3><small>免费切换</small></div>
     <div className="gm-plan-grid">{trainingPlans.map(plan => {
       const current = plan.id === progress.plan.id;
       return <article className={`gm-plan-card${current ? ' is-selected' : ''}`} key={plan.id}>
-        <div className="gm-plan-title"><h4>{plan.name}</h4>{current && <span>正在进行</span>}</div>
-        <div className="gm-plan-targets">{plan.focusKeys.length ? plan.focusKeys.map(key => <span key={key}>{statLabels[key]}</span>) : <span>原生偏好 · 六维基础</span>}</div>
-        <p className="gm-muted">{plan.description}</p>
-        <button type="button" className={`gm-button${current ? '' : ' gm-primary'}`} disabled={current} onClick={() => selectPlan(plan.id)}>{current ? '当前计划' : '选择此计划'}</button>
+        <div className="gm-plan-title"><h4>{plan.name}</h4></div>
+        <div className="gm-plan-targets">{plan.focusKeys.length ? plan.focusKeys.map(key => <span key={key}>{statLabels[key]}</span>) : <span>原生偏好</span>}</div>
+        <button type="button" className={`gm-button${current ? '' : ' gm-primary'}`} aria-label={current ? `当前计划：${plan.name}` : `选择${plan.name}`} disabled={current} onClick={() => selectPlan(plan.id)}>{current ? '已选用' : '选用'}</button>
       </article>;
     })}</div>
-    <p className="gm-use-note">切换计划会将尚未完成的本课投篮进度清零；已完成课数、球员属性和获得的模板保留。专项提高对应属性的成长倾向，经验升满、球员升级后才增加属性；升级总属性点数不变。</p>
-    <section className="gm-paper gm-stack"><h4>培养加奖</h4><p className="gm-muted">推荐时，{trainingCreditMilestones.map(milestone => `Lv.${milestone.level} 且达到${recommendationTierNames[milestone.tier]}及以上，额外 +${milestone.credits} 券`).join('；')}。只取最高达标档，基础券与合作奖励另计。完整课程仍可提高培养声望。</p></section>
-    <TrainingAdvice state={state}/>
+    {progress.shots > 0 && <p className="gm-training-switch-note">切换将清空本课 {progress.shots}/10 球进度</p>}
+    <div className="gm-training-payout" aria-label="当前推荐收益"><span>当前推荐</span><strong>+{reward.credits} 券</strong><small>{reward.repeatTemplate ? '重复模板' : player.templateId ? '模板首次' : '未匹配模板'}</small></div>
+    {showRules && <ComicDialog title="训练说明" className="gm-training-rules-dialog" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules">
+      <section className="gm-stack"><h3>课程与恢复</h3><p>每10次投篮完成1课，完课时恢复部分体力，超出上限不计入<br/>（当前：基础4点+器材额外{effects.courseRecovery}点）。</p></section>
+      <section className="gm-stack"><h3>推荐奖励</h3><p>推荐签约时获得赞助券。相同模板首次发券有额外奖励，之后每次{postgameRepeatTemplateCredits}券。</p><table className="gm-training-bonus-table"><thead><tr><th scope="col">首次培养条件</th><th scope="col">培养加奖</th></tr></thead><tbody>{trainingCreditMilestones.map(milestone => <tr key={milestone.level}><td>Lv.{milestone.level}＋{recommendationTierNames[milestone.tier]}及以上</td><td>+{milestone.credits} 券</td></tr>)}</tbody></table><p className="gm-muted">培养加奖只取最高达标档，基础券与已完成合作另计；未匹配模板无赞助券奖励，完整课程可提高培养声望。</p></section>
+      <button type="button" className="gm-button gm-primary" onClick={() => setShowRules(false)}>返回训练</button>
+    </div></ComicDialog>}
     {pendingPlan && <ComicDialog title="切换训练计划" onClose={() => setPendingPlan(null)}>
-      <div className="gym-panel"><p>当前课程已训练 {progress.shots}/10 球。切换到「{trainingPlans.find(plan => plan.id === pendingPlan.id)?.name}」后，本课进度将从 0 球开始。</p><p className="gm-muted">已完成的 {progress.completedCourses} 节课程和球员成长保留。</p><div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPendingPlan(null)}>继续当前课程</button><button type="button" className="gm-button gm-primary" onClick={() => {onAction({type: 'set-training-plan', id: pendingPlan.id, playerId: pendingPlan.playerId}); setPendingPlan(null);}}>确认切换</button></div></div>
+      <div className="gym-panel"><p>切换至「{trainingPlans.find(plan => plan.id === pendingPlan.id)?.name}」？本课 {progress.shots}/10 球将清零。</p><p className="gm-muted">已完成的 {progress.completedCourses} 课和球员成长保留。</p><div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPendingPlan(null)}>继续当前课程</button><button type="button" className="gm-button gm-primary" onClick={() => {onAction({type: 'set-training-plan', id: pendingPlan.id, playerId: pendingPlan.playerId}); setPendingPlan(null);}}>确认切换</button></div></div>
     </ComicDialog>}
   </div>;
 }
 
-export function GymCooperationPanel({state, onAction}: GymPanelProps) {
-  const [pending, setPending] = useState<{offer: CooperationOffer | null; playerId: string} | null>(null);
-  const player = state.player;
-  if (!player) return <div className="gym-panel gm-empty"><GameIcon name="handshake"/><h3>合作机会随新人到来</h3><p className="gm-muted">招募一位球员后，可以从三份培养合作中选择一份。</p></div>;
-  const offers = cooperationOffers(state);
-  const status = cooperationStatus(state);
-  const equipmentTier = equipmentEffects(state).cooperationBonus;
-  const earnedEquipmentTier = player.equipmentTraining.cooperationCourses[1] >= 2 ? 2 : player.equipmentTraining.cooperationCourses[0] >= 2 ? 1 : 0;
-  const equipmentCourses = equipmentTier > 0 ? player.equipmentTraining.cooperationCourses[equipmentTier - 1] : 0;
-  const equipmentShots = equipmentTier > 0 ? player.equipmentTraining.cooperationCourseShots[equipmentTier - 1] : 0;
-  const accept = (offer: CooperationOffer) => {
-    if (status.offer) setPending({offer, playerId: player.id});
-    else onAction({type: 'accept-cooperation', id: offer.id, playerId: player.id});
-  };
-  return <div className="gym-panel">
-    <Wallet credits={state.credits}/>
-    <section className="gm-paper gm-stack"><h3>赞助合作</h3><p>每位球员有三份固定合作，任选一份。接取后开始累计新的投篮与课程，达标后推荐球员，领取额外赞助券与声望。</p><p className="gm-muted">合作没有期限。未完成也能正常推荐，不扣赞助券、不扣声望。</p></section>
-    {status.offer && <p className="gm-inline-status" role="status">{status.complete ? `「${status.offer.name}」已达标，推荐时额外获得 ${status.rewardCredits} 券、${status.rewardFame} 声望。` : `正在进行「${status.offer.name}」，继续培养即可推进合作。`}</p>}
-    {(equipmentTier > 0 || earnedEquipmentTier > 0) && <section className="gm-paper gm-stack" aria-label="合作器材培养进度">
-      <h4>合作器材培养进度</h4>
-      {equipmentTier > 0 && <><p>本档器材已完成 {equipmentCourses}/2 完整课程，当前课实际启用 {equipmentShots}/10 球。</p>
-        <p className="gm-muted">{!status.offer ? '先接取合作，再累计器材培养进度；需完整10球均启用才计一课。' : player.training.shots > equipmentShots ? '本课已有未启用本档器材的投篮，本课不计完整课程；下一课需完整10球均启用才计一课。' : '需完整10球均启用才计一课。'}</p>
-        {status.offer && equipmentCourses < 2 && <p className="gm-muted">{status.complete ? '合作已达标，' : ''}本档器材还差 {2 - equipmentCourses} 整课取得额外 {equipmentTier} 券训练资格；合作达标后推荐领取。</p>}
+export {GymCooperationPanel} from './GymCooperationPanel';
+
+function TrainingTimeComparison({state, comparison, title, label}: {state: GymState; comparison: EquipmentTrainingComparison; title: string; label: string}) {
+  return <section className="gm-paper gm-stack" aria-label={label}>
+    <h4>培养耗时对比 · {title}</h4>
+    {comparison.status === 'no-player' ? <p className="gm-muted">招募球员后，可按实际等级、体力与训练配置比较培养耗时。</p>
+      : comparison.status === 'ended' ? <p className="gm-muted">当前球员已满级，训练已结束；此项投入仍适用于其他或未来球员。</p>
+      : comparison.status === 'choose-replacement' ? <p className="gm-muted">馆内已满，请在替换确认中选择替换对象，再比较实际培养耗时。</p>
+      : <>{comparison.rows.map(row => <p key={row.level} data-forecast-level={row.level}>到 Lv.{row.level}：约 {offlineDuration(row.beforeMs)} → {offlineDuration(row.afterMs)}{row.beforeMs === row.afterMs ? '（预计耗时不变）' : ''}</p>)}
+        <p className="gm-muted">按当前球员{state.player?.autoEnabled ? '自动' : '手动'}连续训练估算，沿用现有体力、课程与冷却，不包含停留、饮料或后续换装。实际结果会波动，不保证模板；专项属性成长不折算为等级提速，离线延时仅增加可结算时长。</p>
       </>}
-      {earnedEquipmentTier > 0 && <p className="gm-inline-status">已保留额外 {earnedEquipmentTier} 券训练资格，合作达标后推荐领取；换下器材不会丢失。</p>}
-    </section>}
-    <div className="gm-cooperation-list">{offers.map(offer => {
-      const active = status.offer?.id === offer.id;
-      const target = active ? status : cooperationStatus(state, {...player, cooperation: {id: offer.id, playerId: player.id, acceptedShots: player.shots, acceptedCourses: player.training.completedCourses}});
-      return <article className={`gm-cooperation${active ? ' is-active' : ''}${active && status.complete ? ' is-ready' : ''}`} key={offer.id}>
-        <div className="gm-cooperation-title"><h4>{offer.name}</h4><span>{active ? status.complete ? '已达标' : '进行中' : '可选择'}</span></div>
-        <p className="gm-muted">{offer.description}</p>
-        <div className="gm-cooperation-reward"><span>额外 +{active ? status.rewardCredits : offer.credits} 券</span><span>+{active ? status.rewardFame : offer.fame} 声望</span></div>
-        <div className="gm-cooperation-conditions">{target.requirements.map(requirement => <div key={requirement.label} className={`gm-stack${requirement.met ? ' is-met' : ''}`}>
-          <div className={`gm-condition${requirement.met ? ' is-met' : ''}`}><span>{requirement.label}</span><b className="gm-condition-value">{/档次|模板|档位/.test(requirement.label) ? requirement.met ? '已达成 ✓' : '尚未达成' : `${format(requirement.current)} / ${format(requirement.required)}${requirement.met ? ' ✓' : ''}`}</b></div>
-          <progress className="gm-progress" value={Math.min(requirement.current, requirement.required)} max={requirement.required || 1} aria-label={requirement.label}/>
-        </div>)}</div>
-        <button type="button" className={`gm-button${active ? '' : ' gm-primary'}`} disabled={active} onClick={() => accept(offer)}>{active ? status.complete ? '推荐时领取合作奖励' : '当前合作' : status.offer ? '更换为此合作' : '接取合作'}</button>
-      </article>;
-    })}</div>
-    {status.offer && <button type="button" className="gm-info-button" onClick={() => setPending({offer: null, playerId: player.id})}>放弃当前合作</button>}
-    <p className="gm-use-note">更换或放弃合作会清空这份合作的新增球数、课数进度；再次接取从新基线开始。球员属性、已完成课程和球星收藏保留。</p>
-    {pending && <ComicDialog title={pending.offer ? '更换赞助合作' : '放弃赞助合作'} onClose={() => setPending(null)}><div className="gym-panel"><p>{pending.offer ? `确认改接「${pending.offer.name}」？新合作从当前投篮数和课数重新累计。` : '确认放弃当前合作？这份合作尚未领取的奖励与进度不会保留。'}</p><p className="gm-muted">此操作不扣赞助券或声望，不影响已经获得的球员属性与课程记录。</p><div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPending(null)}>保留当前合作</button><button type="button" className="gm-button gm-primary" onClick={() => {onAction(pending.offer ? {type: 'accept-cooperation', id: pending.offer.id, playerId: pending.playerId} : {type: 'abandon-cooperation', playerId: pending.playerId}); setPending(null);}}>{pending.offer ? '确认更换' : '确认放弃'}</button></div></div></ComicDialog>}
-  </div>;
+  </section>;
+}
+
+function EquipmentTrainingPreview({state, item, replaceId}: {state: GymState; item: GymEquipment; replaceId?: string}) {
+  const comparison = useMemo(() => equipmentTrainingComparison(state, item.id, replaceId), [state, item.id, replaceId]);
+  return <TrainingTimeComparison state={state} comparison={comparison} title={state.equippedEquipment.includes(item.id) ? '移出后' : '放入后'} label="器材培养耗时对比"/>;
+}
+
+function ProjectTrainingPreview({state, id}: {state: GymState; id: ProjectId}) {
+  const comparison = useMemo(() => projectTrainingComparison(state, id), [state, id]);
+  return comparison && <TrainingTimeComparison state={state} comparison={comparison} title="项目升一级后" label="项目培养耗时对比"/>;
 }
 
 function EquipmentDetail({item, state, onClose}: {item: GymEquipment; state: GymState; onClose: () => void}) {
@@ -278,6 +294,7 @@ function EquipmentDetail({item, state, onClose}: {item: GymEquipment; state: Gym
     <div className="gym-panel">
       <div className="gm-detail-art"><span className="gm-detail-tag">{rarityLabels[item.rarity]} · {item.grade}阶</span><ProductImage id={item.artId} name={item.name}/><h3>{item.name}</h3><p>{equipmentFamilyLabels[item.family]} · 同类只启用一件</p></div>
       <section className="gm-paper gm-stack"><h4>当前效果</h4><p>{item.description}</p><p className="gm-muted">{equipmentPreview(state, item)}</p></section>
+      <EquipmentTrainingPreview state={state} item={item}/>
       <section className="gm-paper gm-stack"><h4>取得条件</h4><p>球馆 Lv.{item.unlockLevel}{item.requiredTemplates > 0 && ` · 收藏 ${item.requiredTemplates} 种球星模板`}</p><p>售价 {item.price} 张赞助券</p>{offer.reason && !offer.owned && <p className="gm-muted">{offer.reason}</p>}</section>
       <p className={collected ? 'gm-inline-status' : 'gm-muted'}>{state.equippedEquipment.includes(item.id) ? '已收藏 · 馆内生效' : state.ownedEquipment.includes(item.id) ? '已收藏 · 在仓库中' : collected ? '已收藏 · 当前未持有' : offer.price !== null ? '已可购 · 获得后点亮图鉴' : '尚未获得'}</p>
       <button type="button" className="gm-button" onClick={onClose}>返回</button>
@@ -292,10 +309,8 @@ function equipmentPreview(state: GymState, item: GymEquipment, replaceId?: strin
   const targetId = replaceId ?? familyReplacement?.id;
   const courseLimit = `球馆 Lv.${state.gymLevel} 的器材额外恢复上限 +${courseRecoveryCap(state)}。`;
   if (!equipped && !targetId && state.equippedEquipment.length >= equipmentCapacity(state)) return '馆内器材已满，选择替换对象后比较实际效果；被替换器材进入仓库。' + (item.effects.courseRecovery ? courseLimit : '');
-  const preview = {...state,
-    ownedEquipment: state.ownedEquipment.includes(item.id) ? state.ownedEquipment : [...state.ownedEquipment, item.id],
-    equippedEquipment: equipped ? state.equippedEquipment.filter(id => id !== item.id) : [...state.equippedEquipment.filter(id => id !== targetId), item.id],
-  };
+  const preview = previewEquipmentState(state, item.id, replaceId);
+  if (!preview) return '请选择当前馆内的替换对象后比较实际效果。';
   const prefix = equipped ? '移出球馆后' : targetId ? '替换后' : '入馆后';
   const beforeEffects = equipmentEffects(state);
   const afterEffects = equipmentEffects(preview);
@@ -334,7 +349,7 @@ function equipmentPreview(state: GymState, item: GymEquipment, replaceId?: strin
 }
 
 function EquipmentCard({item, state, onAction, onDetails, busy = false, inventory = false}: GymPanelProps & {item: GymEquipment; onDetails: () => void; inventory?: boolean}) {
-  const [pending, setPending] = useState<'replace' | 'sell' | null>(null);
+  const [pending, setPending] = useState<'replace' | 'sell' | 'remove' | null>(null);
   const [replaceId, setReplaceId] = useState('');
   const submitted = useRef(false);
   const offer = equipmentOffer(state, item.id);
@@ -346,7 +361,7 @@ function EquipmentCard({item, state, onAction, onDetails, busy = false, inventor
   const mustReplace = full || !!familyItem;
   const replacementIds = familyItem ? [familyItem.id] : state.equippedEquipment;
   const reason = owned ? equipped ? '已放入球馆，持续为全体球员生效' : familyItem ? '同类只启用一件，替换后旧件进入仓库' : '仓库器材，可重新入馆或半价出售' : offer.reason ?? (offer.price !== null && state.credits < offer.price ? '赞助券不足' : familyItem ? '同类只启用一件，购买时替换旧件入仓库' : full ? '购买时选择替换，旧器材进入仓库' : '购买即放入球馆生效');
-  const open = (mode: 'replace' | 'sell') => {submitted.current = false; setReplaceId(mode === 'replace' ? familyItem?.id ?? '' : ''); setPending(mode);};
+  const open = (mode: 'replace' | 'sell' | 'remove') => {if (busy) return; submitted.current = false; setReplaceId(mode === 'replace' ? familyItem?.id ?? '' : ''); setPending(mode);};
   const submit = (action: GymAction) => {
     if (busy || submitted.current) return;
     submitted.current = true;
@@ -363,13 +378,21 @@ function EquipmentCard({item, state, onAction, onDetails, busy = false, inventor
     <div className="gm-product-image"><ProductImage id={item.artId} name={item.name}/></div>
     <div className="gm-product-copy"><div className="gm-product-meta"><span>{rarityLabels[item.rarity]}</span><span>{equipmentFamilyLabels[item.family]} · {item.grade}阶</span><span>球馆 Lv.{item.unlockLevel}</span>{equipped && <span className="gm-equipped">馆内生效</span>}</div><h4>{item.name}</h4><p className="gm-muted">{item.description}</p>{!equipped && <p className="gm-muted">{equipmentPreview(state, item)}</p>}<button type="button" className="gm-info-button" onClick={onDetails}>器材详情 ›</button></div>
     <div className={`gm-product-actions${owned && !equipped && inventory ? ' gm-warehouse-actions' : ''}`}><p className="gm-muted">{reason}</p>
-      {owned ? equipped ? <button type="button" className="gm-button" disabled>馆内生效</button> : <><button type="button" className="gm-button gm-primary" disabled={busy} onClick={install}>{mustReplace ? '替换馆内器材' : '放入球馆'}</button>{inventory && <button type="button" className="gm-button" disabled={busy} onClick={() => open('sell')}>半价出售 · 返 {refund} 券</button>}</> : <button type="button" className="gm-button gm-primary" disabled={busy || offer.price === null || state.credits < offer.price} onClick={install}>购买 · {item.price} 券</button>}
+      {owned ? equipped ? inventory ? <button type="button" className="gm-button" disabled={busy} onClick={() => open('remove')}>移入仓库</button> : <button type="button" className="gm-button" disabled>馆内生效</button> : <><button type="button" className="gm-button gm-primary" disabled={busy} onClick={install}>{mustReplace ? '替换馆内器材' : '放入球馆'}</button>{inventory && <button type="button" className="gm-button" disabled={busy} onClick={() => open('sell')}>半价出售 · 返 {refund} 券</button>}</> : <button type="button" className="gm-button gm-primary" disabled={busy || offer.price === null || state.credits < offer.price} onClick={install}>购买 · {item.price} 券</button>}
     </div>
     {pending === 'replace' && <ComicDialog title="替换馆内器材" onClose={() => setPending(null)}><div className="gym-panel gm-stack">
       <h3>{owned ? '重新放入' : '购买并放入'}「{item.name}」</h3><p>{familyItem ? `同类只启用一件，将替换「${familyItem.name}」。` : '馆内器材已满，请选择一件替换。'}旧器材进入仓库，可重新换上或半价出售；取消不扣券、不移动器材。</p>
       <label className="gm-replace-label">替换对象<select aria-label="选择替换的器材" value={replaceId} onChange={event => setReplaceId(event.target.value)}>{!familyItem && <option value="">请选择馆内器材</option>}{replacementIds.map(id => <option key={id} value={id}>{equipmentById.get(id)?.name ?? id}</option>)}</select></label>
       {replaceId && <p className="gm-paper gm-use-note">{equipmentPreview(state, item, replaceId)}</p>}
+      {replaceId && <EquipmentTrainingPreview state={state} item={item} replaceId={replaceId}/>}
       <div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPending(null)}>取消替换</button><button type="button" className="gm-button gm-primary" disabled={busy || !replaceId} onClick={() => submit({type: owned ? 'equip' : 'buy-equipment', id: item.id, replaceId})}>{owned ? '确认替换' : `确认购买并替换 · ${item.price} 券`}</button></div>
+    </div></ComicDialog>}
+    {pending === 'remove' && <ComicDialog title="移入器材仓库" onClose={() => setPending(null)}><div className="gym-panel gm-stack">
+      <h3>移出「{item.name}」</h3><p>移出后停止为全体球员提供效果，不扣赞助券；器材与收藏保留，可随时重新放入或半价出售。</p>
+      <p className="gm-paper gm-use-note">{equipmentPreview(state, item)}</p>
+      {item.effects.stamina > 0 && <p className="gm-recommend-warning">体力超过新上限的部分会截断；再次放入不会补回体力，其他在训球员也按新上限处理。</p>}
+      <EquipmentTrainingPreview state={state} item={item}/>
+      <div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPending(null)}>保留馆内器材</button><button type="button" className="gm-button gm-primary" disabled={busy || !equipped} onClick={() => submit({type: 'unequip', id: item.id})}>确认移入仓库</button></div>
     </div></ComicDialog>}
     {pending === 'sell' && <ComicDialog title="出售仓库器材" onClose={() => setPending(null)}><div className="gym-panel gm-stack">
       <h3>出售「{item.name}」返还 {refund} 券</h3><p>按记录购入价的一半返还，向下取整。出售后不再持有，已点亮的器材图鉴保留；需要时可按商店现价重新购买。</p><p className="gm-muted">旧存档缺少购价记录时，按历史价格基准估算，不按涨价后的现价返还。</p>
@@ -380,12 +403,13 @@ function EquipmentCard({item, state, onAction, onDetails, busy = false, inventor
 
 function DrinkCard({state, onAction, purchasing}: GymPanelProps & {purchasing: boolean}) {
   const capacity = staminaMax(state);
-  const restored = state.player ? Math.max(0, Math.min(drinkRecovery, capacity - state.player.stamina)) : 0;
+  const ended = !!state.player && state.player.level >= playerLevelCap;
+  const restored = state.player && !ended ? Math.max(0, Math.min(drinkRecovery, capacity - state.player.stamina)) : 0;
   return <article className="gm-product">
     <div className="gm-product-image"><ProductImage id="item_005" name="运动饮料"/></div>
     <div className="gm-product-copy"><div className="gm-product-meta"><span>消耗品</span><span>持有 {state.inventory.drink} 瓶</span></div><h4>运动饮料</h4><p className="gm-muted">恢复当前球员 {drinkRecovery} 点体力，超过上限的部分不计入。</p>{state.player && <p className="gm-muted">当前体力 {state.player.stamina}/{capacity} · 本次恢复 {restored} 点</p>}</div>
-    <div className="gm-product-actions"><p className="gm-muted">{!state.player ? '招募球员后可使用' : restored === 0 ? '体力已满' : state.inventory.drink === 0 ? '先在商店购买饮料' : ''}</p>
-      <button type="button" className="gm-button" disabled={!state.player || restored <= 0 || state.inventory.drink <= 0} onClick={() => {if (state.player) onAction({type: 'use-drink', id: state.player.id});}}>使用饮料</button>
+    <div className="gm-product-actions"><p className="gm-muted">{!state.player ? '招募球员后可使用' : ended ? '球员已满级，饮料留给其他或未来球员使用' : restored === 0 ? '体力已满' : state.inventory.drink === 0 ? '先在商店购买饮料' : ''}</p>
+      <button type="button" className="gm-button" disabled={!state.player || ended || restored <= 0 || state.inventory.drink <= 0} onClick={() => {if (state.player && !ended) onAction({type: 'use-drink', id: state.player.id});}}>使用饮料</button>
       {purchasing && <button type="button" className="gm-button gm-primary" disabled={state.credits < drinkPrice} onClick={() => onAction({type: 'buy-drink'})}>购买 · {drinkPrice} 券</button>}
     </div>
   </article>;
@@ -433,7 +457,7 @@ export function GymInventoryPanel({state, onAction, busy}: GymPanelProps) {
       const item = equipmentById.get(state.equippedEquipment[index]);
       return <div className="gm-slot" key={index}>{item ? <ProductImage id={item.artId} name={item.name}/> : <span aria-label="空槽">＋</span>}</div>;
     })}</div>
-    <p className="gm-muted">馆内器材持续为全体球员生效，同类只启用一件。被替换的器材进入仓库，可重新放入或按记录购价半价出售；提高体力上限不会立刻补满体力。</p>
+    <p className="gm-muted">馆内器材持续为全体球员生效，同类只启用一件。可主动移入仓库或用其他器材替换，再重新放入或按记录购价半价出售；提高体力上限不会立刻补满体力。</p>
     {Object.keys(state.legacyEquipmentCollection ?? {}).length > 0 && <p className="gm-muted">历史器材收藏 {Object.keys(state.legacyEquipmentCollection ?? {}).length} 件已留档，不计入当前 {equipmentCatalog.length} 件器材的收藏进度。</p>}
     <SlidingTabs labels={['器材与仓库', '消耗品']} label="背包分类" index={tab} onChange={setTab}>
       {tab === 0 ? <div className="gm-stack"><h4>馆内器材 · 持续生效</h4><div className="gm-products">{owned.filter(item => state.equippedEquipment.includes(item.id)).map(item => <EquipmentCard key={item.id} {...{item, state, onAction, busy}} inventory onDetails={() => setSelected(item)}/>)}</div><h4>器材仓库 · {owned.length - state.equippedEquipment.length} 件</h4><div className="gm-products">{owned.filter(item => !state.equippedEquipment.includes(item.id)).map(item => <EquipmentCard key={item.id} {...{item, state, onAction, busy}} inventory onDetails={() => setSelected(item)}/>)}</div>{owned.length === 0 && <div className="gm-empty"><GameIcon name="bag"/><h4>还没有器材</h4><p className="gm-muted">用推荐球员获得的赞助券，到商店购买第一件器材。</p></div>}</div> : <DrinkCard state={state} onAction={onAction} purchasing={false}/>}
@@ -443,22 +467,34 @@ export function GymInventoryPanel({state, onAction, busy}: GymPanelProps) {
 }
 
 export function GymRecommendPanel({state, onAction, onClose}: GymPanelProps) {
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [showRules, setShowRules] = useState(false);
+  const detailsId = useId();
   const player = state.player;
   if (!player) return <div className="gym-panel gm-empty"><GameIcon name="people"/><h3>目前没有在训球员</h3><p className="gm-muted">返回训练馆，免费招募下一名球员。</p>{onClose && <button type="button" className="gm-button" onClick={onClose}>返回训练馆</button>}</div>;
-  const reward = recommendation(state);
+  const reward = recommendationPayout(state);
   const cooperation = cooperationStatus(state);
-  return <div className="gym-panel">
-    <PlayerHeading player={player} value={playerValue(state, player)}/>
-    <PlayerStats stats={player.stats}/>
+  return <div className="gym-panel gm-recommend-panel">
+    <div className="gm-recommend-profile"><PlayerHeading player={player} value={playerValue(state, player)}/><button type="button" className="gm-training-help gm-recommend-help" aria-label="查看推荐说明" title="推荐说明" onClick={() => setShowRules(true)}>?</button></div>
     <div className="gm-recommend-rewards"><div><span>赞助券合计</span><b>+{reward.credits}</b></div><div><span>球馆声望合计</span><b>+{format(reward.fame)}</b></div></div>
-    <section className="gm-paper gm-stack"><h4>赞助券明细</h4><dl className="gm-reward-breakdown"><div><dt>模板基础 · {reward.tierName}</dt><dd>+{reward.baseCredits} 券</dd></div><div><dt>培养加奖 · Lv.{player.level} · {reward.tierName}</dt><dd>+{reward.trainingCredits} 券</dd></div><div><dt>合作奖励{cooperation.offer ? ` · ${cooperation.complete ? '已达标' : '未达标'}` : ' · 未接取'}</dt><dd>+{reward.cooperationCredits} 券</dd></div></dl></section>
-    <section className="gm-paper gm-stack"><h4>球馆声望明细</h4><dl className="gm-reward-breakdown"><div><dt>属性培养声望</dt><dd>+{format(reward.rawFame)}</dd></div><div><dt>课程与培养期间品牌加成</dt><dd>+{format(reward.baseFame - reward.rawFame)}</dd></div><div><dt>合作额外声望</dt><dd>+{format(reward.cooperationFame)}</dd></div></dl></section>
-    <div className="gm-paper gm-stack"><h4>本次培养成果</h4><p>累计训练 {format(player.shots)} 球 · 完成 {player.training.completedCourses} 课 · 六维净成长 +{format(reward.growth)}</p><p className="gm-muted">基础赞助券按实际模板档位发放，培养加奖同时检查当前等级与模板档次，合作奖励另计。完整课程提高培养声望；品牌声望按本次实际训练期间的平均加成结算，当前品牌器材同时影响展示身价。</p></div>
-    <TrainingAdvice state={state}/>
-    {reward.credits === 0 && <p className="gm-recommend-warning">尚未匹配球星模板，本次推荐获得 0 张赞助券。你可以继续培养，也可以免费换人。</p>}
-    {cooperation.offer && !cooperation.complete && <p className="gm-recommend-warning">「{cooperation.offer.name}」尚未达标。本次仍可普通推荐，领取以上基础与培养奖励；不扣券或声望，当前合作随球员离馆结束。</p>}
-    <p className="gm-muted">确认后该球员离馆并进入校友簿，已获得的球星模板保留。空出的训练位可以免费招募下一名球员。</p>
-    <div className="gm-actions">{onClose && <button type="button" className="gm-button" onClick={onClose}>继续培养</button>}<button type="button" className="gm-button gm-primary" onClick={() => onAction({type: 'recommend', id: player.id})}>确认推荐 · +{reward.credits} 券</button></div>
+    <div className="gm-recommend-achievements" aria-label="本次培养成果"><span>训练 <b>{format(player.shots)}</b> 球</span><span>完成 <b>{format(player.training.completedCourses)}</b> 课</span><span>净成长 <b>+{format(reward.growth)}</b></span></div>
+    {reward.tier === 0 && reward.rawCredits === 0 && <p className="gm-recommend-warning">未匹配模板，本次0券；可继续培养或免费换人。</p>}
+    {reward.repeatTemplate && <p className="gm-recommend-warning" role="status">重复模板，本次合计{reward.credits}券，声望照常。</p>}
+    {reward.isFirstPostgameRecommendation && <p className="gm-recommend-warning" role="status">首次推荐，之后同模板每次合计{postgameRepeatTemplateCredits}券，培养或合作提高后不补差额。</p>}
+    {cooperation.offer && (cooperation.complete ? <p className="gm-recommend-cooperation is-complete">合作奖励 · 已达标</p> : <p className="gm-recommend-cooperation">「{cooperation.offer.name}」未达标，推荐后结束。</p>)}
+    <button type="button" className="gm-info-button gm-recommend-details-toggle" aria-expanded={detailsOpen} aria-controls={detailsId} onClick={() => setDetailsOpen(!detailsOpen)}>{detailsOpen ? '收起结算明细' : '查看结算明细'}<span aria-hidden="true">{detailsOpen ? '−' : '+'}</span></button>
+    {detailsOpen && <div className="gm-stack gm-recommend-details" id={detailsId} aria-label="推荐结算明细">
+      <section className="gm-paper gm-stack"><h4>赞助券明细 · 理论与实际</h4><dl className="gm-reward-breakdown"><div><dt>模板基础 · {reward.tierName}</dt><dd>+{reward.baseCredits} 券</dd></div><div><dt>培养加奖 · Lv.{player.level} · {reward.tierName}</dt><dd>+{reward.trainingCredits} 券</dd></div><div><dt>合作奖励{cooperation.offer ? ` · ${cooperation.complete ? '已达标' : '未达标'}` : ' · 未接取'}</dt><dd>+{reward.cooperationCredits} 券</dd></div>{reward.withheldCredits > 0 && <div><dt>重复模板结算调整</dt><dd>−{reward.withheldCredits} 券</dd></div>}<div className="gm-reward-actual"><dt>实际入账</dt><dd>+{reward.credits} 券</dd></div></dl></section>
+      <section className="gm-paper gm-stack"><h4>声望明细</h4><dl className="gm-reward-breakdown"><div><dt>属性培养声望</dt><dd>+{format(reward.rawFame)}</dd></div><div><dt>课程与培养期间品牌加成</dt><dd>+{format(reward.baseFame - reward.rawFame)}</dd></div><div><dt>合作额外声望</dt><dd>+{format(reward.cooperationFame)}</dd></div></dl></section>
+      <section className="gm-stack"><h4>球员六维</h4><PlayerStats stats={player.stats}/></section>
+    </div>}
+    <div className="gm-sheet-footer"><p className="gm-muted">确认后离馆入档，收藏保留；空位可免费补招。</p><div className="gm-actions">{onClose && <button type="button" className="gm-button" onClick={onClose}>继续培养</button>}<button type="button" className="gm-button gm-primary" onClick={() => onAction({type: 'recommend', id: player.id})}>确认推荐 · +{reward.credits} 券</button></div></div>
+    {showRules && <ComicDialog title="推荐说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules">
+      <section className="gm-stack"><h3>发券规则</h3><RecommendationCreditRule state={state}/></section>
+      <section className="gm-stack"><h3>首次培养加奖</h3><table className="gm-training-bonus-table"><thead><tr><th scope="col">等级与模板</th><th scope="col">培养加奖</th></tr></thead><tbody>{trainingCreditMilestones.map(milestone => <tr key={milestone.level}><td>Lv.{milestone.level}＋{recommendationTierNames[milestone.tier]}及以上</td><td>+{milestone.credits} 券</td></tr>)}</tbody></table></section>
+      <section className="gm-stack"><h3>声望与离馆</h3><p>声望来自属性净成长、完整课程、培养期间的平均品牌加成及已完成合作。</p></section>
+      <button type="button" className="gm-button gm-primary" onClick={() => setShowRules(false)}>返回结算</button>
+    </div></ComicDialog>}
   </div>;
 }
 
@@ -468,15 +504,32 @@ function AlumnusDetail({player, onClose}: {player: GymAlumnus; onClose: () => vo
   </ComicDialog>;
 }
 
-export function GymAlumniPanel({state}: GymPanelProps) {
-  const [visible, setVisible] = useState(20);
+export function GymAlumniPanel({state, loadAlumni}: GymPanelProps) {
+  const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<GymAlumnus | null>(null);
-  const all = [...state.alumni].reverse();
-  const legends = all.filter(player => recommendation(player).tier === 5).length;
+  const [loaded, setLoaded] = useState<GymAlumnus[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [retry, setRetry] = useState(0);
+  const progress = alumniProgress(state);
+  const offset = page * 20;
+  useEffect(() => {setPage(0); setSelected(null);}, [state.createdAt, state.seed]);
+  useEffect(() => {
+    if (!loadAlumni) return;
+    let cancelled = false;
+    setLoading(true); setLoadError(''); setLoaded([]);
+    loadAlumni(offset, 20).then(result => {if (!cancelled) setLoaded(result.players);})
+      .catch(() => {if (!cancelled) setLoadError('校友档案暂时无法读取，原记录已保留，请重试。');})
+      .finally(() => {if (!cancelled) setLoading(false);});
+    return () => {cancelled = true;};
+  }, [loadAlumni, offset, progress.total, state.createdAt, state.seed, retry]);
+  const all = loadAlumni ? loaded : [...state.alumni].reverse().slice(offset, offset + 20);
   return <div className="gym-panel">
-    <dl className="gm-metrics"><div><dt>累计推荐</dt><dd>{format(all.length)} 人</dd></div><div><dt>传奇校友</dt><dd>{format(legends)} 人</dd></div></dl>
-    {all.length === 0 ? <div className="gm-empty"><GameIcon name="career"/><h3>第一份校友档案正在等你</h3><p className="gm-muted">推荐球员后，最终模板、六维、身价和推荐成果会留在这里。</p></div> : <div className="gm-alumni-list">{all.slice(0, visible).map(player => <button type="button" key={player.id} className="gm-alumnus" onClick={() => setSelected(player)}><span className="gm-alumnus-image"><StarPortrait src={templatePortrait(player.templateId)} name={player.name}/></span><div><strong>{templateById(player.templateId)?.name ?? player.name}</strong><span>{player.name} · Lv.{player.level} · {player.height} cm</span><span>推荐 +{player.rewardCredits} 券 · +{format(player.rewardFame)} 声望</span></div><b>{format(overallRating(player.stats))}</b></button>)}</div>}
-    {all.length > visible && <button type="button" className="gm-button" onClick={() => setVisible(count => count + 20)}>再看 {Math.min(20, all.length - visible)} 位校友</button>}
+    <dl className="gm-metrics"><div><dt>累计推荐</dt><dd>{format(progress.total)} 人</dd></div><div><dt>传奇校友</dt><dd>{format(progress.legendCount)} 人</dd></div></dl>
+    {progress.total === 0 ? <div className="gm-empty"><GameIcon name="career"/><h3>第一份校友档案正在等你</h3><p className="gm-muted">推荐球员后，最终模板、六维、身价和推荐成果会留在这里。</p></div> : <div className="gm-alumni-list">{all.map(player => <button type="button" key={player.id} className="gm-alumnus" onClick={() => setSelected(player)}><span className="gm-alumnus-image"><StarPortrait src={templatePortrait(player.templateId)} name={player.name}/></span><div><strong>{templateById(player.templateId)?.name ?? player.name}</strong><span>{player.name} · Lv.{player.level} · {player.height} cm</span><span>推荐 +{player.rewardCredits} 券 · +{format(player.rewardFame)} 声望</span></div><b>{format(overallRating(player.stats))}</b></button>)}</div>}
+    {loading && <p className="gm-muted" role="status">正在读取校友档案…</p>}
+    {loadError && <div className="gm-stack"><p className="gm-recommend-warning" role="alert">{loadError}</p><button type="button" className="gm-button" onClick={() => setRetry(value => value + 1)}>重新读取档案</button></div>}
+    {progress.total > 20 && !loadError && <nav className="gm-actions" aria-label="校友档案分页"><button type="button" className="gm-button" disabled={loading || page === 0} onClick={() => setPage(value => value - 1)}>上一页</button><span>第 {page + 1} / {Math.ceil(progress.total / 20)} 页</span><button type="button" className="gm-button" disabled={loading || offset + 20 >= progress.total} onClick={() => setPage(value => value + 1)}>下一页</button></nav>}
     {selected && <AlumnusDetail player={selected} onClose={() => setSelected(null)}/>}
   </div>;
 }

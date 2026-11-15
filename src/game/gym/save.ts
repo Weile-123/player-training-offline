@@ -3,11 +3,13 @@ import {statKeys} from '../types';
 import {templateRules} from '../contract/templates';
 import {equipmentCatalog, previousEquipmentCatalog, legacyEquipmentCatalog, equipmentCanonicalIds, equipmentCatalogVersion, projects, maximumRecommendationCredits} from './catalog';
 import {buildCooperationOffers} from './cooperation';
-import {legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymPlayer, type GymState} from './engine';
+import {legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymAlumnus, type GymPlayer, type GymState} from './engine';
 import {requiredExperience} from './progression';
 
 export type GymStorage = Pick<Storage, 'getItem' | 'setItem'>;
 export const gymSaveKeys = {main: 'gym-management-v1', backup: 'gym-management-v1.backup'};
+/** Writer and reader must agree before either recoverable copy is replaced. */
+export const gymSaveMaxCharacters = 20_000_000;
 const templateIds = new Set(templateRules.map(template => template.id));
 const equipmentIds = new Set(equipmentCatalog.map(equipment => equipment.id));
 const equipmentById = new Map(equipmentCatalog.map(equipment => [equipment.id, equipment]));
@@ -89,6 +91,15 @@ function idList(value: unknown, allowed: ReadonlySet<string>): value is string[]
     && value.every(id => typeof id === 'string' && allowed.has(id));
 }
 
+/** Historical records are checked only when their requested page is read. */
+export function validGymAlumnus(value: unknown, state: Pick<GymState, 'updatedAt' | 'gymLevel'>): value is GymAlumnus {
+  if (!record(value)) return false;
+  const fields: Record<string, unknown> = value;
+  return player(value, state.updatedAt, state.gymLevel, false, 3, true, false)
+    && integer(fields.recommendedAt, value.enteredAt, state.updatedAt)
+    && integer(fields.rewardCredits, 0, maximumRecommendationCredits) && integer(fields.rewardFame) && money(fields.finalValue);
+}
+
 /** Exact aggregate of the old installation, retained for its pending absence. */
 function legacyEffects(state: GymState): EquipmentBonuses {
   const effects: EquipmentBonuses = {stamina: 0, recovery: 0, valuePercent: 0,
@@ -120,6 +131,19 @@ function validPendingEffects(value: unknown, gymLevel: number): boolean {
 }
 
 function validGymShape(value: unknown, legacy = false): value is GymState {
+  if (record(value) && has(value, 'recommendationRulesVersion') && value.recommendationRulesVersion !== 11) return false;
+  if (record(value) && value.recommendationRulesVersion === 11 && !idList(value.postgameRecommendedTemplates, templateIds)) return false;
+  if (record(value) && has(value, 'postgameRecommendedTemplates') && !idList(value.postgameRecommendedTemplates, templateIds)) return false;
+  if (record(value) && has(value, 'collectionGoalId') && value.collectionGoalId !== null
+    && (typeof value.collectionGoalId !== 'string' || !templateIds.has(value.collectionGoalId))) return false;
+  if (record(value) && has(value, 'alumniArchive')) {
+    const archive = value.alumniArchive;
+    if (!record(archive) || !text(archive.id) || !/^[a-zA-Z0-9_-]+$/.test(archive.id)
+      || !integer(archive.count, 1) || !integer(archive.effectiveCount, 0, archive.count)
+      || !integer(archive.legendCount, 0, archive.effectiveCount) || !integer(archive.bestTier, 0, 5)
+      || (archive.effectiveCount === 0 ? archive.bestTier !== 0 : archive.bestTier < 1)
+      || ((archive.legendCount > 0) !== (archive.bestTier === 5))) return false;
+  }
   if (record(value) && has(value, 'offlineRulesVersion') && value.offlineRulesVersion !== 1 && value.offlineRulesVersion !== 2) return false;
   if (record(value) && (legacy ? has(value, 'equipmentCatalogVersion') && ![1, 2, 3].includes(value.equipmentCatalogVersion as number)
     : value.equipmentCatalogVersion !== equipmentCatalogVersion)) return false;
@@ -298,12 +322,14 @@ function restoreGym(value: unknown): GymState | null {
 export function encodeGym(state: GymState): string {
   if (!validGym(state)) throw new Error('invalid-gym-state');
   const payload = JSON.stringify(state);
-  return JSON.stringify({format: 'gym-management-envelope-v1', checksum: hash(payload), payload});
+  const encoded = JSON.stringify({format: 'gym-management-envelope-v1', checksum: hash(payload), payload});
+  if (encoded.length > gymSaveMaxCharacters) throw new Error('gym-save-too-large');
+  return encoded;
 }
 
 export function decodeGym(raw: string | null): GymState | null {
   try {
-    if (!raw || raw.length > 20_000_000) return null;
+    if (!raw || raw.length > gymSaveMaxCharacters) return null;
     const envelope = JSON.parse(raw);
     if (envelope?.format !== 'gym-management-envelope-v1' || typeof envelope.payload !== 'string' || hash(envelope.payload) !== envelope.checksum) return null;
     const state: unknown = JSON.parse(envelope.payload);
