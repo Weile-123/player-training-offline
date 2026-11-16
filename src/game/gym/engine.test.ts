@@ -296,7 +296,7 @@ describe('recommendation, enrollment and gym progression', () => {
       gym = act(gym, {type: 'recruit'});
     }
     expect(gym).toMatchObject({credits: 0, fame: 0, gymLevel: 1, nextPlayer: 52});
-    expect(gym.alumni).toHaveLength(50);
+    expect(gym.alumni).toHaveLength(0);
     expect(gymUpgrade({...gym, fame: 60}).requirements.find(requirement => requirement.label === '有效推荐')).toMatchObject({current: 0, required: 2, met: false});
   });
 
@@ -744,7 +744,7 @@ describe('multiple training positions and online automatic training', () => {
     const recommended = act(gym, {type: 'recommend', id: selectedId});
     expect(recommended.player!.id).toBe(nextId);
     expect(activePlayers(recommended)).toHaveLength(7);
-    expect(recommended.alumni.map(player => player.id)).toEqual([selectedId]);
+    expect(recommended.alumni).toHaveLength(0);
   });
 
   it('keeps manual cooldowns independent and switching selection cannot clear a player cooldown', () => {
@@ -879,6 +879,8 @@ describe('multiple training positions and online automatic training', () => {
     const secondId = gym.bench[0].id;
     gym = act(gym, {type: 'accept-cooperation', id: cooperationOffers(gym)[0].id, playerId: firstId});
     gym = act(withOutcome(gym, 'hold'), {type: 'train', id: firstId});
+    gym.player!.templateId = 'caruso';
+    gym.player!.highestTier = 'rotation';
     const first = copy(gym.player!);
     gym = act(gym, {type: 'select-player', id: secondId});
     expect(cooperationStatus(gym).offer).toBeNull();

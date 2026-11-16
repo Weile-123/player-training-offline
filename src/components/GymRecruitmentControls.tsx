@@ -5,6 +5,7 @@ import {selectedRecruitmentDirections, type SelectedRecruitmentDirection} from '
 import {activePlayers, type GymAction, type GymState, type HeightPreference} from '../game/gym/engine';
 import {ComicDialog} from './ComicDialog';
 import {GameIcon} from './GameIcon';
+import './GymRoster.css';
 
 type Props = {state: GymState; onAction: (action: GymAction) => void; busy?: boolean; emptyCourt?: boolean};
 type Pending = {preference: HeightPreference; direction: SelectedRecruitmentDirection; expectedNextPlayer: number};
@@ -56,7 +57,7 @@ export function GymRecruitmentControls({state, onAction, busy = false, emptyCour
       <p className="gm-muted">若最终推荐本馆已推荐过的模板，总回款仅 {postgameRepeatTemplateCredits} 券；本次精选仍收费 {selectedRecruitmentPrice} 券。</p>
       {state.credits < selectedRecruitmentPrice && <p className="gm-recommend-warning">赞助券还差 {selectedRecruitmentPrice - state.credits} 券，可继续免费培养积累。</p>}
     </> : <p className="gm-muted">新人免费入馆并带满体力，可正常训练、推荐和收集球星。</p>}
-    <button type="button" className="primary" disabled={busy || full || selectedMode && (!unlocked || state.credits < selectedRecruitmentPrice)} onClick={begin}><GameIcon name="people"/>{selectedMode ? `精选招募 · ${selectedRecruitmentPrice}券` : emptyCourt ? '免费招募下一位' : '免费招募新人'}</button>
+    <button type="button" className="primary gm-icon-button" disabled={busy || full || selectedMode && (!unlocked || state.credits < selectedRecruitmentPrice)} onClick={begin}><GameIcon name="people"/><span>{selectedMode ? `精选招募 · ${selectedRecruitmentPrice}券` : emptyCourt ? '免费招募下一位' : '免费招募新人'}</span></button>
     {pending && pendingDirection && <ComicDialog title="确认精选招生" className="gym-management-dialog" onClose={() => setPending(null)}>
       <div className="contract-panel gym-panel gm-stack">
         <h3>{pendingDirection.label} · 一名新人</h3>

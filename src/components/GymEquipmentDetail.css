@@ -1,0 +1,24 @@
+/* Compact gym archive; the original career archive keeps its own proportions. */
+.game-screen.comic-dialog-layer .comic-dialog.equipment-detail-dialog:has(.gym-equipment-detail) { width: min(460px, 100%); }
+.game-screen.comic-dialog-layer .equipment-detail-dialog .sheet-scroll:has(.gym-equipment-detail) { padding: 3px 12px 14px; }
+.equipment-detail-dialog .gym-equipment-detail { padding: 0 1px 3px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-display { aspect-ratio: 2.2; max-height: 185px; border-width: 4px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-display .product-image { width: 43%; height: 88%; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-rarity { top: 6px; right: 6px; padding: 2px 7px; border-width: 3px; font-size: 12px; }
+.game-screen .equipment-detail-dialog .gym-equipment-detail h3 { margin: 7px 5% 0; padding: 4px 8px; border-bottom-width: 3px; font-size: clamp(21px, 5.3vw, 28px); }
+.equipment-detail-dialog .gym-equipment-detail .equipment-name-rule { margin: 4px auto 7px; font-size: 8px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect { padding: 0 8px 10px; border-width: 3px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect h4 { width: 73%; margin: -3px auto 7px; padding: 3px 12px; font-size: clamp(17px, 4.2vw, 22px); }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect > div { gap: 8px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect svg { width: 18%; max-height: 62px; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect > div > div { padding-left: 8px; }
+.game-screen.comic-dialog-layer .equipment-detail-dialog .gym-equipment-detail .equipment-effect p { font-size: 14px; line-height: 1.65; }
+.equipment-detail-dialog .gym-equipment-detail .equipment-effect small { margin-top: 5px; font-size: 11px; line-height: 1.5; }
+.game-screen.comic-dialog-layer .equipment-detail-dialog .gym-equipment-detail > .album-back { min-height: 36px; margin-top: 12px; padding: 5px 10px; border-width: 3px; font-size: 16px; line-height: 1.3; }
+
+@media (max-width: 359px) {
+  .game-screen.comic-dialog-layer .equipment-detail-dialog .sheet-scroll:has(.gym-equipment-detail) { padding-inline: 9px; }
+  .equipment-detail-dialog .gym-equipment-detail .equipment-rarity { font-size: 10px; }
+  .game-screen.comic-dialog-layer .equipment-detail-dialog .gym-equipment-detail .equipment-effect p { font-size: 13px; }
+  .equipment-detail-dialog .gym-equipment-detail .equipment-effect small { font-size: 10px; }
+}

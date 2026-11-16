@@ -1,12 +1,13 @@
 import { Fragment, useId } from 'react';
 import { config, statLabels } from '../game/config';
 import { gameSaleValue, monthPreview, rating } from '../game/engine';
-import { tierConfig, styleSimilarity } from '../game/matching';
+import { styleSimilarity } from '../game/matching';
 import { positionLabels, templateById } from '../game/templates';
 import { statKeys, type Game, type Player } from '../game/types';
 import { usePlayerProfile } from '../platform/usePlayerProfile';
 import { StarPortrait } from './PlayerTemplatePanel';
 import { CreditHearts } from './CreditHearts';
+import { TierBadge } from './TierBadge';
 
 const money=(value:number)=>'$'+value.toLocaleString('en-US');
 
@@ -38,7 +39,7 @@ export function TemplateDossier({player,game}:{player:Player;game:Game}) {
   <div className="dossier-hero">
    <div className="dossier-portrait tier-portrait-frame" data-tier={template?.tier??'undiscovered'}><StarPortrait key={profile?.avatar??'unknown'} src={profile?.avatar??null} name={profile?.name??template?.name??'待发掘'}/></div>
    <div className="dossier-identity"><small>当前 NBA 球星模板</small><h2 style={{fontSize:`clamp(18px,${Math.min(8,64/(profile?.name??template?.name??'待发掘').length)}vw,34px)`}}>{profile?.name??template?.name??'待发掘'}</h2>
-    <div className="dossier-tags"><b>{template?tierConfig(template.tier).label:player.highPotential?'高潜力新秀':'潜力新秀'}</b>{template&&<b>{template.position}</b>}</div>
+    <div className="dossier-tags"><TierBadge tier={template?.tier}/>{template&&<b>{template.position}</b>}</div>
     <p>{template?`${positionLabels[template.position]} · ${template.style}`:'综合评分达到 45 后，匹配符合身高的球星风格。'}</p>
     <div className="dossier-match">{template?<>风格相似度 <strong>{(styleSimilarity(player.stats,template.stats)*100).toFixed(1)}%</strong><small>适配身高 {template.height[0]}–{template.height[1]} cm</small></>:<>等待模板匹配<small>{nextTier?`下一档：${nextTier.label} · 评分 ${nextTier.minimumRating}`:'继续训练发掘潜力'}</small></>}</div>
    </div>

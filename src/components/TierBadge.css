@@ -1,0 +1,13 @@
+.game-screen b.tier-badge[data-tier] {
+ display: inline-flex; align-items: center; justify-content: center; flex: none;
+ width: fit-content; min-width: 0; min-height: 0; margin: 0; padding: 2px 6px;
+ border: 1px solid var(--tier-edge, #858c8d); border-radius: 0; clip-path: none;
+ color: var(--tier-ink, #37444b); background: var(--tier-metal, linear-gradient(135deg,#a8aead,#e1e2dd 46%,#838e90));
+ box-shadow: inset 0 1px 0 #fff7, 0 1px 0 #13232e33; text-shadow: 0 1px 0 #ffffff30;
+ font-family: var(--font-body, 'Microsoft YaHei', sans-serif); font-size: var(--tier-badge-size, 12px);
+ font-style: normal; font-weight: 950; line-height: 1.1; letter-spacing: 0; white-space: nowrap; vertical-align: middle;
+}
+.game-screen b.tier-badge[data-tier='rotation'] { color: #29190e; border-color: #875431; background: linear-gradient(120deg,#c99865,#f0c993 48%,#cf9f6c); text-shadow: none; }
+.game-screen b.tier-badge[data-tier='superstar'] { color: #fff1dc; background: linear-gradient(120deg,#a12a24,#d34c34,#a12a24); text-shadow: 0 1px 1px #5f1717; }
+.game-screen b.tier-badge[data-tier='legend'] { color: #182b34; background: linear-gradient(115deg,#ffc58a,#bce6bb,#abd4ef,#d0b4ec,#f1b1c6); }
+.template-identity-meta > .tier-badge { --tier-badge-size: inherit; }

@@ -58,8 +58,9 @@ export function GymCooperationPanel({state, onAction, busy = false}: GymPanelPro
     </section>}
     {status.offer && <button type="button" className="gm-info-button gm-cooperation-abandon" disabled={busy} onClick={() => setPending({offer: null, playerId: player.id})}>放弃当前合作</button>}
     {showRules && <ComicDialog title="合作说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-cooperation-rules">
-      <section className="gm-stack"><h3>接取与结算</h3><p>每名球员任选一份合作，接取后累计新的训练和课程；所有条件达标后，推荐签约时领取奖励。</p><p className="gm-muted">合作没有期限，未完成也可正常推荐，不扣券或声望。</p></section>
+      <section className="gm-stack"><h3>接取与结算</h3><p>每名球员任选一份合作，接取后累计新的训练和课程；所有条件达标后，按推荐时的最终模板结算，推荐签约时领取奖励。</p><p className="gm-muted">合作没有期限，未完成也可正常推荐，不扣券或声望。更换或放弃合作会清空当前合作进度、未领取奖励和器材资格。</p></section>
       <section className="gm-stack"><h3>正常首次推荐的合作加奖</h3><table className="gm-cooperation-bonus-table"><thead><tr><th scope="col">合作</th><th scope="col">赞助券</th><th scope="col">声望</th></tr></thead><tbody>{offers.map(offer => <tr key={offer.id}><td>{offer.name}</td><td>+{offer.credits}</td><td>+{offer.fame}</td></tr>)}</tbody></table></section>
+      <section className="gm-stack"><h3>器材加奖</h3><p>接取合作后启用合作器材，完成2个完整课程，每课10球都须启用对应器材。取得的资格不会因换下器材消失，合作达标后推荐领取。</p><p className="gm-muted">重复模板推荐合计{postgameRepeatTemplateCredits}券，合作与器材券不另加，声望照常。</p></section>
       <button type="button" className="gm-button gm-primary" onClick={() => setShowRules(false)}>返回合作</button>
     </div></ComicDialog>}
     {pending && <ComicDialog title={pending.offer ? '更换赞助合作' : '放弃赞助合作'} onClose={() => setPending(null)}><div className="gym-panel">

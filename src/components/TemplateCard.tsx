@@ -1,8 +1,9 @@
 import { config, statLabels } from '../game/config';
-import { overallRating, styleSimilarity, tierConfig } from '../game/matching';
+import { overallRating, styleSimilarity } from '../game/matching';
 import { positionLabels, templateById } from '../game/templates';
 import { statKeys, type Player } from '../game/types';
 import { usePlayerProfile } from '../platform/usePlayerProfile';
+import { TierBadge } from './TierBadge';
 
 export function TemplateCard({ player, evolving=false }: { player: Player; evolving?:boolean }) {
   const template = templateById(player.templateId);
@@ -10,7 +11,7 @@ export function TemplateCard({ player, evolving=false }: { player: Player; evolv
   const rating = overallRating(player.stats);
   const nextTier = config.matching.tiers.find(tier => tier.minimumRating > rating);
   return <section className={`template-card ${template?.tier ?? 'undiscovered'} ${evolving?'template-evolving':''}`} aria-label="NBA 模板匹配">
-    <div className="template-caption"><span>NBA 球星模板</span><b>{template ? tierConfig(template.tier).label : '待发掘'}</b></div>
+    <div className="template-caption"><span>NBA 球星模板</span><TierBadge tier={template?.tier}/></div>
     {template ? <>
       <h3>{profile?.name??template.name}</h3>
       <p className="template-meta">{template.position} · {positionLabels[template.position]} · {template.style}</p>

@@ -3,11 +3,25 @@
 }
 
 .training-layout.contract-game.gym-game .game-viewport {
- --dock-height: calc(var(--items-height) + 10px + var(--action-height) + var(--shoot-timer-space));
+ --dock-height: calc(10px + var(--action-height) + var(--shoot-timer-space));
 }
 
 .gym-game .contract-clean-dock {
  padding-bottom: var(--shoot-timer-space);
+}
+
+.gym-game .dock-shop .gym-shop-new-dot {
+ position: absolute;
+ z-index: 2;
+ top: 3px;
+ right: 5px;
+ width: clamp(9px, 8cqw, 14px);
+ aspect-ratio: 1;
+ border: 2px solid #f5e4bf;
+ border-radius: 50%;
+ background: #d32c24;
+ box-shadow: 1px 1px 0 #631b1b;
+ pointer-events: none;
 }
 
 .gym-game .gym-home-control {
@@ -26,55 +40,6 @@
  height: 6cqw;
 }
 
-.gym-experience-inner {display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;width:100%;min-width:0;padding:2px 8px;background:linear-gradient(#193d4c,#0d2330);border:1px solid #08151e;border-radius:3px;color:#fff0c8;}
-.gym-experience-label,.gym-experience-readout {display:grid;gap:1px;flex:none;line-height:1.1;white-space:nowrap;}
-.gym-experience-label>b {color:#f9d476;font-size:clamp(11px,3cqw,18px);font-weight:950;}
-.gym-experience-label>small {font-size:clamp(8px,1.9cqw,12px);font-weight:850;}
-.gym-experience-track {height:12px;min-width:0;border:1px solid #c9a960;background:#081821;box-shadow:inset 0 2px 3px #0008;overflow:hidden;}
-.gym-experience-track>i {display:block;height:100%;background:repeating-linear-gradient(90deg,transparent 0 10px,#08212c44 10px 12px),linear-gradient(#fff1aa,#e6ad35 60%,#b67a1c);transition:width 180ms ease-out;}
-.gym-experience-readout {text-align:right;}
-.gym-experience-readout>b {font-size:clamp(11px,2.8cqw,18px);font-weight:950;font-variant-numeric:tabular-nums;}
-.gym-experience-readout>small {font-size:clamp(8px,1.9cqw,11px);color:#efce88;}
-.reduce-motion .gym-experience-track>i {transition:none;}
-@media(prefers-reduced-motion:reduce){.gym-experience-track>i{transition:none}}
-
-.game-stage .stage-navigation .gym-training-tools {
- right: auto;
- left: 2%;
- display: flex;
- flex-direction: column;
- gap: 6px;
-}
-
-.gym-training-tools .stage-collection-button[data-ready="true"] {
- color: #ffdd7b;
- border-color: #f6c856;
-}
-
-.gym-empty-court {
- position: absolute;
- z-index: 6;
- inset: 0;
- display: grid;
- place-items: center;
- padding: 18px;
- background: #081f2c9e;
-}
-
-.gym-empty-court > div {
- max-width: 350px;
- padding: 18px;
- border: 3px double #e3b568;
- background: #f6e6c4;
- color: #143044;
- text-align: center;
- box-shadow: 5px 5px 0 #0a1b28;
-}
-
-.gym-empty-court h2 {font-size: 20px; margin: 0 0 8px;}
-.gym-empty-court p {font-size: 12px;}
-.gym-empty-court select {width: 100%; margin: 0 0 10px; padding: 7px;}
-.gym-empty-court .primary {width: 100%;}
 .gym-action-pending {pointer-events: none; opacity: .8;}
 .gym-muted {color: #655c48; font-size: 12px;}
 .gym-settings label {display: flex; justify-content: space-between; align-items: center; margin: 15px 0;}

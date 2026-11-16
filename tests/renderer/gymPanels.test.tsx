@@ -3,12 +3,13 @@ import {createRoot, type Root} from 'react-dom/client';
 import {useState, type ComponentType} from 'react';
 import {act} from 'preact/test-utils';
 import {cooperationOffers, newGym, dispatchGym, staminaMax, type GymAction, type GymState} from '../../src/game/gym/engine';
-import {equipmentCatalog, equipmentFamilyLabels, type EquipmentEffects} from '../../src/game/gym/catalog';
+import {equipmentCatalog, type EquipmentEffects} from '../../src/game/gym/catalog';
 import {templateRules} from '../../src/game/contract/templates';
 import {ComicDialog} from '../../src/components/ComicDialog';
 import {productImagePath} from '../../src/components/ProductImage';
-import {GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymShopPanel, TrainingAdvice, type GymPanelProps} from '../../src/components/GymPanels';
+import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, TrainingAdvice, type GymPanelProps} from '../../src/components/GymPanels';
 import {offlineLimitMs, type OfflineTrainingReport} from '../../src/game/gym/offline';
+import {equipmentSummary} from '../../src/presentation/equipmentSummary';
 
 const at = 1_800_000_000_000;
 let root: Root | null = null;
@@ -40,7 +41,7 @@ async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState, bus
 }
 
 function buttonWithin(scope: ParentNode, text: string) {
-  const button = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.includes(text));
+  const button = [...scope.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent?.includes(text) || item.getAttribute('aria-label')?.includes(text));
   expect(button, text).toBeTruthy();
   return button!;
 }
@@ -63,6 +64,57 @@ function equipmentFor(effect: keyof EquipmentEffects, grade = 1) {
 
 function TrainingAdvicePanel({state}: GymPanelProps) {return <TrainingAdvice state={state}/>;}
 
+it.each([12, 99])('uses stamina and experience meters without compact bonus advice in roster at level %s', async level => {
+  Object.defineProperty(document, 'fonts', {configurable: true, value: {ready: Promise.resolve()}});
+  const state = newGym(at, 19);
+  state.player!.level = state.player!.peakLevel = level;
+  state.player!.stamina = 7;
+  state.player!.experience = level === 99 ? 0 : 10;
+  await mount(GymRosterPanel, state);
+  const row = document.querySelector('.roster-card')!;
+  const stamina = row.querySelector('[role="progressbar"][aria-label$="体力"]')!;
+  const experience = row.querySelector('[role="progressbar"][aria-label$="训练经验"]')!;
+  expect(stamina.getAttribute('aria-valuenow')).toBe('7');
+  expect(stamina.getAttribute('aria-valuemax')).toBe('20');
+  expect(experience.getAttribute('aria-valuenow')).toBe(level === 99 ? '1' : '10');
+  expect(Number(experience.getAttribute('aria-valuemax'))).toBeGreaterThan(0);
+  expect(parseFloat(experience.querySelector<HTMLElement>('i')!.style.width)).toBeCloseTo(level === 99 ? 100 : 10 / Number(experience.getAttribute('aria-valuemax')) * 100);
+  expect(row.textContent).not.toContain('手动 1秒/球');
+  expect(row.querySelector('.gm-training-advice')).toBeNull();
+  expect(actions).toEqual([]);
+});
+
+it('keeps only portraits and names in the alumni grid and opens complete records without generated rookie names', async () => {
+  const state = newGym(at, 20);
+  const template = templateRules.find(item => item.tier === 'starter')!;
+  const record = {...state.player!, name: '新秀 3', templateId: template.id, recommendedAt: at, rewardCredits: 2, rewardFame: 30, finalValue: '320'};
+  state.alumni = [record, {...record, id: 'history-unmatched', name: '历史新秀', templateId: null}];
+  await mount(GymAlumniPanel, state);
+  const cards = [...document.querySelectorAll<HTMLElement>('.gm-alumnus')];
+  const matched = cards.find(card => card.dataset.tier === 'starter')!;
+  expect(matched.querySelector('strong')?.textContent).toBe(template.name);
+  expect(matched.textContent).toBe(template.name);
+  expect(matched.textContent).not.toContain('新秀 3');
+  expect(matched.querySelector('.tier-portrait-frame')?.getAttribute('data-tier')).toBe('starter');
+  expect(matched.querySelector('.tier-portrait-frame > .gm-alumni-portrait-surface.album-portrait-surface')).toBeTruthy();
+  const historical = cards.find(card => card.dataset.tier === 'undiscovered')!;
+  expect(historical.textContent).toBe('历史新秀');
+  expect(document.querySelector('.gm-alumni-list')?.textContent).not.toMatch(/Lv\.|cm|推荐 \+|声望/);
+  await press(matched as HTMLButtonElement);
+  const detail = document.querySelector('.gm-detail-dialog')!;
+  expect(detail.querySelector('.gm-player-identity h3')?.textContent).toBe(template.name);
+  expect(detail.textContent).toContain('首发 · Lv.');
+  expect(detail.textContent).not.toContain('新秀 3');
+  expect(detail.querySelector('.gm-alumnus-heading .tier-portrait-frame > .gm-alumni-portrait-surface.album-portrait-surface')).toBeTruthy();
+  expect(detail.querySelectorAll('.gm-stat-grid > div')).toHaveLength(6);
+  expect(detail.textContent).toContain('赞助券 +2 · 球馆声望 +30');
+  await press(buttonWithin(detail, '返回校友簿'));
+  await press(historical as HTMLButtonElement);
+  expect(document.querySelector('.gm-detail-dialog .gm-player-identity h3')?.textContent).toBe('历史新秀');
+  expect(document.querySelector('.gm-detail-dialog .gm-eyebrow')?.textContent).toContain('待发掘');
+  expect(actions).toEqual([]);
+});
+
 function own(state: GymState, installed: string[], warehouse: string[] = []) {
   state.ownedEquipment = [...installed, ...warehouse];
   state.equippedEquipment = [...installed];
@@ -71,34 +123,30 @@ function own(state: GymState, installed: string[], warehouse: string[] = []) {
 }
 
 async function chooseReplacement(id: string) {
-  await act(async () => {
-    const select = document.querySelector<HTMLSelectElement>('[aria-label="选择替换的器材"]')!;
-    select.value = id;
-    select.dispatchEvent(new Event('change', {bubbles: true}));
-  });
+  await press(document.querySelector<HTMLButtonElement>(`.gm-replacement-option[data-equipment-id="${id}"]`)!);
 }
 
-async function filterShop(label: string, value: string) {
-  await act(async () => {
-    const field = [...document.querySelectorAll('.gm-filters > label')].find(item => item.firstChild?.textContent === label)!;
-    const select = field.querySelector('select')!;
-    select.value = value;
-    select.dispatchEvent(new Event('change', {bubbles: true}));
-  });
+async function inventoryManage(name: string, action: string) {
+  if (!document.querySelector('.equipment-detail')) await press(buttonWithin(product(name), '器材详情'));
+  await press(buttonWithin(document.querySelector('.equipment-detail')!, action));
+}
+
+async function chooseInventorySlot(id: string) {
+  await press(document.querySelector<HTMLButtonElement>(`.gm-slot[data-equipment-id="${id}"]`)!);
 }
 
 it('unloads a sole active capacity item with a cancellable preview, then reinstalls and sells from the warehouse', async () => {
   const state = newGym(at, 11), item = equipmentFor('stamina');
   own(state, [item.id]); state.player!.stamina = 24;
   await mount(GymInventoryPanel, state);
-  await press(buttonWithin(product(item.name), '移入仓库'));
+  await inventoryManage(item.name, '移入仓库');
   expect(document.body.textContent).toContain('移出球馆后体力上限 24 → 20，当前体力 24 → 20');
   expect(document.body.textContent).toContain('再次放入不会补回体力');
   expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeTruthy();
   await press(buttonWithin(document, '保留馆内器材'));
   expect(actions).toEqual([]);
   expect(latest.player!.stamina).toBe(24);
-  await press(buttonWithin(product(item.name), '移入仓库'));
+  await inventoryManage(item.name, '移入仓库');
   const confirm = buttonWithin(document, '确认移入仓库');
   await act(async () => {confirm.click(); confirm.click();});
   expect(actions).toEqual([{type: 'unequip', id: item.id}]);
@@ -106,12 +154,12 @@ it('unloads a sole active capacity item with a cancellable preview, then reinsta
   expect(latest.ownedEquipment).toEqual([item.id]);
   expect(latest.player!.stamina).toBe(20);
   expect(latest.credits).toBe(0);
-  await press(buttonWithin(product(item.name), '放入球馆'));
+  await press(buttonWithin(product(item.name), '装备'));
   expect(latest.equippedEquipment).toEqual([item.id]);
   expect(latest.player!.stamina).toBe(20);
-  await press(buttonWithin(product(item.name), '移入仓库'));
+  await inventoryManage(item.name, '移入仓库');
   await press(buttonWithin(document, '确认移入仓库'));
-  await press(buttonWithin(product(item.name), '半价出售'));
+  await inventoryManage(item.name, '半价出售');
   await press(buttonWithin(document, '确认出售'));
   expect(latest.credits).toBe(1);
   expect(latest.ownedEquipment).toEqual([]);
@@ -122,53 +170,65 @@ it('unloads a sole active capacity item with a cancellable preview, then reinsta
 it('keeps unload controls disabled while an inventory operation is busy', async () => {
   const state = newGym(at, 11), item = equipmentFor('stamina'); own(state, [item.id]);
   await mount(GymInventoryPanel, state, true);
-  const unload = buttonWithin(product(item.name), '移入仓库');
+  await press(buttonWithin(product(item.name), '器材详情'));
+  const unload = buttonWithin(document.querySelector('.equipment-detail')!, '移入仓库');
   expect(unload.disabled).toBe(true);
   await press(unload);
   expect(actions).toEqual([]);
   expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
 });
 
-it('calculates optional training comparisons only after opening the equipment detail', async () => {
+it('keeps equipment archives focused on the original art and effect without previews, conditions or ownership status', async () => {
   const state = newGym(at, 11); state.credits = 20;
   const item = equipmentFor('experience');
   await mount(GymShopPanel, state);
   expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
   await press(buttonWithin(product(item.name), '器材详情'));
-  const comparison = document.querySelector('[aria-label="器材培养耗时对比"]')!;
-  expect(comparison.querySelectorAll('[data-forecast-level]')).toHaveLength(2);
-  expect(comparison.textContent).toContain('到 Lv.25');
-  expect(comparison.textContent).toContain('到 Lv.99');
-  expect(comparison.textContent).toContain('不保证模板');
-  expect(comparison.textContent).toContain('沿用现有体力');
+  const archive = document.querySelector('.equipment-detail')!;
+  expect(archive.querySelector('.equipment-display img')?.getAttribute('src')).toBe(productImagePath(item.artId));
+  expect(archive.querySelector('h3')?.textContent).toBe(item.name);
+  expect(archive.querySelector('.equipment-effect')?.textContent).toContain(item.description);
+  expect(archive.querySelector('.gm-equipment-extra')).toBeNull();
+  expect(archive.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  expect(archive.querySelector('.equipment-collected')).toBeNull();
+  expect(archive.textContent).not.toMatch(/入馆后|取得条件|已可购|尚未获得|当前未持有|售价/);
+  await press(buttonWithin(archive, '返回'));
+  expect(document.querySelector('.equipment-detail')).toBeNull();
+  expect(latest).toEqual(state);
   expect(actions).toEqual([]);
 });
 
-it.each([25, 99])('does not quote a finished training target in level-%s equipment details', async level => {
+it.each([25, 99])('shows actual effect changes without training-time predictions in level-%s replacements', async level => {
   const state = newGym(at, 11); state.player!.level = state.player!.peakLevel = level;
-  const item = equipmentFor('experience');
+  state.gymLevel = 3; state.credits = 20;
+  const basic = equipmentFor('experience'), item = equipmentFor('experience', 2);
+  own(state, [basic.id]);
   await mount(GymShopPanel, state);
-  await press(buttonWithin(product(item.name), '器材详情'));
-  const comparison = document.querySelector('[aria-label="器材培养耗时对比"]')!;
-  expect(comparison.querySelector('[data-forecast-level="25"]')).toBeNull();
-  expect(comparison.querySelector('[data-forecast-level="99"]') !== null).toBe(level < 99);
-  if (level === 99) expect(comparison.textContent).toContain('当前球员已满级，训练已结束');
-  expect(actions).toEqual([]);
+  await press(buttonWithin(product(item.name), '购买'));
+  expect(document.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  expect(document.querySelector('select[aria-label="选择替换的器材"]')).toBeNull();
+  const change = document.querySelector('[data-change-id="experience"]')!;
+  expect(change.classList.contains('is-up')).toBe(true);
+  expect(change.querySelector('b')?.textContent).toBe('1→2');
+  expect(document.querySelectorAll('.gm-replacement-changes li')).toHaveLength(1);
+  expect(actions).toEqual([{type: 'buy-equipment', id: item.id, destination: 'warehouse'}]);
 });
 
 it('opens project time comparisons on demand and retains the real charged upgrade flow', async () => {
   const state = newGym(at, 11); state.credits = 10;
   state.player!.stamina = 0; state.player!.recoveryMs = 9_500;
   await mount(GymClubPanel, state);
+  await press(buttonWithin(document, '经营项目'));
   const card = [...document.querySelectorAll<HTMLElement>('.gm-project')].find(item => item.querySelector('h4')?.textContent === '恢复护理')!;
   expect(document.querySelector('[aria-label="项目培养耗时对比"]')).toBeNull();
-  await press(buttonWithin(card, '查看培养耗时对比'));
+  await press(buttonWithin(card, '查看恢复护理详情'));
   const comparison = document.querySelector('[aria-label="项目培养耗时对比"]')!;
   expect(comparison.querySelectorAll('[data-forecast-level]')).toHaveLength(2);
   expect(comparison.textContent).toContain('项目升一级后');
   expect(actions).toEqual([]);
   expect(latest.player!.stamina).toBe(0);
-  await press(buttonWithin(card, '升级 · 1 券'));
+  await press(buttonWithin(document, '返回经营项目'));
+  await press(buttonWithin(card, '升级'));
   expect(latest.projects.recovery).toBe(1);
   expect(latest.credits).toBe(9);
   expect(latest.player!.stamina).toBe(0);
@@ -185,9 +245,11 @@ it('buys a permanent item directly into the gym without refilling stamina or a s
   await mount(GymShopPanel, state);
   expect(document.querySelectorAll('.gm-product')).toHaveLength(35);
   for (const original of equipmentCatalog) {
-    const image = product(original.name).querySelector('img')!;
-    expect(image.getAttribute('src')).toBe(productImagePath(original.artId));
-    expect(image.getAttribute('alt')).toBe(`${original.name}商品图`);
+    const row = document.querySelector<HTMLElement>(`[data-equipment-id="${original.id}"]`)!;
+    const image = row.querySelector('img');
+    expect(image?.getAttribute('src')).toBe(productImagePath(original.artId));
+    expect(image?.getAttribute('alt')).toBe(`${original.name}商品图`);
+    expect(row.querySelector('h4')?.textContent).toBe(original.name);
   }
   expect(item.artId).not.toBe(item.id);
   await press(buttonWithin(product(item.name), '购买'));
@@ -199,7 +261,9 @@ it('buys a permanent item directly into the gym without refilling stamina or a s
   expect(actions).toEqual([{type: 'buy-equipment', id: item.id}]);
   expect(latest.ownedEquipment).not.toContain(item.artId);
   expect(latest.player!.stamina).toBe(15);
-  expect(product(item.name).textContent).toContain('馆内生效');
+  expect(product(item.name).querySelector('.gm-shop-purchased-stamp')?.textContent).toBe('已购买');
+  expect(buttonWithin(product(item.name), '购买').disabled).toBe(true);
+  expect([...document.querySelectorAll<HTMLElement>('.gm-shop-product')].at(-1)?.dataset.equipmentId).toBe(item.id);
   expect(product(item.name).textContent).not.toContain('启用器材');
   const rules = [...document.querySelectorAll('.gm-product-copy p')].map(item => item.textContent).join(' ');
   expect(rules).not.toMatch(/轻伤|重伤|交付|信用|经费|成功权重/);
@@ -217,20 +281,20 @@ it('uses paired original art in warehouse cards, active slots, details and colle
   expect(document.querySelector('.gm-slot img')!.getAttribute('src')).toBe(productImagePath(installed.artId));
   expect(productImagePath(installed.id)).not.toBe(productImagePath(installed.artId));
   await press(buttonWithin(product(warehouse.name), '器材详情'));
-  expect(document.querySelector('.gm-detail-art img')!.getAttribute('src')).toBe(productImagePath(warehouse.artId));
-  expect(document.querySelector('.gm-detail-art h3')!.textContent).toBe(warehouse.name);
+  expect(document.querySelector('.equipment-display img')!.getAttribute('src')).toBe(productImagePath(warehouse.artId));
+  expect(document.querySelector('.equipment-detail h3')!.textContent).toBe(warehouse.name);
   expect(actions).toEqual([]);
   await act(async () => root!.unmount()); root = null;
   await mount(GymCollectionPanel, state);
   await press(buttonWithin(document, '器材图鉴'));
   for (const item of [installed, warehouse]) {
-    const card = [...document.querySelectorAll<HTMLButtonElement>('.gm-album-card')].find(card => card.querySelector('strong')?.textContent === item.name)!;
+    const card = [...document.querySelectorAll<HTMLButtonElement>('.equipment-album-card')].find(card => card.querySelector('strong')?.textContent === item.name)!;
     expect(card.querySelector('img')!.getAttribute('src')).toBe(productImagePath(item.artId));
   }
-  const collected = [...document.querySelectorAll<HTMLButtonElement>('.gm-album-card')].find(card => card.querySelector('strong')?.textContent === installed.name)!;
+  const collected = [...document.querySelectorAll<HTMLButtonElement>('.equipment-album-card')].find(card => card.querySelector('strong')?.textContent === installed.name)!;
   await press(collected);
-  expect(document.querySelector('.gm-detail-art img')!.getAttribute('src')).toBe(productImagePath(installed.artId));
-  expect(document.querySelector('.gm-detail-art h3')!.textContent).toBe(installed.name);
+  expect(document.querySelector('.equipment-display img')!.getAttribute('src')).toBe(productImagePath(installed.artId));
+  expect(document.querySelector('.equipment-detail h3')!.textContent).toBe(installed.name);
   expect(latest.ownedEquipment).toEqual([installed.id, warehouse.id]);
   expect(Object.keys(latest.collectedEquipment)).toEqual([installed.id, warehouse.id]);
   expect(actions).toEqual([]);
@@ -242,14 +306,15 @@ it('replaces a full gym from the warehouse atomically and can cancel without mov
   const incoming = equipmentFor('experience');
   own(state, installed.map(item => item.id), [incoming.id]);
   await mount(GymInventoryPanel, state);
-  await press(buttonWithin(product(incoming.name), '替换馆内器材'));
-  expect(buttonWithin(document, '确认替换').disabled).toBe(true);
+  await press(buttonWithin(product(incoming.name), '装备'));
+  expect(document.querySelectorAll('.gm-slot.is-replaceable')).toHaveLength(4);
+  expect(document.querySelector('.gm-replacement-note')?.textContent).toContain('装备栏已满');
+  expect(document.querySelector('[aria-label="选择替换的器材"]')).toBeNull();
   await press(buttonWithin(document, '取消替换'));
   expect(actions).toEqual([]);
   expect(latest.equippedEquipment).toEqual(state.equippedEquipment);
-  await press(buttonWithin(product(incoming.name), '替换馆内器材'));
-  await chooseReplacement(installed[0].id);
-  await press(buttonWithin(document, '确认替换'));
+  await press(buttonWithin(product(incoming.name), '装备'));
+  await chooseInventorySlot(installed[0].id);
   expect(latest.equippedEquipment).toHaveLength(4);
   expect(latest.equippedEquipment).toContain(incoming.id);
   expect(latest.equippedEquipment).not.toContain(installed[0].id);
@@ -258,7 +323,44 @@ it('replaces a full gym from the warehouse atomically and can cancel without mov
   expect(actionError).toBeUndefined();
 });
 
-it('buys into a full gym only after selecting a replacement and refunds a warehouse sale once', async () => {
+it('uses the shared card in the warehouse, disables equipped items and clears replacement selection across tabs', async () => {
+  const state = newGym(at, 12);
+  const installed = ['stamina', 'recovery', 'courseRecovery', 'valuePercent'].map(effect => equipmentFor(effect as keyof EquipmentEffects));
+  const incoming = equipmentFor('experience');
+  own(state, installed.map(item => item.id), [incoming.id]);
+  await mount(GymInventoryPanel, state);
+  expect(document.querySelectorAll('.gm-inventory .gm-shop-product')).toHaveLength(5);
+  expect(product(incoming.name).querySelector('.gm-equipment-summary')?.textContent).toBe(equipmentSummary(incoming));
+  expect(buttonWithin(product(installed[0].name), '已装备').disabled).toBe(true);
+  await press(buttonWithin(product(incoming.name), '装备'));
+  expect(document.querySelector('.gm-slot-row.is-replacing')).toBeTruthy();
+  await press(buttonWithin(document, '消耗品'));
+  expect(document.querySelector('.gm-replacement-note')).toBeNull();
+  await press(buttonWithin(document, '器材仓库'));
+  expect(document.querySelector('.gm-slot-row.is-replacing')).toBeNull();
+  expect(actions).toEqual([]);
+  await press(buttonWithin(product(incoming.name), '装备'));
+  const slot = document.querySelector<HTMLButtonElement>(`.gm-slot[data-equipment-id="${installed[0].id}"]`)!;
+  await act(async () => {slot.click(); slot.click();});
+  expect(actions).toEqual([{type: 'equip', id: incoming.id, replaceId: installed[0].id}]);
+  expect(latest.equippedEquipment).toContain(incoming.id);
+  expect(latest.ownedEquipment).toContain(installed[0].id);
+});
+
+it('requires a same-family replacement even with free slots and never highlights unrelated equipment', async () => {
+  const state = newGym(at, 13), basic = equipmentFor('stamina'), advanced = equipmentFor('stamina', 2), other = equipmentFor('experience');
+  own(state, [basic.id, other.id], [advanced.id]);
+  await mount(GymInventoryPanel, state);
+  await press(buttonWithin(product(advanced.name), '装备'));
+  expect(document.querySelectorAll('.gm-slot.is-replaceable')).toHaveLength(1);
+  const otherSlot = document.querySelector<HTMLButtonElement>(`.gm-slot[data-equipment-id="${other.id}"]`)!;
+  expect(otherSlot.disabled).toBe(true);
+  await chooseInventorySlot(basic.id);
+  expect(latest.equippedEquipment).toEqual([other.id, advanced.id]);
+  expect(actionError).toBeUndefined();
+});
+
+it('pays into the warehouse before a full-gym replacement and refunds a later sale once', async () => {
   const state = newGym(at, 11);
   state.credits = 30;
   const installed = ['stamina', 'recovery', 'courseRecovery', 'valuePercent'].map(effect => equipmentFor(effect as keyof EquipmentEffects));
@@ -267,13 +369,12 @@ it('buys into a full gym only after selecting a replacement and refunds a wareho
   own(state, installed.map(item => item.id));
   await mount(GymShopPanel, state);
   await press(buttonWithin(product(incoming.name), '购买'));
-  expect(latest.credits).toBe(30);
-  expect(buttonWithin(document, '确认购买并替换').disabled).toBe(true);
-  await press(buttonWithin(document, '取消替换'));
-  expect(actions).toEqual([]);
-  await press(buttonWithin(product(incoming.name), '购买'));
+  expect(latest.credits).toBe(30 - incoming.price);
+  expect(latest.ownedEquipment).toContain(incoming.id);
+  expect(latest.equippedEquipment).not.toContain(incoming.id);
+  expect(buttonWithin(document, '确认替换').disabled).toBe(true);
   await chooseReplacement(outgoing.id);
-  await press(buttonWithin(document, '确认购买并替换'));
+  await press(buttonWithin(document, '确认替换'));
   expect(latest.equippedEquipment).toContain(incoming.id);
   expect(latest.equippedEquipment).not.toContain(outgoing.id);
   expect(latest.ownedEquipment).toContain(outgoing.id);
@@ -281,12 +382,12 @@ it('buys into a full gym only after selecting a replacement and refunds a wareho
   const credits = replaced.credits;
   act(() => root!.unmount()); root = null;
   await mount(GymInventoryPanel, replaced);
-  expect(product(outgoing.name).textContent).toContain('仓库器材');
-  await press(buttonWithin(product(outgoing.name), '半价出售'));
-  expect(document.body.textContent).toContain('图鉴保留');
+  expect(product(outgoing.name).textContent).toContain('装备');
+  await inventoryManage(outgoing.name, '半价出售');
+  expect(document.body.textContent).toContain('收藏保留');
   await press(buttonWithin(document, '保留器材'));
   expect(latest.credits).toBe(credits);
-  await press(buttonWithin(product(outgoing.name), '半价出售'));
+  await inventoryManage(outgoing.name, '半价出售');
   const confirm = buttonWithin(document, '确认出售');
   await act(async () => {confirm.click(); confirm.click();});
   expect(actions.filter(action => action.type === 'sell-equipment')).toHaveLength(1);
@@ -306,14 +407,47 @@ it('previews recovery lost when incoming brand-only equipment replaces a shootin
   await mount(GymShopPanel, state);
   await press(buttonWithin(product(brand.name), '购买'));
   await chooseReplacement(recovery.id);
-  const preview = document.querySelector('.gm-replace-label')!.parentElement!.textContent!;
-  expect(preview).toContain('恢复间隔 19 → 20 秒/点（恢复变慢）');
-  expect(preview).toContain('推荐按实际培养期间的平均品牌加成结算');
-  expect(preview).not.toContain('当前培养声望');
-  expect(latest.credits).toBe(30);
-  expect(actions).toEqual([]);
-  await press(buttonWithin(document, '取消替换'));
+  const changes = document.querySelector('.gm-replacement-changes')!;
+  expect(changes.querySelector('[data-change-id="recovery"] b')?.textContent).toBe('19 秒/点→20 秒/点');
+  expect(changes.querySelector('[data-change-id="recovery"]')?.classList.contains('is-up')).toBe(true);
+  expect(changes.querySelector('[data-change-id="brand"]')?.textContent).toContain('0%→10%');
+  expect(changes.querySelector('[data-change-id="stamina-cap"]')).toBeNull();
+  expect(changes.textContent).not.toContain('当前培养声望');
+  expect(latest.credits).toBe(30 - brand.price);
+  expect(actions).toEqual([{type: 'buy-equipment', id: brand.id, destination: 'warehouse'}]);
+  await press(buttonWithin(document, '放入仓库'));
   expect(latest.equippedEquipment).toContain(recovery.id);
+});
+
+it('keeps a full-gym purchase paid and stored when the replacement dialog is closed', async () => {
+  const state = newGym(at, 11); state.credits = 30;
+  const installed = ['stamina', 'recovery', 'courseRecovery', 'valuePercent'].map(effect => equipmentFor(effect as keyof EquipmentEffects));
+  const incoming = equipmentFor('experience'); own(state, installed.map(item => item.id));
+  await mount(GymShopPanel, state);
+  await press(buttonWithin(product(incoming.name), '购买'));
+  const dialog = document.querySelector('.gm-replacement-options')!.closest('[role="dialog"]')!;
+  await press(buttonWithin(dialog, '关闭面板'));
+  expect(document.querySelector('.gm-replacement-options')).toBeNull();
+  expect(latest.credits).toBe(30 - incoming.price);
+  expect(latest.ownedEquipment).toContain(incoming.id);
+  expect(latest.equippedEquipment).toEqual(installed.map(item => item.id));
+  expect(product(incoming.name).querySelector('.gm-shop-purchased-stamp')?.textContent).toBe('已购买');
+  expect(buttonWithin(product(incoming.name), '购买').disabled).toBe(true);
+  expect(actions).toEqual([{type: 'buy-equipment', id: incoming.id, destination: 'warehouse'}]);
+});
+
+it('does not show a successful replacement or block retries if a purchase is not committed', async () => {
+  const state = newGym(at, 11); state.credits = 30;
+  const installed = ['stamina', 'recovery', 'courseRecovery', 'valuePercent'].map(effect => equipmentFor(effect as keyof EquipmentEffects));
+  const incoming = equipmentFor('experience'); own(state, installed.map(item => item.id));
+  root = createRoot(document.getElementById('root')!);
+  await act(async () => root!.render(<GymShopPanel state={state} onAction={action => actions.push(action)}/>));
+  await press(buttonWithin(product(incoming.name), '购买'));
+  expect(document.querySelector('.gm-replacement-options')).toBeNull();
+  expect(state.credits).toBe(30);
+  expect(state.ownedEquipment).not.toContain(incoming.id);
+  await press(buttonWithin(product(incoming.name), '购买'));
+  expect(actions).toHaveLength(2);
 });
 
 it('confirms and previews a same-family upgrade even when the gym has empty slots', async () => {
@@ -325,20 +459,24 @@ it('confirms and previews a same-family upgrade even when the gym has empty slot
   const advanced = equipmentFor('stamina', 2);
   own(state, [basic.id]);
   await mount(GymShopPanel, state);
-  expect(product(advanced.name).textContent).toContain('体力上限 24 → 30');
   await press(buttonWithin(product(advanced.name), '购买'));
-  const select = document.querySelector<HTMLSelectElement>('[aria-label="选择替换的器材"]')!;
-  expect(select.value).toBe(basic.id);
-  expect([...select.options].map(option => option.value)).toEqual([basic.id]);
-  expect(document.querySelector('.gm-replace-label')!.parentElement!.textContent).toContain('同类只启用一件');
-  expect(buttonWithin(document, '确认购买并替换').disabled).toBe(false);
-  expect(actions).toEqual([]);
-  await press(buttonWithin(document, '取消替换'));
+  expect(document.querySelector('[data-change-id="stamina-cap"]')?.textContent).toBe('体力上限24 点→30 点');
+  const choices = [...document.querySelectorAll<HTMLButtonElement>('.gm-replacement-option')];
+  expect(choices.map(choice => choice.dataset.equipmentId)).toEqual([basic.id]);
+  expect(choices[0].getAttribute('aria-pressed')).toBe('true');
+  expect(choices[0].querySelector('img')?.getAttribute('src')).toBe(productImagePath(basic.artId));
+  expect(document.querySelector('.gm-replacement-options')!.parentElement!.textContent).toContain('同类只启用一件');
+  expect(buttonWithin(document, '确认替换').disabled).toBe(false);
+  expect(actions).toEqual([{type: 'buy-equipment', id: advanced.id, destination: 'warehouse'}]);
+  await press(buttonWithin(document, '放入仓库'));
   expect(latest.equippedEquipment).toEqual([basic.id]);
-  expect(latest.credits).toBe(30);
-  await press(buttonWithin(product(advanced.name), '购买'));
-  await press(buttonWithin(document, '确认购买并替换'));
-  expect(actions).toEqual([{type: 'buy-equipment', id: advanced.id, replaceId: basic.id}]);
+  expect(latest.credits).toBe(30 - advanced.price);
+  const stored = latest;
+  act(() => root!.unmount()); root = null;
+  await mount(GymInventoryPanel, stored);
+  await press(buttonWithin(product(advanced.name), '装备'));
+  await chooseInventorySlot(basic.id);
+  expect(actions).toEqual([{type: 'buy-equipment', id: advanced.id, destination: 'warehouse'}, {type: 'equip', id: advanced.id, replaceId: basic.id}]);
   expect(latest.equippedEquipment).toEqual([advanced.id]);
   expect(latest.ownedEquipment).toContain(basic.id);
   expect(latest.player!.stamina).toBe(15);
@@ -353,63 +491,189 @@ it('only allows the same family as a warehouse replacement when the gym is full'
   const other = ['recovery', 'courseRecovery', 'experience'].map(effect => equipmentFor(effect as keyof EquipmentEffects));
   own(state, [basic, ...other].map(item => item.id), [advanced.id]);
   await mount(GymInventoryPanel, state);
-  await press(buttonWithin(product(advanced.name), '替换馆内器材'));
-  const select = document.querySelector<HTMLSelectElement>('[aria-label="选择替换的器材"]')!;
-  expect(select.value).toBe(basic.id);
-  expect([...select.options].map(option => option.value)).toEqual([basic.id]);
-  await press(buttonWithin(document, '确认替换'));
+  await press(buttonWithin(product(advanced.name), '装备'));
+  expect([...document.querySelectorAll<HTMLElement>('.gm-slot.is-replaceable')].map(slot => slot.dataset.equipmentId)).toEqual([basic.id]);
+  expect(document.querySelector('.gm-replacement-note')?.textContent).toContain('同类仅启用一件');
+  const unavailable = document.querySelector<HTMLButtonElement>(`.gm-slot[data-equipment-id="${other[0].id}"]`)!;
+  expect(unavailable.disabled).toBe(true);
+  await press(unavailable);
+  expect(actions).toEqual([]);
+  await chooseInventorySlot(basic.id);
   expect(latest.equippedEquipment).toEqual([...other.map(item => item.id), advanced.id]);
   expect(latest.ownedEquipment).toContain(basic.id);
   expect(actions).toEqual([{type: 'equip', id: advanced.id, replaceId: basic.id}]);
   expect(actionError).toBeUndefined();
 });
 
-it('filters and previews general experience, automatic experience and offline duration independently', async () => {
+it('removes filters, shows concise real effects on every card and keeps full descriptions in details', async () => {
   const state = newGym(at, 11);
-  state.gymLevel = 6;
+  state.gymLevel = 8;
+  state.collection = Object.fromEntries(templateRules.slice(0, 8).map(template => [template.id, {firstAt: at, highestRating: 40, highestValue: '320'}]));
   await mount(GymShopPanel, state);
-  await filterShop('效果', 'experience');
-  expect(document.querySelectorAll('.gm-product')).toHaveLength(3);
-  expect(product(equipmentFor('experience', 3).name).textContent).toContain('每球器材经验 +0 → +3');
-  expect(document.body.textContent).toContain('手动、在线自动与离线均生效');
-  await filterShop('效果', 'automationExperience');
-  expect(document.querySelectorAll('.gm-product')).toHaveLength(3);
-  expect(product(equipmentFor('automationExperience', 3).name).textContent).toContain('自动每球额外经验 +0 → +3');
-  expect(document.body.textContent).toContain('在线自动与离线加成相同');
-  await filterShop('效果', 'offlineMinutes');
-  expect(document.querySelectorAll('.gm-product')).toHaveLength(3);
-  expect(product(equipmentFor('offlineMinutes', 3).name).textContent).toContain('每次离线训练上限 30分钟 → 1小时30分钟');
+  const shelf = document.querySelector<HTMLElement>('.gm-shop-grid')!;
+  expect(shelf.getAttribute('role')).toBe('region');
+  expect(shelf.getAttribute('aria-label')).toBe('器材货架');
+  expect(shelf.tabIndex).toBe(0);
+  expect(document.querySelector('.gm-shop-filters')).toBeNull();
+  expect(document.querySelectorAll('.gm-shop-product')).toHaveLength(35);
+  for (const item of equipmentCatalog) {
+    const summary = product(item.name).querySelector('.gm-equipment-summary')!;
+    expect(summary.textContent).toBe(equipmentSummary(item));
+    expect(summary.getAttribute('title')).toBe(item.description);
+    expect(summary.textContent!.length).toBeLessThan(18);
+  }
+  for (const [effect, preview] of [
+    ['experience', '每球器材经验 +0 → +3'],
+    ['automationExperience', '自动每球额外经验 +0 → +3'],
+    ['offlineMinutes', '每次离线训练上限 30分钟 → 1小时30分钟'],
+  ] as const) {
+    const item = equipmentFor(effect, 3);
+    const row = product(item.name);
+    expect(row.querySelectorAll('p')).toHaveLength(0);
+    expect(row.querySelectorAll('button')).toHaveLength(2);
+    expect(row.textContent).not.toContain(preview);
+    await press(buttonWithin(row, '器材详情'));
+    expect(document.querySelector('.equipment-effect')?.textContent).toContain(item.description);
+    expect(document.querySelector('.equipment-detail')?.textContent).not.toContain(preview);
+    await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  }
   expect(actions).toEqual([]);
 });
 
-it('filters a complete specialty family and shows its grade in the existing card and detail styles', async () => {
-  await mount(GymShopPanel, newGym(at, 11));
-  await filterShop('类别', 'focus-defense');
+it('shows a complete specialty family with grade metadata and concise focus effects', async () => {
+  const state = newGym(at, 11);
+  state.gymLevel = 8;
+  state.collection = Object.fromEntries(templateRules.slice(0, 8).map(template => [template.id, {firstAt: at, highestRating: 40, highestValue: '320'}]));
+  await mount(GymShopPanel, state);
   const entries = equipmentCatalog.filter(item => item.family === 'focus-defense');
-  expect(document.querySelectorAll('.gm-product')).toHaveLength(2);
+  expect(document.querySelectorAll('[data-family="focus-defense"]')).toHaveLength(2);
   for (const item of entries) {
-    expect(product(item.name).querySelector('.gm-product-meta')!.textContent).toContain(`${equipmentFamilyLabels[item.family]} · ${item.grade}阶`);
+    expect(product(item.name).querySelector('.gm-product-meta')).toBeNull();
     expect(product(item.name).dataset.family).toBe(item.family);
+    expect(product(item.name).dataset.grade).toBe(String(item.grade));
     expect(buttonWithin(product(item.name), '购买').className).toBe('gm-button gm-primary');
   }
   await press(buttonWithin(product(entries[1].name), '器材详情'));
-  const detail = document.querySelector('.gm-detail-dialog')!;
+  const detail = document.querySelector('.equipment-detail-dialog')!;
   expect(detail.textContent).toContain('防守专项 · 同类只启用一件');
   expect(detail.textContent).toContain('3阶');
   expect(actions).toEqual([]);
 });
 
-it('previews offline-family replacement at the shared four-hour limit without summing both grades', async () => {
+it('sorts affordable, listed, unlisted and owned stock without a price sort and refuses repurchase', async () => {
+  const state = newGym(at, 13);
+  state.credits = 4;
+  state.gymLevel = 3;
+  const installed = equipmentFor('stamina'), warehouse = equipmentFor('experience');
+  own(state, [installed.id], [warehouse.id]);
+  await mount(GymShopPanel, state);
+  const unlocked = (item: typeof equipmentCatalog[number]) => state.gymLevel >= item.unlockLevel && Object.keys(state.collection).length >= item.requiredTemplates;
+  const expected = [
+    ...equipmentCatalog.filter(item => !state.ownedEquipment.includes(item.id) && unlocked(item) && state.credits >= item.price),
+    ...equipmentCatalog.filter(item => !state.ownedEquipment.includes(item.id) && unlocked(item) && state.credits < item.price),
+    ...equipmentCatalog.filter(item => !state.ownedEquipment.includes(item.id) && !unlocked(item)).sort((first, second) => first.unlockLevel - second.unlockLevel),
+    ...equipmentCatalog.filter(item => state.ownedEquipment.includes(item.id)),
+  ].map(item => item.id);
+  expect([...document.querySelectorAll<HTMLElement>('.gm-shop-product')].map(item => item.dataset.equipmentId)).toEqual(expected);
+  for (const item of [installed, warehouse]) {
+    const row = product(item.name);
+    expect(row.classList.contains('is-owned')).toBe(true);
+    expect(row.querySelector('.gm-shop-owned-cover > .gm-shop-purchased-stamp')?.textContent).toBe('已购买');
+    expect(row.querySelector('img')?.getAttribute('src')).toBe(productImagePath(item.artId));
+    const purchased = buttonWithin(row, '购买');
+    expect(purchased.disabled).toBe(true);
+    await press(purchased);
+    expect(actions).toEqual([]);
+    await press(buttonWithin(row, '器材详情'));
+    expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(item.name);
+    await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  }
+  const locked = equipmentFor('experience', 3);
+  const row = product(locked.name);
+  expect(row.querySelector('img')?.getAttribute('src')).toBe(productImagePath(locked.artId));
+  expect(buttonWithin(row, '购买').disabled).toBe(true);
+  expect(buttonWithin(row, '器材详情').disabled).toBe(false);
+  expect(row.querySelector('.gm-shop-lock')?.textContent).toContain('尚未上架');
+  expect(actions).toEqual([]);
+});
+
+it('keeps unlocked but unaffordable stock ahead of locked items without a lock overlay', async () => {
+  const state = newGym(at, 15);
+  state.gymLevel = 3;
+  state.credits = 0;
+  await mount(GymShopPanel, state);
+  expect(document.querySelector('.gm-shop-grid')).toBeTruthy();
+  const unlocked = equipmentCatalog.filter(item => item.unlockLevel <= 3 && item.requiredTemplates === 0);
+  const rows = [...document.querySelectorAll<HTMLElement>('.gm-shop-product')];
+  expect(rows.slice(0, unlocked.length).every(row => !row.classList.contains('is-locked'))).toBe(true);
+  const expensive = [...unlocked].sort((first, second) => second.price - first.price)[0];
+  expect(rows[0].dataset.equipmentId).toBe(unlocked[0].id);
+  expect(product(expensive.name).querySelector('.gm-shop-lock')).toBeNull();
+  const purchase = buttonWithin(product(expensive.name), '购买');
+  expect(purchase.disabled).toBe(true);
+  expect(purchase.title).toBe('赞助券不足');
+  await press(purchase);
+  expect(actions).toEqual([]);
+});
+
+it.each([1, 8])('shows original unlisted stock with listing conditions and read-only detail access at gym %s', async gymLevel => {
+  const state = newGym(at, 16);
+  state.gymLevel = gymLevel; state.credits = 100;
+  const item = equipmentFor('experience', 3);
+  await mount(GymShopPanel, state);
+  const card = product(item.name);
+  expect(card.classList.contains('is-locked')).toBe(true);
+  expect(card.querySelector('img')?.getAttribute('src')).toBe(productImagePath(item.artId));
+  expect(card.querySelector('img')?.getAttribute('alt')).toBe(`${item.name}商品图`);
+  expect(buttonWithin(card, '购买').textContent).toContain(`· ${item.price} 券`);
+  expect(card.dataset.rarity).toBe(item.rarity);
+  expect(card.dataset.grade).toBe(String(item.grade));
+  const conditions = card.querySelector('.gm-shop-lock')!;
+  expect(conditions.textContent).toContain('尚未上架');
+  expect(conditions.textContent).toContain(`球馆 Lv.${item.unlockLevel}`);
+  expect(conditions.textContent).toContain(`收藏 ${item.requiredTemplates} 种球星模板`);
+  const purchase = buttonWithin(card, '购买');
+  expect(purchase.disabled).toBe(true);
+  await press(purchase);
+  expect(actions).toEqual([]);
+  const details = buttonWithin(card, '器材详情');
+  expect(details.disabled).toBe(false);
+  await press(details);
+  const archive = document.querySelector('.equipment-detail')!;
+  expect(archive.querySelector('h3')?.textContent).toBe(item.name);
+  expect(archive.querySelector('.equipment-display img')?.getAttribute('src')).toBe(productImagePath(item.artId));
+  expect(archive.querySelector('.equipment-effect')?.textContent).toContain(item.description);
+  expect(archive.querySelector('.gm-equipment-extra')).toBeNull();
+  expect(archive.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  expect(archive.querySelector('.equipment-collected')).toBeNull();
+  expect(latest).toEqual(state);
+  expect(actions).toEqual([]);
+});
+
+it('shows capped offline replacement deltas without training time predictions', async () => {
   const state = newGym(at, 11);
   state.gymLevel = 8;
+  state.credits = 100;
+  state.collection = Object.fromEntries(templateRules.slice(0, 8).map(template => [template.id, {firstAt: at, highestRating: 40, highestValue: '320'}]));
   state.projects.offline = 5;
   const basic = equipmentFor('offlineMinutes');
   const advanced = equipmentFor('offlineMinutes', 3);
   own(state, [basic.id]);
   await mount(GymShopPanel, state);
-  expect(product(advanced.name).textContent).toContain('每次离线训练上限 3小时15分钟 → 4小时');
-  expect(product(advanced.name).textContent).toContain(`将替换「${basic.name}」`);
-  expect(actions).toEqual([]);
+  await press(buttonWithin(product(advanced.name), '器材详情'));
+  expect(document.querySelector('.equipment-effect')?.textContent).toContain(advanced.description);
+  expect(document.querySelector('.equipment-detail')?.textContent).not.toContain('每次离线训练上限 3小时15分钟 → 4小时');
+  await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  await press(buttonWithin(product(advanced.name), '购买'));
+  const confirmation = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '替换馆内器材')!;
+  expect(confirmation.querySelector('[data-change-id="offline-limit"]')?.textContent).toBe('离线训练上限195 分钟→240 分钟');
+  expect(confirmation.textContent).toContain(`可替换「${basic.name}」`);
+  expect(confirmation.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  await press(buttonWithin(confirmation, '放入仓库'));
+  expect(latest.credits).toBe(state.credits - advanced.price);
+  expect(latest.equippedEquipment).toEqual([basic.id]);
+  expect(latest.ownedEquipment).toContain(advanced.id);
+  expect(actions).toEqual([{type: 'buy-equipment', id: advanced.id, destination: 'warehouse'}]);
 });
 
 it('keeps archived equipment collection counts separate from the current thirty-five items', async () => {
@@ -418,9 +682,9 @@ it('keeps archived equipment collection counts separate from the current thirty-
   state.collectedEquipment[equipmentFor('stamina').id] = {firstAt: at};
   await mount(GymCollectionPanel, state);
   await press(buttonWithin(document, '器材图鉴'));
-  expect(document.querySelector('.gm-album-progress')!.textContent).toContain('1 / 35');
+  expect(document.querySelector('.album-progress')!.textContent).toContain('1 / 35');
   expect(document.body.textContent).toContain('历史器材收藏 2 件已留档，不计入当前 35 件器材的收藏进度');
-  expect(document.querySelectorAll('.gm-album-card')).toHaveLength(35);
+  expect(document.querySelectorAll('.equipment-album-card')).toHaveLength(35);
   expect(actions).toEqual([]);
 });
 
@@ -508,7 +772,7 @@ it('uses one drink only for missing stamina and disables use at the cap', async 
   state.inventory.drink = 1;
   await mount(GymInventoryPanel, state);
   await press(buttonWithin(document, '消耗品'));
-  expect(product('运动饮料').textContent).toContain('本次恢复 2 点');
+  expect(buttonWithin(product('运动饮料'), '使用饮料').disabled).toBe(false);
   await press(buttonWithin(product('运动饮料'), '使用饮料'));
   expect(latest.player!.stamina).toBe(20);
   expect(latest.inventory.drink).toBe(0);
@@ -522,6 +786,7 @@ it('offers automatic speed and offline-cap upgrades together from gym level two'
   state.gymLevel = 8;
   state.credits = 100;
   await mount(GymClubPanel, state);
+  await press(buttonWithin(document, '经营项目'));
   expect(staminaMax(latest)).toBe(20);
   expect(document.querySelector('.gm-project.is-future')).toBeNull();
   expect(actions).toEqual([]);
@@ -532,20 +797,27 @@ it('offers automatic speed and offline-cap upgrades together from gym level two'
   expect(latest.player!.stamina).toBe(20);
   expect(staminaMax(latest)).toBe(25);
   const automation = [...document.querySelectorAll<HTMLElement>('.gm-project')].find(card => card.querySelector('h4')?.textContent === '自动训练')!;
-  expect(automation.textContent).toContain('1.8 秒/球');
-  expect(automation.textContent).toContain('每球额外 +1 经验');
+  expect(automation.querySelector('.gm-project-change')?.textContent).toContain('2→1.8秒');
+  expect(automation.textContent).toContain('每球经验 +1');
+  await press(buttonWithin(automation, '查看自动训练详情'));
+  const automationDetails = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '自动训练详情')!;
+  expect(automationDetails.textContent).toContain('1.8 秒/球，每球额外 +1 经验，在线离线均生效');
+  await press(buttonWithin(automationDetails, '返回经营项目'));
   await press(buttonWithin(automation, '升级'));
   expect(latest.projects.automation).toBe(1);
-  expect(automation.textContent).toContain('1.8 秒/球');
+  expect(automation.querySelector('.gm-project-change')?.textContent).toContain('1.8→1.6秒');
   expect(latest.projects.offline).toBe(0);
   const offline = [...document.querySelectorAll<HTMLElement>('.gm-project')].find(card => card.querySelector('h4')?.textContent === '离线课表')!;
-  expect(offline.textContent).toContain('30分钟');
+  expect(offline.textContent).toContain('训练上限30→45分钟');
   expect(offline.textContent).toContain('45分钟');
   await press(buttonWithin(offline, '升级'));
   expect(latest.projects.offline).toBe(1);
   expect(offlineLimitMs(latest)).toBe(2_700_000);
-  expect(offline.textContent).toContain('预计约');
-  expect(offline.textContent).toContain('模板、奖金节点提前推荐');
+  expect(offline.querySelector('[aria-label="离线升级收益预估"]')).toBeNull();
+  await press(buttonWithin(offline, '查看离线课表详情'));
+  const offlineAdvice = document.querySelector('[aria-label="离线升级收益预估"]')!;
+  expect(offlineAdvice.textContent).toContain('当前球员约');
+  expect(offlineAdvice.textContent).toContain('模板、奖金节点提前推荐');
   expect(actionError).toBeUndefined();
 });
 
@@ -553,9 +825,13 @@ it('explains the shared level-two unlock and prevents offline-cap purchases at l
   const state = newGym(at, 11);
   state.credits = 100;
   await mount(GymClubPanel, state);
+  await press(buttonWithin(document, '经营项目'));
   const offline = [...document.querySelectorAll<HTMLElement>('.gm-project')].find(card => card.querySelector('h4')?.textContent === '离线课表')!;
-  expect(offline.textContent).toContain('Lv.2');
-  expect(buttonWithin(offline, '暂不可升级').disabled).toBe(true);
+  expect(offline.textContent).toContain('馆2开放');
+  expect(offline.querySelector<HTMLButtonElement>('.gm-project-upgrade')!.disabled).toBe(true);
+  await press(buttonWithin(offline, '查看离线课表详情'));
+  const details = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '离线课表详情')!;
+  expect(details.textContent).toContain('球馆 2 级免费获得 30 分钟离线训练');
   expect(actions).toEqual([]);
 });
 
@@ -581,7 +857,7 @@ it('presents a capped offline report as saved training, with no claim or automat
   expect(closed).toBe(1);
 });
 
-it.each([false, true])('confirms the displayed recommendation reward and archives the athlete (legend %s)', async legendary => {
+it.each([false, true])('confirms the displayed reward and archives only a matched athlete (legend %s)', async legendary => {
   const state = newGym(at, 11);
   if (legendary) {
     const template = templateRules.find(item => item.tier === 'legend')!;
@@ -607,9 +883,11 @@ it.each([false, true])('confirms the displayed recommendation reward and archive
   await press(confirm);
   expect(latest.player).toBeNull();
   expect(latest.credits).toBe(legendary ? 12 : 0);
-  expect(latest.alumni).toHaveLength(1);
-  expect(latest.alumni[0].id).toBe(id);
-  expect(latest.alumni[0].rewardCredits).toBe(legendary ? 12 : 0);
+  expect(latest.alumni).toHaveLength(legendary ? 1 : 0);
+  if (legendary) {
+    expect(latest.alumni[0].id).toBe(id);
+    expect(latest.alumni[0].rewardCredits).toBe(12);
+  }
   expect(actionError).toBeUndefined();
 });
 
@@ -664,16 +942,46 @@ it('reads new-gym collection records separately from active ownership and opens 
   const item = equipmentFor('stamina');
   state.collectedEquipment[item.id] = {firstAt: at};
   await mount(GymCollectionPanel, state);
-  expect(document.querySelector('.gm-album-progress')!.textContent).toContain('1 / 119');
-  expect(document.querySelectorAll('.gm-album-card:not(.is-unknown)')).toHaveLength(1);
+  expect(document.querySelector('.album-progress')!.textContent).toContain('1 / 119');
+  expect(document.querySelectorAll('.album-card.discovered')).toHaveLength(1);
   await press(buttonWithin(document, '器材图鉴'));
-  expect(document.querySelector('.gm-album-progress')!.textContent).toContain('1 / 35');
-  const collected = document.querySelector<HTMLButtonElement>('.gm-album-card:not(.is-unknown)')!;
+  expect(document.querySelector('.album-progress')!.textContent).toContain('1 / 35');
+  const collected = document.querySelector<HTMLButtonElement>('.equipment-album-card.is-unlocked')!;
   expect(collected.textContent).toContain(item.name);
-  expect(collected.textContent).toContain('已收藏');
+  expect(collected.classList.contains('is-unlocked')).toBe(true);
   await press(collected);
   expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(2);
   expect(document.body.textContent).toContain(`体力上限 +${item.effects.stamina}`);
+  expect(actions).toEqual([]);
+});
+
+it('keeps uncollected album faces unknown while opening unlisted, historical and listed equipment details', async () => {
+  const state = newGym(at, 18);
+  const retained = equipmentFor('experience', 3);
+  const unlisted = equipmentFor('stamina', 3);
+  const listed = equipmentFor('stamina');
+  state.collectedEquipment[retained.id] = {firstAt: at};
+  await mount(GymCollectionPanel, state);
+  await press(buttonWithin(document, '器材图鉴'));
+  const unavailable = document.querySelector<HTMLButtonElement>(`[aria-label="查看${unlisted.name}器材档案"]`)!;
+  expect(unavailable.disabled).toBe(false);
+  expect(unavailable.textContent).toBe('未知器械');
+  expect(unavailable.querySelector('img.product-image')).toBeNull();
+  expect(unavailable.textContent).not.toContain(unlisted.name);
+  await press(unavailable);
+  expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(unlisted.name);
+  expect(document.querySelector('.equipment-effect')?.textContent).toContain(unlisted.description);
+  expect(document.querySelector('.equipment-detail .gm-equipment-extra')).toBeNull();
+  await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  const historical = document.querySelector<HTMLButtonElement>(`[aria-label="查看${retained.name}器材档案"]`)!;
+  expect(historical.disabled).toBe(false);
+  await press(historical);
+  expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(retained.name);
+  await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  const available = document.querySelector<HTMLButtonElement>(`[aria-label="查看${listed.name}器材档案"]`)!;
+  expect(available.disabled).toBe(false);
+  await press(available);
+  expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(listed.name);
   expect(actions).toEqual([]);
 });
 

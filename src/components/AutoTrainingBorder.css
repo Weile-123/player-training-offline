@@ -1,0 +1,5 @@
+.gm-auto-border { position: absolute; inset: -3px; width: calc(100% + 6px); height: calc(100% + 6px); overflow: visible; pointer-events: none; }
+.gm-auto-border > rect { width: calc(100% - 3px); height: calc(100% - 3px); fill: none; stroke: #75d99c; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 18 82; animation: gym-auto-flow 2.8s linear infinite; }
+@keyframes gym-auto-flow { to { stroke-dashoffset: -100; } }
+@media (prefers-reduced-motion: reduce) { .gm-auto-border > rect { animation: none; } }
+body:has(.gym-game.reduce-motion) .gm-auto-border > rect { animation: none; }

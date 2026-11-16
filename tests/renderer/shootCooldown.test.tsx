@@ -51,3 +51,28 @@ it('blocks shots for one second and lowers the gray mask while the cooldown elap
   vi.unstubAllGlobals();
  }
 });
+
+it('keeps the same shot node when automatic mode removes the cooldown and when recruitment changes its artwork', async () => {
+ vi.stubGlobal('cancelAnimationFrame', vi.fn());
+ const root = createRoot(document.getElementById('root')!);
+ const action = vi.fn();
+ try {
+  await act(async () => root.render(<ShootButton disabled={false} reduced onShoot={action} cooldownUntil={0}/>));
+  const button = document.querySelector<HTMLButtonElement>('.dock-shoot')!;
+  await act(async () => root.render(<ShootButton disabled reduced onShoot={action}/>));
+  expect(document.querySelector('.dock-shoot')).toBe(button);
+  expect(button.disabled).toBe(true);
+  expect(document.querySelector('.dock-shoot-timer')).toBeNull();
+  await act(async () => root.render(<ShootButton mode="recruit" disabled={false} reduced onShoot={action}/>));
+  expect(document.querySelector('.dock-shoot')).toBe(button);
+  expect(button.getAttribute('aria-label')).toBe('招募球员');
+  expect(button.classList.contains('is-recruiting')).toBe(true);
+  expect(button.querySelector('.dock-recruit-art text')?.textContent).toBe('招募');
+  expect(button.querySelector('.dock-shoot-cooldown')).toBeNull();
+  await act(async () => button.click());
+  expect(action).toHaveBeenCalledOnce();
+ } finally {
+  act(() => root.unmount());
+  vi.unstubAllGlobals();
+ }
+});

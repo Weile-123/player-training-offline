@@ -1,0 +1,56 @@
+.gm-inventory .gm-slot:disabled { opacity: 1; cursor: default; }
+.gm-inventory .is-replacing .gm-slot:disabled { opacity: .45; }
+.gym-equipment-detail .gm-inventory-management { display: flex; justify-content: center; margin-top: 12px; }
+.gm-shop-grid .gm-equipment-summary { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+
+/* B: the equipment bench and warehouse scroll independently. */
+.game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog { width:min(520px,100%);height:min(820px,calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+.game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog > .sheet-scroll { display:flex;flex-direction:column;overflow:hidden;padding:5px 13px 12px; }
+.gym-inventory-dialog .contract-panel,.gym-inventory-dialog .contract-panel > [aria-busy] { display:flex;flex-direction:column;flex:1;min-height:0;min-width:0; }
+.gm-inventory { --inventory-bench-width:clamp(60px,21cqw,83px);display:flex;flex-direction:column;flex:1;min-height:0;min-width:0;container-type:inline-size; }
+.gm-inventory > .collection-sections,.gm-inventory .collection-tab-panel { display:flex;flex-direction:column;flex:1;min-height:0;min-width:0; }
+.gm-inventory .leaderboard-tabs { margin-bottom:13px; }
+.gm-inventory .collection-tab-panel { padding:0;overflow:hidden; }
+.gm-inventory-split-head { display:grid;grid-template-columns:var(--inventory-bench-width) minmax(0,1fr);flex:none;gap:12px;padding:0 1px 8px; }
+.gym-panel .gm-inventory-split-head h3 { margin:0;font:15px/1.2 var(--font-display);color:#112e3c; }
+.gm-inventory-split-head small { display:block;margin-top:3px;color:#816b49;font:10px/1.3 var(--font-body); }
+.gm-inventory-workbench { display:grid;grid-template-columns:var(--inventory-bench-width) minmax(0,1fr);flex:1;min-height:0;gap:12px;align-items:stretch; }
+.gm-inventory .gm-slot-row { display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:89px;align-content:start;gap:10px;min-height:0;margin:0;padding:2px 3px 5px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#aa8c60 transparent; }
+.gm-inventory .gm-slot-row.is-replacing { outline:0;background:none; }
+.gm-inventory .gm-slot { position:relative;display:flex;flex-direction:column;align-items:stretch;gap:0;min-width:0;min-height:0;padding:5px 3px 6px;border:2px solid #ac9b77;outline:1px solid #112e3c;background:#163441 var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) center/cover;color:#f7e6bf;box-shadow:none; }
+.gm-inventory .gm-slot.is-replaceable { border-color:#f4cd76;outline:2px solid #b83628;background-color:#234449;cursor:pointer;box-shadow:none; }
+.gm-slot-art { display:block;height:57px;min-height:0; }
+.gm-inventory .gm-slot-art img { width:100%;height:100%;object-fit:contain; }
+.gm-slot-art > span { display:grid;place-items:center;height:100%;font-size:26px;color:#d5c08f; }
+.gm-inventory .gm-slot > strong { display:block;min-width:0;margin-top:4px;color:#f7e6bf;font-size:10px;font-weight:900;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.gm-slot-index { position:absolute;top:3px;left:3px;z-index:1;color:#e4d0a0;font:10px/1 var(--font-display); }
+.gm-slot-target-label { position:absolute;top:2px;right:0;padding:1px 2px;font-size:8px;line-height:1.2;background:#b93628;color:#ffedbd; }
+.gm-inventory .gm-products.gm-inventory-list { display:grid;grid-template-columns:minmax(0,1fr);grid-auto-rows:max-content;align-content:start;gap:10px;min-height:0;margin:0;padding:2px 5px 6px 2px;overflow-x:hidden;overflow-y:scroll;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-gutter:stable;scrollbar-color:#a98952 #e2cea6; }
+.gm-inventory-list > .gm-warehouse-product { display:grid;grid-template-columns:47px minmax(0,1fr) auto;gap:6px;align-items:center;min-height:65px;padding:5px;border-width:3px; }
+.gm-inventory-list > .gm-warehouse-product.is-pending-equipment { box-shadow:0 0 0 2px #b43527,inset 0 0 0 1px #15323e,2px 3px 0 #b29c71; }
+.gm-inventory-list .gm-product-image { width:47px;height:48px;border:1px solid #b59b67;background:#ead9b2; }
+.gm-inventory-list .gm-shop-ticket-title { padding:0; }
+.gym-panel .gm-inventory-list h4 { font:12px/1.3 var(--font-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.gm-inventory-list .gm-equipment-summary { margin-top:3px;font-size:9px;line-height:1.5; }
+.gm-inventory-list .gm-info-button { display:block;min-height:0;margin-top:2px;padding:0;border:0;background:none;color:#94402c;font-size:9px;font-weight:900;line-height:1.3;white-space:nowrap; }
+.gm-inventory-list .gm-warehouse-equip { min-width:0;min-height:27px;padding:5px 4px;border:1px solid #17313b;border-radius:0;background:#b62f24;box-shadow:1px 2px 0 #b39a6c;color:#fff0c9;font:11px/1 var(--font-display);white-space:nowrap; }
+.gm-inventory-list .gm-warehouse-equip:disabled { opacity:1;border-color:#a99a78;background:#cec2a2;color:#827251; }
+.gm-inventory-list .is-pending-equipment .gm-warehouse-equip { background:#193d46;border-color:#12303b;color:#f8e4b3; }
+.gm-selected-drawer { display:grid;flex:none;gap:0;margin-top:14px;padding:10px 10px 9px;border:2px solid #153341;border-left:5px solid #b63627;background:#eed9a7;color:#17343f; }
+.gm-selected-drawer-heading { display:flex;align-items:center;gap:8px;min-width:0; }
+.gm-selected-drawer-heading > span { flex:none;padding:2px 4px;background:#17343f;color:#f8e6b9;font-size:9px; }
+.gym-panel .gm-selected-drawer h3 { margin:0;font:16px/1.2 var(--font-display); }
+.gm-selected-drawer-heading > .gm-info-button { flex:none;min-height:0;margin-left:auto;padding:0;font-size:11px; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-selected-drawer > p { margin:7px 0 0;color:#755637;font-size:10px;line-height:1.6; }
+.gm-selected-drawer .gm-replacement-changes { margin-top:8px;padding:0;border:0;background:none; }
+.gm-selected-drawer .gm-replacement-changes > h4 { display:none; }
+.gm-selected-drawer .gm-replacement-changes li { padding-block:5px;font-size:11px; }
+.gm-inventory-bottom { display:flex;justify-content:space-between;flex:none;gap:10px;margin-top:10px;padding-top:8px;border-top:1px solid #b59c6d;color:#806a48;font-size:9px;line-height:1.5; }
+.gm-inventory-bottom small { font-size:9px; }
+.gm-inventory-legacy { flex:none;padding-top:5px;font-size:10px; }
+@media(max-width:359px) {
+ .gm-inventory-workbench,.gm-inventory-split-head{gap:8px}.gm-inventory-list>.gm-warehouse-product{grid-template-columns:35px minmax(0,1fr) auto;gap:4px;padding:4px}.gm-inventory-list .gm-product-image{width:35px;height:42px}.gym-panel .gm-inventory-list h4{font-size:10px}.gm-inventory-list .gm-equipment-summary{font-size:8px}.gm-inventory-list .gm-warehouse-equip{font-size:10px;padding-inline:3px}.gm-inventory-bottom,.gm-inventory-bottom small{gap:4px;font-size:8px}
+}
+@media(max-height:550px) {
+ .game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog .sheet-heading{min-height:48px}.game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog .sheet-heading h2{padding:6px 22px 6px 12px;font-size:24px}.game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog .sheet-close{width:32px;height:32px;min-height:32px;margin-top:7px}.game-screen.comic-dialog-layer .comic-dialog.gym-inventory-dialog .leaderboard-tabs>button{min-height:28px;padding:4px 3px;font-size:15px}.gm-inventory .leaderboard-tabs{margin-bottom:6px}.gm-inventory-split-head{padding-bottom:5px}.gm-selected-drawer{margin-top:7px;padding:6px 8px}.gym-panel .gm-selected-drawer h3{font-size:14px}.gm-inventory-bottom{margin-top:5px;padding-top:4px}
+}

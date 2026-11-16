@@ -1,0 +1,35 @@
+.gm-shop .gm-shop-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: max-content; flex: 1; min-width: 0; min-height: 0; gap: 12px 11px; align-content: start; align-items: stretch; padding: 0 7px 6px 0; overflow-x: hidden; overflow-y: scroll; overscroll-behavior: contain; touch-action: pan-y; scrollbar-gutter: stable; scrollbar-width: thin; scrollbar-color: #a98952 #e2cea6; }
+.gm-shop-grid::-webkit-scrollbar { width: 8px; }
+.gm-shop-grid::-webkit-scrollbar-track { background: #e2cea6; border: 1px solid #c0a375; }
+.gm-shop-grid::-webkit-scrollbar-thumb { min-height: 26px; border: 1px solid #e2cea6; background: #a98952; }
+.gm-shop-grid > .gm-shop-product { --gear-edge: #7d929e; --gear-light: #fffdf2; --gear-metal: linear-gradient(125deg,#718b9a,#f5f5e8 30%,#b7c8ce 48%,#fcfff7 67%,#7c929f); position: relative; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; align-items: stretch; min-width: 0; gap: 0; padding: 7px 9px 8px; border: 4px solid transparent; background: var(--asset-art-game-paper-png, url('/art/game/paper.png')) center/cover padding-box, linear-gradient(#f2dfb7,#f2dfb7) padding-box, var(--gear-metal) border-box; color: #173747; box-shadow: 0 0 0 1px #142e3b, inset 0 0 0 1px #142e3b, 2px 3px 0 #ac956b; isolation: isolate; container-type: inline-size; clip-path: none; }
+.gm-shop-grid > .gm-shop-product[data-rarity='rare'] { --gear-edge: #b57f28; --gear-light: #fff2b4; --gear-metal: linear-gradient(125deg,#99702c,#efc76c 23%,#fff4bc 44%,#cb9434 65%,#f5d88b 84%,#9c702a); }
+.gm-shop-grid > .gm-shop-product[data-rarity='legendary'] { --gear-edge: #b32c26; --gear-light: #ffc4a3; --gear-metal: linear-gradient(125deg,#8f2423,#d94c36 25%,#ffc0a0 43%,#b22c28 61%,#ee795b 82%,#8f2423); }
+.gm-shop-grid > .gm-shop-product::before { content: none; }
+.gm-shop-ticket-face { display: grid; grid-template-columns: clamp(36px, 32cqw, 84px) minmax(0, 1fr); gap: clamp(5px, 3cqw, 9px); align-items: start; min-height: 0; }
+.gm-shop-grid .gm-product-image { align-self: center; width: 100%; height: auto; aspect-ratio: 1; min-width: 0; border: 1px solid #bba16d; background: #ead6ab; }
+.gm-shop-grid .gm-product-image img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.gm-shop-grid .gm-shop-ticket-title { display: block; min-width: 0; padding: 1px 0 0; }
+.gym-panel .gm-shop-grid h4 { min-height: 0; margin: 0; color: #173747; font: clamp(10px, 6cqw, 16px)/1.4 var(--font-display); text-align: left; overflow-wrap: anywhere; }
+.gm-shop-ticket-title > span { display: block; min-height: 12px; margin-top: 5px; color: #916948; font-size: clamp(9px, 4cqw, 10px); line-height: 1.3; }
+.gm-shop-grid .gm-product-actions { grid-column: 1/-1; display: flex; align-items: center; justify-content: space-between; flex-wrap: nowrap; width: 100%; min-width: 0; gap: clamp(3px, 2cqw, 6px); margin-top: 4px; padding-top: 7px; border-top: 1px dashed #b79b68; }
+.gm-shop-grid .gm-product-actions .gm-info-button { flex: none; min-width: 0; min-height: 31px; margin: 0; padding: 4px 1px; border: 0; background: none; color: #8f3f2c; font-size: clamp(9px, 4.7cqw, 12px); font-weight: 900; line-height: 1.2; white-space: nowrap; text-decoration: none; }
+.gm-shop-grid .gm-info-button > i { margin-left: 2px; font-size: 1.5em; line-height: 0; font-style: normal; }
+.gm-shop-grid .gm-product-actions .gm-button { display: flex; align-items: center; justify-content: center; flex: 0 1 auto; gap: 3px; min-width: 0; min-height: 31px; margin: 0; padding: 5px clamp(3px, 2cqw, 8px); border: 2px solid #18313b; border-radius: 0; color: #fff0c9; background: #b23629; box-shadow: 1px 2px 0 #b39763; font: clamp(9px, 4.7cqw, 12px)/1 var(--font-display); white-space: nowrap; }
+.gm-shop-grid .gm-product-actions .gm-button > b { font: 900 1em/1 'Microsoft YaHei', sans-serif; }
+.gm-shop-grid .gm-product-actions .gm-button:disabled { opacity: 1; background: #c7bba0; border-color: #998b6c; color: #72654c; box-shadow: 1px 2px 0 #b19b74; }
+.gm-shop-grid > .gm-shop-product.is-owned { border-color: transparent; background: var(--asset-art-game-paper-png, url('/art/game/paper.png')) center/cover padding-box, linear-gradient(#f2dfb7,#f2dfb7) padding-box, var(--gear-metal) border-box; box-shadow: 0 0 0 1px #142e3b, inset 0 0 0 1px #142e3b, 2px 3px 0 #ac956b; }
+.gm-shop-grid .is-owned .gm-product-image { border-color: #bba16d; background: #ead6ab; filter: none; opacity: 1; }
+.gym-panel .gm-shop-grid .is-owned h4 { color: #173747; }
+.gm-shop-grid .is-owned .gm-info-button { color: #8f3f2c; }
+.gm-shop-lock { position: absolute; inset: 4px; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 6px; border: 1px solid #bba56d; background: #102b3dc4; color: #fff0c6; text-align: center; pointer-events: none; }
+.gm-shop-lock > strong { color: #ffe09d; font: clamp(12px, 7cqw, 18px)/1.2 var(--font-display); }
+.game-screen.comic-dialog-layer .comic-dialog .gm-shop-lock > p, .gm-shop-lock > p { margin: 0; color: #f1e2bf; font-size: clamp(9px, 4.8cqw, 12px); font-weight: 900; line-height: 1.6; }
+.gm-shop-owned-cover { position: absolute; inset: 0; z-index: 3; display: grid; place-items: center; background: #f1dfb867; pointer-events: none; }
+.gm-shop-purchased-stamp { display: block; width: 94%; padding: 5px 0 7px; border: 4px double #ac3328; border-radius: 2px; color: #b13629; background: #f7e6bd2e; transform: rotate(-15deg); font: clamp(21px, 17cqw, 44px)/1 var(--font-display); text-align: center; text-shadow: 1px 0 #b13629; box-shadow: 0 0 0 1px #ac332833, inset 0 0 0 1px #ac33283b; opacity: .87; white-space: nowrap; }
+
+@media (max-width: 359px) {
+  .gm-shop .gm-shop-grid { gap: 9px 7px; }
+  .gm-shop-grid > .gm-shop-product { padding: 6px; }
+  .gm-shop-grid .gm-product-actions .gm-button { gap: 1px; padding-inline: 2px; }
+}

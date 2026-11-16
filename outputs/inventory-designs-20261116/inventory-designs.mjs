@@ -1,0 +1,21 @@
+const equipment={
+ brace:{name:'护膝绑带',art:'relic_003',effect:'全员体力上限 +4',rarity:'common'},
+ mat:{name:'冥想训练垫',art:'relic_014',effect:'回体间隔缩短 1 秒',rarity:'common'},
+ lesson:{name:'新人培训课',art:'relic_007',effect:'每课额外回体 +1',rarity:'common'},
+ machine:{name:'基础投篮机',art:'relic_002',effect:'自动每球经验 +1',rarity:'common'},
+ vest:{name:'负重背心',art:'relic_033',effect:'全员体力上限 +10',rarity:'rare'},
+ notes:{name:'传承笔记',art:'relic_028',effect:'每次投篮经验 +1',rarity:'common'},
+};
+const equipped=['brace','mat','lesson','machine'];
+const bag=['notes','vest','brace','mat','lesson','machine'];
+const icon=`<svg viewBox="0 0 40 40" aria-hidden="true"><path d="M14 11V8a6 6 0 0 1 12 0v3M10 16a10 10 0 0 1 20 0v18H10Z M10 23H7v11h3m20-11h3v11h-3"/><rect x="14" y="23" width="12" height="8" rx="2"/><path d="M17 16h6"/></svg>`;
+const image=key=>`<img src="/art/products/${equipment[key].art}.png" alt="${equipment[key].name}">`;
+const heading=(letter,name,caption)=>`<div class="design-caption"><b>${letter}</b><div><strong>${name}</strong><span>${caption}</span></div></div>`;
+const header=()=>`<header class="dialog-header"><h1>${icon}<span>器材背包</span></h1><button class="close" aria-label="关闭">×</button></header>`;
+const tabs=()=>`<nav class="tabs"><button class="selected">器材仓库</button><button>消耗品</button></nav>`;
+function slot(key,index,selected=false,dim=false){const item=equipment[key];return `<button class="slot ${item.rarity} ${selected?'target':''} ${dim?'dim':''}"><span class="slot-index">0${index+1}</span><div class="slot-art">${image(key)}</div><strong>${item.name}</strong>${selected?'<span class="target-label">点击替换</span>':''}</button>`;}
+function card(key,selected=false){const item=equipment[key],active=equipped.includes(key);return `<article class="gear-card ${item.rarity} ${selected?'picked':''}"><div class="gear-face"><div class="gear-art">${image(key)}</div><div><h3>${item.name}</h3><p>${item.effect}</p></div></div><div class="gear-actions"><button class="details">详情 ›</button><button class="equip ${active?'muted':selected?'selecting':''}">${active?'已装备':selected?'选择中':'装备'}</button></div></article>`;}
+function row(key,selected=false){const item=equipment[key],active=equipped.includes(key);return `<article class="gear-row ${item.rarity} ${selected?'picked':''}"><div class="gear-row-art">${image(key)}</div><div class="row-title"><h3>${item.name}</h3><p>${item.effect}</p><button class="details">详情 ›</button></div><button class="equip ${active?'muted':selected?'selecting':''}">${active?'已装备':selected?'选择中':'装备'}</button></article>`;}
+function a(){return `${heading('A','装备横栏 · 双列仓库','装备位始终在上，点选后就近替换。')}<section class="dialog scheme-a">${header()}<div class="body"><div class="section-title"><h2>馆内装备</h2><span><b>4</b> / 4 已装备</span></div><div class="equipped-horizontal">${equipped.map((k,i)=>slot(k,i,true)).join('')}</div><div class="replace-brief"><span><b>正在装备「传承笔记」</b><small>点击上方器材位替换，旧件留在仓库。</small></span><button>取消</button></div>${tabs()}<div class="warehouse-heading"><h2>全部器材 <small>6 件</small></h2><span>已装备置后</span></div><div class="gear-grid">${bag.map(k=>card(k,k==='notes')).join('')}</div><div class="bottom-note"><span>器材全馆共享 · 同类仅启用一件</span><small>移出 / 半价出售，在详情内操作</small></div></div></section><p class="design-foot">替换时只高亮可选装备位；选中后直接完成替换。</p>`;}
+function b(){return `${heading('B','侧栏装备台 · 清单仓库','装备与仓库并排，替换时无需上下翻找。')}<section class="dialog scheme-b">${header()}<div class="body">${tabs()}<div class="split-head"><h2>装备台 <small>4 / 4</small></h2><h2>仓库 <small>6 件</small></h2></div><div class="workbench"><aside class="equipped-vertical">${equipped.map((k,i)=>slot(k,i,k==='brace',k!=='brace')).join('')}</aside><div class="inventory-list">${['vest','notes','brace','mat','lesson','machine'].map(k=>row(k,k==='vest')).join('')}</div></div><section class="selected-drawer"><div class="selected-drawer-heading"><span>待装备</span><h2>负重背心</h2><button>取消</button></div><div class="change-line"><span>全员体力上限</span><b>24 <i>→</i> <strong>30</strong></b></div><p>同类仅启用一件，点击左侧高亮的护膝绑带替换。</p></section><div class="bottom-note"><span>器材全馆共享</span><small>详情内可移出 / 半价出售</small></div></div></section><p class="design-foot">左栏保留装备位，右侧清单滚动；底部就近显示替换提示。</p>`;}
+document.querySelector('#design').innerHTML=document.body.dataset.scheme==='b'?b():a();

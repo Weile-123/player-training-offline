@@ -1,0 +1,18 @@
+.gm-replacement-options { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-replacement-option { display: grid; align-content: start; justify-items: center; gap: 5px; min-width: 0; padding: 6px 4px; border: 2px solid #9e8964; border-radius: 0; background: #f3e2ba; color: #193541; box-shadow: 1px 2px #b8a079; font-size: 11px; line-height: 1.3; text-align: center; }
+.gm-replacement-option .product-image { display: block; width: 100%; max-width: 72px; height: auto; aspect-ratio: 1; object-fit: contain; }
+.gm-replacement-option > span { overflow-wrap: anywhere; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-replacement-option[aria-pressed='true'] { border-color: #b73928; background: #f8df9f; box-shadow: 0 0 0 1px #b73928, inset 0 0 0 1px #fff4ce; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-replacement-option:disabled { opacity: .4; cursor: default; }
+.gm-replacement-options-note { font-size: 11px; }
+.gm-replacement-changes { padding: 9px 10px; border: 1px solid #b59a68; background: #f7e8c5; }
+.gym-panel .gm-replacement-changes > h4 { margin: 0 0 7px; font-size: 14px; }
+.gm-replacement-changes > ul { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.gm-replacement-changes li { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 12px; padding: 6px 0; border-top: 1px solid #d5bf92; font-size: 12px; }
+.gm-replacement-changes li > span { min-width: 0; color: #5c513d; }
+.gm-replacement-changes li > b { display: inline-flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 4px; text-align: right; font-size: 12px; }
+.gm-replacement-changes li i { font-style: normal; }
+.gm-replacement-changes .is-up > b { color: #247346; }
+.gm-replacement-changes .is-down > b { color: #b5362c; }
+.gm-replacement-changes strong { font-weight: 950; }
+@media (max-width: 359px) { .gm-replacement-options { gap: 6px; } .game-screen.comic-dialog-layer .comic-dialog .gm-replacement-option { padding: 5px 2px; font-size: 10px; } .gm-replacement-changes { padding-inline: 8px; } .gm-replacement-changes li { gap: 6px; font-size: 11px; } .gm-replacement-changes li > b { font-size: 11px; } }

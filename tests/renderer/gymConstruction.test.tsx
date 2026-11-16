@@ -32,23 +32,51 @@ async function mount(state: GymState) {
 }
 function expansion() {return document.querySelector('[aria-label="下一球馆升级条件"]')!;}
 
+it('separates expansion and projects in the shared sliding tabs while retaining both routes', async () => {
+  const state = eligible(2, 100), before = structuredClone(state);
+  const action = await mount(state);
+  const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tablist"][aria-label="球馆经营分类"] [role="tab"]')];
+  expect(tabs.map(tab => tab.textContent)).toEqual(['球馆升级', '经营项目']);
+  expect(tabs[0].getAttribute('aria-selected')).toBe('true');
+  expect(expansion()).toBeTruthy();
+  expect(document.querySelectorAll('.gm-project')).toHaveLength(0);
+  await act(async () => tabs[1].click());
+  expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+  expect(document.querySelector('.leaderboard-tabs')?.getAttribute('data-index')).toBe('1');
+  expect(expansion()).toBeNull();
+  expect(document.querySelectorAll('.gm-project')).toHaveLength(6);
+  await act(async () => tabs[1].dispatchEvent(new KeyboardEvent('keydown', {key: 'Home', bubbles: true})));
+  expect(document.querySelector('.leaderboard-tabs')?.getAttribute('data-index')).toBe('0');
+  expect(expansion()).toBeTruthy();
+  expect(document.querySelectorAll('.gm-project')).toHaveLength(0);
+  expect(state).toEqual(before);
+  expect(action).not.toHaveBeenCalled();
+});
+
 it('keeps the first expansion free and explains its permanent extra training place', async () => {
-  const action = await mount(eligible(1, 0));
-  expect(expansion().textContent).toContain('升至球馆 Lv.2 免费');
-  expect(expansion().textContent).toContain('累计声望保留');
-  expect(expansion().textContent).toContain('新增 1 个训练位');
+  const state = eligible(1, 0);
+  const action = await mount(state);
+  expect(expansion().querySelector('.gm-expansion-unlocks')?.textContent).toContain('下一级新增+1 训练位');
+  expect(expansion().textContent).toContain('自动训练');
+  expect(expansion().querySelector('footer')?.textContent).not.toContain('尚未');
   const button = expansion().querySelector('button')!;
-  expect(button.textContent).toBe('免费升级球馆');
+  expect(button.textContent).toBe('免费');
   expect(button.disabled).toBe(false);
   await act(async () => button.click());
   expect(action).toHaveBeenCalledExactlyOnceWith({type: 'upgrade-gym', targetLevel: 2});
+  const result = dispatchGym(state, state.revision, action.mock.calls[0][0], at);
+  expect(result.error).toBeUndefined();
+  expect(result.state.credits).toBe(0);
+  expect(result.state.fame).toBe(state.fame);
 });
 
 it('shows the exact expansion price and cash gap while disabling an unfunded upgrade', async () => {
   const action = await mount(eligible(6, 139));
-  expect(expansion().textContent).toContain('本次扩建花费 140 券');
-  expect(expansion().textContent).toContain('成功升级后扣除');
-  expect(expansion().textContent).toContain('扩建资金还差 1 券');
+  expect(expansion().textContent).toContain('扩建赞助券139 / 140');
+  const budget = expansion().querySelector('[aria-label="扩建赞助券"]')!;
+  expect(budget.getAttribute('aria-valuenow')).toBe('139');
+  expect(budget.getAttribute('aria-valuemax')).toBe('140');
+  expect(expansion().textContent).not.toContain('扩建资金还差');
   const button = expansion().querySelector('button')!;
   expect(button.textContent).toBe('升级 · 140 券');
   expect(button.disabled).toBe(true);
@@ -76,7 +104,7 @@ it('still requires cultivation achievements even when construction is fully fund
   const state = eligible(6, 140);
   state.fame = 10_999;
   const action = await mount(state);
-  expect(expansion().textContent).toContain('本次扩建花费 140 券');
+  expect(expansion().querySelector('button')?.textContent).toBe('升级 · 140 券');
   expect(expansion().textContent).not.toContain('扩建资金还差');
   expect(expansion().querySelector('button')!.disabled).toBe(true);
   expect(action).not.toHaveBeenCalled();

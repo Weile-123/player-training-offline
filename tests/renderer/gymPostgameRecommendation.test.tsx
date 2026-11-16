@@ -45,6 +45,8 @@ it('quotes the first full payout above500 and explains that confirming consumes 
   const before = structuredClone(state);
   expect(recommendation(state).credits).toBe(23);
   await mount(state);
+  expect(document.querySelector('.gm-recommend-player .tier-portrait-frame .album-portrait-surface')).toBeTruthy();
+  expect(document.querySelector('.gm-eyebrow .tier-badge[data-tier="legend"]')?.textContent).toBe('传奇');
   expect(confirmation().textContent).toContain('+23 券');
   expect(document.body.textContent?.replace(/\s+/g, '')).toContain('首次推荐，之后同模板每次合计1券');
   expect(document.body.textContent).toContain('培养或合作提高后不补差额');
@@ -72,13 +74,18 @@ it('quotes the first full payout above500 and explains that confirming consumes 
   expect(result?.state.alumni[0].rewardCredits).toBe(23);
 });
 
-it.each([1, 2, 3, 4, 5, 6, 7, 8])('shows theoretical components and exactly one repeat coupon at gym level %s', async gymLevel => {
+it.each([1, 2, 3, 4, 5, 6, 7, 8])('shows only payable repeat components without subtracting first-time rewards at gym level %s', async gymLevel => {
   const state = fixture(gymLevel, 499, true);
   await mount(state);
   expect(document.querySelector('.gm-recommend-rewards')?.textContent).toContain('赞助券合计+1');
   expect(document.querySelector('.gm-reward-breakdown')).toBeNull();
   await press(button('查看结算明细'));
-  expect(document.querySelector('.gm-reward-breakdown')?.textContent).toContain('重复模板结算调整−22 券');
+  const creditDetail = document.querySelector('.gm-recommend-credit-detail')!;
+  expect(creditDetail.querySelectorAll('.gm-reward-breakdown > div')).toHaveLength(2);
+  expect(creditDetail.textContent).toContain('重复模板推荐+1 券');
+  expect(creditDetail.textContent).toContain('首次推荐加成不再发放');
+  expect(creditDetail.textContent).not.toMatch(/重复模板结算调整|培养加奖|合作奖励|[−-]\d/);
+  expect(creditDetail.querySelector('.gm-reward-actual')?.textContent).toBe('实际入账+1 券');
   expect(document.body.textContent?.replace(/\s+/g, '')).toContain('重复模板，本次合计1券，声望照常');
   expect(document.body.textContent).not.toContain('未匹配模板，本次0券');
   expect(confirmation().textContent).toContain('+1 券');

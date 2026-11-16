@@ -22,6 +22,10 @@ async function mount(game: GymState) {
   const action = vi.fn();
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<GymClubPanel state={game} onAction={action}/>));
+  const projects = [...document.querySelectorAll<HTMLButtonElement>('[role="tab"]')].find(tab => tab.textContent === '经营项目')!;
+  await act(async () => projects.click());
+  const toggle = document.querySelector<HTMLButtonElement>('[aria-label="查看离线课表详情"]');
+  if (toggle) await act(async () => toggle.click());
   return action;
 }
 function advice() {return document.querySelector('[aria-label="离线升级收益预估"]')!;}
@@ -35,7 +39,7 @@ it('warns when all automatic athletes may finish before the current cap while le
   expect(advice().textContent).toContain('1 名球员预计都可');
   expect(advice().textContent).toContain('延长时长不一定增加本批训练收益');
   expect(advice().textContent).toContain('实际经验结果会波动');
-  const upgrade = offlineCard().querySelector('button')!;
+  const upgrade = offlineCard().querySelector('.gm-primary')!;
   expect(upgrade.disabled).toBe(false);
   await act(async () => upgrade.click());
   expect(action).toHaveBeenCalledExactlyOnceWith({type: 'upgrade-project', id: 'offline'});
@@ -70,7 +74,7 @@ it('explains why no automatic roster yields no current offline training without 
   await mount(game);
   expect(advice().textContent).toContain('当前没有开启自动的球员');
   expect(advice().textContent).not.toContain('预计都可');
-  expect(offlineCard().querySelector('button')!.disabled).toBe(false);
+  expect(offlineCard().querySelector('.gm-primary')!.disabled).toBe(false);
 });
 
 it('does not present an upgrade forecast when the project is already maxed', async () => {
@@ -78,5 +82,5 @@ it('does not present an upgrade forecast when the project is already maxed', asy
   game.projects.offline = 5;
   await mount(game);
   expect(advice()).toBeNull();
-  expect(offlineCard().querySelector('button')!.disabled).toBe(true);
+  expect(offlineCard().querySelector('.gm-primary')!.disabled).toBe(true);
 });

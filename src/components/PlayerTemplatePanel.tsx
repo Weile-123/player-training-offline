@@ -5,7 +5,6 @@ import {assetUrl} from '../presentation/assetUrls';
 import { useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { statLabels } from '../game/config';
 import { rating } from '../game/engine';
-import { tierConfig } from '../game/matching';
 import { positionLabels, templateById } from '../game/templates';
 import { statKeys, type Player } from '../game/types';
 import type { ShotFeedback } from '../presentation/feedback';
@@ -13,6 +12,7 @@ import { AnimatedNumber } from './AnimatedNumber';
 import { usePlayerProfile } from '../platform/usePlayerProfile';
 import { fallbackProfile } from '../platform/hupuPlayers';
 import { SchemeArt } from './SchemeArt';
+import { TierBadge } from './TierBadge';
 
 export function templatePortrait(id:string|null|undefined) {
  return fallbackProfile(id)?.avatar ?? null;
@@ -87,14 +87,14 @@ export function TemplatePortraitReveal({tier,reduced=false,...current}:PortraitS
  </span>;
 }
 
-export function PlayerTemplatePanel({player,feedback,reduced=false,disabled,onDetails,onShare}:{player:Player|undefined;feedback:ShotFeedback|null;reduced?:boolean;disabled:boolean;onDetails?:()=>void;onShare?:()=>void}) {
+export function PlayerTemplatePanel({player,feedback,reduced=false,disabled,onDetails,onShare,showTrainingLevel=true}:{player:Player|undefined;feedback:ShotFeedback|null;reduced?:boolean;disabled:boolean;onDetails?:()=>void;onShare?:()=>void;showTrainingLevel?:boolean}) {
  const t=templateById(player?.templateId),profile=usePlayerProfile(t?.id),name=profile?.name??t?.name??'待发掘';
  const changes=feedback?.player.id===player?.id?feedback?.changes:undefined;
  const tone=(delta=0)=>delta>0?'up' as const:delta<0?'down' as const:'neutral' as const;
  const Tag=onDetails&&!onShare?'button':'div';
  return <Tag className={`star-template-panel ${t?.tier??'undiscovered'}`} data-tier={t?.tier??'undiscovered'} {...(onDetails?{disabled:disabled||!player,onClick:onDetails}:{})} aria-label={`${onDetails?'查看球员档案':'当前球星模板'}：${name}`}>
   <TemplatePortraitReveal key={player?.id??'empty'} templateId={player?.templateId} tier={t?.tier??'undiscovered'} src={profile?.avatar??templatePortrait(t?.id)} fallbackSrc={templatePortrait(t?.id)} highPotential={player?.highPotential} name={name} reduced={reduced}/>
-  <span className="template-main-identity"><strong style={{fontSize:`min(${Math.min(6.6,43/name.length)}cqw,var(--template-name-max,6.6cqw))`}} title={name}>{name}</strong><span className="template-identity-meta"><b>{t?tierConfig(t.tier).label:player?.highPotential?'高潜力新秀':'潜力新秀'}</b>{onShare&&t?<button type="button" className="template-share-button" disabled={disabled||!player} onClick={event=>{event.stopPropagation();onShare();}}>训练{player?.level??'—'} | 分享+1</button>:<span>训练{player?.level??'—'} | {t?positionLabels[t.position]:'等待匹配'}</span>}</span></span>
+  <span className="template-main-identity"><strong style={{fontSize:`min(${Math.min(6.6,43/name.length)}cqw,var(--template-name-max,6.6cqw))`}} title={name}>{name}</strong><span className="template-identity-meta"><TierBadge tier={t?.tier}/>{onShare&&t?<button type="button" className="template-share-button" disabled={disabled||!player} onClick={event=>{event.stopPropagation();onShare();}}>训练{player?.level??'—'} | 分享+1</button>:<span>{showTrainingLevel && <>训练{player?.level??'—'} | </>}{t?positionLabels[t.position]:'等待匹配'}</span>}</span></span>
   <span className="template-live-rating"><small>综合评分</small>{player?<AnimatedNumber key={player.id} value={rating(player)} decimals={1} reduced={reduced} tone={tone(statKeys.reduce((sum,k)=>sum+(changes?.[k]??0),0))}/>:<b>—</b>}</span>
   <span className="template-live-stats">{statKeys.map(k=><span key={k}><small>{statLabels[k]}</small>{player?<AnimatedNumber key={player.id} value={player.stats[k]} reduced={reduced} tone={tone(changes?.[k])}/>:<b>—</b>}</span>)}</span>
  </Tag>;

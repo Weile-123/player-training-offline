@@ -69,7 +69,8 @@ export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
   | {type: 'train' | 'recommend' | 'use-drink'; id: string}
   | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number}
-  | {type: 'buy-equipment' | 'equip'; id: string; replaceId?: string}
+  | {type: 'buy-equipment'; id: string; replaceId?: string; destination?: 'warehouse'}
+  | {type: 'equip'; id: string; replaceId?: string}
   | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
   | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string}
   | {type: 'accept-cooperation'; id: string; playerId: string}
@@ -585,7 +586,8 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
         next.postgameRecommendedTemplates = initialized.postgameRecommendedTemplates;
       }
       if (reward.isFirstPostgameRecommendation) next.postgameRecommendedTemplates = [...(next.postgameRecommendedTemplates ?? []), player.templateId!];
-      next.alumni.push({...player, recommendedAt: now, rewardCredits: reward.credits, rewardFame: reward.fame, finalValue: playerValue(next, player)});
+      // Free replacement of an undiscovered player is not a completed alumni record.
+      if (reward.tierId !== null) next.alumni.push({...player, recommendedAt: now, rewardCredits: reward.credits, rewardFame: reward.fame, finalValue: playerValue(next, player)});
       next.credits += reward.credits;
       next.fame += reward.fame;
       next.player = next.bench.shift() ?? null;
@@ -651,16 +653,21 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       const offer = equipmentOffer(next, action.id);
       if (offer.price === null) return fail(offer.reason ?? '器材暂不可购');
       if (next.credits < offer.price) return fail('赞助券不足');
-      const invalidInstallation = installationError(next, action.id, action.replaceId);
-      if (invalidInstallation) return fail(invalidInstallation);
+      if (action.destination === 'warehouse' && action.replaceId !== undefined) return fail('入库购买不会替换馆内器材');
+      if (action.destination !== 'warehouse') {
+        const invalidInstallation = installationError(next, action.id, action.replaceId);
+        if (invalidInstallation) return fail(invalidInstallation);
+      }
       next.credits -= offer.price;
       next.ownedEquipment.push(action.id);
       next.purchasePrices[action.id] = offer.price;
       next.collectedEquipment[action.id] ??= {firstAt: now};
       events.push({type: 'equipment-bought', id: action.id});
-      installEquipment(next, action.id, action.replaceId, events);
-      reconcileRecovery(timed, next);
-      for (const trainee of activePlayers(next)) rememberPlayer(next, events, trainee);
+      if (action.destination !== 'warehouse') {
+        installEquipment(next, action.id, action.replaceId, events);
+        reconcileRecovery(timed, next);
+        for (const trainee of activePlayers(next)) rememberPlayer(next, events, trainee);
+      }
       break;
     }
     case 'equip': {

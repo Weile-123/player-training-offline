@@ -1,18 +1,14 @@
 import {useEffect, useRef, useState, useSyncExternalStore, type CSSProperties} from 'react';
 import {useGym} from '../gymStore';
-import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotExperience, staminaMax, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
+import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotExperience, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
 import {templateById} from '../game/templates';
-import {overallRating} from '../game/matching';
-import {statKeys, type Player} from '../game/types';
-import {statLabels} from '../game/config';
+import {type Player} from '../game/types';
 import {gameAudio} from '../presentation/audio';
 import {soundEnabled} from '../presentation/sampleAudio';
 import {decodePreferences, presentationConfig, type ShotFeedback} from '../presentation/feedback';
 import {getAnimationConfig, subscribeAnimationConfig, watchAnimationConfig} from '../presentation/animationConfig';
 import {useModalAccessibility} from '../presentation/useModalAccessibility';
 import {valueTone} from '../presentation/valueTone';
-import {assetUrl} from '../presentation/assetUrls';
-import {itemCatalog} from '../game/contract/catalog';
 import {ComicDialog} from './ComicDialog';
 import {DockButtonFrame} from './DockButtonFrame';
 import {DockIcon} from './DockIcon';
@@ -27,17 +23,20 @@ import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, G
 import {offlineLimitMs} from '../game/gym/offline';
 import {trainingGuidance} from '../game/gym/guidance';
 import {GymRecruitmentControls} from './GymRecruitmentControls';
+import {GymPlayerDetails} from './GymPlayerDetails';
+import {GymTrainingToolbar} from './GymTrainingToolbar';
+import {useGymShopNotice} from '../presentation/gymShopNotice';
+import {gymPlayerName} from '../presentation/gymPlayerName';
 import './TrainingLayout.css';
 import '../equipment-status.css';
 import './GymGame.css';
 
-type Panel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'collection' | 'experience' | 'player' | 'training' | 'cooperation' | null;
-const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材与背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', collection: '收藏图鉴', experience: '训练经验', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
+type Panel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'recruit' | 'collection' | 'experience' | 'player' | 'training' | 'cooperation' | null;
+const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', recruit: '新人招生', collection: '收藏图鉴', experience: '训练经验', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
 const outcomeLabels = {hold: '维持', success: '成功', great: '大成功'};
-const supplyIds = ['item_005', 'item_001', 'item_002', 'item_003', 'item_004'] as const;
 
 function displayedPlayer(player: GymPlayer): Player {
- return {id: player.id, name: player.name, age: 18, height: player.height, stats: player.stats, level: player.level, shots: player.shots, templateId: player.templateId, heat: 0, hotShots: 0, iceShots: 0};
+ return {id: player.id, name: gymPlayerName(player), age: 18, height: player.height, stats: player.stats, level: player.level, shots: player.shots, templateId: player.templateId, heat: 0, hotShots: 0, iceShots: 0};
 }
 
 function formatValue(value: string) {
@@ -48,23 +47,12 @@ function formatValue(value: string) {
  return `${Number(amount / 10000000000n) / 100}万亿`;
 }
 
-function PlayerDetails({player, onTraining}: {player: GymPlayer; onTraining: () => void}) {
- const current = templateById(player.templateId);
- return <div className="gym-panel gm-stack" aria-label="当前球员资料">
-  <h3>{player.name} · {player.height} cm</h3>
-  <p>训练 Lv.{player.level} · 已投篮 {player.shots} 次 · 当前模板 {current?.name ?? '待发掘'}</p>
-  <p>综合评分 {overallRating(player.stats).toFixed(1)}</p>
-  <dl className="gm-metrics">{statKeys.map(key => <div key={key}><dt>{statLabels[key]}</dt><dd>{player.stats[key]}</dd></div>)}</dl>
-  <button className="secondary" onClick={onTraining}>查看训练计划与培养记录</button>
-  {player.level >= playerLevelCap && <p className="gym-muted">球员已达到 Lv.{playerLevelCap} 训练上限，可核对成果后推荐签约。</p>}
- </div>;
-}
-
 export default function GymGame({onHome}: {onHome: () => void}) {
  const store = useGym();
  const state = store.state;
  const player = state.player;
- const [panel, setPanel] = useState<Panel>(null);
+ const [panel, setPanel] = useState<Panel>(player ? null : 'recruit');
+ const shopHasNewEquipment = useGymShopNotice(state, panel === 'shop');
  const [busy, setBusy] = useState(false);
  const [feedback, setFeedback] = useState<ShotFeedback | null>(null);
  const [shots, setShots] = useState<ShotFeedback[]>([]);
@@ -173,11 +161,11 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    if (action.type === 'recommend') {
     const reward = result.events.find(event => event.type === 'recommended');
     setNotice(`推荐成功 · 赞助券 +${reward?.credits ?? 0} · 声望 +${reward?.fame ?? 0}${reward?.repeatTemplate ? ' · 重复模板奖励' : reward?.isFirstPostgameRecommendation ? ' · 模板首次推荐奖励' : ''}`);
-    setPanel(null);
+    setPanel(result.state.player ? null : 'recruit');
     setFeedback(null);
     setShots([]);
    }
-   if (action.type === 'recruit') {setFeedback(null); setShots([]); setNotice(action.mode === 'selected' ? '精选新人已入馆，可选择训练计划并开始培养' : '新人已入馆，可以开始培养');}
+   if (action.type === 'recruit') {if (panel === 'recruit') setPanel(null); setFeedback(null); setShots([]); setNotice(action.mode === 'selected' ? '精选新人已入馆，可选择训练计划并开始培养' : '新人已入馆，可以开始培养');}
    if (action.type === 'select-player') {setPanel(null); setFeedback(null); setShots([]);}
    if (action.type === 'set-training-plan') {
     setPanel(null);
@@ -196,10 +184,8 @@ export default function GymGame({onHome}: {onHome: () => void}) {
   }
  };
  const onAction = (action: GymAction) => {void perform(action);};
- const capacity = staminaMax(state);
  const training = trainingStatus(state);
  const cooperation = cooperationStatus(state);
- const cooperationShots = cooperation.requirements[0];
  const experienceRequired = requiredExperience(player?.level ?? 0);
  const atCap = !!player && player.level >= playerLevelCap;
  const guidance = trainingGuidance(state);
@@ -214,24 +200,18 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    </header>
    <GymScoreboard state={state} onClub={() => setPanel('club')} onPlayer={() => setPanel('roster')}/>
    <section className="game-player"><div className="player-value-card" data-tier={templateById(player?.templateId)?.tier ?? 'undiscovered'}>
-    <PlayerTemplatePanel player={player ? displayedPlayer(player) : undefined} feedback={feedback} reduced={reduced} disabled={!player} onDetails={() => setPanel('player')}/>
+    <PlayerTemplatePanel player={player ? displayedPlayer(player) : undefined} feedback={feedback} reduced={reduced} disabled={!player} showTrainingLevel={false} onDetails={() => setPanel('player')}/>
     <div className="player-value-footer"><div className={`player-value-amount value-tone-${valueTone(templateById(player?.templateId)?.tier)}`}><small>身价</small><FittedAmount fitHeight text={player ? formatValue(playerValue(state, player)) : '—'}/></div>
      <button className="sell-shortcut red-stamp" disabled={!player || busy} onClick={() => setPanel('recommend')}><span>推荐签约</span><i>›</i></button>
     </div>
    </div></section>
-   <button className="probability-panel gym-experience" onClick={() => setPanel('experience')} aria-label="查看训练经验">
-    <div className="probability-frame"><div className="gym-experience-inner"><span className="gym-experience-label"><b>Lv.{player?.level ?? 0}</b><small>训练经验</small></span><div className="gym-experience-track" role="progressbar" aria-label="当前球员训练经验" aria-valuemin={0} aria-valuemax={atCap ? 1 : experienceRequired} aria-valuenow={atCap ? 1 : player?.experience ?? 0} aria-valuetext={atCap ? '已满级' : `${player?.experience ?? 0}/${experienceRequired} 经验`}><i style={{width: `${atCap ? 100 : Math.min(100, (player?.experience ?? 0) / experienceRequired * 100)}%`}}/></div><span className="gym-experience-readout"><b>{atCap ? '已满级' : `${player?.experience ?? 0}/${experienceRequired}`}</b><small aria-live="polite">{feedback?.player.id === player?.id ? feedback?.message : '点击查看升级需求'}</small></span></div></div>
-   </button>
+   <GymTrainingToolbar level={player?.level ?? 0} experience={player?.experience ?? 0} required={experienceRequired} atCap={atCap} cooperationReady={cooperation.complete} onExperience={() => setPanel('experience')} onTraining={() => setPanel('training')} onCooperation={() => setPanel('cooperation')}/>
    <section className="game-stage">
     <ShotScene feedback={feedback} shots={shots} hot={false} busy={shots.length > 0} reduced={reduced} hideOutcomeLabel onFinish={id => setShots(previous => id === undefined ? [] : previous.filter(shot => shot.id !== id))}/>
     <ShotStatusPop active={!!player && !panel} feedback={feedback} hoopScale={visual.hoopScale} reduced={reduced}/>
     <GymStamina state={state}/>
     <div className="stage-navigation">
      <div className="contract-stage-tools"><button className="stage-collection-button" onClick={() => setPanel('collection')} aria-label="打开图鉴"><span>图鉴</span></button></div>
-     <div className="contract-stage-tools gym-training-tools">
-      <button className="stage-collection-button" onClick={() => setPanel('training')} aria-label="选择训练计划">训练计划</button>
-      <button className="stage-collection-button" data-ready={cooperation.complete} onClick={() => setPanel('cooperation')} aria-label="赞助合作">{cooperation.complete ? '合作已达成' : cooperation.offer && cooperationShots ? `合作 ${cooperationShots.current}/${cooperationShots.required}` : '赞助合作'}</button>
-     </div>
     </div>
     {player && !notice && !store.actionError && <button className="court-equipment-status" aria-label="查看当前训练课程" onClick={() => setPanel('training')}>
      <span className="equipment-status-heading">{training.plan.name} <i>›</i></span>
@@ -241,41 +221,33 @@ export default function GymGame({onHome}: {onHome: () => void}) {
      {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : recommendationPayout(state).repeatTemplate ? `重复模板推荐合计 ${postgameRepeatTemplateCredits} 券，声望照常` : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
     </button>}
     {(store.actionError || notice) && <div className="contract-status" role="status">{store.actionError || notice}</div>}
-    {!player && <div className="gym-empty-court"><div><h2>下一位新星，等你发掘</h2><GymRecruitmentControls state={state} onAction={onAction} busy={busy} emptyCourt/></div></div>}
    </section>
    <footer className="game-dock contract-clean-dock"><div className="dock-canvas">
-    <div className="consumable-bar"><div className="consumable-grid" role="group" aria-label="一次性物品，固定五格">
-     {supplyIds.map(id => {
-      const item = itemCatalog.find(entry => entry.id === id)!;
-      const available = id === 'item_005';
-      const quantity = available ? state.inventory.drink : 0;
-      return <button key={id} className="consumable-slot" disabled={!available || !player || atCap || quantity < 1 || player.stamina >= capacity || busy} title={available ? atCap ? '球员已满级，饮料留给其他球员使用' : '恢复 10 点体力' : `${item.name} · 后续开放`} aria-label={available ? `使用运动饮料，数量${quantity}${atCap ? '，球员已满级不可使用' : ''}` : `${item.name}，后续开放`} onClick={() => {if (player && available && !atCap) onAction({type: 'use-drink', id: player.id});}}><img className="consumable-icon" src={assetUrl(`art/consumables/${item.icon}.png`)} alt="" aria-hidden="true" draggable={false}/><span><strong>{item.shortName}</strong><b>×{quantity}</b></span></button>;
-     })}
-    </div></div>
     <div className="dock-side dock-side-left">
      <button className="dock-control dock-bag css-dock-button" aria-label="打开背包" onClick={() => setPanel('inventory')}><DockButtonFrame/><DockIcon name="bag"/><strong>背包</strong></button>
      <button className="dock-control dock-month css-dock-button" aria-label="球馆经营" onClick={() => setPanel('club')}><DockButtonFrame/><DockIcon name="month"/><strong>球馆</strong></button>
     </div>
-    <ShootButton disabled={!player || player.autoEnabled || player.stamina < 1 || player.level >= playerLevelCap || busy || !!panel} reduced={reduced} cooldownUntil={player?.autoEnabled ? undefined : player?.nextShotAt ?? 0} cooldownDurationMs={1000} onShoot={() => {if (player) onAction({type: 'train', id: player.id});}}/>
+    <ShootButton mode={player ? 'shoot' : 'recruit'} disabled={!!player && (player.autoEnabled || player.stamina < 1 || player.level >= playerLevelCap) || busy || !!panel} reduced={reduced} cooldownUntil={player?.autoEnabled ? undefined : player?.nextShotAt ?? 0} cooldownDurationMs={1000} onShoot={() => {if (player) onAction({type: 'train', id: player.id}); else setPanel('recruit');}}/>
     <div className="dock-side dock-side-right">
-     <button className="dock-control dock-shop css-dock-button" aria-label="器材商店" onClick={() => setPanel('shop')}><DockButtonFrame/><DockIcon name="shop"/><strong>商店</strong></button>
+     <button className="dock-control dock-shop css-dock-button" aria-label="器材商店" onClick={() => setPanel('shop')}><DockButtonFrame/><DockIcon name="shop"/><strong>商店</strong>{shopHasNewEquipment && <i className="gym-shop-new-dot" role="img" aria-label="新器材可购买"/>}</button>
      <button className="dock-control dock-rest css-dock-button" aria-label="推荐球员签约" disabled={!player || busy} onClick={() => setPanel('recommend')}><DockButtonFrame/><DockIcon name="rest"/><strong>推荐签约</strong></button>
     </div>
    </div></footer>
   </div>
-  {panel && <ComicDialog title={panelTitles[panel]} onClose={() => setPanel(null)} variant={panel === 'collection' ? 'album' : panel === 'roster' ? 'roster' : 'standard'} className={panel === 'collection' ? 'collection-album-dialog' : panel === 'roster' ? 'scheme-roster-dialog' : 'gym-management-dialog'}><div className="contract-panel">
+  {panel && <ComicDialog title={panelTitles[panel]} onClose={() => setPanel(null)} variant={panel === 'collection' ? 'album' : panel === 'roster' ? 'roster' : 'standard'} className={panel === 'collection' ? 'collection-album-dialog' : panel === 'roster' ? 'scheme-roster-dialog' : panel === 'shop' ? 'gym-management-dialog gym-shop-dialog' : panel === 'inventory' ? 'gym-management-dialog gym-inventory-dialog' : 'gym-management-dialog'}><div className="contract-panel">
    {store.actionError && <p className="contract-notice" role="alert">{store.actionError}</p>}
    <div aria-busy={busy} className={busy ? 'gym-action-pending' : ''}>
     {panel === 'club' && <GymClubPanel state={state} onAction={onAction}/>}
     {panel === 'training' && <GymTrainingPanel key={player?.id} state={state} onAction={onAction}/>}
     {panel === 'cooperation' && <GymCooperationPanel key={player?.id} state={state} onAction={onAction}/>}
     {panel === 'shop' && <GymShopPanel state={state} onAction={onAction} busy={busy}/>}
-    {panel === 'inventory' && <><GymInventoryPanel state={state} onAction={onAction} busy={busy}/><button className="secondary inventory-home-button" onClick={onHome}><GameIcon name="home"/>保存并返回首页</button></>}
+    {panel === 'inventory' && <GymInventoryPanel state={state} onAction={onAction} busy={busy}/>}
     {panel === 'recommend' && <GymRecommendPanel state={state} onAction={onAction} onClose={() => setPanel(null)}/>}
     {panel === 'alumni' && <GymAlumniPanel state={state} onAction={onAction} loadAlumni={store.loadAlumni}/>}
     {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} busy={busy} onAlumni={() => setPanel('alumni')}/>}
+    {panel === 'recruit' && <GymRecruitmentControls state={state} onAction={onAction} busy={busy} emptyCourt/>}
     {panel === 'collection' && <GymCollectionPanel state={state} onAction={onAction} busy={busy}/>}
-    {panel === 'player' && player && <PlayerDetails player={player} onTraining={() => setPanel('training')}/>}
+    {panel === 'player' && player && <GymPlayerDetails player={player} onTraining={() => setPanel('training')}/>}
     {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>当前模式：维持 30% 获得 {trainingShotExperience(state, 'hold')} 经验，成功 60% 获得 {trainingShotExperience(state, 'success')} 经验，大成功 10% 获得 {trainingShotExperience(state, 'great')} 经验。剩余经验会保留到下一级。</p><p>手动基础为8／12／20经验；自动项目每级使每次自动投篮额外 +1 经验，在线与离线共同生效。只有升级时获得属性成长机会，天赋、训练专项与馆内器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动与离线训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>{offlineHint}每 10 球完成一课，推荐时按培养成果与合作结算奖励。训练计划与推荐面板可查看培养奖金条件和预计训练时间。</p></>}
    </div>
   </div></ComicDialog>}

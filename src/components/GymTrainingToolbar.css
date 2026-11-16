@@ -1,0 +1,72 @@
+.gym-training-toolbar {
+ display: flex;
+ align-items: stretch;
+ gap: clamp(5px, 1.25cqw, 9px);
+ width: 100%;
+ height: 100%;
+ min-width: 0;
+ min-height: 0;
+ padding: 3px 1.7% 4px;
+ border-bottom: 1px solid #9e8967;
+ background: #09151d;
+ container-type: inline-size;
+}
+
+.gym-game .gym-experience {
+ position: relative;
+ display: flex;
+ flex: 1;
+ flex-direction: column;
+ justify-content: center;
+ gap: clamp(4px, .75cqw, 6px);
+ min-width: 0;
+ min-height: 0;
+ margin: 0;
+ padding: clamp(5px, 1.1cqw, 8px) clamp(6px, 1.7cqw, 12px);
+ border: 2px solid #f0da9f;
+ border-radius: 0;
+ background: linear-gradient(#1c3e49, #112834);
+ box-shadow: 2px 3px 0 #06141c;
+ color: #f4e4bd;
+ text-align: left;
+}
+
+.gym-experience::before { content: ''; position: absolute; inset: 4px; border: 1px solid #7a8b86; pointer-events: none; }
+.gym-experience-upper { display: flex; align-items: center; gap: clamp(4px, .85cqw, 6px); min-width: 0; line-height: 1; }
+.gym-experience-upper > strong { flex: none; padding: 3px clamp(6px, 1.4cqw, 10px); background: #af3329; color: #f4e4bd; clip-path: polygon(7% 0, 100% 0, 92% 100%, 0 100%); font: clamp(12px, 2.4cqw, 17px)/1 var(--font-number); }
+.gym-experience-upper > span:not(.gym-experience-readout) { white-space: nowrap; font: clamp(8px, 1.7cqw, 12px)/1 var(--font-display); }
+.gym-experience-readout { margin-left: auto; white-space: nowrap; }
+.gym-experience-readout > b { font: clamp(15px, 2.8cqw, 20px)/1 var(--font-number); font-variant-numeric: tabular-nums; }
+.gym-experience-readout small { font-size: .75em; color: #b4c3bb; }
+.gym-experience-track { height: clamp(7px, 1.4cqw, 10px); flex: none; min-width: 0; border: 1px solid #ae9250; background: #071921; box-shadow: inset 0 2px 3px #0009; overflow: hidden; }
+.gym-experience-track > i { display: block; height: 100%; background: linear-gradient(#fff0aa, #e2ab37 65%, #ab731d); transition: width 180ms ease-out; }
+
+.gym-training-tickets { display: flex; flex: none; gap: clamp(4px, .7cqw, 5px); align-items: stretch; }
+.gym-game .gym-training-ticket {
+ position: relative;
+ display: flex;
+ flex: none;
+ flex-direction: column;
+ justify-content: center;
+ align-items: center;
+ gap: clamp(4px, .85cqw, 6px);
+ width: clamp(44px, 10.56cqw, 76px);
+ min-height: 44px;
+ margin: 0;
+ padding: 5px 6px;
+ border: 0;
+ border-radius: 0;
+ background: #f0d9a5 var(--training-ticket-paper) center/cover;
+ box-shadow: 2px 3px 0 #020b12;
+ color: #173442;
+ clip-path: polygon(0 0, 94% 0, 100% 8%, 100% 92%, 94% 100%, 0 100%, 0 65%, 4% 60%, 0 55%, 0 45%, 4% 40%, 0 35%);
+}
+.gym-training-ticket::before { content: ''; position: absolute; inset: 4px; border: 1px solid #8a6f38; pointer-events: none; }
+.gym-training-ticket > svg { display: block; flex: none; width: clamp(17px, 3.5cqw, 25px); height: clamp(17px, 3.5cqw, 25px); fill: none; stroke: currentColor; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; }
+.gym-training-ticket > span { white-space: nowrap; font: clamp(13px, 2.8cqw, 20px)/1 var(--font-display); }
+.gym-game .gym-cooperation-ticket { background-color: #f7c66a; background-blend-mode: multiply; }
+.gym-cooperation-ready { position: absolute; top: 1px; right: 1px; width: clamp(10px, 2.1cqw, 15px); height: clamp(10px, 2.1cqw, 15px); clip-path: polygon(0 0, 100% 0, 100% 100%); background: #bc392b; }
+.gym-game .gym-training-ticket:active { transform: translateY(1px); }
+.gym-game .gym-training-ticket:focus-visible { outline: 2px solid #fff0c8; outline-offset: -2px; }
+.reduce-motion .gym-experience-track > i { transition: none; }
+@media (prefers-reduced-motion: reduce) { .gym-experience-track > i { transition: none; } }

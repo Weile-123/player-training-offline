@@ -42,6 +42,27 @@
 .gm-club-heading { display: flex; align-items: center; gap: 11px; }
 .gm-club-level { display: grid; place-items: center; flex: none; width: 58px; height: 57px; color: #fae9bd; background: #12313c; border: 3px double #e3c48a; outline: 1px solid #122733; font: 950 33px/1 var(--font-number, Impact), sans-serif; transform: skewX(-5deg); }
 .gm-club-heading > div { display: grid; gap: 4px; }
+.gm-club-overview { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.gm-club-resources { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 9px 11px; border: 3px double #173541; color: #eedaad; background: #15313e; font-size: 11px; }
+.gm-club-resources > span { display: flex; align-items: center; gap: 6px; }
+.gm-club-resources b { color: #f6cb5f; font-size: 19px; font-weight: 950; font-variant-numeric: tabular-nums; }
+.gm-club-resources .gm-coupon { margin: 0; }
+.gm-club-expansion { display: grid; gap: 8px; padding: 10px; }
+.gm-club-conditions { display: grid; gap: 5px; padding-block: 6px; border-block: 1px solid #d0b98d; }
+.gm-club-expansion-footer { display: flex; gap: 8px; align-items: center; }
+.gm-club-expansion-footer > p { flex: 1; }
+.gm-club-expansion-footer > button { flex: none; }
+.gm-club-shortfall { color: #9e392a; font-size: 11px; }
+.gm-projects-compact .gm-project { gap: 6px; padding: 10px 11px; box-shadow: 1px 2px 0 #c7af82; }
+.gm-projects-compact .gm-info-button { justify-self: start; font-size: 11px; }
+.gm-projects-compact .gm-project-footer .gm-button { min-height: 33px; padding-block: 5px; }
+.gm-projects-compact .gm-project-footer > p { font-size: 11px; }
+.gm-collection { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.gm-collection > .collection-sections { flex: 1; min-height: 0; }
+.gm-collection .collection-tab-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.gm-legacy-album-note { margin: 0 0 7px; color: #6c5b41; font-size: 11px; }
+.gm-album-record p { margin: 6px 0 0; font-size: 13px; }
+.gm-equipment-extra { margin-top: 12px; text-align: left; }
 .gym-panel .gm-metrics { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
 .gm-metrics > div { display: grid; gap: 3px; padding: 9px 10px; border: 1px solid var(--gm-line); background: var(--gm-paper); }
 .gm-metrics dt { color: #65513a; font-size: 11px; font-weight: 800; }
@@ -74,6 +95,9 @@
 .gm-filters { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
 .gm-filters > label { display: grid; gap: 3px; min-width: 0; color: #675036; font-size: 10px; font-weight: 900; }
 .gm-filters select { min-width: 0; width: 100%; min-height: 35px; padding: 3px 4px; background: #faedcb; border: 1px solid #a98e62; border-radius: 0; color: #17323b; font-size: 12px; font-weight: 750; }
+.gm-shop-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 4px; border: 3px double #e6cf9c; outline: 1px solid #193340; background: #183541; }
+.gm-shop-filters > label { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 6px; color: #f3dfb8; font-size: 10px; padding-left: 3px; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-shop-filters select, .gm-shop-filters select { display: block; height: 28px; min-height: 28px; margin: 0; padding: 2px 4px; border: 1px solid #c3a26b; border-radius: 0; background: #f2e2bd; color: #143340; font-size: 11px; line-height: 1.2; }
 .gm-products { display: grid; gap: 8px; }
 .gm-product { display: grid; grid-template-columns: 68px minmax(0,1fr); gap: 7px 10px; align-items: start; padding: 9px; border: 1px solid #ab946e; border-left: 4px solid #ae9367; background: #faeccb; }
 .gm-product[data-rarity='rare'] { border-left-color: #44718c; }
@@ -86,6 +110,17 @@
 .gm-product-actions { grid-column: 1/-1; display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
 .gm-product-actions > p { flex: 1; min-width: 0; }
 .gm-product-actions .gm-button { min-width: 91px; }
+.gm-shop-product { grid-template-columns: clamp(58px, 18%, 84px) minmax(0, 1fr); gap: 9px; align-items: center; padding: 8px; border: 2px solid #bda779; border-left: 4px solid #ae9367; background: #f6e8c8; box-shadow: 1px 2px 0 #c7af82; }
+.gm-shop-product .gm-product-image { width: 100%; height: auto; aspect-ratio: 1; border: 1px solid #c4ad7d; background: #eddbb6; }
+.gm-shop-product .gm-product-copy { gap: 10px; }
+.gym-panel .gm-shop-product h4 { color: #15313e; font-size: 15px; line-height: 1.35; }
+.gm-shop-product .gm-product-actions { grid-column: auto; justify-content: space-between; gap: 5px; flex-wrap: wrap; }
+.gm-shop-product .gm-info-button { min-height: 32px; color: #8b3a2a; font-size: 11px; text-decoration: none; }
+.gm-shop-product .gm-product-actions .gm-button { min-width: 88px; min-height: 34px; padding: 5px 7px; font-size: 12px; }
+.gm-shop-product.is-owned { border-color: #aaa795; border-left-color: #929181; background: #e5e1d4; box-shadow: 1px 2px 0 #c3bca9; }
+.gm-shop-product.is-owned .gm-product-image { border-color: #b3ae9a; background: #d9d6c9; filter: grayscale(.85); opacity: .65; }
+.gym-panel .gm-shop-product.is-owned h4 { color: #7a786b; }
+.gm-shop-product.is-owned .gm-info-button { color: #797260; }
 .gm-equipped { color: #346344; font-weight: 900; font-size: 11px; }
 .gm-slot-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .gm-slot { display: grid; place-items: center; width: 48px; height: 48px; padding: 2px; border: 2px solid #90784f; background: #dcca9f; color: #806d50; font-size: 17px; }
@@ -158,7 +193,6 @@
 .gym-panel .leaderboard-tabs { margin-bottom: 1px; }
 
 .game-screen .gm-roster .contract-roster-actions {grid-template-columns:repeat(2,minmax(0,1fr));}
-.gm-roster-training {display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 9px;padding:6px 9px;border-top:1px solid #a48b61;background:#e9d8af;color:#17303b;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums;}
 .gm-roster-recruit {display:grid;gap:8px;margin:12px 0;padding:13px;border:2px dashed #aa8b57;background:#f4e4c2;}
 .gm-roster-recruit h3 {margin:0;color:#15303a;font-size:16px;}
 .gm-roster-recruit select {width:100%;min-height:37px;padding:6px;border:1px solid #9e835b;border-radius:0;background:#f7ebce;color:#17303b;}

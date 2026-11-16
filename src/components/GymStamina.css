@@ -1,0 +1,24 @@
+.gym-stamina-a {
+ --stamina-unit: clamp(.68px, .139cqw, 1px);
+ position: absolute;
+ z-index: 7;
+ top: clamp(10px, 5cqh, 19px);
+ right: clamp(10px, 2.65cqw, 19px);
+ width: calc(74 * var(--stamina-unit));
+ padding: 0;
+ border: 0;
+ background: none;
+ color: #f4e7c0;
+ filter: drop-shadow(1px 2px 0 #061a2a);
+ pointer-events: none;
+}
+.gym-stamina-a-title { display: block; padding: calc(6 * var(--stamina-unit)) calc(4 * var(--stamina-unit)) calc(7 * var(--stamina-unit)); background: #b6332b; color: #f4e7c0; clip-path: polygon(5% 0, 100% 0, 92% 100%, 0 100%); text-align: center; font: calc(18 * var(--stamina-unit))/1 var(--font-display); }
+.gym-stamina-a-body { display: grid; grid-template-columns: calc(7 * var(--stamina-unit)) minmax(0, 1fr); gap: calc(11 * var(--stamina-unit)); padding: calc(14 * var(--stamina-unit)) calc(3 * var(--stamina-unit)) 0 calc(9 * var(--stamina-unit)); }
+.gym-stamina-a-track { position: relative; display: block; width: calc(5 * var(--stamina-unit)); height: min(calc(174 * var(--stamina-unit)), 52cqh); padding: 0; border: 0; background: #172f40; box-shadow: 0 0 0 1px #edd89e66; }
+.gym-stamina-a-track > i { position: absolute; display: block; bottom: 0; left: 0; right: 0; background: #f0ce79; }
+.gym-stamina-a-values { min-width: 0; padding-top: calc(24 * var(--stamina-unit)); }
+.gym-stamina-a-values > strong { display: block; color: #ffe9ab; font: calc(52 * var(--stamina-unit))/.95 var(--font-number); }
+.gym-stamina-a-values > small { display: block; margin-top: calc(7 * var(--stamina-unit)); color: #e2ceaa; text-align: right; font: calc(21 * var(--stamina-unit))/1 var(--font-number); }
+.gym-stamina-a-values > em { display: block; margin-top: calc(17 * var(--stamina-unit)); color: #d3c5a9; text-align: center; font: normal calc(10 * var(--stamina-unit))/1.4 var(--font-body); }
+.gym-stamina-a-values > em > b { color: #f4d895; font: calc(16 * var(--stamina-unit))/1.4 var(--font-number); }
+.gym-game .game-stage .stage-navigation .contract-stage-tools { left: 2%; right: auto; }

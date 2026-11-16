@@ -1,0 +1,12 @@
+/* Alumni use the main-court portrait treatment, with information kept in the archive. */
+.gm-alumni-panel .gm-alumni-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 12px 9px; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-panel .gm-alumni-list > .gm-alumnus[data-tier] { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 7px; min-width: 0; width: 100%; padding: 3px; border: 0; border-radius: 0; background: none; box-shadow: none; color: #15313b; text-align: center; }
+.gm-alumni-panel .gm-alumnus > .gm-alumnus-image { display: block; position: relative; width: 100%; height: auto; aspect-ratio: .82; min-width: 0; overflow: hidden; }
+.gm-alumni-panel .gm-alumnus > strong { display: block; min-width: 0; margin: 0; font-size: clamp(11px, 3.2vw, 16px); font-weight: 950; line-height: 1.35; overflow-wrap: anywhere; }
+.gm-alumni-portrait-surface { display: block; position: relative; width: 100%; height: 100%; overflow: hidden; }
+.gm-alumni-portrait-surface > img, .gm-alumni-portrait-surface > svg, .gm-alumni-portrait-surface > .template-silhouette { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center bottom; }
+.gm-alumni-portrait-surface > img.template-portrait-photo { filter: drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0); }
+.gm-alumnus-heading { grid-template-columns: 86px minmax(0, 1fr); }
+.gm-alumnus-heading > .gm-player-image { display: block; width: 86px; height: 104px; min-width: 0; overflow: hidden; }
+.gm-alumni-panel .gm-alumnus:focus-visible { outline: 2px solid #a93225; outline-offset: 2px; }
+@media (max-width: 359px) { .gm-alumni-panel .gm-alumni-list { gap: 10px 6px; } .gm-alumni-panel .gm-alumnus > strong { font-size: 11px; } .gm-alumnus-heading { grid-template-columns: 72px minmax(0, 1fr); } .gm-alumnus-heading > .gm-player-image { width: 72px; height: 92px; } }

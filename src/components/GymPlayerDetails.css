@@ -1,0 +1,31 @@
+.gm-player-profile { container-type: inline-size; gap: 12px; }
+.gm-profile-hero { position: relative; display: grid; grid-template-columns: 25% minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px; border: 3px double #15313e; background: #e9d8b2 var(--asset-art-game-template-paper-png,url('/art/game/template-paper.png')) center/cover; box-shadow: 2px 3px 0 #b09a6d; }
+.gm-profile-portrait { display: block; align-self: stretch; min-height: 110px; min-width: 0; overflow: hidden; aspect-ratio: .78; background: #16303e var(--asset-art-collection-court-lines-svg,url('/art/collection/court-lines.svg')) center/cover; border: 3px solid #b6975e; outline: 1px solid #16313e; }
+.gm-profile-portrait > img, .gm-profile-portrait > svg { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center bottom; }
+.gm-profile-identity { display: grid; gap: 5px; min-width: 0; }
+.gym-panel .gm-profile-identity h3 { font-size: clamp(20px, 6cqw, 32px); line-height: 1.15; overflow-wrap: anywhere; }
+.gm-profile-tier { justify-self: start; padding: 2px 10px 3px 7px; color: #fff0c8; font-size: clamp(10px, 2.8cqw, 14px); font-weight: 900; background: #b73025; clip-path: polygon(0 0, 100% 0, 93% 100%, 0 100%); }
+.gym-panel .gm-profile-identity p { color: #4d5349; font-size: clamp(11px, 3.1cqw, 16px); }
+.gm-profile-identity small { color: #736044; font-size: clamp(10px, 2.7cqw, 13px); line-height: 1.4; }
+.gm-profile-rating { align-self: center; display: grid; justify-items: center; gap: 4px; padding: 8px; border-left: 1px solid #b79c6d; }
+.gm-profile-rating > span { color: #66553c; font-size: clamp(9px, 2.5cqw, 13px); font-weight: 800; white-space: nowrap; }
+.gm-profile-rating > b { color: #a22f25; font: 900 clamp(25px, 7.6cqw, 43px)/1 var(--font-number,Impact),sans-serif; }
+.gm-profile-record { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 9px 3px; border-block: 1px solid #b69e70; background: #eedbb14d; }
+.gm-profile-record > span { display: grid; justify-items: center; gap: 4px; color: #766145; font-size: 10px; }
+.gm-profile-record > span + span { border-left: 1px solid #c5ae82; }
+.gm-profile-record b { color: #1b3e48; font-size: clamp(15px, 4.6cqw, 23px); font-weight: 950; line-height: 1; }
+.gm-profile-record small { margin-left: 3px; color: #746143; font-size: 10px; }
+.gm-profile-abilities { padding: 9px 11px 10px; border: 3px double #243d44; border-radius: 3px; background: #f9edce; }
+.gm-profile-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px solid #d5be92; }
+.gym-panel .gm-profile-section-title h4 { font-size: 15px; }
+.gm-profile-section-title > span { color: #8b7757; font-size: 10px; }
+.gm-profile-stat-list { display: grid; gap: 7px; }
+.gm-profile-stat { display: grid; grid-template-columns: 19px 30px minmax(0, 1fr) 28px; align-items: center; gap: 8px; min-height: 25px; }
+.gm-profile-stat > .album-icon { width: 18px; height: 18px; color: var(--ability-color); }
+.gm-profile-stat > span { color: #5e513b; font-size: 12px; font-weight: 850; }
+.gm-profile-stat > b { color: #15313e; text-align: right; font: 900 22px/1 var(--font-number,Impact),sans-serif; }
+.gm-profile-stat-track { height: 11px; padding: 1px; border: 1px solid #a99570; background: #e1d0ad; transform: skewX(-9deg); overflow: hidden; }
+.gm-profile-stat-track > i { display: block; height: 100%; background: var(--ability-color); box-shadow: inset 0 1px #ffffff55; }
+.gm-profile-training { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 40px; }
+.gm-profile-training > span { margin-left: 6px; font-size: 23px; line-height: 1; }
+@media(max-width: 360px) { .gm-profile-hero { gap: 7px; padding: 7px; } .gm-profile-portrait { min-height: 96px; } .gm-profile-rating { padding: 5px; } .gm-profile-stat { gap: 6px; } }

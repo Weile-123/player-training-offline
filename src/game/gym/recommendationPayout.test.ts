@@ -146,7 +146,7 @@ describe('all-level per-template recommendation rewards', () => {
     const paid = recommend(state);
     expect(paid.state.credits).toBe(500);
     expect(paid.state.postgameRecommendedTemplates).toEqual([]);
-    expect(paid.state.alumni[0].rewardCredits).toBe(0);
+    expect(paid.state.alumni).toHaveLength(0);
   });
 
   it('keeps the earlier recommendation counted after upgrading from seven to eight', () => {

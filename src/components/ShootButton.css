@@ -34,3 +34,65 @@
  text-shadow: 0 2px 3px #07141c, 1px 0 #07141c;
  pointer-events: none;
 }
+
+/* Preserve the original shot rim and crop; replace only its baked-in central artwork. */
+.game-screen .dock-shoot.is-recruiting .dock-shoot-face {
+ background: none;
+}
+.dock-recruit-surface {
+ position: absolute;
+ inset: 0;
+ border-radius: inherit;
+}
+.dock-recruit-surface::before {
+ content: '';
+ position: absolute;
+ inset: 0;
+ border-radius: inherit;
+ background: var(--asset-art-game-dock-controls-png,url('/art/game/dock-controls.png')) 49.922% 81.25% / 278.552% 147.059% no-repeat;
+ filter: grayscale(1) sepia(1) saturate(2.6) hue-rotate(-8deg) brightness(1.35);
+}
+.dock-recruit-infill {
+ position: absolute;
+ inset: 9% 12% 15%;
+ border-radius: 50%;
+ overflow: hidden;
+ background:
+  radial-gradient(ellipse at 32% 20%, #f2d49480, transparent 54%),
+  radial-gradient(ellipse at 66% 80%, #79471940, transparent 65%),
+  linear-gradient(122deg, #d9aa55, #c89b45 43%, #bd8936 76%, #a8732b);
+ box-shadow: inset 1px 2px 5px #ffe8a526, inset -2px -3px 6px #623d2926;
+}
+.dock-recruit-infill::before {
+ content: '';
+ position: absolute;
+ inset: 0;
+ background:
+  var(--asset-art-game-probability-grain-png,url('/art/game/probability-grain.png')) center/23% repeat,
+  var(--asset-art-game-paper-png,url('/art/game/paper.png')) center/130% 100% no-repeat;
+ background-blend-mode: multiply;
+ filter: grayscale(1) contrast(1.25);
+ mix-blend-mode: soft-light;
+ opacity: .8;
+}
+.dock-recruit-infill::after {
+ content: '';
+ position: absolute;
+ inset: 0;
+ background:
+  radial-gradient(circle, #fff0bb66 0 .45px, transparent .8px) 1px 2px/5px 6px,
+  radial-gradient(circle, #73481940 0 .5px, transparent .9px) 3px 1px/4px 5px,
+  repeating-linear-gradient(123deg, transparent 0 17px, #fff0b516 18px, transparent 19px 37px, #74451c14 38px, transparent 39px 61px);
+ opacity: .6;
+}
+.dock-recruit-art {
+ position: absolute;
+ inset: 0;
+ width: 100%;
+ height: 100%;
+ fill: #f8e7c3;
+}
+.dock-recruit-art text {
+ font: 74px var(--font-display);
+ letter-spacing: 1px;
+}

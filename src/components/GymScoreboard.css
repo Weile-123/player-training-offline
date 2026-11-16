@@ -1,0 +1,44 @@
+.game-viewport > .gym-scoreboard { grid-row: 2; }
+.gym-scoreboard {
+ display: grid;
+ grid-template-columns: clamp(50px, 14.6%, 100px) minmax(0, 1fr);
+ gap: clamp(7px, 1.9%, 13px);
+ width: 96.6%;
+ height: calc(100% - .6cqh);
+ min-height: 0;
+ margin: .3cqh auto;
+ padding: clamp(4px, 1.2%, 8px);
+ border: 3px double #e7d4a6;
+ background: radial-gradient(#b8c6c419 .7px, transparent 1px) 0 0/4px 4px, #102c3c;
+ box-shadow: 0 0 0 2px #07141d, 3px 4px 0 #030c13;
+ color: #f4e4bd;
+ container-type: inline-size;
+}
+.gym-game .gym-score-medal { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-width: 0; min-height: 0; padding: 0; border: 1px solid #0d2632; border-radius: 0; background: #f4e4bd var(--asset-art-game-paper-png,url('/art/game/paper.png')) center/cover; color: #0b202c; clip-path: polygon(0 0, 100% 0, 100% 91%, 50% 100%, 0 91%); }
+.gym-score-medal > span { font: clamp(11px, 2.9cqw, 20px)/1.2 var(--font-display); }
+.gym-score-medal > b { font: clamp(26px, 7.15cqw, 49px)/.95 var(--font-number); color: #aa3025; }
+.gym-score-detail { display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); min-width: 0; min-height: 0; }
+.gym-score-top { display: flex; align-items: center; justify-content: space-between; gap: clamp(5px, 1.7cqw, 12px); min-width: 0; padding-bottom: clamp(3px, 1cqw, 7px); }
+.gym-score-identity { display: grid; gap: clamp(3px, .9cqw, 6px); min-width: 0; }
+.gym-score-identity > small { color: #d6b565; font-size: clamp(7px, 1.6cqw, 11px); line-height: 1; letter-spacing: 1px; white-space: nowrap; }
+.gym-score-identity > strong { font: clamp(12px, 3.65cqw, 25px)/1.15 var(--font-display); white-space: nowrap; }
+.gym-score-actions { display: flex; flex: none; align-items: center; gap: clamp(3px, .8cqw, 6px); }
+.gym-game .gym-score-roster { display: flex; align-items: center; justify-content: center; flex: none; gap: clamp(3px, .9cqw, 6px); height: clamp(26px, 5.8cqw, 40px); padding: clamp(2px, .6cqw, 4px) clamp(3px, 1cqw, 7px); border: 3px double #cbb487; border-radius: 0; background: radial-gradient(#e9c77c26 .7px, transparent .9px) 0 0/4px 4px, linear-gradient(120deg, #183f4c, #112834); color: #f4e4bd; }
+.gym-score-roster > svg { flex: none; width: clamp(13px, 3.5cqw, 24px); height: clamp(13px, 3.5cqw, 24px); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gym-score-roster > span { font: clamp(8px, 2.19cqw, 15px)/1 var(--font-display); white-space: nowrap; }
+.gym-score-roster > b { font: clamp(13px, 3.2cqw, 22px)/1 var(--font-number); color: #ffd477; white-space: nowrap; }
+.gym-score-roster > .gym-score-chevron { display: block; align-self: center; width: clamp(7px, 1.45cqw, 10px); height: clamp(7px, 1.45cqw, 10px); stroke-width: 2.7; }
+.gym-score-progress { display: flex; align-items: center; gap: clamp(4px, 1cqw, 7px); min-width: 0; min-height: 0; padding-top: clamp(4px, 1.16cqw, 8px); border-top: 1px solid #b9a778; }
+.gym-score-metrics { display: flex; align-items: baseline; gap: clamp(3px, .88cqw, 6px); white-space: nowrap; }
+.gym-score-metrics > span { padding: 3px 6px 3px 4px; background: #b93328; color: #f4e4bd; clip-path: polygon(5% 0, 100% 0, 93% 100%, 0 100%); font: clamp(7px, 1.6cqw, 11px)/1 var(--font-display); }
+.gym-score-metrics > b { font: clamp(18px, 4.52cqw, 31px)/.9 var(--font-number); color: #ffd477; }
+.gym-score-metrics > small { font: clamp(9px, 2.19cqw, 15px)/1 var(--font-number); color: #bac5bf; }
+.gym-score-track { flex: 1; min-width: 0; height: clamp(12px, 2.5cqw, 18px); padding: 1px; border: 1px solid #d5bd82; background: #071b26; box-shadow: inset 0 2px 2px #0007; overflow: hidden; }
+.gym-score-track > i { display: block; height: 100%; background: linear-gradient(#ffdd82, #d99e39); }
+.gym-game :is(.gym-score-medal, .gym-score-roster):focus-visible { outline: 2px solid #fff0c8; outline-offset: -2px; }
+@container (max-width: 360px) {
+ .gym-score-top { gap: 3px; }
+ .gym-score-progress { gap: 4px; padding-top: 3px; }
+ .gym-score-metrics > span { font-size: 7px; }
+ .gym-score-club > svg:not(.gym-score-chevron) { display: none; }
+}

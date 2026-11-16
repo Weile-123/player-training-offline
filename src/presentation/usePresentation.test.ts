@@ -2,7 +2,6 @@ import {createElement} from 'react';
 import {renderToStaticMarkup} from 'react-dom/server';
 import {afterEach,describe,expect,it,vi} from 'vitest';
 import {newGame,seededRandom,select} from '../game/engine';
-import {ShootButton} from '../components/ShootButton';
 import type {Game} from '../game/types';
 import type {usePresentation} from './usePresentation';
 
@@ -19,12 +18,11 @@ async function fixture(game:Game,unlocks:string[]=[]){
  // Capture the real hook's event handlers without mocking React or game actions.
  function Harness(){controller=usePresentation();return null;}
  renderToStaticMarkup(createElement(Harness));
- const button=ShootButton({disabled:false,reduced:false,onShoot:controller.train});
- const click=()=>button.props.onClick({currentTarget:{firstElementChild:null}});
+ const click=()=>controller.train();
  return {useGame,controller,click,play};
 }
 
-describe('shoot button training integration',()=>{
+describe('training presentation integration',()=>{
  it('trains an on-court player even when a previous template unlock is pending',async()=>{
   const original=newGame(seededRandom(4)),game=select(original,original.selectedId!);
   const {useGame,click,play}=await fixture(game,['curry']);

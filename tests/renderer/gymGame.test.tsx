@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {newGym, type GymAction, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, newGym, type GymAction, type GymState} from '../../src/game/gym/engine';
 import {templateRules} from '../../src/game/contract/templates';
 import {statKeys} from '../../src/game/types';
 import type {GymStore} from '../../src/gymStore';
@@ -105,18 +105,16 @@ async function twoPlayers() {
   return [state().player!.id, state().bench[0].id];
 }
 
-it.each([98, 99])('protects the main-court drink at level %s without blocking a trainable player', async level => {
+it.each([98, 99])('removes the main-court consumable shelf without consuming inventory at level %s', async level => {
   const initial = newGym(at, 21);
   initial.player!.level = initial.player!.peakLevel = level;
   initial.player!.stamina = 0; initial.inventory.drink = 1;
   await mount(initial);
-  const drink = document.querySelector<HTMLButtonElement>('.consumable-slot[aria-label^="使用运动饮料"]')!;
-  expect(drink.disabled).toBe(level === 99);
-  if (level === 99) expect(drink.title).toContain('球员已满级');
-  await act(async () => drink.click());
-  expect(state().inventory.drink).toBe(level === 99 ? 1 : 0);
-  expect(state().player!.stamina).toBe(level === 99 ? 0 : 10);
-  expect(harness.actions.filter(action => action.type === 'use-drink')).toHaveLength(level === 99 ? 0 : 1);
+  expect(document.querySelector('.consumable-bar')).toBeNull();
+  expect(document.querySelector('[aria-label="一次性物品，固定五格"]')).toBeNull();
+  expect(state().inventory.drink).toBe(1);
+  expect(state().player!.stamina).toBe(0);
+  expect(harness.actions.filter(action => action.type === 'use-drink')).toHaveLength(0);
 });
 
 it('shows the repeated-template payout on court rather than claiming the highest bonus was achieved', async () => {
@@ -130,7 +128,7 @@ it('shows the repeated-template payout on court rather than claiming the highest
   expect(course).not.toContain('最高培养奖金已达成');
 });
 
-it('replaces the old probability row with experience and reports a shot before a level is earned', async () => {
+it('updates experience without adding shot-result or click-instruction copy below its progress bar', async () => {
   const initial = newGym(at, 21);
   initial.player!.level = 10;
   initial.player!.peakLevel = 10;
@@ -138,13 +136,117 @@ it('replaces the old probability row with experience and reports a shot before a
   await mount(initial);
   expect(document.querySelector('.probability-segment')).toBeNull();
   expect(document.querySelector('[aria-label="当前球员训练经验"]')?.getAttribute('aria-valuenow')).toBe('0');
+  expect(document.querySelector('[aria-label="查看训练经验"]')?.textContent).not.toContain('点击查看升级需求');
   await press('投篮训练');
   expect(state().player!.experience).toBeGreaterThan(0);
   expect(state().player!.level).toBe(10);
   expect(state().player!.stats).toEqual(attributes);
-  expect(document.querySelector('.gym-experience-readout')?.textContent).toContain('经验 +');
+  const experience = document.querySelector('[aria-label="查看训练经验"]')!;
+  expect(experience.textContent).not.toMatch(/成功|维持|经验\s*\+|点击查看/);
+  expect(document.querySelector('[aria-label="当前球员训练经验"]')?.getAttribute('aria-valuenow')).toBe(String(state().player!.experience));
   await press('查看训练经验');
   expect(document.querySelector('[role="dialog"]')?.textContent).toContain('需要 95 经验');
+});
+
+it('places fixed-label plan and cooperation tickets beside experience and keeps both panel routes usable', async () => {
+  const initial = newGym(at, 26);
+  await mount(initial);
+  const toolbar = document.querySelector('[aria-label="训练快捷操作"]')!;
+  const plan = document.querySelector<HTMLButtonElement>('[aria-label="选择训练计划"]')!;
+  const cooperation = document.querySelector<HTMLButtonElement>('[aria-label="赞助合作"]')!;
+  expect(toolbar).toBeTruthy();
+  expect(toolbar.contains(document.querySelector('[aria-label="当前球员训练经验"]'))).toBe(true);
+  expect(toolbar.contains(plan)).toBe(true);
+  expect(toolbar.contains(cooperation)).toBe(true);
+  expect(plan.textContent).toBe('计划');
+  expect(cooperation.textContent).toBe('合作');
+  expect(document.querySelector('.game-stage [aria-label="选择训练计划"]')).toBeNull();
+  expect(document.querySelector('.game-stage [aria-label="赞助合作"]')).toBeNull();
+  expect(document.querySelector('.gym-training-tools')).toBeNull();
+  expect(document.querySelector('.game-stage [aria-label="打开图鉴"]')).toBeTruthy();
+  expect(document.querySelector('[aria-label="合作已达成"]')).toBeNull();
+  await press('选择训练计划');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('训练计划');
+  await press('关闭面板');
+  await press('赞助合作');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('赞助合作');
+  expect(harness.actions).toEqual([]);
+  expect(state()).toEqual(initial);
+});
+
+it.each([false, true])('keeps the cooperation ticket text stable and marks only an earned cooperation (complete %s)', async complete => {
+  const initial = newGym(at, 27);
+  const template = templateRules.find(item => item.tier === 'rotation')!;
+  Object.assign(initial.player!, {templateId: template.id, highestTier: template.tier,
+    shots: complete ? 10 : 5, level: 10, peakLevel: 10});
+  initial.player!.training.completedCourses = complete ? 1 : 0;
+  initial.player!.cooperation = {id: cooperationOffers(initial)[0].id,
+    playerId: initial.player!.id, acceptedShots: 0, acceptedCourses: 0};
+  expect(cooperationStatus(initial).complete).toBe(complete);
+  await mount(initial);
+  const ticket = document.querySelector<HTMLButtonElement>('[aria-label="赞助合作"]')!;
+  expect(ticket.textContent).toBe('合作');
+  expect(!!ticket.querySelector('[aria-label="合作已达成"]')).toBe(complete);
+  await press('赞助合作');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('赞助合作');
+  expect(document.querySelector('.gm-cooperation.is-active')?.textContent).toContain(complete ? '已达标' : '进行中');
+  expect(harness.actions).toEqual([]);
+  expect(state()).toEqual(initial);
+});
+
+it('renders an empty court with safe experience values and no earned cooperation marker', async () => {
+  const initial = newGym(at, 28);
+  initial.player = null;
+  await mount(initial);
+  const progress = document.querySelector('[aria-label="当前球员训练经验"]')!;
+  expect(progress.getAttribute('aria-valuenow')).toBe('0');
+  expect(Number(progress.getAttribute('aria-valuemax'))).toBeGreaterThan(0);
+  expect(document.querySelector('[aria-label="查看训练经验"]')?.textContent).not.toMatch(/undefined|NaN|点击查看/);
+  expect(document.querySelector('[aria-label="合作已达成"]')).toBeNull();
+  expect(document.querySelector('.gym-empty-court')).toBeNull();
+  expect(document.querySelector('.game-stage .gym-empty-recruit')).toBeNull();
+  const recruitment = document.querySelector('[aria-label="新人招生"]')!;
+  expect(recruitment.closest('[role="dialog"]')?.querySelector('h2')?.textContent).toBe('新人招生');
+  expect(recruitment.closest('.game-stage')).toBeNull();
+  expect(document.querySelector('.game-stage [aria-label="新人招生"]')).toBeNull();
+  expect(document.querySelector('[aria-label="投篮训练"]')).toBeNull();
+  expect(document.querySelector<HTMLButtonElement>('[aria-label="招募球员"]')?.disabled).toBe(true);
+  expect(harness.actions).toEqual([]);
+});
+
+it('can dismiss and reopen global recruitment, then closes it after recruiting into the empty court', async () => {
+  const initial = newGym(at, 28);
+  initial.player = null;
+  await mount(initial);
+  await press('关闭面板');
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  await advance(1000);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  const recruitButton = document.querySelector<HTMLButtonElement>('[aria-label="招募球员"]')!;
+  expect(recruitButton.classList.contains('is-recruiting')).toBe(true);
+  expect(recruitButton.disabled).toBe(false);
+  await press('招募球员');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('新人招生');
+  await press('免费招募下一位');
+  expect(state().player).toBeTruthy();
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(document.querySelector('.gym-empty-court')).toBeNull();
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeNull();
+  expect(document.querySelector('[aria-label="投篮训练"]')).toBeTruthy();
+  expect(harness.actions.filter(action => action.type === 'recruit')).toHaveLength(1);
+});
+
+it('opens global recruitment after the final trainee is recommended', async () => {
+  await mount(newGym(at, 29));
+  await press('推荐球员签约');
+  await press('确认推荐');
+  expect(state().player).toBeNull();
+  const recruitment = document.querySelector('[aria-label="新人招生"]')!;
+  expect(recruitment.closest('[role="dialog"]')?.querySelector('h2')?.textContent).toBe('新人招生');
+  expect(recruitment.closest('.game-stage')).toBeNull();
+  await press('免费招募下一位');
+  expect(state().player).toBeTruthy();
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
 });
 
 it('locks automatic training at level one without changing the original main controls', async () => {
@@ -154,7 +256,8 @@ it('locks automatic training at level one without changing the original main con
   const toggle = document.querySelector<HTMLButtonElement>('[role="switch"]')!;
   expect(toggle.disabled).toBe(true);
   expect(toggle.textContent).toContain('Lv.2');
-  expect(document.querySelector('.roster-intro')?.textContent).toContain('1/1');
+  expect(toggle.getAttribute('aria-checked')).toBe('false');
+  expect(document.querySelector('.gm-roster-recruit')).toBeNull();
 });
 
 it('shows a full experience slot at the level cap without a zero denominator', async () => {
@@ -166,6 +269,9 @@ it('shows a full experience slot at the level cap without a zero denominator', a
   expect(progress.getAttribute('aria-valuetext')).toBe('已满级');
   expect(progress.getAttribute('aria-valuemax')).toBe('1');
   expect(progress.querySelector('i')?.style.width).toBe('100%');
+  expect(document.querySelector('[aria-label="查看训练经验"]')?.textContent).not.toMatch(/点击查看|经验\s*\+/);
+  expect(document.querySelector('[aria-label="选择训练计划"]')?.textContent).toBe('计划');
+  expect(document.querySelector('[aria-label="赞助合作"]')?.textContent).toBe('合作');
   expect(document.querySelector('[aria-label="查看当前训练课程"]')?.textContent).toContain('等级已满');
   expect(document.querySelector<HTMLButtonElement>('[aria-label="投篮训练"]')!.disabled).toBe(true);
   await press('查看训练经验');
@@ -174,6 +280,9 @@ it('shows a full experience slot at the level cap without a zero denominator', a
 
 it('selects a bench athlete for manual training and recommends only that selected athlete', async () => {
   const [firstId, secondId] = await twoPlayers();
+  const recruited = state().bench.find(entry => entry.id === secondId)!;
+  // A matched trainee is archived; undiscovered departures are covered separately.
+  recruited.templateId = 'bryant'; recruited.highestTier = 'legend';
   const row = document.querySelector<HTMLElement>(`[data-player-id="${secondId}"]`)!;
   await act(async () => row.querySelector<HTMLButtonElement>('.primary')!.click());
   expect(state().player!.id).toBe(secondId);
@@ -203,9 +312,11 @@ it('keeps player records, training access and the album usable after template su
   await act(async () => details.click());
   const profile = document.querySelector('[aria-label="当前球员资料"]')!;
   expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('球员资料');
-  expect(profile.textContent).toContain(`${initial.player!.name} · 200 cm`);
-  expect(profile.textContent).toContain(`训练 Lv.25 · 已投篮 0 次 · 当前模板 ${current.name}`);
-  expect([...profile.querySelectorAll('dd')].map(item => item.textContent)).toEqual(statKeys.map(key => String(initial.player!.stats[key])));
+  expect(profile.textContent).toContain('200 cm');
+  expect(profile.textContent).not.toContain(initial.player!.name);
+  expect(profile.textContent).toContain(current.name);
+  expect(profile.querySelector('[aria-label="培养记录"]')?.textContent).toContain('Lv.25');
+  expect([...profile.querySelectorAll('[role="meter"]')].map(item => item.getAttribute('aria-valuenow'))).toEqual(statKeys.map(key => String(initial.player!.stats[key])));
   expect(document.querySelector('.gym-goal-card')).toBeNull();
   expect(document.querySelector('[aria-label="选择收藏培养目标"]')).toBeNull();
   await press('查看训练计划与培养记录');
@@ -213,7 +324,7 @@ it('keeps player records, training access and the album usable after template su
   await press('关闭面板');
   await press('打开图鉴');
   expect(document.querySelector('[aria-label="球星收藏进度"]')).toBeTruthy();
-  expect(document.querySelectorAll('.gm-album-card')).toHaveLength(templateRules.length);
+  expect(document.querySelectorAll('.album-card')).toHaveLength(templateRules.length);
   expect(document.querySelector('[aria-label="选择收藏培养目标"]')).toBeNull();
   expect(harness.actions).toEqual([]);
   expect(state()).toEqual(initial);

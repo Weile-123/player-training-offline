@@ -1,13 +1,13 @@
-import {afterEach, beforeEach, expect, it} from 'vitest';
-import {createRoot, type Root} from 'react-dom/client';
-import {useState, type ComponentType} from 'react';
-import {act} from 'preact/test-utils';
-import {cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendation, type GymAction, type GymState} from '../../src/game/gym/engine';
-import {equipmentCatalog} from '../../src/game/gym/catalog';
-import {templateRules} from '../../src/game/contract/templates';
-import {ComicDialog} from '../../src/components/ComicDialog';
-import {GymRecommendPanel, GymShopPanel, GymTrainingPanel, type GymPanelProps} from '../../src/components/GymPanels';
-import {GymCooperationPanel} from '../../src/components/GymCooperationPanel';
+import { afterEach, beforeEach, expect, it } from 'vitest';
+import { createRoot, type Root } from 'react-dom/client';
+import { useState, type ComponentType } from 'react';
+import { act } from 'preact/test-utils';
+import { cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendation, type GymAction, type GymState } from '../../src/game/gym/engine';
+import { equipmentCatalog } from '../../src/game/gym/catalog';
+import { templateRules } from '../../src/game/contract/templates';
+import { ComicDialog } from '../../src/components/ComicDialog';
+import { GymRecommendPanel, GymShopPanel, GymTrainingPanel, type GymPanelProps } from '../../src/components/GymPanels';
+import { GymCooperationPanel } from '../../src/components/GymCooperationPanel';
 
 const at = 1_800_000_000_000;
 let root: Root | null = null;
@@ -15,7 +15,7 @@ let latest: GymState;
 let actions: GymAction[];
 let actionError: string | undefined;
 
-beforeEach(() => {actions = []; actionError = undefined;});
+beforeEach(() => { actions = []; actionError = undefined; });
 afterEach(() => {
   if (root) act(() => root!.unmount());
   root = null;
@@ -32,10 +32,10 @@ async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState) {
       actionError = result.error;
       setState(result.state);
     };
-    return <><button type="button" onClick={() => {if (state.player) onAction({type: 'train', id: state.player.id});}}>测试投篮</button><ComicDialog title="经营面板" onClose={() => {}}><Panel state={state} onAction={onAction}/></ComicDialog></>;
+    return <><button type="button" onClick={() => { if (state.player) onAction({ type: 'train', id: state.player.id }); }}>测试投篮</button><ComicDialog title="经营面板" onClose={() => { }}><Panel state={state} onAction={onAction} /></ComicDialog></>;
   }
   root = createRoot(document.getElementById('root')!);
-  await act(async () => root!.render(<Scene/>));
+  await act(async () => root!.render(<Scene />));
 }
 
 function buttonWithin(scope: ParentNode, text: string) {
@@ -97,8 +97,8 @@ it.each([[1, 5], [2, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 7]])('appli
   const equipment = equipmentCatalog.filter(item => item.effects.courseRecovery > 0 && item.unlockLevel <= gymLevel).sort((first, second) => second.effects.courseRecovery - first.effects.courseRecovery)[0];
   state.ownedEquipment = [equipment.id];
   state.equippedEquipment = [...state.ownedEquipment];
-  state.purchasePrices = {[equipment.id]: equipment.price};
-  state.collection = Object.fromEntries(templateRules.slice(0, equipment.requiredTemplates).map(template => [template.id, {firstAt: at, highestRating: 50, highestValue: '320'}]));
+  state.purchasePrices = { [equipment.id]: equipment.price };
+  state.collection = Object.fromEntries(templateRules.slice(0, equipment.requiredTemplates).map(template => [template.id, { firstAt: at, highestRating: 50, highestValue: '320' }]));
   state.player!.stamina = 10;
   state.player!.shots = 9;
   state.player!.training.shots = 9;
@@ -117,7 +117,7 @@ it.each([[1, 5], [2, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 7]])('appli
 it('asks before discarding an unfinished course and keeps completed courses and growth', async () => {
   await mount(GymTrainingPanel, newGym(at, 12));
   await shoot(13);
-  const stats = {...latest.player!.stats};
+  const stats = { ...latest.player!.stats };
   await press(buttonWithin(card('.gm-plan-card', '内线防守'), '选用'));
   expect(latest.player!.training.shots).toBe(3);
   expect(actions.filter(action => action.type === 'set-training-plan')).toHaveLength(0);
@@ -133,7 +133,7 @@ it('asks before discarding an unfinished course and keeps completed courses and 
 
 it('keeps the compact reward at one coupon for a repeated template even in gym one and at the level cap', async () => {
   const state = newGym(at, 17);
-  Object.assign(state.player!, {level: 25, peakLevel: 25, templateId: 'bryant', highestTier: 'legend'});
+  Object.assign(state.player!, { level: 25, peakLevel: 25, templateId: 'bryant', highestTier: 'legend' });
   state.postgameRecommendedTemplates = ['bryant'];
   expect(recommendation(state).credits).toBe(23);
   await mount(GymTrainingPanel, state);
@@ -213,24 +213,25 @@ it('keeps replacing a cooperation optional until confirmation and starts the new
   expect(actionError).toBeUndefined();
 });
 
-it('shows new equipment purposes in real detail dialogs and exposes the expanded effect filters', async () => {
+it('shows brief equipment effects without filters and keeps complete effects in details', async () => {
   const state = newGym(at, 15);
   state.gymLevel = 8;
   state.credits = 100;
   await mount(GymShopPanel, state);
-  const filters = [...document.querySelectorAll('select option')].map(option => option.textContent);
-  expect(filters).toContain('专项成长');
-  expect(filters).toContain('课程恢复');
-  expect(filters).toContain('合作奖励');
-  expect(filters).toContain('身价与品牌');
-  expect(filters).toContain('每球经验');
-  expect(filters).toContain('自动经验');
-  expect(filters).toContain('离线时长');
+  expect(document.querySelector('.gm-shop-filters')).toBeNull();
+  expect(document.querySelectorAll('.gm-shop-page select')).toHaveLength(0);
+  expect(document.querySelectorAll('.gm-equipment-summary')).toHaveLength(equipmentCatalog.length);
   const item = equipmentCatalog.find(entry => entry.effects.courseRecovery > 0)!;
-  await press(buttonWithin(card('.gm-product', item.name), '器材详情'));
+  const summary = card('.gm-product', item.name).querySelector('.gm-equipment-summary')!;
+  expect(summary.textContent).toBe(`完成课程额外恢复 +${item.effects.courseRecovery}`);
+  expect(summary.getAttribute('title')).toBe(item.description);
+  await press(buttonWithin(card('.gm-product', item.name), `器材详情：${item.name}`));
   const detail = [...document.querySelectorAll<HTMLElement>('[role="dialog"]')].find(dialog => dialog.querySelector('h2')?.textContent === '器材档案')!;
-  expect(detail.textContent).toContain('每完成 10 球课程额外恢复');
-  expect(detail.textContent).toContain('每课恢复');
-  expect(detail.textContent).toContain('球馆 Lv.8 的器材额外恢复上限 +3');
+  expect(detail.querySelector('.equipment-effect')?.textContent).toContain(item.description);
+  expect(detail.textContent).toContain('完成课程额外恢复');
+  expect(detail.querySelector('.gm-equipment-extra')).toBeNull();
+  expect(detail.querySelector('[aria-label="器材培养耗时对比"]')).toBeNull();
+  expect(detail.querySelector('.equipment-collected')).toBeNull();
+  expect(detail.textContent).not.toMatch(/取得条件|球馆 Lv.8 的器材额外恢复上限|入馆后/);
   expect(detail.textContent).not.toMatch(/推荐券数保持原档位|成功权重|交付|信用|经费/);
 });

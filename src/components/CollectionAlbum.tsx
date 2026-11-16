@@ -2,7 +2,6 @@ import {EquipmentMystery} from './EquipmentMystery';
 import {useState,type CSSProperties} from 'react';
 import {useContract} from '../contractStore';
 import {templateRules} from '../game/contract/templates';
-import {tierConfig} from '../game/matching';
 import {positionLabels,type TemplateTier} from '../game/templates';
 import {rules} from '../game/contract/rules';
 import {statKeys,type StatKey} from '../game/types';
@@ -11,6 +10,7 @@ import {usePlayerProfile} from '../platform/usePlayerProfile';
 import {StarPortrait,templatePortrait} from './PlayerTemplatePanel';
 import {ComicDialog} from './ComicDialog';
 import {SlidingTabs} from './SlidingTabs';
+import {TierBadge} from './TierBadge';
 import {shopCatalog} from '../game/contract/commerce';
 import {EquipmentDetailDialog} from './EquipmentDetailDialog';
 import {collectedEquipment} from '../game/contract/careerStats';
@@ -64,7 +64,7 @@ function StarCollection(){
    <article className="album-detail">
     <header className="album-hero">
      <div className="album-hero-photo tier-portrait-frame" data-tier={chosen.tier}><div className="collection-photo"><StarPortrait key={profile?.avatar} src={profile?.avatar??templatePortrait(chosen.id)} name={chosen.name}/></div></div>
-     <div className="album-hero-info"><h3>{chosen.name} <span className="album-tier" data-tier={chosen.tier}>{tierConfig(chosen.tier).label}</span></h3><p className="album-style">{chosen.style}</p>
+     <div className="album-hero-info"><h3>{chosen.name} <TierBadge tier={chosen.tier} className="album-tier"/></h3><p className="album-style">{chosen.style}</p>
       <dl className="album-requirements"><div><dt>最低等级</dt><dd><AlbumIcon name="level"/><span>训练</span><b>+{chosen.minLevel}</b></dd></div><div><dt>身高要求</dt><dd><AlbumIcon name="height"/><b>{chosen.height[0]}–{chosen.height[1]}</b><span>cm</span></dd></div><div><dt>位置</dt><dd><AlbumIcon name="position"/><strong>{positionLabels[chosen.position]}</strong></dd></div></dl>
      </div>
     </header>

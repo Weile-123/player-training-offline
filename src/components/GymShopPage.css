@@ -1,0 +1,50 @@
+/* B's ticket shelf and navigation, on A's warm paper surface. */
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog { width: min(720px, 100%); height: min(820px, calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); padding: 4px; border: 2px solid #132c38; background: #f4e4be var(--asset-art-game-template-paper-png, url('/art/game/template-paper.png')) center/cover; box-shadow: 5px 6px 0 #03111b; }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog::before { background: transparent; }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-heading { align-items: center; min-height: 58px; margin: 0 14px; padding: 3px 0; border-bottom: 1px solid #b59b67; }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-heading::before { content: none; }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-heading h2 { min-width: 0; margin-left: -11px; padding: 7px 28px 9px 14px; border: 0; background: #b63128 var(--asset-art-game-red-png, url('/art/game/red.png')) center/cover; color: #ffedc7; font: clamp(23px, 4.8vw, 32px)/1.15 var(--font-display); letter-spacing: 1px; text-shadow: 1px 2px #70261d; clip-path: polygon(4% 0,100% 0,95% 23%,98% 24%,89% 100%,0 100%); }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-close { width: 36px; height: 36px; min-height: 36px; margin: 0; border: 3px double #efdab0; background: #0b2332; color: #efdab0; box-shadow: 0 0 0 1px #173543; }
+.game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-scroll { display: flex; flex-direction: column; padding: 0 14px; overflow: hidden; }
+.gym-shop-dialog .contract-panel, .gym-shop-dialog .contract-panel > [aria-busy] { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+.gm-shop-page { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; overflow: hidden; color: #173543; }
+.gm-shop-resources { display: flex; align-items: center; justify-content: space-between; flex: none; gap: 8px; min-width: 0; min-height: 41px; padding: 5px 1px; }
+.gm-shop-club-mark { display: flex; align-items: center; gap: 7px; min-width: 0; color: #77613f; font-size: 12px; white-space: nowrap; }
+.gm-shop-club-mark svg { flex: none; width: 22px; height: 23px; fill: none; stroke: #173543; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.gm-shop-club-mark b { margin-left: 2px; color: #ae3528; font: 25px/1 var(--font-number, Impact), sans-serif; }
+.gm-shop-coupon { display: flex; align-items: center; justify-content: flex-end; gap: 8px; min-width: 0; color: #77613f; }
+.gm-shop-coupon > i { display: grid; place-items: center; flex: none; width: 30px; height: 22px; border: 1px solid #b58d45; color: #8d5f23; transform: rotate(-8deg); font-size: 14px; font-style: normal; font-weight: 900; }
+.gm-shop-coupon > span { font-size: 12px; white-space: nowrap; }
+.gm-shop-coupon > b { min-width: 0; margin-left: 3px; color: #ae3528; font: 28px/.95 var(--font-number, Impact), sans-serif; overflow-wrap: anywhere; }
+.gm-shop-page .collection-sections { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.gm-shop-page .leaderboard-tabs { margin: 2px 2px 9px; }
+.gm-shop-page .collection-tab-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; padding: 0; }
+.gm-shop-page .collection-tab-panel:has(> .gm-product) { overflow-y: auto; }
+.gm-shop-shelf { display: flex; flex-direction: column; flex: 1; min-height: 0; gap: 0; }
+.gm-shop-page .gm-shop-filters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: none; gap: 14px; margin: 7px 0; padding: 0; border: 0; outline: 0; background: transparent; }
+.gm-shop-page .gm-shop-filters > label { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 0; color: #6c5739; font-size: 12px; font-weight: 900; white-space: nowrap; }
+.game-screen.comic-dialog-layer .comic-dialog .gm-shop-page .gm-shop-filters select, .gm-shop-page .gm-shop-filters select { flex: 1; min-width: 0; height: 27px; min-height: 27px; margin: 0; padding: 3px 7px; border: 1px solid #bd9c60; border-radius: 0; background: #f5e6c4; color: #173543; font-size: 12px; font-weight: 900; line-height: 1.2; }
+.gm-shop-shelf-heading { display: flex; align-items: center; justify-content: space-between; flex: none; gap: 8px; margin-bottom: 7px; padding-bottom: 5px; border-bottom: 1px solid #bba36c; }
+.gm-shop-page .gm-shop-shelf-heading > h3 { margin: 0; font: 18px/1 var(--font-display); }
+.gm-shop-shelf-heading > span { color: #8c7350; font-size: 10px; }
+.gm-shop-bottom { display: flex; align-items: center; justify-content: space-between; flex: none; gap: 12px; margin-top: 6px; padding: 7px 2px; border-top: 1px solid #aa925f; color: #806a49; font-size: 10px; }
+.gm-shop-bottom > b { color: #805b30; font-weight: 400; }
+
+@media (max-width: 430px) {
+  .game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-heading { min-height: 52px; margin-inline: 8px; }
+  .game-screen.comic-dialog-layer .comic-dialog.gym-shop-dialog .sheet-scroll { padding-inline: 8px; }
+  .gm-shop-resources { gap: 5px; min-height: 35px; padding-block: 4px; }
+  .gm-shop-club-mark, .gm-shop-coupon > span { font-size: 10px; }
+  .gm-shop-club-mark { gap: 4px; }
+  .gm-shop-club-mark svg { width: 18px; height: 20px; }
+  .gm-shop-club-mark b { font-size: 23px; }
+  .gm-shop-coupon { gap: 5px; }
+  .gm-shop-coupon > i { width: 24px; height: 18px; font-size: 11px; }
+  .gm-shop-coupon > b { font-size: 25px; margin-left: 0; }
+  .gm-shop-page .gm-shop-filters { gap: 8px; margin: 6px 0; }
+  .gm-shop-page .gm-shop-filters > label { gap: 4px; font-size: 10px; }
+  .game-screen.comic-dialog-layer .comic-dialog .gm-shop-page .gm-shop-filters select, .gm-shop-page .gm-shop-filters select { padding-inline: 4px; font-size: 10px; }
+  .gm-shop-page .gm-shop-shelf-heading > h3 { font-size: 16px; }
+  .gm-shop-shelf-heading > span { font-size: 9px; }
+  .gm-shop-bottom { gap: 8px; font-size: 9px; }
+}
