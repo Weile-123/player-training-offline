@@ -1,0 +1,65 @@
+/* Directly ported from outputs/ui-redesign-20261116/designs.css, offline B.
+ * Only the explicitly requested single-row scrolling and template colors differ. */
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard {border:3px double #c7aa6d;background:var(--ink);color:#f6e6bf;padding:12px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-top {display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-top h2 {font:19px var(--display);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-top small {color:#8fd6ab;font-size:10px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-primary {display:flex;align-items:baseline;gap:8px;padding-top:10px;margin-top:9px;border-top:1px solid #638078;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-primary b {font:43px/1 var(--display);color:#72d9ae;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-primary span {color:#d4bf99;font-size:11px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics {display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding-top:12px;margin-top:10px;border-top:1px solid #638078;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics > div {min-width:0;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics > div + div {border-left:1px solid #638078;padding-left:10px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics span {display:block;color:#c2b898;font-size:10px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics b {display:block;font:21px/1.15 var(--display);color:#f3ddb0;margin-top:5px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics b small {font:10px 'Microsoft YaHei',sans-serif;margin-left:3px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-metrics .duration {font-size:17px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .cap-note {display:flex;gap:7px;align-items:start;padding:7px 9px;margin-top:9px;border-left:3px solid #b77b40;background:#ebd5ac;font-size:10px;line-height:1.65;color:#785238;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .cap-note > b {display:grid;place-items:center;width:15px;height:15px;border:1px solid #ac7842;border-radius:50%;flex:none;font:10px Arial;margin-top:1px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .result-heading {display:flex;align-items:center;justify-content:space-between;margin:13px 0 8px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .result-heading h2 {font:17px var(--display);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .result-heading small {font-size:10px;color:#816848;}
+/* 183.5px is the original B card width inside its 410px dialog. At narrower
+ * widths the cards retain that size and scroll, rather than changing design. */
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .player-columns {display:grid;grid-template-columns:none;grid-auto-flow:column;grid-template-rows:auto;grid-auto-columns:183.5px;gap:9px;min-width:0;overflow-x:scroll;overflow-y:hidden;padding-bottom:12px;overscroll-behavior-x:contain;scrollbar-gutter:auto;scrollbar-width:thin;scrollbar-color:#9d8051 #ddc89f;touch-action:pan-x pan-y;}
+.gym-design-surface.offline-b .player-columns::-webkit-scrollbar {height:10px;}
+.gym-design-surface.offline-b .player-columns::-webkit-scrollbar-track {background:#ddc89f;border:1px solid #c1a774;}
+.gym-design-surface.offline-b .player-columns::-webkit-scrollbar-thumb {min-width:28px;border:2px solid #ddc89f;border-radius:5px;background:#9d8051;}
+.gym-design-surface.offline-b .player-columns:focus-visible {outline:2px solid #a23c2c;outline-offset:2px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-athlete {position:relative;min-width:0;border:2px solid #9d8e6f;background:#f4e7ca;overflow:hidden;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover {display:flex;align-items:center;min-height:77px;background:linear-gradient(135deg,#31545d,#0f2f3b);color:#f5e8c2;padding:8px 7px;gap:6px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > img, .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > svg, .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > .template-silhouette {width:52px;height:62px;max-width:none;flex:none;object-fit:cover;object-position:top;align-self:end;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > .template-silhouette {position:relative;inset:auto;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > .template-silhouette > span {font-size:8px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover .gm-offline-portrait[data-tier] {position:relative; display:block; box-sizing:border-box; width:52px; height:62px; flex:none; align-self:end; overflow:hidden; border:3px solid transparent; border-image:none; background:linear-gradient(#183a46,#183a46) padding-box,var(--tier-metal) border-box; box-shadow:0 0 0 1px #18313e,1px 2px 0 var(--tier-light);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait > .album-portrait-surface {position:relative; display:block; width:100%; height:100%; overflow:hidden;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait :is(img,svg,.template-silhouette) {width:100%; height:100%; max-width:none; max-height:none; object-fit:cover; object-position:top;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait .template-silhouette {position:relative; inset:auto;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait .template-silhouette > span {font-size:8px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait[data-tier=legend] {--tier-metal:conic-gradient(from var(--legend-angle),#fa675d,#ffc14c,#a2da59,#40c7bb,#4c9fe8,#a17ce5,#eb77ba,#fa675d); animation:legend-border-orbit 6s linear infinite;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b.reduce-motion .gm-offline-portrait[data-tier=legend] {animation:none;}
+@media(prefers-reduced-motion:reduce) {.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-portrait[data-tier=legend] {animation:none;}}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover > div {min-width:0;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover h3 {font:15px/1.3 var(--display);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover small {display:block;margin-top:5px;font-size:9px;color:#e2bc71;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-growth {padding:9px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level {display:flex;align-items:baseline;justify-content:space-between;font:25px/1 var(--display);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level small {font:10px 'Microsoft YaHei',sans-serif;color:#88734f;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level strong {font-weight:normal;color:#24674f;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-xp {font-size:11px;color:#9f382a;text-align:center;background:#e9d5aa;padding:5px;margin-top:7px;font-weight:bold;line-height:normal;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-stat {display:flex;justify-content:space-between;font-size:10px;margin-top:7px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-stat span {color:#806847;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-stat b {color:#2b474a;font-size:11px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-template {font-size:9px;line-height:1.6;margin-top:8px;border-top:1px solid #c5ae7a;padding-top:7px;color:#806847;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-template strong {display:block;font-size:10px;font-weight:bold;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-change {white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-before, .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-change > i {color:#806847;font-weight:normal;font-style:normal;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-after {color:#b33226;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-unchanged {color:#8d3b28;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary {margin-top:11px;padding:10px;background:#e1dbc0;border:1px solid #99a889;display:flex;align-items:center;gap:9px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary .tick {border:2px solid #55846a;color:#356c53;flex:none;width:27px;height:27px;display:grid;place-items:center;font-size:18px;font-weight:bold;border-radius:50%;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary strong {font-size:12px;color:#315a4e;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary small {display:block;margin-top:4px;color:#697354;font-size:10px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-bottom {margin-top:12px;padding-top:0;border:0;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-bottom p {font-size:10px;line-height:1.65;color:#806947;margin-bottom:10px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-empty {padding:15px 10px;border:1px dashed #b69c70;color:#806847;text-align:center;}

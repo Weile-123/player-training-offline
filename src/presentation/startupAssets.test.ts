@@ -4,7 +4,8 @@ import {selectStartupAssets} from './startupAssets';
 
 it('keeps the home and complete shot sequence ready within a 10 MB startup asset budget',()=>{
  const selected=selectStartupAssets(manifest.entries),paths=new Set(selected.map(a=>a.path));
- for(const path of ['art/home/title-comic.png','art/home/continue-frame.svg','art/home/button-new-career.png','art/home/button-new-game.png','art/home/button-career.png','art/home/button-collection.png','art/home/button-rank.png','art/home/background-simple-sky.png','art/home/background-portrait-simple-sky.png','art/game/template-paper.png','art/game/dock-controls.png','art/collection/court-lines.svg'])expect(paths.has(path),path).toBe(true);
+ for(const path of ['art/home/title-comic.webp','art/home/continue-frame.svg','art/home/button-new-career.png','art/home/button-new-game.png','art/home/button-career.png','art/home/button-collection.png','art/home/button-rank.png','art/home/background-simple-sky.webp','art/home/background-portrait-simple-sky.webp','art/game/template-paper.png','art/game/dock-controls.png','art/collection/court-lines.svg'])expect(paths.has(path),path).toBe(true);
+ for(const path of ['art/home/title-comic.png','art/home/background-simple-sky.png','art/home/background-portrait-simple-sky.png'])expect(paths.has(path)).toBe(false);
  for(const file of ['court-clean.png','ball.png','net.png','rim-front.png','player-data.json'])expect(paths.has('art/shot/'+file),file).toBe(true);
  for(const outcome of ['great','success','hold','minor','severe'])expect(paths.has(`art/shot-status/${outcome}.png`),outcome).toBe(true);
  expect(selected.reduce((total,a)=>total+a.bytes,0)).toBeLessThan(10_000_000);

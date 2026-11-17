@@ -131,14 +131,14 @@ it('asks before discarding an unfinished course and keeps completed courses and 
   expect(actionError).toBeUndefined();
 });
 
-it('keeps the compact reward at one coupon for a repeated template even in gym one and at the level cap', async () => {
+it('keeps earned cultivation coupons in the compact repeated-template reward even at the level cap', async () => {
   const state = newGym(at, 17);
   Object.assign(state.player!, { level: 25, peakLevel: 25, templateId: 'bryant', highestTier: 'legend' });
   state.postgameRecommendedTemplates = ['bryant'];
   expect(recommendation(state).credits).toBe(23);
   await mount(GymTrainingPanel, state);
   const payout = document.querySelector('[aria-label="当前推荐收益"]')!;
-  expect(payout.querySelector('strong')?.textContent).toBe('+1 券');
+  expect(payout.querySelector('strong')?.textContent).toBe('+19 券');
   expect(payout.querySelector('small')?.textContent).toBe('重复模板');
 
   const capped = structuredClone(state);
@@ -146,7 +146,7 @@ it('keeps the compact reward at one coupon for a repeated template even in gym o
   await mount(GymTrainingPanel, capped);
   expect(document.querySelector('.gm-plan-summary')?.textContent).toContain('已满级，训练已结束');
   expect(document.querySelector('.gm-plan-summary')?.textContent).not.toContain('完课恢复');
-  expect(document.querySelector('[aria-label="当前推荐收益"] strong')?.textContent).toBe('+1 券');
+  expect(document.querySelector('[aria-label="当前推荐收益"] strong')?.textContent).toBe('+19 券');
   expect(actions).toEqual([]);
 });
 

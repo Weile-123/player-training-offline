@@ -5,6 +5,7 @@ import {equipmentCatalog, previousEquipmentCatalog, legacyEquipmentCatalog, equi
 import {buildCooperationOffers} from './cooperation';
 import {legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymAlumnus, type GymPlayer, type GymState} from './engine';
 import {requiredExperience} from './progression';
+import {allGymConsumables, maximumStoredChalkShots} from './consumables';
 
 export type GymStorage = Pick<Storage, 'getItem' | 'setItem'>;
 export const gymSaveKeys = {main: 'gym-management-v1', backup: 'gym-management-v1.backup'};
@@ -27,7 +28,9 @@ const has = (value: object, key: string) => Object.prototype.hasOwnProperty.call
 function agreement(value: unknown, athlete: Record<string, unknown>): boolean {
   return value === null || (record(value) && text(value.id) && value.playerId === athlete.id
     && integer(value.acceptedShots, 0, athlete.shots as number)
-    && integer(value.acceptedCourses, 0, record(athlete.training) ? athlete.training.completedCourses as number : 0));
+    && integer(value.acceptedCourses, 0, record(athlete.training) ? athlete.training.completedCourses as number : 0)
+    && (!has(value, 'acceptedRevision') || integer(value.acceptedRevision))
+    && (!has(value, 'adCompleted') || typeof value.adCompleted === 'boolean'));
 }
 
 function stats(value: unknown, min: number, max: number, whole = true): value is Record<typeof statKeys[number], number> {
@@ -68,6 +71,9 @@ function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boo
   if ((!legacy || has(value, 'experience')) && !integer(value.experience, 0, level === 99 ? 0 : requirement - 1)) return false;
   if ((!legacy || has(value, 'nextShotAt')) && !integer(value.nextShotAt)) return false;
   if ((!legacy || has(value, 'autoEnabled')) && (typeof value.autoEnabled !== 'boolean' || (gymLevel < 2 && value.autoEnabled))) return false;
+  if (has(value, 'greatShotReady') && typeof value.greatShotReady !== 'boolean') return false;
+  if (has(value, 'greatShotsRemaining') && !integer(value.greatShotsRemaining, 1, maximumStoredChalkShots)) return false;
+  if (has(value, 'shareLevelClaimed') && typeof value.shareLevelClaimed !== 'boolean') return false;
   if ((!legacy || has(value, 'cooperation')) && !agreement(value.cooperation, value)) return false;
   if ((!legacy || Object.prototype.hasOwnProperty.call(value, 'enteredGymLevel')) && !integer(value.enteredGymLevel, 1, gymLevel)) return false;
   if (!legacy || Object.prototype.hasOwnProperty.call(value, 'training')) {
@@ -131,6 +137,7 @@ function validPendingEffects(value: unknown, gymLevel: number): boolean {
 }
 
 function validGymShape(value: unknown, legacy = false): value is GymState {
+  if (record(value) && has(value, 'staminaRewardCount') && !integer(value.staminaRewardCount)) return false;
   if (record(value) && has(value, 'recommendationRulesVersion') && value.recommendationRulesVersion !== 11) return false;
   if (record(value) && value.recommendationRulesVersion === 11 && !idList(value.postgameRecommendedTemplates, templateIds)) return false;
   if (record(value) && has(value, 'postgameRecommendedTemplates') && !idList(value.postgameRecommendedTemplates, templateIds)) return false;
@@ -154,6 +161,7 @@ function validGymShape(value: unknown, legacy = false): value is GymState {
     || !integer(value.credits) || !integer(value.fame) || !integer(value.gymLevel, 1, 8)
     || !record(value.projects) || !record(value.inventory) || !integer(value.inventory.drink)
     || !idList(value.ownedEquipment, allowedEquipment) || !idList(value.equippedEquipment, allowedEquipment)) return false;
+  if (!allGymConsumables.every(item => !has(value.inventory as object, item.id) || integer((value.inventory as Record<string, unknown>)[item.id]))) return false;
   const owned = value.ownedEquipment;
   if (!legacy || has(value, 'purchasePrices')) {
     if (!record(value.purchasePrices) || Object.keys(value.purchasePrices).length !== owned.length

@@ -1,8 +1,8 @@
-import {recoverySeconds, staminaMax, type GymState} from '../game/gym/engine';
+import {playerLevelCap, recoverySeconds, staminaMax, type GymState} from '../game/gym/engine';
 import './GymStamina.css';
 
 /** Approved A: a continuous courtside line with a separate score, without a housing. */
-export function GymStamina({state}: {state: GymState}) {
+export function GymStamina({state, onRestore, busy = false}: {state: GymState; onRestore?: () => void; busy?: boolean}) {
   const player = state.player;
   const maximum = staminaMax(state);
   const count = player?.stamina ?? 0;
@@ -15,5 +15,6 @@ export function GymStamina({state}: {state: GymState}) {
       <div className="gym-stamina-a-track" role="progressbar" aria-label="球员体力" aria-valuemin={0} aria-valuemax={maximum} aria-valuenow={count} aria-valuetext={`${count}/${maximum}，${description}`}><i style={{height: `${Math.min(100, Math.max(0, count / maximum * 100))}%`}}/></div>
       <div className="gym-stamina-a-values" aria-hidden="true"><strong>{count}</strong><small>/{maximum}</small><em>{recovering ? <>恢复<br/><b>{recovery}秒</b></> : <b>{player ? '已满' : '待招'}</b>}</em></div>
     </div>
+    {onRestore && player && count === 0 && player.level < playerLevelCap && <button type="button" className="gym-stamina-restore" disabled={busy} aria-label={(state.staminaRewardCount ?? 0) === 0 ? '分享发帖，体力回满' : '看广告，体力回满'} onClick={onRestore}><small>{(state.staminaRewardCount ?? 0) === 0 ? '分享' : '广告'}</small><span>体力回满</span></button>}
   </aside>;
 }

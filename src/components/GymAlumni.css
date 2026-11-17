@@ -1,12 +1,35 @@
-/* Alumni use the main-court portrait treatment, with information kept in the archive. */
-.gm-alumni-panel .gm-alumni-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: 12px 9px; }
-.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-panel .gm-alumni-list > .gm-alumnus[data-tier] { display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; gap: 7px; min-width: 0; width: 100%; padding: 3px; border: 0; border-radius: 0; background: none; box-shadow: none; color: #15313b; text-align: center; }
-.gm-alumni-panel .gm-alumnus > .gm-alumnus-image { display: block; position: relative; width: 100%; height: auto; aspect-ratio: .82; min-width: 0; overflow: hidden; }
-.gm-alumni-panel .gm-alumnus > strong { display: block; min-width: 0; margin: 0; font-size: clamp(11px, 3.2vw, 16px); font-weight: 950; line-height: 1.35; overflow-wrap: anywhere; }
-.gm-alumni-portrait-surface { display: block; position: relative; width: 100%; height: 100%; overflow: hidden; }
-.gm-alumni-portrait-surface > img, .gm-alumni-portrait-surface > svg, .gm-alumni-portrait-surface > .template-silhouette { display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center bottom; }
-.gm-alumni-portrait-surface > img.template-portrait-photo { filter: drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0); }
-.gm-alumnus-heading { grid-template-columns: 86px minmax(0, 1fr); }
-.gm-alumnus-heading > .gm-player-image { display: block; width: 86px; height: 104px; min-width: 0; overflow: hidden; }
-.gm-alumni-panel .gm-alumnus:focus-visible { outline: 2px solid #a93225; outline-offset: 2px; }
-@media (max-width: 359px) { .gm-alumni-panel .gm-alumni-list { gap: 10px 6px; } .gm-alumni-panel .gm-alumnus > strong { font-size: 11px; } .gm-alumnus-heading { grid-template-columns: 72px minmax(0, 1fr); } .gm-alumnus-heading > .gm-player-image { width: 72px; height: 92px; } }
+﻿/* Alumni archive: paper record cards, matching the original game's career treatment. */
+.gm-alumni-panel {gap: 12px;}
+.gm-alumni-heading {display: flex; align-items: center; gap: 9px; padding: 10px; border: 4px double #e4cc96; outline: 1px solid #17313c; color: #f4e6c0; background: radial-gradient(#e8cd8b33 .6px, transparent 1px) 0 0/4px 4px, #122e3c;}
+.gm-alumni-heading > span {display: grid; place-items: center; width: 37px; height: 37px; flex: none; border-right: 1px solid #8f815e; padding-right: 8px;}
+.gm-alumni-heading .game-icon {width: 28px; height: 28px;}
+.gm-alumni-heading small {font-size: 10px; color: #ddc899; letter-spacing: .06em;}
+.gm-alumni-heading h3 {margin: 4px 0 0; color: inherit; font: 16px/1.3 var(--font-display);}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-panel > .gm-alumni-totals {display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; margin: 0; border: 0; background: none;}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-totals > div {display: block; min-width: 0; padding: 8px 3px 6px; text-align: center; border: 3px double #203743; border-radius: 5px; background: #fff0cc66;}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-totals dt {padding: 0; border: 0; font-size: 11px; color: #66573c; text-align: center;}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-totals dd {padding: 0; border: 0; margin: 5px 0 0; color: #b12b24; font: 28px/1 var(--font-number); text-align: center;}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-totals dd small {font: 11px/1 var(--font-body); color: #233b40;}
+.gm-alumni-section-title {display: flex; align-items: center; gap: 9px; margin-top: 2px; padding-bottom: 6px; border-bottom: 1px solid #b89a61;}
+.gm-alumni-section-title h4 {margin: 0; font: 19px/1.2 var(--font-display);}
+.gm-alumni-section-title span {margin-left: auto; color: #8b7350; font-size: 10px;}
+.gm-alumni-panel .gm-alumni-list {display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 10px;}
+.game-screen.comic-dialog-layer .comic-dialog .gm-alumni-panel .gm-alumni-list > .gm-alumnus[data-tier] {position: relative; display: grid; grid-template-columns: 40% minmax(0, 1fr); align-items: stretch; gap: 8px; min-width: 0; width: 100%; padding: 7px; border: 3px solid transparent; border-radius: 4px; background: linear-gradient(#f6e7c8, #efddaf) padding-box, var(--tier-metal) border-box; box-shadow: 0 0 0 1px #294049, inset 0 0 0 1px #b89b63, 1px 2px 0 #977c4f66; color: #15313b; text-align: left; cursor: pointer;}
+.gm-alumni-panel .gm-alumnus > .gm-alumnus-image {display: block; position: relative; width: 100%; height: auto; min-height: 91px; aspect-ratio: .68; min-width: 0; overflow: hidden;}
+.gm-alumni-panel .gm-alumnus-copy {display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0;}
+.gm-alumni-panel .gm-alumnus-copy strong {display: block; min-width: 0; margin: 0; font: 14px/1.25 var(--font-display); overflow-wrap: anywhere;}
+.gm-alumni-panel .gm-alumnus-copy > span {display: flex; align-items: center; flex-wrap: wrap; gap: 3px; font-size: 9px;}
+.gm-alumni-panel .gm-alumnus-copy small {font-size: 9px; color: #806745;}
+.gm-alumni-panel .gm-alumnus-copy > small {margin-top: 2px;}
+.gm-alumni-panel .gm-alumnus-copy > b {color: #b62c24; font: 17px/1.1 var(--font-number); overflow-wrap: anywhere;}
+.gm-alumnus-open {position: absolute; right: 5px; top: 3px; color: #967143; font-size: 15px;}
+.gm-alumni-portrait-surface {display: block; position: relative; width: 100%; height: 100%; overflow: hidden;}
+.gm-alumni-portrait-surface > img, .gm-alumni-portrait-surface > svg, .gm-alumni-portrait-surface > .template-silhouette {display: block; width: 100%; height: 100%; max-width: none; max-height: none; object-fit: cover; object-position: center bottom;}
+.gm-alumni-portrait-surface > img.template-portrait-photo {filter: drop-shadow(2px 0 #f3deb0) drop-shadow(-2px 0 #f3deb0) drop-shadow(0 -2px #f3deb0);}
+.gm-alumni-panel .gm-alumnus[data-tier=legend] {--tier-metal: conic-gradient(from var(--legend-angle), #fa675d, #ffc14c, #a2da59, #40c7bb, #4c9fe8, #a17ce5, #eb77ba, #fa675d); animation: legend-border-orbit 6s linear infinite;}
+.gm-alumnus-heading {grid-template-columns: 86px minmax(0, 1fr);}
+.gm-alumnus-heading > .gm-player-image {display: block; width: 86px; height: 104px; min-width: 0; overflow: hidden;}
+.gm-alumni-panel .gm-alumnus:focus-visible {outline: 2px solid #a93225; outline-offset: 3px;}
+.gm-alumni-group-note {padding: 7px 9px; border-left: 3px solid #b38b4c; background: #eeddb7; font-size: 12px;}
+@media (max-width: 359px) {.gm-alumni-panel .gm-alumni-list {grid-template-columns: 1fr; gap: 9px;} .game-screen.comic-dialog-layer .comic-dialog .gm-alumni-panel .gm-alumni-list > .gm-alumnus[data-tier] {grid-template-columns: 66px minmax(0, 1fr); padding: 8px; gap: 12px;} .gm-alumni-panel .gm-alumnus > .gm-alumnus-image {min-height: 79px; aspect-ratio: .8;} .gm-alumni-panel .gm-alumnus-copy strong {font-size: 16px;} .gm-alumnus-heading {grid-template-columns: 72px minmax(0, 1fr);} .gm-alumnus-heading > .gm-player-image {width: 72px; height: 92px;}}
+@media (prefers-reduced-motion: reduce) {.gm-alumni-panel .gm-alumnus[data-tier=legend] {animation: none;}}

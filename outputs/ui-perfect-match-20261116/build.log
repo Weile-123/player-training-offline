@@ -1,0 +1,55 @@
+
+> player-training-offline@0.1.0 prebuild
+> node scripts/prepare-assets.mjs
+
+{"files":148,"localMB":80.18507289886475,"cdnMB":0}
+
+> player-training-offline@0.1.0 build
+> tsc -b && vite build
+
+vite v6.4.4 building for production...
+transforming...
+✓ 236 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                               1.06 kB │ gzip:   0.56 kB
+dist/assets/click-responsive-BaRAW6pC.flac                   21.30 kB
+dist/assets/ball5-DSDp0WHW.flac                              24.83 kB
+dist/assets/ball2-BRiVBvVg.mp3                               33.02 kB
+dist/assets/ball3-BNmYZeZG.flac                              35.42 kB
+dist/assets/ball4-C-sNxE-2.flac                              38.69 kB
+dist/assets/click-responsive-BWeL2idb.wav                    51.11 kB
+dist/assets/upgrade-BtxN5MzR.flac                            52.16 kB
+dist/assets/new_month-BIwwZ5mu.flac                          61.03 kB
+dist/assets/ball3-TkFbxTZT.wav                               74.13 kB
+dist/assets/ball1-CKUcMh_y.flac                              77.53 kB
+dist/assets/ball4-B1oZrPsh.wav                               89.13 kB
+dist/assets/upgrade-_rbOUzyP.wav                            113.32 kB
+dist/assets/ball1-Carogcd-.wav                              156.46 kB
+dist/assets/ball5--pIua6D_.wav                              178.25 kB
+dist/assets/new_month-DGTJTcfc.wav                          193.07 kB
+dist/assets/background-portrait-simple-sky-DZ3n80yM.webp    745.68 kB
+dist/assets/background-simple-sky-CCw_-TEp.webp             868.29 kB
+dist/assets/black_bont-C1biAdUO.ttf                       2,828.08 kB
+dist/assets/GymHome-CEpse12j.css                            150.01 kB │ gzip:  29.62 kB
+dist/assets/index-mmjmnSzQ.css                              226.71 kB │ gzip:  47.72 kB
+dist/assets/index-B4NCGPtw.js                               169.27 kB │ gzip:  61.02 kB
+dist/assets/GymHome-wh45TQsB.js                             567.11 kB │ gzip: 132.26 kB
+✓ built in 3.06s
+
+> player-training-offline@0.1.0 postbuild
+> node scripts/copy-runtime-assets.mjs
+
+CDN build: 0 remote assets, 148 local assets + 121 on-demand poster portraits.
+Packaged REVIEW-NOTES.md and REVIEW-EVIDENCE.json.
+
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+npm notice
+npm notice New major version of npm available! 10.7.0 -> 12.2.2
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+npm notice To update run: npm install -g npm@12.2.2
+npm notice

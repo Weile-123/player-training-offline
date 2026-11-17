@@ -44,3 +44,25 @@
 .gym-muted {color: #655c48; font-size: 12px;}
 .gym-settings label {display: flex; justify-content: space-between; align-items: center; margin: 15px 0;}
 .gym-settings input {width: 22px; height: 22px; accent-color: #26785b;}
+
+/* The two player actions size to their labels, leaving the remaining row to value. */
+.training-layout.gym-game .player-value-footer {grid-template-columns: minmax(0, 1fr) auto; gap: 5px; padding-block: clamp(4px, 1.4cqw, 6px);}
+.gym-player-actions {display: flex; align-items: stretch; gap: 6px; min-height: 0;}
+.training-layout.gym-game .player-value-footer .sell-shortcut {position: relative; display: flex; align-items: center; justify-content: center; gap: 0; padding-block: 0; padding-inline: clamp(7px, 1.8cqw, 11px); min-width: unset; border-radius: 8px;}
+.training-layout.gym-game .player-value-footer .sell-shortcut > span {font-size: clamp(10px, 2.6cqw, 18px); line-height: 1.15;}
+.training-layout.gym-game .player-value-footer .gym-court-auto {background: linear-gradient(110deg, #246b79, #164552); box-shadow: inset 0 0 0 1px #10343b, 1px 2px 0 #102532;}
+.training-layout.gym-game .player-value-footer .gym-court-auto.is-active {border-color: #85dfab; background: linear-gradient(110deg, #24694f, #164b3c);}
+.gym-court-auto .gm-auto-border {inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px);}
+.gym-game .gym-court-switch {position: absolute; right: 2cqw; bottom: 2cqw; z-index: 9; display: flex; align-items: center; gap: 8px; min-height: 40px; max-width: 42%; padding: 6px 13px 6px 6px; border: 1px solid #70beae; border-radius: 999px; background: linear-gradient(115deg, #123b45f5, #09252ef5); color: #eaf8ee; box-shadow: 0 3px 8px #04171d80; font-size: clamp(11px, 2.6cqw, 15px); line-height: 1.2;}
+.gym-court-switch > svg {display: block; flex: none; width: 28px; height: 28px; padding: 5px; border-radius: 50%; background: #79d5b6; color: #103b43; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;}
+.gym-court-switch > span {display: flex; align-items: center; gap: 7px; white-space: nowrap;}
+.gym-court-switch small {padding-left: 7px; border-left: 1px solid #5c958e; color: #9ddcc8; font: 11px/1.1 var(--font-number, Impact), sans-serif; font-variant-numeric: tabular-nums;}
+.gym-game .gym-court-switch:hover:not(:disabled) {background: linear-gradient(115deg, #20505af5, #0e3540f5); border-color: #a0e5cc;}
+.gym-game .gym-court-switch:active:not(:disabled) {transform: translateY(1px); box-shadow: 0 1px 3px #04171d80;}
+.gym-game .gym-court-switch:disabled {opacity: .5; cursor: wait;}
+.gym-court-switch:focus-visible, .gym-player-actions button:focus-visible {outline: 2px solid #74dcaa; outline-offset: 2px;}
+@container game-shell (min-aspect-ratio: 11/10) {
+ .training-layout.gym-game .player-value-footer {padding-block: 4px;}
+ .training-layout.gym-game .player-value-footer .sell-shortcut > span {font-size: clamp(10px, 1.4cqw, 15px);}
+ .training-layout.gym-game .player-value-footer .sell-shortcut {padding-inline: clamp(5px, 1cqw, 8px);}
+}

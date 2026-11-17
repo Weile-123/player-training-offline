@@ -1,0 +1,201 @@
+{
+  "results": [
+    {
+      "width": 320,
+      "height": 740,
+      "card": {
+        "share": {
+          "text": "分享·等级+3",
+          "background": "linear-gradient(110deg, rgb(245, 204, 81), rgb(220, 165, 43))",
+          "borderStyle": "double",
+          "borderRadius": "8px",
+          "font": "600 8px / 8.8px GameBlack, \"Microsoft YaHei\", sans-serif",
+          "letterSpacing": "normal",
+          "padding": "3px 4px",
+          "width": 68.9375,
+          "badgeWidth": 22
+        },
+        "metaText": "首发分享·等级+3",
+        "name": {
+          "top": 205.46875,
+          "right": 180.28125
+        },
+        "button": {
+          "top": 218.890625,
+          "right": 181.1875
+        },
+        "statsLeft": 184.609375,
+        "headerTop": 196.765625,
+        "overlapsStats": false,
+        "clippedAtTop": false,
+        "overflow": false
+      },
+      "borders": {
+        "unlockedCount": 6,
+        "unknownCount": 29,
+        "unlockedColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "unknownColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "equal": true
+      },
+      "sell": {
+        "sale": {
+          "width": 252,
+          "height": 36.796875,
+          "background": "linear-gradient(110deg, rgb(197, 64, 42), rgb(172, 43, 33))",
+          "color": "rgb(255, 240, 202)",
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(113, 43, 32)"
+        },
+        "back": {
+          "width": 252,
+          "height": 36.796875,
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(30, 53, 64)"
+        },
+        "equal": true
+      }
+    },
+    {
+      "width": 430,
+      "height": 932,
+      "card": {
+        "share": {
+          "text": "分享·等级+3",
+          "background": "linear-gradient(110deg, rgb(245, 204, 81), rgb(220, 165, 43))",
+          "borderStyle": "double",
+          "borderRadius": "8px",
+          "font": "600 8.30353px / 9.13388px GameBlack, \"Microsoft YaHei\", sans-serif",
+          "letterSpacing": "normal",
+          "padding": "3px 7px",
+          "width": 77.015625,
+          "badgeWidth": 22.609375
+        },
+        "metaText": "首发分享·等级+3",
+        "name": {
+          "top": 248.765625,
+          "right": 242.703125
+        },
+        "button": {
+          "top": 268.359375,
+          "right": 217.78125
+        },
+        "statsLeft": 248.625,
+        "headerTop": 233.453125,
+        "overlapsStats": false,
+        "clippedAtTop": false,
+        "overflow": false
+      },
+      "borders": {
+        "unlockedCount": 6,
+        "unknownCount": 29,
+        "unlockedColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "unknownColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "equal": true
+      },
+      "sell": {
+        "sale": {
+          "width": 356,
+          "height": 36.796875,
+          "background": "linear-gradient(110deg, rgb(197, 64, 42), rgb(172, 43, 33))",
+          "color": "rgb(255, 240, 202)",
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(113, 43, 32)"
+        },
+        "back": {
+          "width": 356,
+          "height": 36.796875,
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(30, 53, 64)"
+        },
+        "equal": true
+      }
+    },
+    {
+      "width": 844,
+      "height": 430,
+      "card": {
+        "share": {
+          "text": "分享·等级+3",
+          "background": "linear-gradient(110deg, rgb(245, 204, 81), rgb(220, 165, 43))",
+          "borderStyle": "double",
+          "borderRadius": "8px",
+          "font": "600 8px / 8.8px GameBlack, \"Microsoft YaHei\", sans-serif",
+          "letterSpacing": "normal",
+          "padding": "3px",
+          "width": 66.9375,
+          "badgeWidth": 22
+        },
+        "metaText": "首发分享·等级+3",
+        "name": {
+          "top": 202,
+          "right": 271.859375
+        },
+        "button": {
+          "top": 216.078125,
+          "right": 273.0625
+        },
+        "statsLeft": 275.71875,
+        "headerTop": 192.578125,
+        "overlapsStats": false,
+        "clippedAtTop": false,
+        "overflow": false
+      },
+      "borders": {
+        "unlockedCount": 6,
+        "unknownCount": 29,
+        "unlockedColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "unknownColors": [
+          "rgb(119, 130, 120)"
+        ],
+        "equal": true
+      },
+      "sell": {
+        "sale": {
+          "width": 418,
+          "height": 36.796875,
+          "background": "linear-gradient(110deg, rgb(197, 64, 42), rgb(172, 43, 33))",
+          "color": "rgb(255, 240, 202)",
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(113, 43, 32)"
+        },
+        "back": {
+          "width": 418,
+          "height": 36.796875,
+          "padding": "5px 10px",
+          "font": "1000 16px / 20.8px \"PingFang SC\", \"Microsoft YaHei\", system-ui, sans-serif",
+          "border": "3px double rgb(30, 53, 64)"
+        },
+        "equal": true
+      }
+    },
+    {
+      "home": {
+        "title": "传奇球馆 · 从训练球星开始",
+        "titleSrc": "blob:http://127.0.0.1:8800/08c69ee9-5571-47aa-bf69-a2536a1565c5",
+        "titleImage": {
+          "naturalWidth": 2061,
+          "naturalHeight": 763
+        },
+        "background": "url(\"http://127.0.0.1:8800/public/art/home/background-portrait-simple-sky.webp\")",
+        "overflow": false,
+        "hasSave": false
+      }
+    }
+  ],
+  "issues": []
+}

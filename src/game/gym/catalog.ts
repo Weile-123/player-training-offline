@@ -36,7 +36,7 @@ export const trainingCreditMilestones = [
 
 /** Legendary base + highest training milestone + legendary cooperation + equipment. */
 export const maximumRecommendationCredits = 33;
-/** After the first recommendation of a matched template at any gym level, later ones pay this amount. */
+/** Repeated-template base coupons. Training, cooperation and earned equipment bonuses remain additive. */
 export const postgameRepeatTemplateCredits = 1;
 
 export type GymLevel = { level: number; name: string; fame: number; upgradePrice: number; requiredRecommendations: number; requiredTier: number; requiredLegends: number; requiredTemplates: number };

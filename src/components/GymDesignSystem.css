@@ -1,0 +1,49 @@
+/* Shared frame and typography copied from outputs/ui-redesign-20261116/designs.css.
+   Scoped to these two approved designs; existing game dialogs stay independent. */
+@font-face {font-family: GameDisplay; src: url('../fonts/black_bont.ttf') format('truetype'); font-display: block;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog {
+ --ink:#112e3c; --paper:#f3e5c6; --muted:#826d4b; --line:#bca06c; --red:#bb3025; --green:#2e795c; --gold:#d5a449; --display:GameDisplay,'Microsoft YaHei',sans-serif;
+ box-sizing:border-box; width:min(410px,100%); max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom)); min-height:0; margin:0; padding:3px; border:1px solid #a28d65; border-radius:0; background:#162e39; color:var(--ink); box-shadow:0 0 0 1px #07141f,4px 5px #030c1366; filter:none; clip-path:polygon(11px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 11px); font:12px/normal 'Microsoft YaHei',sans-serif;
+}
+.game-screen.comic-dialog-layer:has(.gym-design-dialog) > .comic-dialog-backdrop {padding:12px 10px;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog::before {inset:4px; background:var(--paper) url('/art/game/template-paper.png') center/cover; clip-path:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading {box-sizing:border-box; display:flex; align-items:start; justify-content:space-between; gap:14px; min-height:61px; padding:0 9px 0 0; margin:0; border:0; background:radial-gradient(#d6a74d 1px,transparent 1px) right 11px top 8px/4px 4px no-repeat;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading::before {content:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading h2 {box-sizing:border-box; display:block; gap:normal; min-width:215px; max-width:none; flex:0 1 auto; margin:0; padding:11px 28px 12px 13px; border:0; background:linear-gradient(100deg,#d03127,#ad281f); clip-path:polygon(10px 0,100% 0,91% 100%,0 100%,0 10px); font:27px/1.1 var(--display); letter-spacing:normal; color:#fff0cf; text-shadow:1px 2px #712a20;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading h2 > svg {display:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading .sheet-close {box-sizing:border-box; margin:10px 0 0; padding:1px 6px; flex:none; width:34px; height:34px; min-height:34px; display:grid; place-items:center; background:var(--ink); color:#f9ebc8; font:29px/1 Arial; border:3px double #ead5a3; border-radius:0; outline:1px solid var(--ink); box-shadow:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading .sheet-close::after {content:'×'; font:29px/1 Arial;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-heading .sheet-close .game-icon {display:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-scroll {box-sizing:border-box; padding:0 13px 14px; background:none; scrollbar-width:none;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog > .sheet-scroll::-webkit-scrollbar {width:0;height:0;}
+.game-screen.comic-dialog-layer .gym-design-surface {display:block; min-width:0; margin:0; padding:0; color:var(--ink,#112e3c); font:12px/normal 'Microsoft YaHei',sans-serif; letter-spacing:normal;}
+.game-screen.comic-dialog-layer .gym-design-surface, .game-screen.comic-dialog-layer .gym-design-surface * {box-sizing:border-box;}
+.game-screen.comic-dialog-layer .gym-design-surface :is(h1,h2,h3,p,dl,dd) {margin:0; font-family:inherit; font-style:normal; letter-spacing:normal; line-height:normal; color:inherit;}
+.game-screen.comic-dialog-layer .gym-design-surface h1 {font-size:2em; font-weight:bold;}
+.game-screen.comic-dialog-layer .gym-design-surface h2 {font-size:1.5em; font-weight:bold;}
+.game-screen.comic-dialog-layer .gym-design-surface h3 {font-size:1.17em; font-weight:bold;}
+.game-screen.comic-dialog-layer .gym-design-surface p {font-size:12px; font-weight:normal;}
+.game-screen.comic-dialog-layer .gym-design-surface :is(b,strong) {font-family:inherit; font-size:inherit; font-style:normal; font-weight:bold; letter-spacing:normal; line-height:inherit;}
+.game-screen.comic-dialog-layer .gym-design-surface small {font-family:inherit; font-size:11px; font-style:normal; letter-spacing:normal; line-height:inherit;}
+.game-screen.comic-dialog-layer .gym-design-surface img {display:block; max-width:100%; object-fit:contain;}
+.game-screen.comic-dialog-layer .gym-design-surface button {font:inherit; color:inherit; border-radius:0; cursor:pointer;}
+
+.game-screen.comic-dialog-layer .gym-design-surface .section-title {display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:9px}
+.game-screen.comic-dialog-layer .gym-design-surface .section-title h2 {font:17px/1.2 var(--display)}
+.game-screen.comic-dialog-layer .gym-design-surface .section-title small {color:var(--muted);font-size:10px}
+.game-screen.comic-dialog-layer .gym-design-surface .eyebrow {font-size:10px;letter-spacing:1px;color:var(--muted)}
+.game-screen.comic-dialog-layer .gym-design-surface .muted {color:var(--muted)}
+.game-screen.comic-dialog-layer .gym-design-surface .number {font-family:var(--display);font-variant-numeric:tabular-nums}
+.game-screen.comic-dialog-layer .gym-design-surface .chip {display:inline-block;border:1px solid #b39356;background:#eed198;color:#574021;padding:2px 6px;font-size:10px;white-space:nowrap}
+.game-screen.comic-dialog-layer .gym-design-surface .green-chip {color:#25634e;border-color:#8eaf8a;background:#e0e6c7}
+.game-screen.comic-dialog-layer .gym-design-surface .block {margin-top:13px;padding-top:11px;border-top:1px solid var(--line)}
+.game-screen.comic-dialog-layer .gym-design-surface .bar {height:6px;background:#d9c69e;overflow:hidden}
+.game-screen.comic-dialog-layer .gym-design-surface .bar>i {display:block;height:100%;background:var(--green)}
+.game-screen.comic-dialog-layer .gym-design-surface .footnote {font-size:10px;line-height:1.7;color:#806b4d}
+.game-screen.comic-dialog-layer .gym-design-surface .help {width:23px;height:23px;display:inline-grid;place-items:center;border:1px solid #b59a68;border-radius:50%;background:#fff1ce;font-weight:bold;font-size:12px}
+.game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog .gym-design-surface .primary {width:100%;min-height:40px;border:2px solid var(--ink);background:#bc3025;box-shadow:2px 3px #a48d62;color:#fff1cc;font:17px var(--display);padding:8px;line-height:normal;white-space:normal}
+.game-screen.comic-dialog-layer .gym-design-surface .stats-row {display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:29px;border-bottom:1px dotted #c6b085}
+.game-screen.comic-dialog-layer .gym-design-surface .stats-row:last-child {border-bottom:0}
+.game-screen.comic-dialog-layer .gym-design-surface .stats-row span {color:#786242;font-size:11px}
+.game-screen.comic-dialog-layer .gym-design-surface .stats-row b {font-size:13px}
+.game-screen.comic-dialog-layer .gym-design-surface .stats-row b small {font-size:10px;font-weight:400;color:#806847}

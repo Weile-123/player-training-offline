@@ -11,7 +11,7 @@ export default defineConfig({
   // Runtime config is polled; do not reload the page and discard flying balls on save.
   server: {
     host: '127.0.0.1',
-    port: 5174,
+    port: 8800,
     strictPort: true,
     watch: { ignored: ['**/public/config/animation.json','**/.tmp/**','**/output/**','**/hupu-ai-game-skills/**'] },
     fs: { deny: ['**/.git/**','**/.env*','**/credentials.json','**/debug-context.json','**/debug-logs.json','**/hupu-ai-game-skills/**','**/.tmp/**'] },

@@ -13,7 +13,7 @@ async function bounded<T>(task:Promise<T>):Promise<T>{
 }
 
 /** One user-triggered flow, including the atomic game reward, shared by every entry. */
-export async function completeRewardedVideo(grant:()=>void,options:{mock?:boolean;load?:()=>Promise<HupuSdk|undefined>}={}):Promise<void>{
+export async function completeRewardedVideo(grant:()=>void,options:{mock?:boolean;load?:()=>Promise<HupuSdk|undefined>;onTaskStateError?:(message:string)=>void}={}):Promise<void>{
  if(pending)throw Error('广告正在进行，请稍候');
  setPending(true);
  try{
@@ -25,7 +25,11 @@ export async function completeRewardedVideo(grant:()=>void,options:{mock?:boolea
   const response=await bounded(sdk.vatask.completeRewardVideo());
   if(response.code!==200||response.data?.rewarded!==true)throw Error(response.message||'未完成广告观看，奖励未领取');
   // Refresh platform state, but a query failure cannot revoke a confirmed reward.
-  try{void sdk.vatask.getActivityTaskState().catch(()=>{});}catch{/* optional refresh failure */}
+  const refreshFailed=(error:unknown)=>options.onTaskStateError?.(error instanceof Error?error.message:'任务状态刷新失败，奖励已确认');
+  try{void bounded(sdk.vatask.getActivityTaskState()).then(result=>{
+   const response=result as {code?:number;message?:string}|null;
+   if(response?.code!==undefined&&response.code!==200)refreshFailed(Error(response.message||'任务状态刷新失败，奖励已确认'));
+  }).catch(refreshFailed);}catch(error){refreshFailed(error);}
   grant();
  }finally{setPending(false);}
 }

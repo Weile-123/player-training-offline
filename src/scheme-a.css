@@ -55,8 +55,8 @@
 .game-screen .contract-roster-actions>button:active:not(:disabled){translate:0 2px;box-shadow:none}
 /* 首页：文字图片与实时存档信息分层。 */
 .contract-home .home-brand{width:100%;height:24cqh;padding-top:1cqh}
-.contract-home .home-background{background-image:url('../public/art/home/background-simple-sky.png');background-size:cover;background-position:center top}
-@media(max-aspect-ratio:1/1){.contract-home .home-background{background-image:url('../public/art/home/background-portrait-simple-sky.png');background-position:center top}}
+.contract-home .home-background{background-image:url('../public/art/home/background-simple-sky.webp');background-size:cover;background-position:center top}
+@media(max-aspect-ratio:1/1){.contract-home .home-background{background-image:url('../public/art/home/background-portrait-simple-sky.webp');background-position:center top}}
 .contract-title-image{padding:0;transform:none}
 .home-brand .contract-title-image img{object-position:center top}
 .home-continue.has-progress{display:flex;align-items:center;justify-content:center;gap:2%;height:calc(14 * var(--u));margin:calc(2 * var(--u)) 0 calc(1 * var(--u));padding:0 3%;color:#f5e8cc;background:#071620 var(--asset-art-game-probability-grain-png,url('/art/game/probability-grain.png')) center/cover;border:3px solid #f1e1bf;border-radius:4px;box-shadow:inset 0 0 0 2px #06131d,0 0 0 2px #07131b;clip-path:polygon(3% 0,96% 1%,100% 20%,99% 84%,96% 100%,3% 98%,0 79%,1% 19%)}

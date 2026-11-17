@@ -5,6 +5,7 @@ const config=JSON.parse(readFileSync('public/config/assets.json','utf8'));
 const previous=JSON.parse(readFileSync('src/data/runtime-assets.json','utf8'));
 const verified=existsSync('src/data/cdn-assets.json')?JSON.parse(readFileSync('src/data/cdn-assets.json','utf8')):{};
 const alwaysLocal=new Set(['art/home/background-simple-sky.png','art/home/background-portrait-simple-sky.png','art/home/title-comic.png','art/collection/court-lines.svg','art/home/continue-frame.svg','art/shot/player-data.json']);
+for(const path of ['art/home/background-simple-sky.webp','art/home/background-portrait-simple-sky.webp','art/home/title-comic.webp'])alwaysLocal.add(path);
 const paths=new Set([...previous.entries.map(a=>a.path),...Object.keys(config.urls??{}),...alwaysLocal]);
 const entries=[...paths].sort().map(path=>{
  const url=alwaysLocal.has(path)?undefined:config.urls?.[path];

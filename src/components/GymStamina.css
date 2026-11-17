@@ -22,3 +22,6 @@
 .gym-stamina-a-values > em { display: block; margin-top: calc(17 * var(--stamina-unit)); color: #d3c5a9; text-align: center; font: normal calc(10 * var(--stamina-unit))/1.4 var(--font-body); }
 .gym-stamina-a-values > em > b { color: #f4d895; font: calc(16 * var(--stamina-unit))/1.4 var(--font-number); }
 .gym-game .game-stage .stage-navigation .contract-stage-tools { left: 2%; right: auto; }
+.gym-stamina-restore {display: grid; width: 100%; gap: 2px; margin-top: 10px; padding: 6px 2px; border: 1px solid #dfc382; border-radius: 4px; color: #f8e6b4; background: #173b3de8; font: 12px/1.2 var(--font-display); cursor: pointer; pointer-events: auto;}
+.gym-stamina-restore small {font: 9px/1 var(--font-body); color: #c7c7a7;}
+.gym-stamina-restore:disabled {opacity: .6;}

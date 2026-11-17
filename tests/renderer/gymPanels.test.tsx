@@ -47,7 +47,7 @@ function buttonWithin(scope: ParentNode, text: string) {
 }
 
 function product(name: string) {
-  const card = [...document.querySelectorAll<HTMLElement>('.gm-product')].find(item => item.querySelector('h4')?.textContent === name);
+  const card = [...document.querySelectorAll<HTMLElement>('.gm-product, .gm-consumable-card')].find(item => item.querySelector('h4')?.textContent === name);
   expect(card, name).toBeTruthy();
   return card!;
 }
@@ -84,7 +84,7 @@ it.each([12, 99])('uses stamina and experience meters without compact bonus advi
   expect(actions).toEqual([]);
 });
 
-it('keeps only portraits and names in the alumni grid and opens complete records without generated rookie names', async () => {
+it('shows a compact alumni summary and opens complete records without generated rookie names', async () => {
   const state = newGym(at, 20);
   const template = templateRules.find(item => item.tier === 'starter')!;
   const record = {...state.player!, name: '新秀 3', templateId: template.id, recommendedAt: at, rewardCredits: 2, rewardFame: 30, finalValue: '320'};
@@ -93,13 +93,14 @@ it('keeps only portraits and names in the alumni grid and opens complete records
   const cards = [...document.querySelectorAll<HTMLElement>('.gm-alumnus')];
   const matched = cards.find(card => card.dataset.tier === 'starter')!;
   expect(matched.querySelector('strong')?.textContent).toBe(template.name);
-  expect(matched.textContent).toBe(template.name);
+  expect(matched.textContent).toContain('最终身价');
+  expect(matched.textContent).toContain('$320.00');
   expect(matched.textContent).not.toContain('新秀 3');
   expect(matched.querySelector('.tier-portrait-frame')?.getAttribute('data-tier')).toBe('starter');
   expect(matched.querySelector('.tier-portrait-frame > .gm-alumni-portrait-surface.album-portrait-surface')).toBeTruthy();
   const historical = cards.find(card => card.dataset.tier === 'undiscovered')!;
-  expect(historical.textContent).toBe('历史新秀');
-  expect(document.querySelector('.gm-alumni-list')?.textContent).not.toMatch(/Lv\.|cm|推荐 \+|声望/);
+  expect(historical.querySelector('strong')?.textContent).toBe('历史新秀');
+  expect(document.querySelector('.gm-alumni-list')?.textContent).toContain('Lv.');
   await press(matched as HTMLButtonElement);
   const detail = document.querySelector('.gm-detail-dialog')!;
   expect(detail.querySelector('.gm-player-identity h3')?.textContent).toBe(template.name);
@@ -848,13 +849,14 @@ it('presents a capped offline report as saved training, with no claim or automat
   expect(dialog.textContent).toContain('离线训练报告');
   expect(dialog.textContent).toContain('2小时');
   expect(dialog.textContent).toContain('30分钟');
-  expect(dialog.textContent).toContain('Lv.0 → Lv.8');
-  expect(dialog.textContent).toContain('超出部分仅恢复体力');
-  expect(dialog.textContent).toContain('已自动保存');
-  expect(dialog.textContent).toContain('不会自动推荐或招募');
-  expect(dialog.textContent).not.toContain('领取');
+  expect(dialog.querySelector('.athlete-level > span')?.textContent).toBe('Lv.0');
+  expect(dialog.querySelector('.athlete-level > strong')?.textContent).toBe('8');
+  expect(dialog.textContent).toContain('超出时长仅恢复体力');
+  expect(dialog.textContent).toContain('已保存，无需领取');
+  expect([...dialog.querySelectorAll('button')].some(button => button.textContent?.includes('领取'))).toBe(false);
   await press(buttonWithin(dialog, '继续培养'));
   expect(closed).toBe(1);
+  expect(actions).toEqual([]);
 });
 
 it.each([false, true])('confirms the displayed reward and archives only a matched athlete (legend %s)', async legendary => {

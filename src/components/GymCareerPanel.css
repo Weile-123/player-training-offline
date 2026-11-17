@@ -1,0 +1,73 @@
+/* Approved B design + A record card: declarations migrated verbatim from the design source. */
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame {display:grid;grid-template-columns:68px 1fr auto;gap:10px;align-items:center;border:2px solid #c19c55;border-left:5px solid #bd923e;padding:7px 8px;background:#f7e5b7}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-portrait {height:75px;border:2px solid #a98d51;background:#183a46;overflow:hidden}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-portrait img {height:100%;width:100%;object-fit:cover;object-position:top}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame h3 {font:19px var(--display)}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame p {font-size:11px;color:#806343;margin-top:5px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-value {text-align:right}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-value span {display:block;font-size:9px;color:#806343}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-value b {display:block;color:#a44128;font:22px var(--display);margin-top:5px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-hero {display:grid;grid-template-columns:1fr auto;gap:10px;align-items:start;padding:14px;background:var(--ink);color:#f5e8c8;border:3px double #cfaf6f}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-hero h2 {font:21px var(--display);margin-top:5px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-hero .eyebrow {color:#c9b381}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-level {font:35px/1 var(--display);color:#efd28d}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame {grid-column:span 2;border-top:1px solid #7f8b80;padding-top:9px;margin-top:1px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame-head {display:flex;align-items:baseline;justify-content:space-between;margin-bottom:8px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame-head span {font-size:11px;color:#c9b894}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame-head b {font:25px/1 var(--display);color:#6ed5ac}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame-head small {font:11px 'Microsoft YaHei',sans-serif;color:#baa986}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-hero .bar {background:#49605b}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-hero .bar>i {background:#55b18d}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-fame p {font-size:9px;color:#bfc5b1;margin-top:6px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-counters {display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .counter {display:flex;align-items:center;justify-content:space-between;padding:10px;border:1px solid #b49a6b;background:#eddbb3}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .counter span {font-size:11px;color:#786343}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .counter b {font:27px/1 var(--display);color:#9d392b}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-split {display:grid;grid-template-columns:1.05fr 1fr;gap:12px;margin-top:12px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-split>section:last-child {border-left:1px solid var(--line);padding-left:12px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .dashboard-split h2 {font:16px var(--display);margin-bottom:8px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution {display:flex;height:14px;gap:2px;margin-top:5px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution i {background:#8b9c9a;display:block}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution i:nth-child(2) {background:#477982}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution i:nth-child(3) {background:#a88c46}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution i:nth-child(4) {background:#b66336}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution i:nth-child(5) {background:#8a482e}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution-key {display:grid;grid-template-columns:1fr 1fr;gap:7px 8px;margin-top:11px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution-key div {display:flex;align-items:center;justify-content:space-between;font-size:10px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution-key span {color:#806947}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution-key b {font-size:12px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .records-table {margin-top:11px;border:1px solid #baa16e}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .records-table header {background:#e7d3aa;padding:8px 10px;font:16px var(--display);border-bottom:1px solid #baa16e}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .records-table .stats-row {margin-inline:10px;min-height:32px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .collection-rings {display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring-card {display:flex;gap:9px;align-items:center;padding:9px 8px;border:1px solid #b49c72;background:#eadebf}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring {width:43px;height:43px;flex:none;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--green) 0 42%,#cdbb94 42% 100%)}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring:before {content:'';position:absolute;width:34px;height:34px;border-radius:50%;background:#eddfbf}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring b {position:relative;font:18px var(--display)}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring-card h3 {font-size:11px}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring-card small {display:block;margin-top:5px;font-size:9px;color:#806847}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .footnote {margin-top:11px;padding-top:8px;border-top:1px solid var(--line)}
+
+/* The record uses the court card's uninterrupted foil surround and inner bands.
+ * Compensate for the thicker frame so the approved record layout stays in place. */
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame[data-tier] {position:relative; isolation:isolate; border:4px solid transparent; padding:5px 6px 5px 9px; background:linear-gradient(#f7e5b7,#f7e5b7) padding-box,var(--tier-metal) border-box; box-shadow:0 0 0 1px #142a34,inset 0 0 0 1px #142a34,inset 0 0 0 3px var(--tier-light),inset 0 0 0 4px var(--tier-edge),2px 3px 0 #b59a68;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame .best-portrait[data-tier] {position:relative; box-sizing:border-box; border:3px solid transparent; border-image:none; background:linear-gradient(#183a46,#183a46) padding-box,var(--tier-metal) border-box; box-shadow:0 0 0 1px #18313e,1px 2px 0 var(--tier-light);}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-portrait > span {position:relative; display:block; width:100%; height:100%; overflow:hidden;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .best-portrait :is(img,svg,.template-silhouette) {width:100%; height:100%; max-width:none; max-height:none; object-fit:cover; object-position:top;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame > div:nth-child(2) {min-width:0;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame h3 {overflow-wrap:anywhere;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame :is(.chip,.best-value span) {white-space:nowrap;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame .chip {font-family:'Microsoft YaHei',sans-serif; font-weight:normal;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame :is([data-tier=legend]), .game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame[data-tier=legend] {--tier-metal:conic-gradient(from var(--legend-angle),#fa675d,#ffc14c,#a2da59,#40c7bb,#4c9fe8,#a17ce5,#eb77ba,#fa675d); animation:legend-border-orbit 6s linear infinite;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b.reduce-motion .hall-of-fame[data-tier=legend], .game-screen.comic-dialog-layer .gym-design-surface.career-b.reduce-motion .hall-of-fame [data-tier=legend] {animation:none;}
+@media(prefers-reduced-motion:reduce) {.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame[data-tier=legend], .game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame [data-tier=legend] {animation:none;}}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring {position:relative; background:conic-gradient(var(--green) 0 var(--progress),#cdbb94 var(--progress) 100%);}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring.is-equipment {background:conic-gradient(#ac7d38 0 var(--progress),#cdbb94 var(--progress) 100%);}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .ring:before {inset:auto; z-index:auto;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .distribution .is-empty {width:100%; background:#d3c19a;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-loading, .game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-empty {margin-top:10px; padding:8px 9px; border:1px dashed #b69d72; color:#806b4d; font-size:10px; line-height:1.7;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-error {display:flex; gap:8px; align-items:center; margin-top:10px; padding:8px 9px; border:1px solid #b87960; background:#efd8be;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-error p {font-size:10px; color:#7d432d;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-error button {width:auto; flex:none; min-height:28px; padding:4px 7px; font-size:11px;}
+.game-screen.comic-dialog-layer .gym-design-surface.career-b .gm-career-locked {font-size:11px; font-weight:bold;}
+@media(max-width:359px) {.game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame {grid-template-columns:56px minmax(0,1fr); gap:7px;} .game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame .best-value {grid-column:2; text-align:left;} .game-screen.comic-dialog-layer .gym-design-surface.career-b .hall-of-fame .best-portrait {grid-row:span 2; height:88px;}}

@@ -10,6 +10,12 @@
 .gm-roster { display: grid; gap: 12px; min-width: 0; }
 .gm-roster > .contract-cards { margin: 0; }
 .gm-roster > .gm-roster-recruit { margin: 0; }
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions { grid-template-columns: 1fr .85fr 1fr; gap: 8px; }
+.game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions > button.gm-icon-button { padding-inline: 5px; gap: 5px; }
+.gm-roster-planning { gap: 9px; }
+.gm-roster-planning-name { margin: 0; padding-bottom: 8px; border-bottom: 1px solid #b59d71; font-size: 12px; }
+.gm-roster-planning .collection-tab-panel { padding-inline: 0; }
+.gm-roster-planning .leaderboard-tabs { margin-bottom: 12px; }
 .game-screen.comic-dialog-layer .comic-dialog.scheme-roster-dialog > .sheet-scroll { padding-top: 5px; }
 .gm-roster-meters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; padding: 8px 9px; border-top: 1px solid #ae9568; background: #e9d8af; }
 .gm-roster-meter { display: grid; gap: 5px; min-width: 0; color: #17303b; font-size: 11px; font-weight: 850; font-variant-numeric: tabular-nums; }

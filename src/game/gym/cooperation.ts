@@ -2,7 +2,13 @@ import {type StatKey} from '../types';
 import {hash} from '../contract/random';
 import {type GymPlayer, type GymState} from './engine';
 
-export type Cooperation = {id: string; playerId: string; acceptedShots: number; acceptedCourses: number};
+export type Cooperation = {
+  id: string; playerId: string; acceptedShots: number; acceptedCourses: number;
+  /** Distinguishes a new acceptance of the same offer while an advertisement was open. */
+  acceptedRevision?: number;
+  /** Satisfies this cooperation only; never fabricates training or equipment qualification. */
+  adCompleted?: boolean;
+};
 export type CooperationOffer = {
   id: string; kind: 'basic' | 'specialist' | 'rising' | 'elite' | 'legend'; name: string; description: string;
   requiredShots: number; requiredCourses: number; requiredTier: number; focusKeys: readonly StatKey[];

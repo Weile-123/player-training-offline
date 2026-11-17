@@ -1,4 +1,4 @@
-import {automaticIntervalMs, experienceForLevel, playerLevelCap, recoverySeconds, staminaMax, trainingShotExperience, trainingStatus, type GymPlayer, type GymState} from './engine';
+import {automaticIntervalMs, experienceForLevel, guaranteedGreatShots, playerLevelCap, recoverySeconds, staminaMax, trainingShotExperience, trainingStatus, type GymPlayer, type GymState} from './engine';
 import {offlineLimitMs} from './offline';
 
 export type TrainingForecast = {
@@ -63,9 +63,11 @@ export function forecastTraining(state: GymState, player: GymPlayer | null = sta
   const target = Math.max(player.level, Math.min(playerLevelCap, Math.floor(targetLevel)));
   const remaining = Math.max(0, experienceForLevel(target) - experienceForLevel(player.level) - player.experience);
   const payouts = (['hold', 'success', 'great'] as const).map(outcome => trainingShotExperience(state, outcome, player));
-  const expectedShots = remaining ? stoppingShots(remaining, payouts) : 0;
+  const openingShots = Math.min(guaranteedGreatShots(player), Math.ceil(remaining / payouts[2]));
+  const afterOpening = Math.max(0, remaining - openingShots * payouts[2]);
+  const expectedShots = remaining ? openingShots + stoppingShots(afterOpening, payouts) : 0;
   const estimatedMs = estimateShotTime(state, player, Math.ceil(expectedShots));
-  return {targetLevel: target, expectedShots, estimatedMs, minShots: Math.ceil(remaining / Math.max(...payouts)),
-    maxShots: Math.ceil(remaining / Math.min(...payouts)), withinOfflineLimit: player.autoEnabled && estimatedMs <= offlineLimitMs(state),
+  return {targetLevel: target, expectedShots, estimatedMs, minShots: openingShots + Math.ceil(afterOpening / Math.max(...payouts)),
+    maxShots: openingShots + Math.ceil(afterOpening / Math.min(...payouts)), withinOfflineLimit: player.autoEnabled && estimatedMs <= offlineLimitMs(state),
     automatic: player.autoEnabled, finished: remaining === 0};
 }

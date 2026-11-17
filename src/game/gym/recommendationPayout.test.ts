@@ -38,7 +38,7 @@ function recommend(state: GymState) {
 }
 
 describe('all-level per-template recommendation rewards', () => {
-  it('publishes economy 11 with a one-coupon repeated-template reward and unchanged 33-coupon theoretical maximum', () => {
+  it('publishes economy 11 with a one-coupon repeated-template base and unchanged 33-coupon theoretical maximum', () => {
     expect(gymEconomyVersion).toBe(11);
     expect(postgameRepeatTemplateCredits).toBe(1);
     expect(maximumRecommendationCredits).toBe(33);
@@ -65,27 +65,27 @@ describe('all-level per-template recommendation rewards', () => {
     expect(state).toEqual(before);
   });
 
-  it.each([0, 499, 500, 501, 5_000])('pays exactly one for an already recommended G8 template at balance %i', credits => {
+  it.each([0, 499, 500, 501, 5_000])('pays a base of one plus earned bonuses for an already recommended G8 template at balance %i', credits => {
     const state = fixture(credits);
     state.postgameRecommendedTemplates = ['bryant'];
     const before = structuredClone(state);
     const raw = recommendation(state);
     const payout = recommendationPayout(state);
-    expect(payout).toMatchObject({credits: 1, rawCredits: 33, withheldCredits: 32,
-      repeatTemplate: true, isFirstPostgameRecommendation: false, baseCredits: 5, trainingCredits: 18, cooperationCredits: 10});
+    expect(payout).toMatchObject({credits: 29, rawCredits: 33, withheldCredits: 4,
+      repeatTemplate: true, isFirstPostgameRecommendation: false, baseCredits: 1, trainingCredits: 18, cooperationCredits: 10});
     const result = recommend(state);
-    expect(result.state.credits).toBe(credits + 1);
+    expect(result.state.credits).toBe(credits + 29);
     expect(result.state.fame - state.fame).toBe(raw.fame);
-    expect(result.state.alumni[0]).toMatchObject({rewardCredits: 1, rewardFame: raw.fame});
+    expect(result.state.alumni[0]).toMatchObject({rewardCredits: 29, rewardFame: raw.fame});
     expect(result.state.postgameRecommendedTemplates).toEqual(['bryant']);
-    expect(result.events.find(event => event.type === 'recommended')).toMatchObject({credits: 1, rawCredits: 33, withheldCredits: 32,
+    expect(result.events.find(event => event.type === 'recommended')).toMatchObject({credits: 29, rawCredits: 33, withheldCredits: 4,
       repeatTemplate: true, isFirstPostgameRecommendation: false});
     expect(alumniProgress(result.state)).toMatchObject({total: 1, effectiveCount: 1, legendCount: 1, bestTier: 5});
     expect(validGym(result.state)).toBe(true);
     expect(state).toEqual(before);
   });
 
-  it.each([1, 2, 3, 4, 5, 6, 7, 8])('records a normal first reward and limits repeats to one at gym level %i', gymLevel => {
+  it.each([1, 2, 3, 4, 5, 6, 7, 8])('records a normal first reward and changes only the repeated base at gym level %i', gymLevel => {
     const firstState = fixture(1_000, gymLevel);
     const raw = recommendation(firstState);
     const first = recommend(firstState);
@@ -94,12 +94,13 @@ describe('all-level per-template recommendation rewards', () => {
     expect(first.events.find(event => event.type === 'recommended')).toMatchObject({isFirstPostgameRecommendation: true});
     const state = fixture(1_000, gymLevel);
     state.postgameRecommendedTemplates = ['bryant'];
-    expect(recommendationPayout(state)).toEqual({...raw, credits: 1, rawCredits: raw.credits, withheldCredits: raw.credits - 1,
+    const repeatCredits=1+raw.trainingCredits+raw.cooperationCredits;
+    expect(recommendationPayout(state)).toEqual({...raw, baseCredits:1, credits: repeatCredits, rawCredits: raw.credits, withheldCredits: raw.baseCredits - 1,
       repeatTemplate: true, isFirstPostgameRecommendation: false});
     const result = recommend(state);
-    expect(result.state.credits).toBe(1_001);
+    expect(result.state.credits).toBe(1_000+repeatCredits);
     expect(result.state.postgameRecommendedTemplates).toEqual(['bryant']);
-    expect(result.state.alumni[0].rewardCredits).toBe(1);
+    expect(result.state.alumni[0].rewardCredits).toBe(repeatCredits);
   });
 
   it('makes a later, more cultivated player of the same template a repeat without changing raw fame or cooperation', () => {
@@ -115,15 +116,15 @@ describe('all-level per-template recommendation rewards', () => {
     expect(secondRaw.credits).toBe(33);
     expect(cooperationStatus(first.state).complete).toBe(true);
     const actual = recommendationPayout(first.state);
-    expect(actual).toMatchObject({credits: 1, rawCredits: 33, withheldCredits: 32, repeatTemplate: true,
+    expect(actual).toMatchObject({credits: 29, rawCredits: 33, withheldCredits: 4, repeatTemplate: true,
       fame: secondRaw.fame, growth: secondRaw.growth, cooperationCredits: secondRaw.cooperationCredits});
     expect(actual.growth).toBeGreaterThan(firstRaw.growth);
     const paid = recommend(first.state);
-    expect(paid.state.credits).toBe(24);
+    expect(paid.state.credits).toBe(52);
     expect(paid.state.fame).toBe(firstRaw.fame + secondRaw.fame);
   });
 
-  it('gives a different template its own first reward even in the same tier, then only one for either repeat', () => {
+  it('gives a different template its own first base even in the same tier and preserves later bonuses', () => {
     const state = fixture(700);
     addBench(state, 'jordan'); addBench(state, 'bryant'); addBench(state, 'jordan');
     let current = state;
@@ -133,8 +134,8 @@ describe('all-level per-template recommendation rewards', () => {
       rewards.push(result.events.find(event => event.type === 'recommended')!.credits);
       current = result.state;
     }
-    expect(rewards).toEqual([33, 33, 1, 1]);
-    expect(current.credits).toBe(768);
+    expect(rewards).toEqual([33, 33, 29, 29]);
+    expect(current.credits).toBe(824);
     expect(current.postgameRecommendedTemplates).toEqual(['bryant', 'jordan']);
     expect(alumniProgress(current)).toMatchObject({total: 4, effectiveCount: 4, legendCount: 4});
   });
@@ -147,6 +148,29 @@ describe('all-level per-template recommendation rewards', () => {
     expect(paid.state.credits).toBe(500);
     expect(paid.state.postgameRecommendedTemplates).toEqual([]);
     expect(paid.state.alumni).toHaveLength(0);
+  });
+
+  it('pays exactly 1 + 6 = 7 for a repeated template with completed elite cooperation and no other bonuses', () => {
+    const state=fixture(0,3),player=state.player!;
+    player.level=player.peakLevel=9;player.experience=0;player.equipmentTraining.cooperationCourses=[0,0];
+    state.postgameRecommendedTemplates=[player.templateId!];
+    expect(cooperationOffers(state).at(-1)!.kind).toBe('elite');expect(cooperationStatus(state).complete).toBe(true);
+    const raw=recommendation(state),payout=recommendationPayout(state);
+    expect(payout).toMatchObject({baseCredits:1,trainingCredits:0,cooperationCredits:6,credits:7,rawCredits:11,withheldCredits:4,repeatTemplate:true});
+    const result=recommend(state);expect(result.state.credits).toBe(7);expect(result.state.fame).toBe(raw.fame);
+  });
+
+  it('stacks cultivation, cooperation and earned equipment bonuses on a repeated template', () => {
+    const state=fixture(0,3);state.postgameRecommendedTemplates=[state.player!.templateId!];
+    expect(cooperationStatus(state)).toMatchObject({complete:true,equipmentCredits:2});
+    expect(recommendationPayout(state)).toMatchObject({baseCredits:1,trainingCredits:18,cooperationCredits:8,credits:27,rawCredits:31,withheldCredits:4});
+    expect(recommend(state).state.credits).toBe(1+18+6+2);
+  });
+
+  it('still pays only the base coupon when a repeated template has no completed bonus',()=>{
+    const state=fixture(),player=state.player!;player.level=player.peakLevel=9;player.experience=0;player.cooperation=null;
+    state.postgameRecommendedTemplates=[player.templateId!];
+    expect(recommendationPayout(state)).toMatchObject({baseCredits:1,trainingCredits:0,cooperationCredits:0,credits:1,rawCredits:5,withheldCredits:4});
   });
 
   it('keeps the earlier recommendation counted after upgrading from seven to eight', () => {
@@ -163,7 +187,7 @@ describe('all-level per-template recommendation rewards', () => {
     const upgraded = dispatchGym(early.state, early.state.revision, {type: 'upgrade-gym', targetLevel: 8}, 1_000);
     expect(upgraded.error).toBeUndefined();
     expect(upgraded.state.gymLevel).toBe(8);
-    expect(recommendationPayout(upgraded.state)).toMatchObject({credits: 1, repeatTemplate: true, isFirstPostgameRecommendation: false});
+    expect(recommendationPayout(upgraded.state)).toMatchObject({baseCredits:1, credits: 29, repeatTemplate: true, isFirstPostgameRecommendation: false});
     expect(recommend(upgraded.state).state.postgameRecommendedTemplates).toEqual(['bryant']);
   });
 
@@ -176,9 +200,9 @@ describe('all-level per-template recommendation rewards', () => {
       cooperation: {...legacy.player!.cooperation!, id: 'old-bryant:legend', playerId: 'old-bryant'},
       rewardCredits: 33, rewardFame: 100, finalValue: '0'}];
     const restored = decodeGym(encodeGym(legacy))!;
-    expect(recommendationPayout(restored)).toMatchObject({credits: 1, repeatTemplate: true, isFirstPostgameRecommendation: false});
+    expect(recommendationPayout(restored)).toMatchObject({baseCredits:1, credits: 29, repeatTemplate: true, isFirstPostgameRecommendation: false});
     const paid = recommend(restored).state;
-    expect(paid.credits).toBe(5_001);
+    expect(paid.credits).toBe(5_029);
     expect(paid.recommendationRulesVersion).toBe(11);
     expect(paid.postgameRecommendedTemplates).toEqual(['jordan', 'bryant']);
     const newTemplate = {...paid, player: {...legacy.player!, templateId: 'curry'}};
@@ -200,7 +224,7 @@ describe('all-level per-template recommendation rewards', () => {
     state.postgameRecommendedTemplates = ['bryant', 'jordan'];
     const restored = decodeGym(encodeGym(state))!;
     expect(restored.postgameRecommendedTemplates).toEqual(['bryant', 'jordan']);
-    expect(recommendationPayout(restored).credits).toBe(1);
+    expect(recommendationPayout(restored).credits).toBe(29);
     expect(validGym({...state, postgameRecommendedTemplates: nbaTemplates.map(template => template.id)})).toBe(true);
     for (const value of [['bryant', 'bryant'], ['unknown-template'], null, 'bryant', [17]]) {
       expect(validGym({...state, postgameRecommendedTemplates: value})).toBe(false);
@@ -251,8 +275,8 @@ describe('all-level per-template recommendation rewards', () => {
     const reloaded = createGymStore(storage, 17, () => 1_000);
     const second = await reloaded.getState().act({type: 'recommend', id: first.state.player!.id});
     expect(second.error).toBeUndefined();
-    expect(second.state.credits).toBe(34);
-    expect(second.state.alumni.map(player => player.rewardCredits)).toEqual([33, 1]);
+    expect(second.state.credits).toBe(62);
+    expect(second.state.alumni.map(player => player.rewardCredits)).toEqual([33, 29]);
     expect(second.state.postgameRecommendedTemplates).toEqual(['bryant']);
     expect(activePlayers(second.state)).toHaveLength(0);
   });

@@ -109,22 +109,28 @@ it.each([1, 8])('ignores a saved template goal for free admission at gym level %
   expect(latest.player).not.toBeNull();
 });
 
-it('reads alumni in fixed pages and exposes a retry when archive loading fails', async () => {
+it('loads complete alumni before grouped pagination and exposes a retry when archive loading fails', async () => {
   const state = newGym(at, 7);
   const row = {...state.player!, id: 'archived', recommendedAt: at, rewardCredits: 0, rewardFame: 0, finalValue: '320'} as GymAlumnus;
   state.alumniArchive = {id: 'history', count: 45, effectiveCount: 0, legendCount: 0, bestTier: 0};
   const loadAlumni = vi.fn<NonNullable<GymPanelProps['loadAlumni']>>()
     .mockRejectedValueOnce(new Error('unavailable'))
-    .mockResolvedValue({players: [row], total: 45});
+    .mockResolvedValue({players: Array.from({length: 45}, (_, index) => ({...row, id: `archived-${index}`, recommendedAt: at + index})), total: 45});
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<GymAlumniPanel state={state} onAction={() => {}} loadAlumni={loadAlumni}/>));
   await act(async () => {await Promise.resolve();});
   expect(document.querySelector('[role="alert"]')?.textContent).toContain('原记录已保留');
   await click('重新读取档案');
-  expect(loadAlumni).toHaveBeenLastCalledWith(0, 20);
-  expect(document.querySelectorAll('.gm-alumnus')).toHaveLength(1);
+  await act(async () => {await Promise.resolve();});
+  expect(loadAlumni).toHaveBeenLastCalledWith(0, 100);
+  expect(document.querySelectorAll('.gm-alumnus')).toHaveLength(20);
+  const calls = loadAlumni.mock.calls.length;
   await click('下一页');
-  expect(loadAlumni).toHaveBeenLastCalledWith(20, 20);
+  expect(document.querySelectorAll('.gm-alumnus')).toHaveLength(20);
+  expect(loadAlumni.mock.calls).toHaveLength(calls);
+  await click('下一页');
+  expect(document.querySelectorAll('.gm-alumnus')).toHaveLength(5);
   await click('上一页');
-  expect(loadAlumni).toHaveBeenLastCalledWith(0, 20);
+  expect(document.querySelectorAll('.gm-alumnus')).toHaveLength(20);
+  expect(loadAlumni.mock.calls).toHaveLength(calls);
 });

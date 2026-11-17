@@ -1,0 +1,179 @@
+[
+  {
+    "width": 320,
+    "career": {
+      "tier": "legend",
+      "borders": [
+        "4px",
+        "4px",
+        "4px",
+        "4px"
+      ],
+      "shadow": "rgb(20, 42, 52) 0px 0px 0px 1px, rgb(20, 42, 52) 0px 0px 0px 1px inset, rgb(255, 241, 189) 0px 0px 0px 3px inset, rgb(178, 126, 73) 0px 0px 0px 4px inset, rgb(181, 154, 104) 2px 3px 0px 0px",
+      "background": "linear-gradient(rgb(247, 229, 183), rgb(247, 229, 183)), conic-gradient(from 0.33deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "0.33deg",
+      "width": 266,
+      "height": 119.5
+    },
+    "portrait": {
+      "tier": "legend",
+      "borders": [
+        "3px",
+        "3px",
+        "3px",
+        "3px"
+      ],
+      "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px",
+      "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 1.32996deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "1.32996deg",
+      "width": 56,
+      "height": 88
+    },
+    "offline": [
+      {
+        "tier": "superstar",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), linear-gradient(125deg, rgb(143, 36, 35), rgb(217, 76, 54) 25%, rgb(255, 192, 160) 43%, rgb(178, 44, 40) 61%, rgb(238, 121, 91) 82%, rgb(143, 36, 35))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 196, 163) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.66804deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.66804deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      }
+    ]
+  },
+  {
+    "width": 430,
+    "career": {
+      "tier": "legend",
+      "borders": [
+        "4px",
+        "4px",
+        "4px",
+        "4px"
+      ],
+      "shadow": "rgb(20, 42, 52) 0px 0px 0px 1px, rgb(20, 42, 52) 0px 0px 0px 1px inset, rgb(255, 241, 189) 0px 0px 0px 3px inset, rgb(178, 126, 73) 0px 0px 0px 4px inset, rgb(181, 154, 104) 2px 3px 0px 0px",
+      "background": "linear-gradient(rgb(247, 229, 183), rgb(247, 229, 183)), conic-gradient(from 1.326deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "1.326deg",
+      "width": 376,
+      "height": 93
+    },
+    "portrait": {
+      "tier": "legend",
+      "borders": [
+        "3px",
+        "3px",
+        "3px",
+        "3px"
+      ],
+      "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px",
+      "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 1.662deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "1.662deg",
+      "width": 68,
+      "height": 75
+    },
+    "offline": [
+      {
+        "tier": "superstar",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), linear-gradient(125deg, rgb(143, 36, 35), rgb(217, 76, 54) 25%, rgb(255, 192, 160) 43%, rgb(178, 44, 40) 61%, rgb(238, 121, 91) 82%, rgb(143, 36, 35))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 196, 163) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.33204deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.33204deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      }
+    ]
+  },
+  {
+    "width": 844,
+    "career": {
+      "tier": "legend",
+      "borders": [
+        "4px",
+        "4px",
+        "4px",
+        "4px"
+      ],
+      "shadow": "rgb(20, 42, 52) 0px 0px 0px 1px, rgb(20, 42, 52) 0px 0px 0px 1px inset, rgb(255, 241, 189) 0px 0px 0px 3px inset, rgb(178, 126, 73) 0px 0px 0px 4px inset, rgb(181, 154, 104) 2px 3px 0px 0px",
+      "background": "linear-gradient(rgb(247, 229, 183), rgb(247, 229, 183)), conic-gradient(from 1.332deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "1.332deg",
+      "width": 376,
+      "height": 93
+    },
+    "portrait": {
+      "tier": "legend",
+      "borders": [
+        "3px",
+        "3px",
+        "3px",
+        "3px"
+      ],
+      "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px",
+      "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 1.662deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+      "animation": "legend-border-orbit",
+      "angle": "1.662deg",
+      "width": 68,
+      "height": 75
+    },
+    "offline": [
+      {
+        "tier": "superstar",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), linear-gradient(125deg, rgb(143, 36, 35), rgb(217, 76, 54) 25%, rgb(255, 192, 160) 43%, rgb(178, 44, 40) 61%, rgb(238, 121, 91) 82%, rgb(143, 36, 35))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 196, 163) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.67404deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      },
+      {
+        "tier": "legend",
+        "width": 52,
+        "height": 62,
+        "border": "3px",
+        "background": "linear-gradient(rgb(24, 58, 70), rgb(24, 58, 70)), conic-gradient(from 0.67404deg, rgb(250, 103, 93), rgb(255, 193, 76), rgb(162, 218, 89), rgb(64, 199, 187), rgb(76, 159, 232), rgb(161, 124, 229), rgb(235, 119, 186), rgb(250, 103, 93))",
+        "shadow": "rgb(24, 49, 62) 0px 0px 0px 1px, rgb(255, 241, 189) 1px 2px 0px 0px"
+      }
+    ]
+  }
+]

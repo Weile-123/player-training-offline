@@ -42,3 +42,5 @@
  .gym-score-metrics > span { font-size: 7px; }
  .gym-score-club > svg:not(.gym-score-chevron) { display: none; }
 }
+.gym-score-club {position: relative;}
+.gym-score-club > .gym-upgrade-dot {position: absolute; z-index: 2; top: -4px; right: -4px; width: 9px; height: 9px; border: 1px solid #ffe4ad; border-radius: 50%; background: #e13527; box-shadow: 0 1px 2px #071a29;}

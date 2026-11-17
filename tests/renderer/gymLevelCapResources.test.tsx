@@ -58,14 +58,14 @@ function card(name: string) {
 }
 async function click(item: HTMLButtonElement) {await act(async () => item.click());}
 
-it('disables every new cooperation at 99 and explains that existing qualifications remain', async () => {
+it('disables ordinary cooperation admission at 99 and explains that existing qualifications remain', async () => {
   const state = fixture(99);
   await mount(GymCooperationPanel, state);
   const before = structuredClone(latest);
-  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation button')];
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation button:not(.gm-cooperation-ad)')];
   expect(buttons).toHaveLength(3);
   expect(buttons.every(item => item.disabled)).toBe(true);
-  expect(document.querySelector('[aria-label="满级合作限制"]')?.textContent).toContain('不能新接或更换合作');
+  expect(document.querySelector('[aria-label="满级合作限制"]')?.textContent).toContain('已有合作与器材资格保留');
   for (const item of buttons) await click(item);
   expect(actions).toEqual([]);
   expect(latest).toEqual(before);
@@ -75,7 +75,7 @@ it('preserves a completed level-99 cooperation, its equipment eligibility and ac
   const state = fixture(99, true), expected = recommendationPayout(state);
   await mount(GymCooperationPanel, state);
   expect(document.body.textContent).toContain('已有合作与器材资格保留，可照常推荐结算');
-  const replacements = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation:not(.is-active) button')];
+  const replacements = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation:not(.is-active) button:not(.gm-cooperation-ad)')];
   expect(replacements).toHaveLength(2);
   for (const item of replacements) {expect(item.disabled).toBe(true); await click(item);}
   expect(actions).toEqual([]);
@@ -147,7 +147,7 @@ it.each([
   expect(use.disabled).toBe(level === 99);
   await click(use);
   if (level === 99) {
-    expect(document.body.textContent).toContain('球员已满级，饮料留给其他或未来球员使用');
+    expect(use.title).toContain('99 级训练上限');
     expect(latest.inventory.drink).toBe(1);
     expect(latest.player!.stamina).toBe(0);
     expect(actions).toEqual([]);

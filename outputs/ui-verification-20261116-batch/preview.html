@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><base href="/"><title>训练馆界面验收 · 内存样例</title>
+<script>
+// Isolate even module-initialization reads from real browser saves.
+const temporaryStorage=()=>{const values=new Map();return {get length(){return values.size;},key:index=>Array.from(values.keys())[index]??null,getItem:key=>values.get(String(key))??null,setItem:(key,value)=>{values.set(String(key),String(value));},removeItem:key=>{values.delete(String(key));},clear:()=>values.clear()};};
+Object.defineProperty(window,'localStorage',{configurable:true,value:temporaryStorage()});
+Object.defineProperty(window,'sessionStorage',{configurable:true,value:temporaryStorage()});
+Object.defineProperty(window,'indexedDB',{configurable:true,value:undefined});
+localStorage.setItem('player-training.preferences.v1',JSON.stringify({version:1,sound:false,reducedMotion:false}));
+// Account/portrait fallbacks remain local; no SDK or cloud transport is present.
+window.ColorboxAI={auth:{getUserInfo:async()=>({code:200,data:{islogin:0}})}};
+</script>
+</head><body class="ui-test-preview"><template id="game-svg-prototypes"><svg><g></g><path></path><circle></circle><ellipse></ellipse><rect></rect><line></line><polyline></polyline><polygon></polygon><text></text><tspan></tspan><defs></defs><mask></mask><clipPath></clipPath><linearGradient></linearGradient><radialGradient></radialGradient><stop></stop><image></image><use></use><symbol></symbol><filter></filter><feColorMatrix></feColorMatrix><feComponentTransfer></feComponentTransfer><feComposite></feComposite><feFlood></feFlood><feFuncA></feFuncA><foreignObject></foreignObject><title></title><desc></desc></svg></template><div id="root"></div><script type="module" src="/outputs/ui-verification-20261116-batch/preview.tsx"></script></body></html>

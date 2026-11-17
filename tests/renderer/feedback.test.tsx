@@ -1,9 +1,6 @@
 import {afterEach,expect,it,vi} from 'vitest';
-const testApplicationId=vi.hoisted(()=>{
- const id='app_0123456789';
- vi.stubEnv('VITE_HUPU_ACTIVITY_ID',id);
- return id;
-});
+import activity from '../../hupu-skills/activity.json';
+const testApplicationId=activity.activityId;
 import {createRoot} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import {FeedbackPage} from '../../src/components/HomeSettings';

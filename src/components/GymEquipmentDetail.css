@@ -22,3 +22,6 @@
   .game-screen.comic-dialog-layer .equipment-detail-dialog .gym-equipment-detail .equipment-effect p { font-size: 13px; }
   .equipment-detail-dialog .gym-equipment-detail .equipment-effect small { font-size: 10px; }
 }
+.equipment-detail.gym-equipment-detail .gm-inventory-management {display: block; width: 100%;}
+.game-screen .equipment-detail.gym-equipment-detail .gm-inventory-management > .gm-equipment-sell {width: 100%; margin: 0; color: #fff0ca; border-color: #712b20; background: linear-gradient(110deg,#c5402a,#ac2b21); box-shadow: inset 0 0 0 1px #eaa46c,1px 2px 0 #17303b;}
+.game-screen.comic-dialog-layer .equipment-detail-dialog .gym-equipment-detail .gm-inventory-management > .album-back {min-height:36px;padding:5px 10px;border-width:3px;font-size:16px;line-height:1.3;}

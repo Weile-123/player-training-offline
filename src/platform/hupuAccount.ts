@@ -1,7 +1,8 @@
 import {ensureColorboxSdk,sdkDeadline,type HupuUser} from './hupuSdk';
+import {hupuProject} from './hupuProject';
 
 export const feedbackConfig=Object.freeze({
- applicationId:import.meta.env.VITE_HUPU_ACTIVITY_ID?.trim()??'',
+ applicationId:hupuProject.applicationId,
  apiBase:'https://feedback-public-d8fnf79rd0e395c3-1252166086.ap-shanghai.app.tcloudbase.com/api',
  envId:'feedback-public-d8fnf79rd0e395c3',
 });
@@ -65,14 +66,14 @@ export async function submitUserFeedback(raw:string):Promise<{id:string}>{
 export async function uploadCloudSave(value:string,expectedPuid?:string):Promise<void>{
  if(new TextEncoder().encode(value).byteLength>2*1024*1024)throw Error('存档超过云端 2 MB 限制，请先导出本地备份');
  await requireUser(expectedPuid);const api=window.ColorboxAI?.cloudSave;
- if(!api)throw Error('当前环境不支持云存档，请在虎扑内打开');
- const result=await guardedCloudCall(api,'write',()=>sdkDeadline(api.setValue({key:cloudSaveKey,value}),'云存档上传结果暂不确定，请稍后查看云端存档'));
+ if(!api?.setValue)throw Error('当前环境不支持云存档，请在虎扑内打开');
+ const result=await guardedCloudCall(api,'write',()=>sdkDeadline(api.setValue!({key:cloudSaveKey,value}),'云存档上传结果暂不确定，请稍后查看云端存档'));
  if(result.code!==200)throw Error(result.message||'云存档上传失败，本地进度已保留');
 }
 export async function downloadCloudSave(expectedPuid?:string):Promise<string|null>{
  await requireUser(expectedPuid);const api=window.ColorboxAI?.cloudSave;
- if(!api)throw Error('当前环境不支持云存档，请在虎扑内打开');
- const result=await guardedCloudCall(api,'read',()=>sdkDeadline(api.getValue({key:cloudSaveKey})));
+ if(!api?.getValue)throw Error('当前环境不支持云存档，请在虎扑内打开');
+ const result=await guardedCloudCall(api,'read',()=>sdkDeadline(api.getValue!({key:cloudSaveKey})));
  if(result.code!==200)throw Error(result.message||'云存档读取失败，本地进度已保留');
  if(result.data===null)return null;
  if(typeof result.data!=='string')throw Error('云存档格式异常，本地进度已保留');

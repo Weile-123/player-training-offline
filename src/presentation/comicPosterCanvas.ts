@@ -1,7 +1,7 @@
 const ink='#102c3a',cream='#fff0c8',red='#bd2d21',gold='#ba9559';
 export const posterColors={ink,cream,red,gold};
 /** Drawing primitives shared by all four exported posters, in game UI colours. */
-export function comicPoster(height=1320){
+export function comicPoster(height=1320,branding={name:'王牌训练师',slogan:'从训练球星开始'}){
  const canvas=document.createElement('canvas');canvas.width=900;canvas.height=height;
  const ctx=canvas.getContext('2d');if(!ctx)throw Error('当前浏览器无法生成图片');
  function box(x:number,y:number,w:number,h:number,fill:string,border=gold,radius=8,width=2){
@@ -39,7 +39,7 @@ export function comicPoster(height=1320){
  }
  function fit(img:HTMLImageElement,x:number,y:number,w:number,h:number){const s=Math.min(w/img.width,h/img.height);ctx!.drawImage(img,x+(w-img.width*s)/2,y+(h-img.height*s)/2,img.width*s,img.height*s);}
  function header(label:string,kicker:string,theme:'standard'|'cap'|'victory'='standard'){
-  text('王牌训练师',48,65,26,ink);text('从训练球星开始',852,65,19,ink,'right');
+  text(branding.name,48,65,26,ink);text(branding.slogan,852,65,19,ink,'right');
   if(theme==='standard'){
    ctx!.save();ctx!.translate(30,87);ctx!.rotate(-.018);ribbon('',0,0,840,132);ball(70,66,34);text(label,471,92,65,cream,'center',680);ctx!.restore();
   }else{
@@ -53,7 +53,7 @@ export function comicPoster(height=1320){
   }
   ctx!.strokeStyle=gold;ctx!.lineWidth=2;ctx!.beginPath();ctx!.moveTo(60,259);ctx!.lineTo(225,259);ctx!.moveTo(675,259);ctx!.lineTo(840,259);ctx!.stroke();text(kicker,450,268,23,ink,'center',430);
  }
- function footer(slogan:string,color=red){ribbon(slogan,48,height-127,804,61,27,color);text('王牌训练师',450,height-38,22,ink,'center');}
+ function footer(slogan:string,color=red){ribbon(slogan,48,height-127,804,61,27,color);text(branding.name,450,height-38,22,ink,'center');}
  box(0,0,900,height,ink,ink,0);box(13,13,874,height-26,'#e9d5aa',gold,20,3);box(22,22,856,height-44,ink,ink,15);box(29,29,842,height-58,'#f3e3c5',cream,12,2);
  const gradient=ctx.createLinearGradient(0,0,900,height);gradient.addColorStop(0,'#fff5df66');gradient.addColorStop(.55,'#d9b37622');gradient.addColorStop(1,'#fff0c455');ctx.fillStyle=gradient;ctx.fillRect(34,34,832,height-68);
  return {canvas,ctx,box,text,dots,ribbon,ball,panel,portrait,fit,header,footer,blob:()=>new Promise<Blob>((resolve,reject)=>canvas.toBlob(value=>value?resolve(value):reject(Error('海报生成失败')),'image/png'))};

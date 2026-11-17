@@ -1,5 +1,5 @@
 {
-  "version": "af1624fec094f6ab",
+  "version": "1cb5b16c1899d4a8",
   "entries": [
     {
       "path": "art/career/album.png",
@@ -39,8 +39,8 @@
     },
     {
       "path": "art/collection/court-lines.svg",
-      "bytes": 339,
-      "hash": "1c9fb54828cf0f68",
+      "bytes": 345,
+      "hash": "b172b1cce0c5aaee",
       "local": true
     },
     {
@@ -135,14 +135,26 @@
     },
     {
       "path": "art/home/background-portrait-simple-sky.png",
-      "bytes": 604953,
-      "hash": "775f6e87940dab87",
+      "bytes": 2867504,
+      "hash": "2772c0682a8324b1",
+      "local": true
+    },
+    {
+      "path": "art/home/background-portrait-simple-sky.webp",
+      "bytes": 745682,
+      "hash": "230b6ad181ed9ff5",
       "local": true
     },
     {
       "path": "art/home/background-simple-sky.png",
-      "bytes": 682246,
-      "hash": "cabfe73515ade830",
+      "bytes": 3072426,
+      "hash": "1125053c7042d15e",
+      "local": true
+    },
+    {
+      "path": "art/home/background-simple-sky.webp",
+      "bytes": 868290,
+      "hash": "8e91a72e8087042c",
       "local": true
     },
     {
@@ -177,14 +189,20 @@
     },
     {
       "path": "art/home/continue-frame.svg",
-      "bytes": 997,
-      "hash": "100ae5aa84faf84c",
+      "bytes": 1005,
+      "hash": "a68a9df93d707fd7",
       "local": true
     },
     {
       "path": "art/home/title-comic.png",
-      "bytes": 613156,
-      "hash": "b63a886d9d0b1a6c",
+      "bytes": 1856307,
+      "hash": "f353aff2bef7ae4b",
+      "local": true
+    },
+    {
+      "path": "art/home/title-comic.webp",
+      "bytes": 475432,
+      "hash": "3606e02c9431ad86",
       "local": true
     },
     {
@@ -861,8 +879,8 @@
     },
     {
       "path": "art/shot/player-data.json",
-      "bytes": 292737,
-      "hash": "aa98ad2156cb79f9",
+      "bytes": 292738,
+      "hash": "480c9be0a9b6a6e6",
       "local": true
     },
     {

@@ -1,0 +1,24 @@
+.gym-game .gym-player-share {padding: 3px 7px; margin-left: 2px; border: 3px double #fff0a8; border-radius: 8px; background: linear-gradient(110deg,#f5cc51,#dca52b); box-shadow: 0 0 0 1px #84521d,inset 0 0 0 1px #ac731b,1px 2px 0 #17303b; color: #573510; text-shadow: 0 1px #ffeaa6; font: 600 clamp(8px, 2.1cqw, 11px)/1.1 var(--font-display); white-space: nowrap; cursor: pointer;}
+.gym-game .template-main-identity:has(.gym-player-share) {gap: 1px;}
+.training-layout.gym-game .player-value-card .star-template-panel:has(.gym-player-share) {grid-template-columns: 23% minmax(0, 1fr) 23% 17%;}
+.gym-game .template-identity-meta:has(.gym-player-share) {font-size: clamp(7px, 2.1cqw, 11px); gap: 2px; flex-wrap: nowrap;}
+.gym-game .template-identity-meta:has(.gym-player-share) > .tier-badge {flex: none; --tier-badge-size: clamp(8px, 2.1cqw, 11px); padding: 2px;}
+.gym-game .template-identity-meta > .template-position-action {display: inline-flex; align-items: center; white-space: nowrap; overflow: visible; border-left: 0; padding-left: 0;}
+.gym-share-content {display: grid; gap: 9px;}
+.gym-share-reward {margin: 0; padding: 8px 10px; border-left: 3px solid #ad3226; background: #e8d4a2; color: #a92c24; font-size: 13px;}
+.gym-share-dialog .gym-share-poster {display: block; width: 100%; height: auto; border: 2px solid #18313d; background: #ead9b4;}
+.gym-share-dialog .poster-share-footer {padding: 10px 16px 14px;}
+.gym-share-dialog .poster-share-footer > button {width: 100%;}
+.gym-debug-content {display: grid; gap: 12px;}
+.gym-game .gym-local-test {position: absolute; left: 50%; top: 4px; transform: translateX(-50%); z-index: 9; border: 1px solid #b99e63; background: #193943e8; color: #f7e7be; padding: 3px 8px; font: 11px/1.2 var(--font-body);}
+.gym-court-quick-actions {position: absolute; bottom: 2cqw; right: 2cqw; z-index: 9; display: flex; align-items: center; justify-content: flex-end; gap: 8px; max-width: calc(100% - 4cqw);}
+.gym-game .gym-court-quick-actions > .gym-court-switch {position: relative; right: auto; bottom: auto; max-width: none; min-height: 36px;}
+.gym-game .gym-court-quick-actions > .gym-stamina-restore {display: flex; align-items: center; justify-content: center; gap: 5px; width: auto; min-height: 36px; margin: 0; padding: 7px 10px; border: 2px double #dcca91; border-radius: 8px; background: #194c44; color: #f8edc6; font: 12px/1.15 var(--font-display); white-space: nowrap; pointer-events: auto; cursor: pointer;}
+.gym-button-spinner {display: inline-block; flex: none; width: 12px; height: 12px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: gym-button-loading .8s linear infinite;}
+@keyframes gym-button-loading {to {transform: rotate(360deg);}}
+@media(max-width:359px){.gym-game .gym-court-quick-actions>.gym-court-switch{gap:4px;padding-right:8px;font-size:10px}.gym-game .gym-court-quick-actions>.gym-stamina-restore{font-size:10px;padding-inline:7px}.gym-court-quick-actions{gap:5px}.gym-game .gym-player-share{padding-inline:4px}}
+@container game-shell (min-aspect-ratio: 11/10) {
+ .training-layout.gym-game .player-value-card .star-template-panel:has(.gym-player-share) {grid-template-columns: 23% minmax(0, 1fr) 21% 16%;}
+ .gym-game .gym-player-share {font-size: clamp(8px, 1.1cqw, 10px); padding-inline: 3px;}
+ .gym-game .template-identity-meta:has(.gym-player-share) {font-size: clamp(7px, 1.1cqw, 9px);}
+}

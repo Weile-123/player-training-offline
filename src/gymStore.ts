@@ -3,6 +3,7 @@ import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recovery
 import {gymSaveKeys, readGym, type GymStorage} from './game/gym/save';
 import {createGymHistory, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
 import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
+import {parseGymCloudArchive} from './platform/gymCloudArchive';
 
 const lockName = 'gym-management-v1.writer';
 const queues = new WeakMap<GymStorage, Promise<unknown>>();
@@ -36,6 +37,7 @@ export type GymStore = {
   act: (action: GymAction) => Promise<GymResult>;
   tick: () => Promise<GymResult>;
   flush: () => Promise<void>;
+  restoreCloudArchive?: (raw: string, expected: {createdAt: number; seed: number; revision: number; updatedAt: number}, backup: string | null) => Promise<void>;
 };
 
 const randomSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
@@ -160,6 +162,21 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
       dismissOfflineReport: () => set({pendingOfflineReport: null}),
       suspend: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
       flush: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
+      restoreCloudArchive: async (raw, expected, backup) => {
+        const {state: restored} = parseGymCloudArchive(raw);
+        await exclusive(storage, async () => {
+          const committed = await history.transact(current => {
+            const active = current.state;
+            if (active && (active.createdAt !== expected.createdAt || active.seed !== expected.seed || active.revision !== expected.revision || active.updatedAt !== expected.updatedAt)) throw Error('本地进度已变化，请重新同步确认');
+            // Retain a complete, portable local recovery copy before changing authoritative state.
+            if (backup !== null) storage.setItem('gym-management-v1.cloud-restore.backup', backup);
+            return {state: restored, value: undefined};
+          });
+          if (!committed.state) throw Error('云存档未能写入本地，原进度已保留');
+          hydrated = true;
+          set({state: committed.state, hasSave: true, hydrating: false, actionError: '', isSuspended: true, pendingOfflineReport: null, saveMessage: '已同步云存档'});
+        });
+      },
     };
   });
 

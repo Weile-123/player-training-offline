@@ -1,0 +1,19 @@
+.gm-consumables { display: grid; gap: 10px; }
+.gm-inventory .gm-consumables { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.gm-consumable-card { display: grid; grid-template-columns: 68px minmax(0,1fr); gap: 10px; padding: 10px; border: 1px solid #b69b67; background: #f4e8c8; }
+.gm-consumable-image { display: grid; place-items: start center; padding-top: 4px; }
+.gm-consumable-image img { width: 64px; height: 64px; object-fit: contain; }
+.gm-consumable-copy { min-width: 0; display: grid; gap: 6px; }
+.gm-consumable-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
+.gm-consumable-heading h4 { margin: 0; color: #173a44; font-size: 14px; }
+.gm-consumable-heading > span { color: #876840; white-space: nowrap; font-size: 11px; }
+.gm-consumable-copy p, .gm-consumable-copy small { margin: 0; color: #725c3f; font-size: 11px; line-height: 1.6; }
+.gm-consumable-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 7px; }
+.gm-consumable-actions .gm-button { min-height: 32px; padding: 5px 4px; font-size: 12px; }
+.gm-consumable-actions > :only-child { grid-column: 1/-1; }
+.gm-consumable-ready { margin: 0; padding: 8px 10px; background: #dfe8cd; border-left: 3px solid #4f805c; color: #365d43; font-size: 12px; }
+.gm-consumable-note { margin: 0; color: #806849; font-size: 11px; line-height: 1.6; }
+.gm-retired-consumables {border-top: 1px solid #b69b67; padding-top: 8px; color: #806849; font-size: 11px;}
+.gm-retired-consumables > summary {cursor: pointer; padding: 5px 0;}
+.gm-retired-consumables > div {display: grid; gap: 8px; margin-top: 6px;}
+@media (max-width: 360px) { .gm-consumable-card { grid-template-columns: 50px minmax(0,1fr); gap: 7px; padding: 8px; } .gm-consumable-image img { width: 48px; height: 48px; } }

@@ -1,0 +1,53 @@
+[
+  {
+    "viewport": [
+      320,
+      740
+    ],
+    "buttonOverlapsStats": false,
+    "buttonRight": 182.1875,
+    "statsLeft": 184.609375,
+    "buttonFont": "8px",
+    "parentFont": "7px",
+    "identityWidth": 94.03125,
+    "identityClipped": false,
+    "overflow": false,
+    "shareOnce": true,
+    "staminaShareThenAd": true,
+    "cooperationAd": true
+  },
+  {
+    "viewport": [
+      430,
+      932
+    ],
+    "buttonOverlapsStats": false,
+    "buttonRight": 215.296875,
+    "statsLeft": 248.625,
+    "buttonFont": "8px",
+    "parentFont": "8.30353px",
+    "identityWidth": 128.546875,
+    "identityClipped": false,
+    "overflow": false,
+    "shareOnce": true,
+    "staminaShareThenAd": true,
+    "cooperationAd": true
+  },
+  {
+    "viewport": [
+      844,
+      430
+    ],
+    "buttonOverlapsStats": false,
+    "buttonRight": 274.0625,
+    "statsLeft": 275.71875,
+    "buttonFont": "8px",
+    "parentFont": "7px",
+    "identityWidth": 91.734375,
+    "identityClipped": false,
+    "overflow": false,
+    "shareOnce": true,
+    "staminaShareThenAd": true,
+    "cooperationAd": true
+  }
+]

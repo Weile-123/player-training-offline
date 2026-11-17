@@ -43,7 +43,7 @@ describe('level cap resource protection', () => {
     const original = structuredClone(state), originalStatus = cooperationStatus(state), expected = recommendationPayout(state);
     expect(originalStatus.complete).toBe(true);
     expect(originalStatus.equipmentCredits).toBe(2);
-    expect(expected.credits).toBe(repeat ? 1 : 33);
+    expect(expected.credits).toBe(repeat ? 29 : 33);
     const replacement = cooperationOffers(state).find(offer => offer.kind === 'basic')!;
     const denied = dispatchGym(state, state.revision, {type: 'accept-cooperation', id: replacement.id, playerId: state.player!.id}, at);
     expect(denied.error).toContain('无法新接或更换合作');

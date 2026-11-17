@@ -1,0 +1,110 @@
+[
+  {
+    "kind": "career",
+    "width": 320,
+    "height": 740,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 300,
+    "surfaceWidth": 266,
+    "sheetWidth": 292,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": null
+  },
+  {
+    "kind": "offline",
+    "width": 320,
+    "height": 740,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 300,
+    "surfaceWidth": 266,
+    "sheetWidth": 292,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": {
+      "client": 266,
+      "total": 569,
+      "overflowX": "scroll",
+      "scrollbarHeight": 10,
+      "cardWidths": [
+        183.5,
+        183.5,
+        183.5
+      ]
+    }
+  },
+  {
+    "kind": "career",
+    "width": 430,
+    "height": 932,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 410,
+    "surfaceWidth": 376,
+    "sheetWidth": 402,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": null
+  },
+  {
+    "kind": "offline",
+    "width": 430,
+    "height": 932,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 410,
+    "surfaceWidth": 376,
+    "sheetWidth": 402,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": {
+      "client": 376,
+      "total": 569,
+      "overflowX": "scroll",
+      "scrollbarHeight": 10,
+      "cardWidths": [
+        183.5,
+        183.5,
+        183.5
+      ]
+    }
+  },
+  {
+    "kind": "career",
+    "width": 844,
+    "height": 430,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 410,
+    "surfaceWidth": 376,
+    "sheetWidth": 402,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": null
+  },
+  {
+    "kind": "offline",
+    "width": 844,
+    "height": 430,
+    "rootOverflow": false,
+    "contentOverflow": false,
+    "dialogWidth": 410,
+    "surfaceWidth": 376,
+    "sheetWidth": 402,
+    "sheetPadding": "0px 13px 14px",
+    "sheetScrollbar": "none",
+    "scrolling": {
+      "client": 376,
+      "total": 569,
+      "overflowX": "scroll",
+      "scrollbarHeight": 10,
+      "cardWidths": [
+        183.5,
+        183.5,
+        183.5
+      ]
+    }
+  }
+]

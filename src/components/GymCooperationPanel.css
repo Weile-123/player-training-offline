@@ -23,3 +23,9 @@
 .gm-cooperation-bonus-table th, .gm-cooperation-bonus-table td { padding: 6px 5px; border-bottom: 1px solid #cdb98e; }
 .gm-cooperation-bonus-table th { color: #66523c; font-weight: 700; }
 .gm-cooperation-bonus-table td:not(:first-child) { color: #943526; white-space: nowrap; }
+.gm-cooperation-actions {display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 7px;}
+.gm-cooperation-actions > .gm-button {min-width: 0; padding-inline: 3px;}
+.gm-cooperation-ad {display: flex; align-items: center; justify-content: center; gap: 5px; background: #1a4745; color: #f8e8c1; border-color: #af8d51;}
+.gm-cooperation-ad > svg {width: 19px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5;}
+.gm-cooperation-ad > svg path {fill: currentColor; stroke: none;}
+.gm-cooperation-ad-done {margin: 8px 0; padding: 9px; background: #e2e8cc; color: #245947; font-size: 13px;}

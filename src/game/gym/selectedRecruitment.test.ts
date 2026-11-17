@@ -113,7 +113,7 @@ describe('optional selected recruitment', () => {
     expect(state).toEqual(before);
   });
 
-  it('keeps a normal first reward up to 33 and charges a net seven for a later selected repeat', () => {
+  it('keeps a normal first reward up to 33 and preserves training bonuses on a later selected repeat', () => {
     const initial = {...fixture(), player: null};
     const paid = command(initial, {type: 'recruit', preference: 'forward', mode: 'selected', direction: 'finishing', expectedNextPlayer: initial.nextPlayer});
     const player = paid.player!;
@@ -135,6 +135,7 @@ describe('optional selected recruitment', () => {
     repeated.player.cooperation = null;
     repeated.player.equipmentTraining.cooperationCourses = [0, 0];
     const repeatedPayout = command(repeated, {type: 'recommend', id: repeated.player.id});
-    expect(settled.credits - repeatedPayout.credits).toBe(7);
+    // A repeated legendary player still earns the 18-coupon cultivation milestone.
+    expect(repeatedPayout.credits-settled.credits).toBe(1+18-selectedRecruitmentPrice);
   });
 });

@@ -9,7 +9,8 @@ import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLe
 import {isSelectedRecruitmentDirection, selectedRecruitmentBase, type SelectedRecruitmentDirection} from './selectedRecruitment';
 import {trainingBias, trainingPlans, type TrainingPlanId, type TrainingProgress} from './training';
 import {buildCooperationOffers, type Cooperation, type CooperationStatus} from './cooperation';
-import {playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
+import {experienceForLevel, playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
+import {chalkTrainingShots, consumableById, teamSupplyRecovery, type GymConsumableId} from './consumables';
 
 export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
 export {trainingPlans} from './training';
@@ -24,6 +25,11 @@ export type GymPlayer = {
   templateId: string | null; highestTier: TemplateTier | null; shots: number;
   book: Ledger; stamina: number; recoveryMs: number; enteredGymLevel: number; training: TrainingProgress;
   experience: number; nextShotAt: number; autoEnabled: boolean; cooperation: Cooperation | null;
+  /** One effective shot only; absent on older saves and consumed by online/offline training alike. */
+  greatShotReady?: boolean;
+  greatShotsRemaining?: number;
+  /** Per recruit, independent of which template is currently displayed. */
+  shareLevelClaimed?: boolean;
   equipmentTraining: {brandTotal: number; brandShots: number; cooperationCourses: [number, number]; cooperationCourseShots: [number, number]};
 };
 export type EquipmentBonuses = {
@@ -34,7 +40,7 @@ export type Recommendation = {
   credits: number; fame: number; growth: number; tier: number; tierId: TemplateTier | null; tierName: string;
   baseCredits: number; trainingCredits: number; cooperationCredits: number; rawFame: number; baseFame: number; cooperationFame: number;
 };
-/** Credits are the payout; component bonuses remain the unchanged theoretical amounts. */
+/** Credits are the payout; base credits reflect repeats while earned bonuses stay additive. */
 export type RecommendationPayout = Recommendation & {
   /** Legacy event name; now means the first recommendation at any gym level. */
   rawCredits: number; withheldCredits: number; repeatTemplate: boolean; isFirstPostgameRecommendation: boolean;
@@ -51,7 +57,7 @@ export type GymState = {
   offlineRulesVersion?: 1 | 2;
   kind: 'gym-management'; version: 1; balanceVersion: 3; seed: number; revision: number; createdAt: number; updatedAt: number; nextPlayer: number;
   player: GymPlayer | null; bench: GymPlayer[]; credits: number; fame: number; gymLevel: number; projects: Record<ProjectId, number>;
-  ownedEquipment: string[]; equippedEquipment: string[]; purchasePrices: Record<string, number>; inventory: {drink: number};
+  ownedEquipment: string[]; equippedEquipment: string[]; purchasePrices: Record<string, number>; inventory: {drink: number} & Partial<Record<Exclude<GymConsumableId, 'drink'>, number>>;
   collection: Record<string, {firstAt: number; highestRating: number; highestValue: string}>;
   collectedEquipment: Record<string, {firstAt: number}>; alumni: GymAlumnus[];
   alumniArchive?: GymAlumniArchive;
@@ -61,24 +67,32 @@ export type GymState = {
   recommendationRulesVersion?: 11;
   /** Legacy field name retained for compatibility; counts recommendations at every gym level. */
   postgameRecommendedTemplates?: string[];
+  /** The first stamina reward uses posting; all later rewards use advertisements. */
+  staminaRewardCount?: number;
   rng: {recruits: Stream; economy: Stream; attributes: Stream};
   /** Read only by save migration; new games keep timing and cooperation on each player. */
   nextShotAt?: number; cooperation?: Cooperation | null;
 };
 export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
-  | {type: 'train' | 'recommend' | 'use-drink'; id: string}
+  | {type: 'train' | 'recommend'; id: string}
+  | {type: 'use-drink'; id: string}
   | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number}
   | {type: 'buy-equipment'; id: string; replaceId?: string; destination?: 'warehouse'}
   | {type: 'equip'; id: string; replaceId?: string}
   | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
-  | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string}
-  | {type: 'accept-cooperation'; id: string; playerId: string}
-  | {type: 'abandon-cooperation'; playerId: string}
+  | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string; scope?: 'roster'}
+  | {type: 'accept-cooperation'; id: string; playerId: string; scope?: 'roster'}
+  | {type: 'abandon-cooperation'; playerId: string; scope?: 'roster'}
+  | {type: 'share-player-levels'; playerId: string}
+  | {type: 'restore-stamina-reward'; playerId: string; method: 'share' | 'ad'; expectedCount: number}
+  | {type: 'complete-cooperation-ad'; id: string; playerId: string; expectedCooperationId: string | null; expectedCooperationRevision: number | null; scope?: 'roster'}
   | {type: 'select-player'; id: string}
   | {type: 'set-auto'; id: string; enabled: boolean}
   | {type: 'auto-step'}
   | {type: 'buy-drink'}
+  | {type: 'buy-consumable'; id: GymConsumableId}
+  | {type: 'use-consumable'; id: GymConsumableId; playerId: string}
   | {type: 'upgrade-gym'; targetLevel?: number};
 export type GymEvent = {
   type: string; id?: string; playerId?: string; outcome?: 'hold' | 'success' | 'great';
@@ -90,6 +104,39 @@ export type GymResult = {state: GymState; events: GymEvent[]; error?: string};
 export const shotCooldownMs = 1_000;
 export const drinkPrice = 1;
 export const drinkRecovery = 10;
+
+export function staminaRewardMethod(state: GymState): 'share' | 'ad' {
+  return (state.staminaRewardCount ?? 0) === 0 ? 'share' : 'ad';
+}
+
+export function consumableCount(state: GymState, id: GymConsumableId): number {
+  return state.inventory[id] ?? 0;
+}
+
+export function guaranteedGreatShots(player: GymPlayer | null | undefined): number {
+  return player?.greatShotsRemaining ?? (player?.greatShotReady ? 1 : 0);
+}
+
+/** A disabled use action never spends stock, including a stale full-stamina click. */
+export function consumableUseReason(state: GymState, id: GymConsumableId): string {
+  const item = consumableById.get(id);
+  if (!item) return '消耗品不存在';
+  const player = state.player;
+  if (!player) return '招募球员后可使用';
+  if (id === 'supplement') {
+    if (consumableCount(state, id) < 1) return '团队补给已用完';
+    const eligible = activePlayers(state).filter(trainee => trainee.level < playerLevelCap);
+    if (!eligible.length) return '所有球员已满级，补给留给后续新人使用';
+    return eligible.some(trainee => trainee.stamina < staminaMax(state)) ? '' : '全体可训练球员体力已满';
+  }
+  if (player.level >= playerLevelCap) return `球员已达到 ${playerLevelCap} 级训练上限，无需使用${item.name}`;
+  if (consumableCount(state, id) < 1) return `${item.name}已用完`;
+  if ((id === 'drink' || id === 'brace') && player.stamina >= staminaMax(state)) return '当前体力已满';
+  if (id === 'timer' && player.autoEnabled) return '请先暂停自动训练再使用加练秒表';
+  if (id === 'timer' && player.stamina < 1) return '体力不足，无法加练';
+  if (id === 'chalk' && guaranteedGreatShots(player) > 0) return `镁粉还可生效${guaranteedGreatShots(player)}球，用完后再使用`;
+  return '';
+}
 
 export function automaticIntervalMs(state: GymState): number {
   return Math.max(1_000, 2_000 - state.projects.automation * 200);
@@ -240,7 +287,7 @@ export function cooperationStatus(state: GymState, player: GymPlayer | null = st
     {label: `模板档次（${tierNames[offer.requiredTier]}及以上）`, current: tier, required: offer.requiredTier, met: tier >= offer.requiredTier},
     ...offer.focusKeys.map(key => ({label: statLabels[key], current: player.stats[key], required: offer.requiredAttribute, met: player.stats[key] >= offer.requiredAttribute})),
   ];
-  const complete = requirements.every(requirement => requirement.met);
+  const complete = active.adCompleted === true || requirements.every(requirement => requirement.met);
   const eligible = player.equipmentTraining.cooperationCourses;
   const equipmentCredits = complete ? eligible[1] >= 2 ? 2 : eligible[0] >= 2 ? 1 : 0 : 0;
   return {offer, requirements, complete, rewardCredits: offer.credits + equipmentCredits, rewardFame: offer.fame, equipmentCredits};
@@ -294,8 +341,11 @@ export function recommendationPayout(state: GymState, player: GymPlayer | null =
   const eligible = !!player?.templateId && raw.tierId !== null;
   const repeatTemplate = eligible && recommendedTemplateIds(state).includes(player!.templateId!);
   const isFirstPostgameRecommendation = eligible && !repeatTemplate;
-  const credits = repeatTemplate ? postgameRepeatTemplateCredits : raw.credits;
-  return {...raw, credits, rawCredits: raw.credits, withheldCredits: raw.credits - credits, repeatTemplate, isFirstPostgameRecommendation};
+  // Advertising can now satisfy a cooperation before an appearance is earned;
+  // an undiscovered recruit still never earns recommendation coupons.
+  const baseCredits = repeatTemplate ? postgameRepeatTemplateCredits : raw.baseCredits;
+  const credits = !eligible ? 0 : baseCredits + raw.trainingCredits + raw.cooperationCredits;
+  return {...raw, baseCredits, credits, rawCredits: raw.credits, withheldCredits: raw.credits - credits, repeatTemplate, isFirstPostgameRecommendation};
 }
 
 export function projectCost(id: string, nextLevel: number): number {
@@ -462,22 +512,9 @@ function rememberPlayer(state: GymState, events: GymEvent[], player: GymPlayer |
   if (!previous) events.push({type: 'template-unlocked', templateId: player.templateId, playerId: player.id});
 }
 
-/** A valid shot always earns XP; only a level gained consumes attribute RNG. */
-export function trainPlayer(state: GymState, player: GymPlayer, now: number, events: GymEvent[], reuseMatching = false) {
-  const cooperationWasComplete = cooperationStatus(state, player).complete;
-  const roll = random(state.rng.economy);
-  const outcome: TrainingOutcome = roll < .3 ? 'hold' : roll < .9 ? 'success' : 'great';
-  const experienceGain = trainingShotExperience(state, outcome, player);
-  const equipment = equipmentEffects(state);
-  player.equipmentTraining.brandShots++;
-  player.equipmentTraining.brandTotal += Math.min(50, equipment.valuePercent);
-  if (player.cooperation) for (let tier = 1; tier <= 2; tier++) if (equipment.cooperationBonus >= tier) {
-    player.equipmentTraining.cooperationCourseShots[tier - 1]++;
-  }
+function addPlayerExperience(state: GymState, player: GymPlayer, experience: number): number {
   const before = player.level;
-  const previousStats = {...player.stats};
-  const previousTemplate = player.templateId;
-  player.experience += experienceGain;
+  player.experience += experience;
   while (player.level < playerLevelCap && player.experience >= requiredExperience(player.level)) {
     player.experience -= requiredExperience(player.level);
     player.level++;
@@ -486,6 +523,28 @@ export function trainPlayer(state: GymState, player: GymPlayer, now: number, eve
   const levelGain = player.level - before;
   if (levelGain > 0) player.stats = grow(player.stats, effectiveTrainingBias(state, player), 'success', levelGain, state.rng.attributes);
   player.peakLevel = Math.max(player.peakLevel, player.level);
+  return levelGain;
+}
+
+/** A valid shot always earns XP; only a level gained consumes attribute RNG. */
+export function trainPlayer(state: GymState, player: GymPlayer, now: number, events: GymEvent[], reuseMatching = false) {
+  const cooperationWasComplete = cooperationStatus(state, player).complete;
+  const roll = random(state.rng.economy);
+  const guaranteed = guaranteedGreatShots(player);
+  const outcome: TrainingOutcome = guaranteed > 0 ? 'great' : roll < .3 ? 'hold' : roll < .9 ? 'success' : 'great';
+  if (guaranteed > 1) player.greatShotsRemaining = guaranteed - 1;
+  else delete player.greatShotsRemaining;
+  delete player.greatShotReady;
+  const experienceGain = trainingShotExperience(state, outcome, player);
+  const equipment = equipmentEffects(state);
+  player.equipmentTraining.brandShots++;
+  player.equipmentTraining.brandTotal += Math.min(50, equipment.valuePercent);
+  if (player.cooperation) for (let tier = 1; tier <= 2; tier++) if (equipment.cooperationBonus >= tier) {
+    player.equipmentTraining.cooperationCourseShots[tier - 1]++;
+  }
+  const previousStats = {...player.stats};
+  const previousTemplate = player.templateId;
+  const levelGain = addPlayerExperience(state, player, experienceGain);
   player.stamina--;
   player.shots++;
   player.training.shots++;
@@ -620,33 +679,92 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       break;
     }
     case 'set-training-plan': {
-      if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
+      const trainee = action.scope === 'roster' ? activePlayers(next).find(entry => entry.id === action.playerId) : player;
+      if (!trainee || action.playerId !== trainee.id) return fail('当前球员已变化，请重新选择');
       if (!trainingPlans.some(plan => plan.id === action.id)) return fail('训练计划不存在');
-      if (player.training.planId === action.id) return fail('当前已使用该训练计划');
-      player.training.planId = action.id;
-      player.training.shots = 0;
-      player.equipmentTraining.cooperationCourseShots = [0, 0];
-      events.push({type: 'training-plan-changed', playerId: player.id, id: action.id});
+      if (trainee.training.planId === action.id) return fail('当前已使用该训练计划');
+      trainee.training.planId = action.id;
+      trainee.training.shots = 0;
+      trainee.equipmentTraining.cooperationCourseShots = [0, 0];
+      events.push({type: 'training-plan-changed', playerId: trainee.id, id: action.id});
       break;
     }
     case 'accept-cooperation': {
-      if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
-      if (!cooperationOffers(next).some(offer => offer.id === action.id)) return fail('合作目标已变化，请重新选择');
-      if (player.cooperation?.id === action.id) return fail('该合作已在进行');
-      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限，无法新接或更换合作`);
-      player.cooperation = {id: action.id, playerId: player.id, acceptedShots: player.shots, acceptedCourses: player.training.completedCourses};
-      player.equipmentTraining.cooperationCourses = [0, 0];
-      player.equipmentTraining.cooperationCourseShots = [0, 0];
-      events.push({type: 'cooperation-accepted', playerId: player.id, id: action.id});
+      const trainee = action.scope === 'roster' ? activePlayers(next).find(entry => entry.id === action.playerId) : player;
+      if (!trainee || action.playerId !== trainee.id) return fail('当前球员已变化，请重新选择');
+      if (!cooperationOffers(next, trainee).some(offer => offer.id === action.id)) return fail('合作目标已变化，请重新选择');
+      if (trainee.cooperation?.id === action.id) return fail('该合作已在进行');
+      if (trainee.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限，无法新接或更换合作`);
+      trainee.cooperation = {id: action.id, playerId: trainee.id, acceptedShots: trainee.shots, acceptedCourses: trainee.training.completedCourses, acceptedRevision: original.revision + 1};
+      trainee.equipmentTraining.cooperationCourses = [0, 0];
+      trainee.equipmentTraining.cooperationCourseShots = [0, 0];
+      events.push({type: 'cooperation-accepted', playerId: trainee.id, id: action.id});
       break;
     }
     case 'abandon-cooperation': {
+      const trainee = action.scope === 'roster' ? activePlayers(next).find(entry => entry.id === action.playerId) : player;
+      if (!trainee || action.playerId !== trainee.id) return fail('当前球员已变化，请重新选择');
+      if (!trainee.cooperation) return fail('当前没有进行中的合作');
+      trainee.cooperation = null;
+      trainee.equipmentTraining.cooperationCourses = [0, 0];
+      trainee.equipmentTraining.cooperationCourseShots = [0, 0];
+      events.push({type: 'cooperation-abandoned', playerId: trainee.id});
+      break;
+    }
+    case 'share-player-levels': {
       if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
-      if (!player.cooperation) return fail('当前没有进行中的合作');
-      player.cooperation = null;
-      player.equipmentTraining.cooperationCourses = [0, 0];
-      player.equipmentTraining.cooperationCourseShots = [0, 0];
-      events.push({type: 'cooperation-abandoned', playerId: player.id});
+      if (!templateById(player.templateId)) return fail('获得球员模板后才能分享升级');
+      if (player.shareLevelClaimed) return fail('该球员已领取分享升级奖励');
+      if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      const beforeStats = {...player.stats}, beforeTemplate = player.templateId;
+      const cooperationWasComplete = cooperationStatus(next, player).complete;
+      const targetLevel = Math.min(playerLevelCap, player.level + 3);
+      const experienceGain = experienceForLevel(targetLevel) - experienceForLevel(player.level);
+      const levelGain = addPlayerExperience(next, player, experienceGain);
+      player.shareLevelClaimed = true;
+      if (player.level === playerLevelCap) player.autoEnabled = false;
+      const matched = match(player);
+      player.templateId = matched.templateId;
+      player.lastStyle = matched.lastStyle;
+      if (tierIds.indexOf(matched.tier) > tierIds.indexOf(player.highestTier)) player.highestTier = matched.tier;
+      const changes = Object.fromEntries(statKeys.map(key => [key, player.stats[key] - beforeStats[key]])) as Stats;
+      events.push({type: 'player-share-rewarded', playerId: player.id, changes, levelGain, experienceGain});
+      if (beforeTemplate !== player.templateId) events.push({type: 'template-changed', playerId: player.id, templateId: player.templateId ?? undefined});
+      rememberPlayer(next, events, player);
+      if (!cooperationWasComplete && cooperationStatus(next, player).complete) events.push({type: 'cooperation-ready', playerId: player.id, id: player.cooperation!.id});
+      break;
+    }
+    case 'restore-stamina-reward': {
+      if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
+      const count = next.staminaRewardCount ?? 0;
+      if (!Number.isSafeInteger(action.expectedCount) || action.expectedCount !== count) return fail('体力奖励已领取，请重新打开');
+      if (action.method !== staminaRewardMethod(next)) return fail('体力奖励领取方式已变化，请重试');
+      if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      if (player.stamina >= staminaMax(next)) return fail('该球员体力已满');
+      if (!Number.isSafeInteger(count + 1)) return fail('体力奖励次数已达到上限');
+      const restoredStamina = staminaMax(next) - player.stamina;
+      player.stamina = staminaMax(next);
+      player.recoveryMs = 0;
+      next.staminaRewardCount = count + 1;
+      events.push({type: 'stamina-rewarded', playerId: player.id, restoredStamina});
+      break;
+    }
+    case 'complete-cooperation-ad': {
+      const trainee = action.scope === 'roster' ? activePlayers(next).find(entry => entry.id === action.playerId) : player;
+      if (!trainee || action.playerId !== trainee.id) return fail('当前球员已变化，请重新选择');
+      const active = trainee.cooperation;
+      if ((active?.id ?? null) !== action.expectedCooperationId
+        || (active ? active.acceptedRevision ?? 0 : null) !== action.expectedCooperationRevision) return fail('合作目标已变化，请重新选择');
+      if (!cooperationOffers(next, trainee).some(offer => offer.id === action.id)) return fail('合作目标已变化，请重新选择');
+      if (active?.id === action.id && cooperationStatus(next, trainee).complete) return fail('该合作已经达成');
+      if (active?.id !== action.id) {
+        trainee.cooperation = {id: action.id, playerId: trainee.id, acceptedShots: trainee.shots,
+          acceptedCourses: trainee.training.completedCourses, acceptedRevision: original.revision + 1, adCompleted: true};
+        trainee.equipmentTraining.cooperationCourses = [0, 0];
+        trainee.equipmentTraining.cooperationCourseShots = [0, 0];
+      } else active.adCompleted = true;
+      events.push({type: 'cooperation-ad-completed', playerId: trainee.id, id: action.id});
+      events.push({type: 'cooperation-ready', playerId: trainee.id, id: action.id});
       break;
     }
     case 'buy-equipment': {
@@ -698,23 +816,46 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       events.push({type: 'equipment-sold', id: action.id, credits: refund});
       break;
     }
-    case 'buy-drink': {
-      if (next.credits < drinkPrice) return fail('赞助券不足');
-      if (!Number.isSafeInteger(next.inventory.drink + 1)) return fail('饮料库存已达到上限');
-      next.credits -= drinkPrice;
-      next.inventory.drink++;
-      events.push({type: 'drink-bought'});
+    case 'buy-drink':
+    case 'buy-consumable': {
+      const id = action.type === 'buy-drink' ? 'drink' : action.id;
+      const item = consumableById.get(id);
+      if (!item) return fail('消耗品不存在');
+      if (item.retired) return fail('该消耗品已停止销售，已有库存仍可使用');
+      if (next.gymLevel < item.unlockLevel) return fail(`球馆 ${item.unlockLevel} 级开放${item.name}`);
+      if (next.credits < item.price) return fail('赞助券不足');
+      if (!Number.isSafeInteger(consumableCount(next, id) + 1)) return fail('消耗品库存已达到上限');
+      next.credits -= item.price;
+      next.inventory[id] = consumableCount(next, id) + 1;
+      events.push({type: id === 'drink' ? 'drink-bought' : 'consumable-bought', id});
       break;
     }
-    case 'use-drink': {
-      if (!player || action.id !== player.id) return fail('当前球员已变化，请重新选择');
-      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限，无需使用运动饮料`);
-      if (!next.inventory.drink) return fail('运动饮料已用完');
-      if (player.stamina >= staminaMax(next)) return fail('当前体力已满');
-      next.inventory.drink--;
-      player.stamina = Math.min(staminaMax(next), player.stamina + drinkRecovery);
-      if (player.stamina === staminaMax(next)) player.recoveryMs = 0;
-      events.push({type: 'drink-used', playerId: player.id});
+    case 'use-drink':
+    case 'use-consumable': {
+      const playerId = action.type === 'use-drink' ? action.id : action.playerId;
+      const id = action.type === 'use-drink' ? 'drink' : action.id;
+      if (!player || playerId !== player.id) return fail('当前球员已变化，请重新选择');
+      const reason = consumableUseReason(next, id);
+      if (reason) return fail(reason);
+      next.inventory[id] = consumableCount(next, id) - 1;
+      if (id === 'drink' || id === 'brace') {
+        player.stamina = Math.min(staminaMax(next), id === 'brace' ? staminaMax(next) : player.stamina + drinkRecovery);
+        if (player.stamina === staminaMax(next)) player.recoveryMs = 0;
+      } else if (id === 'timer') {
+        const nextShotAt = player.nextShotAt;
+        for (let shot = 0; shot < 10 && player.stamina >= 1 && player.level < playerLevelCap; shot++) trainPlayer(next, player, now, events);
+        // A time-saving item creates no wall-clock recovery and keeps the normal next-shot gate.
+        player.nextShotAt = Math.max(nextShotAt, now + shotCooldownMs);
+      } else if (id === 'chalk') {
+        player.greatShotsRemaining = chalkTrainingShots;
+        delete player.greatShotReady;
+      } else if (id === 'supplement') {
+        for (const trainee of activePlayers(next)) if (trainee.level < playerLevelCap) {
+          trainee.stamina = Math.min(staminaMax(next), trainee.stamina + teamSupplyRecovery);
+          if (trainee.stamina === staminaMax(next)) trainee.recoveryMs = 0;
+        }
+      }
+      events.push({type: id === 'drink' ? 'drink-used' : 'consumable-used', id, playerId: player.id});
       break;
     }
     case 'upgrade-project': {

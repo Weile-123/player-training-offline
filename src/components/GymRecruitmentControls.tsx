@@ -54,7 +54,7 @@ export function GymRecruitmentControls({state, onAction, busy = false, emptyCour
       <p>{keys(currentDirection)}的出生基础各为46–48，招生项目另各加 {state.projects.recruitment} 点。其余出生属性、成长偏好按普通规则生成。</p>
       <p className="gm-muted">不赠送等级或经验，不保证获得指定球星。每次确认支付 {selectedRecruitmentPrice} 券，仍需实际培养。</p>
       <p className="gm-muted">适合希望减少反复筛选、提前达到专项条件的培养。较高出生属性可能跳过低档模板，不保证增加整体图鉴收集率。</p>
-      <p className="gm-muted">若最终推荐本馆已推荐过的模板，总回款仅 {postgameRepeatTemplateCredits} 券；本次精选仍收费 {selectedRecruitmentPrice} 券。</p>
+      <p className="gm-muted">若最终模板重复，基础回款 {postgameRepeatTemplateCredits} 券，培养、合作与器材加奖另计；本次精选收费 {selectedRecruitmentPrice} 券。</p>
       {state.credits < selectedRecruitmentPrice && <p className="gm-recommend-warning">赞助券还差 {selectedRecruitmentPrice - state.credits} 券，可继续免费培养积累。</p>}
     </> : <p className="gm-muted">新人免费入馆并带满体力，可正常训练、推荐和收集球星。</p>}
     <button type="button" className="primary gm-icon-button" disabled={busy || full || selectedMode && (!unlocked || state.credits < selectedRecruitmentPrice)} onClick={begin}><GameIcon name="people"/><span>{selectedMode ? `精选招募 · ${selectedRecruitmentPrice}券` : emptyCourt ? '免费招募下一位' : '免费招募新人'}</span></button>
@@ -65,7 +65,7 @@ export function GymRecruitmentControls({state, onAction, busy = false, emptyCour
         <p>身高分组：{heightPreferenceLabels[pending.preference]}，在该范围内随机生成。</p>
         <p>本次支付 <strong>{selectedRecruitmentPrice} 券</strong>，当前 {state.credits} 券，支付后 {Math.max(0, state.credits - selectedRecruitmentPrice)} 券。</p>
         <p className="gm-muted">确认后才生成新人；取消不扣券。不保证传奇或指定球星，继续培养仍按原规则结算。</p>
-        <p className="gm-muted">若最终推荐本馆已推荐过的模板，回款合计 {postgameRepeatTemplateCredits} 券，不再叠加培养或合作券；所有馆级使用同一规则，升级不重置首次资格。</p>
+        <p className="gm-muted">所有馆级采用同一规则：重复模板基础 {postgameRepeatTemplateCredits} 券，培养、合作与器材加奖另计；升级不重置首次资格。</p>
         {stale && <p className="gm-recommend-warning" role="alert">球员名册已变化，请返回重新选择招生。</p>}
         <div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPending(null)}>取消招生</button><button type="button" className="gm-button gm-primary" disabled={busy || stale || full || state.credits < selectedRecruitmentPrice} onClick={confirm}>确认支付 {selectedRecruitmentPrice} 券并招募</button></div>
       </div>

@@ -115,8 +115,10 @@ function card(selector: string, heading: string) {
 it('starts at home, completes a course, chooses a plan and cooperation, recommends, recruits, saves and continues the same gym', async () => {
   await mount();
   await press('设置');
-  expect(document.querySelector('.gym-settings')?.textContent).toContain('完整课程提高推荐时的培养声望');
-  expect(document.querySelector('.gym-settings')?.textContent).not.toContain('完整课程与达成的合作会提高签约回报');
+  expect(document.querySelector('.home-settings-dialog')).toBeTruthy();
+  expect(document.querySelector('.home-settings')?.textContent).toContain('游戏音效');
+  expect(document.querySelector('.settings-cloud')).toBeTruthy();
+  expect(document.querySelector('.home-settings')?.textContent).not.toContain('减少动态效果');
   await press('关闭面板');
   await press('开设训练馆');
   expect(document.querySelector('[aria-label="篮球训练馆"]')).toBeTruthy();
@@ -142,6 +144,8 @@ it('starts at home, completes a course, chooses a plan and cooperation, recommen
   expect(state().alumni).toHaveLength(0);
   expect(document.querySelector('.gym-empty-court')).toBeNull();
   expect(document.querySelector('.dock-shoot.is-recruiting')).toBeTruthy();
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  await press('招募球员');
   await press('免费招募下一位');
   const nextId = state().player!.id;
   expect(nextId).not.toBe(firstId);
@@ -164,10 +168,12 @@ it('starts at home, completes a course, chooses a plan and cooperation, recommen
   await press('保存并返回首页');
   await press('生涯');
   expect(document.querySelector('.gm-alumni-list')).toBeNull();
-  expect(document.body.textContent).toContain('第一份校友档案正在等你');
+  expect(document.querySelector('[aria-label="球馆经营档案"]')).toBeTruthy();
+  expect(document.body.textContent).toContain('最高身价纪录');
   await press('关闭面板');
   await press('排行榜');
-  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('后续版本开放');
+  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('球员榜');
+  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('声望榜');
 });
 
 it('uses shop, inventory and projects before upgrading the gym and filling its second independent training seat', async () => {
@@ -186,6 +192,8 @@ it('uses shop, inventory and projects before upgrading the gym and filling its s
   expect(initial.fame).toBeGreaterThanOrEqual(160);
   await mount(initial);
   await press('继续经营');
+  expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('球馆经营');
+  await press('关闭面板');
   await press('器材商店');
   await press('购买', card('.gm-product', capacity.name));
   expect(state().ownedEquipment).toContain(capacity.id);
@@ -204,12 +212,12 @@ it('uses shop, inventory and projects before upgrading the gym and filling its s
   await press('球馆升级');
   await press('免费');
   expect(state().gymLevel).toBe(2);
-  await press('关闭面板');
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
   await press('打开球员名册');
   await press('免费招募新人');
   expect(state().bench).toHaveLength(1);
   expect(state().bench[0].stamina).toBe(25 + capacity.effects.stamina);
-  const switches = [...document.querySelectorAll<HTMLButtonElement>('[role="switch"]')];
+  const switches = [...document.querySelectorAll<HTMLButtonElement>('.gm-roster [role="switch"]')];
   expect(switches).toHaveLength(2);
   await act(async () => switches[1].click());
   await settlePending();

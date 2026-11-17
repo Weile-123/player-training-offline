@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState, useSyncExternalStore, type CSSProperties} from 'react';
 import {useGym} from '../gymStore';
-import {automaticIntervalMs, cooperationStatus, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotExperience, trainingShotExperience, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
+import {automaticIntervalMs, cooperationStatus, gymUpgrade, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotExperience, staminaRewardMethod, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
 import {templateById} from '../game/templates';
 import {type Player} from '../game/types';
 import {gameAudio} from '../presentation/audio';
@@ -19,20 +19,26 @@ import {ShotScene} from './ShotScene';
 import {ShotStatusPop} from './ShotStatusPop';
 import {ShootButton} from './ShootButton';
 import {GymScoreboard, GymStamina} from './GymStatus';
-import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel, offlineDuration} from './GymPanels';
-import {offlineLimitMs} from '../game/gym/offline';
+import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel} from './GymPanels';
 import {trainingGuidance} from '../game/gym/guidance';
 import {GymRecruitmentControls} from './GymRecruitmentControls';
 import {GymPlayerDetails} from './GymPlayerDetails';
 import {GymTrainingToolbar} from './GymTrainingToolbar';
 import {useGymShopNotice} from '../presentation/gymShopNotice';
 import {gymPlayerName} from '../presentation/gymPlayerName';
+import {AutoTrainingBorder} from './AutoTrainingBorder';
+import {GymShareDialog} from './GymShareDialog';
+import {GymDebugDialog} from './GymDebugDialog';
+import {getGymDebug, gymDebugAvailable} from '../platform/gymDebug';
+import {completeRewardedVideo} from '../platform/rewardedVideo';
+import {assertHupuProject} from '../platform/hupuProject';
+import './GymRewards.css';
 import './TrainingLayout.css';
 import '../equipment-status.css';
 import './GymGame.css';
 
-type Panel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'recruit' | 'collection' | 'experience' | 'player' | 'training' | 'cooperation' | null;
-const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', recruit: '新人招生', collection: '收藏图鉴', experience: '训练经验', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
+type Panel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'recruit' | 'collection' | 'player' | 'training' | 'cooperation' | null;
+const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', recruit: '新人招生', collection: '收藏图鉴', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
 const outcomeLabels = {hold: '维持', success: '成功', great: '大成功'};
 
 function displayedPlayer(player: GymPlayer): Player {
@@ -57,6 +63,11 @@ export default function GymGame({onHome}: {onHome: () => void}) {
  const [feedback, setFeedback] = useState<ShotFeedback | null>(null);
  const [shots, setShots] = useState<ShotFeedback[]>([]);
  const [notice, setNotice] = useState('');
+ const [platformWarning, setPlatformWarning] = useState('');
+ const [share, setShare] = useState<{player: GymPlayer; reason: 'levels' | 'stamina'; expectedCount: number; createdAt: number; seed: number} | null>(null);
+ const [debugOpen, setDebugOpen] = useState(false);
+ const [adAction, setAdAction] = useState<GymAction | null>(null);
+ const upgradePrompted = useRef(new Set<number>());
  const busyRef = useRef(false);
  const sequence = useRef(0);
  const resultPresenter = useRef<(result: GymResult, previous: GymState) => void>(() => {});
@@ -112,8 +123,15 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    save();
   };
  }, []);
- useEffect(() => {if (viewport.current) viewport.current.inert = panel !== null || !!store.pendingOfflineReport;}, [panel, store.pendingOfflineReport]);
+ useEffect(() => {if (viewport.current) viewport.current.inert = panel !== null || !!store.pendingOfflineReport || !!share || debugOpen;}, [panel, store.pendingOfflineReport, share, debugOpen]);
+ const upgradeReady = gymUpgrade(state).canUpgrade;
+ useEffect(() => {
+  if (!upgradeReady || upgradePrompted.current.has(state.gymLevel) || busy || panel || share || debugOpen || store.pendingOfflineReport) return;
+  upgradePrompted.current.add(state.gymLevel);
+  setPanel('club');
+ }, [upgradeReady, state.gymLevel, busy, panel, share, debugOpen, store.pendingOfflineReport]);
  useEffect(() => {setFeedback(null); setShots([]);}, [player?.id]);
+ useEffect(() => {if (panel) {setNotice(''); setPlatformWarning('');}}, [panel]);
  useEffect(() => {
   if (!notice) return;
   const timer = setTimeout(() => setNotice(''), 4_000);
@@ -144,52 +162,77 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    const old = [previous.player, ...previous.bench].find(entry => entry?.id === next.id);
    const before = cooperationStatus(previous, old ?? null);
    const after = cooperationStatus(result.state, next);
-   if (!before.complete && after.complete) setNotice(recommendationPayout(result.state, next).repeatTemplate ? `合作目标达成 · 声望照常，重复模板推荐合计 ${postgameRepeatTemplateCredits} 券` : `合作目标达成 · 推荐签约可额外获得 ${after.rewardCredits} 券`);
+   if (!before.complete && after.complete) setNotice(`合作目标达成 · 推荐签约可额外获得 ${after.rewardCredits} 券`);
   }
  };
 
- const perform = async (action: GymAction) => {
-  if (busyRef.current) return;
+ const perform = async (action: GymAction, withAd = false): Promise<boolean> => {
+  if (busyRef.current) return false;
   busyRef.current = true;
   setBusy(true);
   setNotice('');
+  setPlatformWarning('');
   try {
+   const origin = useGym.getState().state;
+   if (withAd) {
+    setAdAction(action);
+    // The platform's rewarded acknowledgement, not the bridge-start acknowledgement, grants access.
+    await completeRewardedVideo(() => {}, {mock: getGymDebug().skipAds, onTaskStateError: setPlatformWarning});
+    assertHupuProject();
+    const current = useGym.getState().state;
+    if (current.createdAt !== origin.createdAt || current.seed !== origin.seed) {setNotice('本局游戏已变化，未发放旧奖励'); return false;}
+   }
    const previous = useGym.getState().state;
    const result = await useGym.getState().act(action);
-   if (result.error) return;
+   if (result.error) return false;
    resultPresenter.current(result, previous);
    if (action.type === 'recommend') {
     const reward = result.events.find(event => event.type === 'recommended');
     setNotice(`推荐成功 · 赞助券 +${reward?.credits ?? 0} · 声望 +${reward?.fame ?? 0}${reward?.repeatTemplate ? ' · 重复模板奖励' : reward?.isFirstPostgameRecommendation ? ' · 模板首次推荐奖励' : ''}`);
-    setPanel(result.state.player ? null : 'recruit');
+    setPanel(null);
     setFeedback(null);
     setShots([]);
    }
    if (action.type === 'recruit') {if (panel === 'recruit') setPanel(null); setFeedback(null); setShots([]); setNotice(action.mode === 'selected' ? '精选新人已入馆，可选择训练计划并开始培养' : '新人已入馆，可以开始培养');}
    if (action.type === 'select-player') {setPanel(null); setFeedback(null); setShots([]);}
-   if (action.type === 'set-training-plan') {
+   if (action.type === 'set-training-plan' && action.scope !== 'roster') {
     setPanel(null);
     setNotice(`已开始${trainingStatus(result.state).plan.name}，每 10 球完成一课`);
    }
-   if (action.type === 'accept-cooperation') {
+   if (action.type === 'accept-cooperation' && action.scope !== 'roster') {
     setPanel(null);
     setNotice('赞助合作已接取，培养进度从现在开始累计');
    }
-   if (action.type === 'upgrade-gym') {setNotice('球馆晋级，新的项目与器材已开放'); void gameAudio.play('evolution', soundEnabled());}
-  } catch {
-   setNotice('操作暂未保存，请稍后重试');
+   if (action.type === 'upgrade-gym') {setPanel(null); setNotice('球馆晋级，新的项目与器材已开放'); void gameAudio.play('evolution', soundEnabled());}
+   if (action.type === 'share-player-levels') setNotice(`分享奖励到账 · 等级 +${result.events.find(event => event.type === 'player-share-rewarded')?.levelGain ?? 0}`);
+   if (action.type === 'restore-stamina-reward') setNotice('体力已回满');
+   if (action.type === 'complete-cooperation-ad') setNotice('合作已完成 · 推荐签约时领取奖励');
+   return true;
+  } catch (error) {
+   setNotice(withAd && error instanceof Error ? error.message : '操作暂未保存，请稍后重试');
+   return false;
   } finally {
    busyRef.current = false;
    setBusy(false);
+   setAdAction(null);
   }
  };
  const onAction = (action: GymAction) => {void perform(action);};
+ const onAdAction = (action: GymAction) => {void perform(action, true);};
+ const openShare = (reason: 'levels' | 'stamina') => {if (player && !busy) setShare({player, reason, expectedCount: state.staminaRewardCount ?? 0, createdAt: state.createdAt, seed: state.seed});};
+ const restoreStamina = () => {
+  if (!player || busy) return;
+  if (staminaRewardMethod(state) === 'share') openShare('stamina');
+  else onAdAction({type: 'restore-stamina-reward', playerId: player.id, method: 'ad', expectedCount: state.staminaRewardCount ?? 0});
+ };
  const training = trainingStatus(state);
  const cooperation = cooperationStatus(state);
  const experienceRequired = requiredExperience(player?.level ?? 0);
  const atCap = !!player && player.level >= playerLevelCap;
  const guidance = trainingGuidance(state);
- const offlineHint = state.gymLevel < 2 ? '离线训练将在球馆 Lv.2 开放，基础上限 30分钟。' : `离开或关闭页面后，仅开启自动的球员继续按体力、器材、专项和课程规则训练，每次最多结算 ${offlineDuration(offlineLimitMs(state))}，超出部分仅恢复体力。可升级离线课表延长上限。`;
+ const trainees = (player ? [player, ...state.bench] : state.bench).slice().sort((first, second) => first.enteredAt - second.enteredAt || first.id.localeCompare(second.id));
+ const currentIndex = trainees.findIndex(trainee => trainee.id === player?.id);
+ const nextTrainee = trainees.length > 1 ? trainees[(currentIndex + 1) % trainees.length] : undefined;
 
  return <main className={`game-screen contract-game training-layout gym-game${reduced ? ' reduce-motion' : ''}`} aria-label="篮球训练馆" style={{'--game-max-width': `${visual.gameMaxWidthPx}px`, '--shoot-button-scale': visual.shootButtonScale} as CSSProperties}>
   <div className="game-viewport" ref={viewport}>
@@ -200,16 +243,19 @@ export default function GymGame({onHome}: {onHome: () => void}) {
    </header>
    <GymScoreboard state={state} onClub={() => setPanel('club')} onPlayer={() => setPanel('roster')}/>
    <section className="game-player"><div className="player-value-card" data-tier={templateById(player?.templateId)?.tier ?? 'undiscovered'}>
-    <PlayerTemplatePanel player={player ? displayedPlayer(player) : undefined} feedback={feedback} reduced={reduced} disabled={!player} showTrainingLevel={false} onDetails={() => setPanel('player')}/>
+    <PlayerTemplatePanel player={player ? displayedPlayer(player) : undefined} feedback={feedback} reduced={reduced} disabled={!player} showTrainingLevel={false} showPosition={false} onDetails={() => setPanel('player')} identityAction={player && templateById(player.templateId) && !player.shareLevelClaimed && player.level < playerLevelCap ? <button type="button" className="gym-player-share" disabled={busy} onClick={event => {event.stopPropagation(); openShare('levels');}}>分享·等级+3</button> : undefined}/>
     <div className="player-value-footer"><div className={`player-value-amount value-tone-${valueTone(templateById(player?.templateId)?.tier)}`}><small>身价</small><FittedAmount fitHeight text={player ? formatValue(playerValue(state, player)) : '—'}/></div>
-     <button className="sell-shortcut red-stamp" disabled={!player || busy} onClick={() => setPanel('recommend')}><span>推荐签约</span><i>›</i></button>
+     <div className="gym-player-actions"><button className="sell-shortcut red-stamp" disabled={!player || busy} onClick={() => setPanel('recommend')}><span>推荐签约</span></button>
+      {player && state.gymLevel >= 2 && <button type="button" className={`sell-shortcut gym-court-auto${player.autoEnabled ? ' is-active' : ''}`} role="switch" aria-label="当前球员自动训练" aria-checked={player.autoEnabled} disabled={busy || atCap && !player.autoEnabled} onClick={() => onAction({type: 'set-auto', id: player.id, enabled: !player.autoEnabled})}><span>{player.autoEnabled ? '暂停自动' : atCap ? '已满级' : '开启自动'}</span>{player.autoEnabled && <AutoTrainingBorder/>}</button>}
+     </div>
     </div>
    </div></section>
-   <GymTrainingToolbar level={player?.level ?? 0} experience={player?.experience ?? 0} required={experienceRequired} atCap={atCap} cooperationReady={cooperation.complete} onExperience={() => setPanel('experience')} onTraining={() => setPanel('training')} onCooperation={() => setPanel('cooperation')}/>
+   <GymTrainingToolbar level={player?.level ?? 0} experience={player?.experience ?? 0} required={experienceRequired} atCap={atCap} cooperationReady={cooperation.complete} onTraining={() => setPanel('training')} onCooperation={() => setPanel('cooperation')}/>
    <section className="game-stage">
     <ShotScene feedback={feedback} shots={shots} hot={false} busy={shots.length > 0} reduced={reduced} hideOutcomeLabel onFinish={id => setShots(previous => id === undefined ? [] : previous.filter(shot => shot.id !== id))}/>
     <ShotStatusPop active={!!player && !panel} feedback={feedback} hoopScale={visual.hoopScale} reduced={reduced}/>
     <GymStamina state={state}/>
+    {gymDebugAvailable() && <button type="button" className="gym-local-test" onClick={() => setDebugOpen(true)}>本地测试</button>}
     <div className="stage-navigation">
      <div className="contract-stage-tools"><button className="stage-collection-button" onClick={() => setPanel('collection')} aria-label="打开图鉴"><span>图鉴</span></button></div>
     </div>
@@ -218,9 +264,10 @@ export default function GymGame({onHome}: {onHome: () => void}) {
      <span className="equipment-status-mini charge"><span>本课训练</span><b>{training.shots}/10 球</b></span>
      <span className="equipment-status-mini"><span>复盘恢复</span><b>最多 +{training.nextRecovery}</b></span>
      <small>已完成 {training.completedCourses} 课 · {atCap ? '等级已满' : player.autoEnabled ? `自动 ${automaticIntervalMs(state) / 1000}秒/球` : '手动 1秒/球'}</small>
-     {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : recommendationPayout(state).repeatTemplate ? `重复模板推荐合计 ${postgameRepeatTemplateCredits} 券，声望照常` : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
+     {guidance && <small>{atCap ? '训练已结束，按当前模板推荐结算' : guidance.allStatsMax ? '六维已满，可核对奖金后推荐' : guidance.nextBonus ? `下个奖金节点 Lv.${guidance.nextBonus.level}＋${guidance.nextBonus.tierName}` : '最高培养奖金已达成，可推荐兑现'}</small>}
     </button>}
-    {(store.actionError || notice) && <div className="contract-status" role="status">{store.actionError || notice}</div>}
+    {(store.actionError || notice || platformWarning) && <div className="contract-status" role="status">{store.actionError || platformWarning || notice}</div>}
+    <div className="gym-court-quick-actions">{nextTrainee && <button type="button" className="gym-court-switch" aria-label="切换训练球员" title={`下一位：${gymPlayerName(nextTrainee)}`} disabled={busy} onClick={() => onAction({type: 'select-player', id: nextTrainee.id})}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h16m-4-4 4 4-4 4M21 17H5m4-4-4 4 4 4"/></svg><span>切换球员<small>{currentIndex + 1}/{trainees.length}</small></span></button>}{player && player.stamina === 0 && !atCap && <button type="button" className="gym-stamina-restore" aria-label={staminaRewardMethod(state) === 'share' ? '分享发帖，体力回满' : '看广告，体力回满'} disabled={busy} aria-busy={adAction?.type === 'restore-stamina-reward'} onClick={restoreStamina}>{adAction?.type === 'restore-stamina-reward' ? <><i className="gym-button-spinner" aria-hidden="true"/>加载中…</> : '体力回满'}</button>}</div>
    </section>
    <footer className="game-dock contract-clean-dock"><div className="dock-canvas">
     <div className="dock-side dock-side-left">
@@ -236,21 +283,28 @@ export default function GymGame({onHome}: {onHome: () => void}) {
   </div>
   {panel && <ComicDialog title={panelTitles[panel]} onClose={() => setPanel(null)} variant={panel === 'collection' ? 'album' : panel === 'roster' ? 'roster' : 'standard'} className={panel === 'collection' ? 'collection-album-dialog' : panel === 'roster' ? 'scheme-roster-dialog' : panel === 'shop' ? 'gym-management-dialog gym-shop-dialog' : panel === 'inventory' ? 'gym-management-dialog gym-inventory-dialog' : 'gym-management-dialog'}><div className="contract-panel">
    {store.actionError && <p className="contract-notice" role="alert">{store.actionError}</p>}
-   <div aria-busy={busy} className={busy ? 'gym-action-pending' : ''}>
+   {notice && panel !== 'alumni' && <p className="contract-notice" role="status">{notice}</p>}
+   {platformWarning && <p className="contract-notice" role="alert">{platformWarning}</p>}
+   <div aria-busy={busy} className={busy && !adAction ? 'gym-action-pending' : ''}>
     {panel === 'club' && <GymClubPanel state={state} onAction={onAction}/>}
     {panel === 'training' && <GymTrainingPanel key={player?.id} state={state} onAction={onAction}/>}
-    {panel === 'cooperation' && <GymCooperationPanel key={player?.id} state={state} onAction={onAction}/>}
+    {panel === 'cooperation' && <GymCooperationPanel key={player?.id} state={state} onAction={onAction} onAdAction={onAdAction} busy={busy} adAction={adAction}/>}
     {panel === 'shop' && <GymShopPanel state={state} onAction={onAction} busy={busy}/>}
     {panel === 'inventory' && <GymInventoryPanel state={state} onAction={onAction} busy={busy}/>}
     {panel === 'recommend' && <GymRecommendPanel state={state} onAction={onAction} onClose={() => setPanel(null)}/>}
     {panel === 'alumni' && <GymAlumniPanel state={state} onAction={onAction} loadAlumni={store.loadAlumni}/>}
-    {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} busy={busy} onAlumni={() => setPanel('alumni')}/>}
+    {panel === 'roster' && <GymRosterPanel state={state} onAction={onAction} onAdAction={onAdAction} busy={busy} adAction={adAction} onAlumni={() => setPanel('alumni')}/>}
     {panel === 'recruit' && <GymRecruitmentControls state={state} onAction={onAction} busy={busy} emptyCourt/>}
     {panel === 'collection' && <GymCollectionPanel state={state} onAction={onAction} busy={busy}/>}
     {panel === 'player' && player && <GymPlayerDetails player={player} onTraining={() => setPanel('training')}/>}
-    {panel === 'experience' && <><h3>训练积累经验，升满后升级</h3><p>当前 Lv.{player?.level ?? 0} → {atCap ? '已达到等级上限' : `Lv.${(player?.level ?? 0) + 1} 需要 ${experienceRequired} 经验`}。{!atCap && `已积累 ${player?.experience ?? 0} 经验。`}</p><p>当前模式：维持 30% 获得 {trainingShotExperience(state, 'hold')} 经验，成功 60% 获得 {trainingShotExperience(state, 'success')} 经验，大成功 10% 获得 {trainingShotExperience(state, 'great')} 经验。剩余经验会保留到下一级。</p><p>手动基础为8／12／20经验；自动项目每级使每次自动投篮额外 +1 经验，在线与离线共同生效。只有升级时获得属性成长机会，天赋、训练专项与馆内器材共同影响成长方向；原球星模板规则保持不变。</p><p>每球消耗 1 体力，手动投篮冷却 1 秒，仅训练当前选中的球员。球馆 Lv.2 免费开放每人独立自动与离线训练，当前 {automaticIntervalMs(state) / 1000} 秒/球，可在球员名册中启停；自动中的球员暂停手动投篮。</p><p>{offlineHint}每 10 球完成一课，推荐时按培养成果与合作结算奖励。训练计划与推荐面板可查看培养奖金条件和预计训练时间。</p></>}
    </div>
   </div></ComicDialog>}
   {store.pendingOfflineReport && <GymOfflineReport report={store.pendingOfflineReport} onClose={store.dismissOfflineReport}/>}
+  {share && <GymShareDialog key={`${share.player.id}:${share.reason}`} player={share.player} value={playerValue(state, share.player)} reason={share.reason} onClose={() => setShare(null)} onGranted={async () => {
+   const current = useGym.getState().state;
+   if (current.createdAt !== share.createdAt || current.seed !== share.seed) return false;
+   return perform(share.reason === 'levels' ? {type: 'share-player-levels', playerId: share.player.id} : {type: 'restore-stamina-reward', playerId: share.player.id, method: 'share', expectedCount: share.expectedCount});
+  }}/>}
+  {debugOpen && <GymDebugDialog onClose={() => setDebugOpen(false)}/>}
  </main>;
 }

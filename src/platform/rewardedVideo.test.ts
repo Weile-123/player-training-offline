@@ -56,3 +56,9 @@ it('missing native callback releases the gameplay lock and ignores late rewards'
   resolve({code:200,data:{rewarded:true}});await Promise.resolve();expect(grant).not.toHaveBeenCalled();
  }finally{vi.useRealTimers();}
 });
+it('reports a platform task refresh failure without revoking a confirmed reward',async()=>{
+ const grant=vi.fn(),warning=vi.fn();
+ await completeRewardedVideo(grant,{load:async()=>({vatask:{completeRewardVideo:async()=>({code:200,data:{rewarded:true}}),getActivityTaskState:async()=>({code:429,message:'任务刷新过于频繁'})}}),onTaskStateError:warning});
+ await Promise.resolve();await Promise.resolve();
+ expect(grant).toHaveBeenCalledOnce();expect(warning).toHaveBeenCalledExactlyOnceWith('任务刷新过于频繁');
+});

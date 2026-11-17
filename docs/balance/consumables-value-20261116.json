@@ -1,0 +1,1555 @@
+{
+  "version": 1,
+  "basis": "production-engine-event-replay",
+  "seedCount": 32,
+  "fixedHorizonSeconds": 300,
+  "targetRule": "start level + 10",
+  "assumptions": "Zero starting stamina; bare vs fully purchased currently unlocked projects and utility equipment; one item only; no fake elapsed time or extra courses; paired seeds.",
+  "chalkGuaranteedShots": 50,
+  "scenarios": [
+    {
+      "gymLevel": 1,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 0,
+      "targetLevel": 10,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 1,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 0,
+      "targetLevel": 10,
+      "startStamina": 0,
+      "staminaCap": 29,
+      "recoverySeconds": 18,
+      "courseRecovery": 5,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 12.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 180,
+          "meanSecondsSavedPerCoupon": 180,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 250.25,
+          "meanWindowExtraXpPerCoupon": 250.25,
+          "meanWindowExtraShots": 20,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 2,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 5,
+      "targetLevel": 15,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 2,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 5,
+      "targetLevel": 15,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 2,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 5,
+      "targetLevel": 15,
+      "startStamina": 0,
+      "staminaCap": 34,
+      "recoverySeconds": 17,
+      "courseRecovery": 5,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 12.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 170,
+          "meanSecondsSavedPerCoupon": 170,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 251,
+          "meanWindowExtraXpPerCoupon": 251,
+          "meanWindowExtraShots": 20,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 2,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 5,
+      "targetLevel": 15,
+      "startStamina": 0,
+      "staminaCap": 34,
+      "recoverySeconds": 17,
+      "courseRecovery": 5,
+      "intervalSeconds": 1.8,
+      "expectedXpPerShot": 14.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 170,
+          "meanSecondsSavedPerCoupon": 170,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 291,
+          "meanWindowExtraXpPerCoupon": 291,
+          "meanWindowExtraShots": 20,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 10,
+      "targetLevel": 20,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 452,
+          "meanSecondsSavedPerCoupon": 452,
+          "meanTargetShotsSaved": 36.38,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 10,
+      "targetLevel": 20,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 451.5,
+          "meanSecondsSavedPerCoupon": 451.5,
+          "meanTargetShotsSaved": 36.38,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 10,
+      "targetLevel": 20,
+      "startStamina": 0,
+      "staminaCap": 45,
+      "recoverySeconds": 15,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 13.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 150,
+          "meanSecondsSavedPerCoupon": 150,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 299,
+          "meanWindowExtraXpPerCoupon": 299,
+          "meanWindowExtraShots": 22,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 182.22,
+          "meanSecondsSavedPerCoupon": 182.22,
+          "meanTargetShotsSaved": 30.78,
+          "meanWindowExtraXp": 322.5,
+          "meanWindowExtraXpPerCoupon": 322.5,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 12
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 10,
+      "targetLevel": 20,
+      "startStamina": 0,
+      "staminaCap": 45,
+      "recoverySeconds": 15,
+      "courseRecovery": 6,
+      "intervalSeconds": 1.6,
+      "expectedXpPerShot": 16.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 150,
+          "meanSecondsSavedPerCoupon": 150,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 365,
+          "meanWindowExtraXpPerCoupon": 365,
+          "meanWindowExtraShots": 22,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 135.59,
+          "meanSecondsSavedPerCoupon": 135.59,
+          "meanTargetShotsSaved": 25.38,
+          "meanWindowExtraXp": 322.5,
+          "meanWindowExtraXpPerCoupon": 322.5,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 12
+        }
+      ]
+    },
+    {
+      "gymLevel": 4,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 15,
+      "targetLevel": 25,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 435.53,
+          "meanSecondsSavedPerCoupon": 435.53,
+          "meanTargetShotsSaved": 36.34,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 4,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 15,
+      "targetLevel": 25,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 434.81,
+          "meanSecondsSavedPerCoupon": 434.81,
+          "meanTargetShotsSaved": 36.34,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 4,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 15,
+      "targetLevel": 25,
+      "startStamina": 0,
+      "staminaCap": 50,
+      "recoverySeconds": 14,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 13.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 140,
+          "meanSecondsSavedPerCoupon": 140,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 380.25,
+          "meanWindowExtraXpPerCoupon": 380.25,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 171.28,
+          "meanSecondsSavedPerCoupon": 171.28,
+          "meanTargetShotsSaved": 30.94,
+          "meanWindowExtraXp": 331.25,
+          "meanWindowExtraXpPerCoupon": 331.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 11
+        }
+      ]
+    },
+    {
+      "gymLevel": 4,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 15,
+      "targetLevel": 25,
+      "startStamina": 0,
+      "staminaCap": 50,
+      "recoverySeconds": 14,
+      "courseRecovery": 6,
+      "intervalSeconds": 1.4,
+      "expectedXpPerShot": 18.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 140,
+          "meanSecondsSavedPerCoupon": 140,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 520.25,
+          "meanWindowExtraXpPerCoupon": 520.25,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 119.26,
+          "meanSecondsSavedPerCoupon": 119.26,
+          "meanTargetShotsSaved": 22.66,
+          "meanWindowExtraXp": 331.25,
+          "meanWindowExtraXpPerCoupon": 331.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 11
+        }
+      ]
+    },
+    {
+      "gymLevel": 5,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 20,
+      "targetLevel": 30,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 442.69,
+          "meanSecondsSavedPerCoupon": 442.69,
+          "meanTargetShotsSaved": 36.56,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 5,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 20,
+      "targetLevel": 30,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 442.88,
+          "meanSecondsSavedPerCoupon": 442.88,
+          "meanTargetShotsSaved": 36.56,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 5,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 20,
+      "targetLevel": 30,
+      "startStamina": 0,
+      "staminaCap": 55,
+      "recoverySeconds": 13,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 13.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 130,
+          "meanSecondsSavedPerCoupon": 130,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 297.38,
+          "meanWindowExtraXpPerCoupon": 297.38,
+          "meanWindowExtraShots": 22,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 159.22,
+          "meanSecondsSavedPerCoupon": 159.22,
+          "meanTargetShotsSaved": 30.97,
+          "meanWindowExtraXp": 397.63,
+          "meanWindowExtraXpPerCoupon": 397.63,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 3
+        }
+      ]
+    },
+    {
+      "gymLevel": 5,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 20,
+      "targetLevel": 30,
+      "startStamina": 0,
+      "staminaCap": 55,
+      "recoverySeconds": 13,
+      "courseRecovery": 6,
+      "intervalSeconds": 1.2,
+      "expectedXpPerShot": 19.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 130,
+          "meanSecondsSavedPerCoupon": 130,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 429.38,
+          "meanWindowExtraXpPerCoupon": 429.38,
+          "meanWindowExtraShots": 22,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 105.91,
+          "meanSecondsSavedPerCoupon": 105.91,
+          "meanTargetShotsSaved": 21.59,
+          "meanWindowExtraXp": 397.63,
+          "meanWindowExtraXpPerCoupon": 397.63,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 3
+        }
+      ]
+    },
+    {
+      "gymLevel": 6,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 25,
+      "targetLevel": 35,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 431.72,
+          "meanSecondsSavedPerCoupon": 431.72,
+          "meanTargetShotsSaved": 35.91,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 6,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 25,
+      "targetLevel": 35,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 432.19,
+          "meanSecondsSavedPerCoupon": 432.19,
+          "meanTargetShotsSaved": 35.91,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 6,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 25,
+      "targetLevel": 35,
+      "startStamina": 0,
+      "staminaCap": 70,
+      "recoverySeconds": 12,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 13.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 120,
+          "meanSecondsSavedPerCoupon": 120,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 382.13,
+          "meanWindowExtraXpPerCoupon": 382.13,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 150.28,
+          "meanSecondsSavedPerCoupon": 150.28,
+          "meanTargetShotsSaved": 31.16,
+          "meanWindowExtraXp": 414.88,
+          "meanWindowExtraXpPerCoupon": 414.88,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 1
+        }
+      ]
+    },
+    {
+      "gymLevel": 6,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 25,
+      "targetLevel": 35,
+      "startStamina": 0,
+      "staminaCap": 70,
+      "recoverySeconds": 12,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 21.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 120,
+          "meanSecondsSavedPerCoupon": 120,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 606.13,
+          "meanWindowExtraXpPerCoupon": 606.13,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 94.41,
+          "meanSecondsSavedPerCoupon": 94.41,
+          "meanTargetShotsSaved": 19.44,
+          "meanWindowExtraXp": 414.88,
+          "meanWindowExtraXpPerCoupon": 414.88,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 1
+        }
+      ]
+    },
+    {
+      "gymLevel": 7,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 40,
+      "targetLevel": 50,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 438.56,
+          "meanSecondsSavedPerCoupon": 438.56,
+          "meanTargetShotsSaved": 36.72,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 7,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 40,
+      "targetLevel": 50,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 439,
+          "meanSecondsSavedPerCoupon": 439,
+          "meanTargetShotsSaved": 36.72,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 7,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 40,
+      "targetLevel": 50,
+      "startStamina": 0,
+      "staminaCap": 75,
+      "recoverySeconds": 9,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 14.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 90,
+          "meanSecondsSavedPerCoupon": 90,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 416,
+          "meanWindowExtraXpPerCoupon": 416,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 104.03,
+          "meanSecondsSavedPerCoupon": 104.03,
+          "meanTargetShotsSaved": 28.91,
+          "meanWindowExtraXp": 423.75,
+          "meanWindowExtraXpPerCoupon": 423.75,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 7,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 40,
+      "targetLevel": 50,
+      "startStamina": 0,
+      "staminaCap": 75,
+      "recoverySeconds": 9,
+      "courseRecovery": 6,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 22.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 90,
+          "meanSecondsSavedPerCoupon": 90,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 640,
+          "meanWindowExtraXpPerCoupon": 640,
+          "meanWindowExtraShots": 28,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 64.41,
+          "meanSecondsSavedPerCoupon": 64.41,
+          "meanTargetShotsSaved": 18.53,
+          "meanWindowExtraXp": 423.75,
+          "meanWindowExtraXpPerCoupon": 423.75,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "built": false,
+      "mode": "manual",
+      "startLevel": 55,
+      "targetLevel": 65,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 440.31,
+          "meanSecondsSavedPerCoupon": 440.31,
+          "meanTargetShotsSaved": 36.56,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "built": false,
+      "mode": "automatic",
+      "startLevel": 55,
+      "targetLevel": 65,
+      "startStamina": 0,
+      "staminaCap": 20,
+      "recoverySeconds": 20,
+      "courseRecovery": 4,
+      "intervalSeconds": 2,
+      "expectedXpPerShot": 11.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 200,
+          "meanSecondsSavedPerCoupon": 200,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 205.38,
+          "meanWindowExtraXpPerCoupon": 205.38,
+          "meanWindowExtraShots": 18,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 440.63,
+          "meanSecondsSavedPerCoupon": 440.63,
+          "meanTargetShotsSaved": 36.56,
+          "meanWindowExtraXp": 159.25,
+          "meanWindowExtraXpPerCoupon": 159.25,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 31
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "built": true,
+      "mode": "manual",
+      "startLevel": 55,
+      "targetLevel": 65,
+      "startStamina": 0,
+      "staminaCap": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 7,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 14.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 80,
+          "meanSecondsSavedPerCoupon": 80,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 500.38,
+          "meanWindowExtraXpPerCoupon": 500.38,
+          "meanWindowExtraShots": 34,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 70.47,
+          "meanSecondsSavedPerCoupon": 70.47,
+          "meanTargetShotsSaved": 29.34,
+          "meanWindowExtraXp": 423.75,
+          "meanWindowExtraXpPerCoupon": 423.75,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "built": true,
+      "mode": "automatic",
+      "startLevel": 55,
+      "targetLevel": 65,
+      "startStamina": 0,
+      "staminaCap": 80,
+      "recoverySeconds": 8,
+      "courseRecovery": 7,
+      "intervalSeconds": 1,
+      "expectedXpPerShot": 22.6,
+      "items": [
+        {
+          "id": "drink",
+          "price": 1,
+          "meanTargetSecondsSaved": 80,
+          "meanSecondsSavedPerCoupon": 80,
+          "meanTargetShotsSaved": 0,
+          "meanWindowExtraXp": 772.38,
+          "meanWindowExtraXpPerCoupon": 772.38,
+          "meanWindowExtraShots": 34,
+          "meanChalkRemainingAfterWindow": 0
+        },
+        {
+          "id": "chalk",
+          "price": 1,
+          "meanTargetSecondsSaved": 46.16,
+          "meanSecondsSavedPerCoupon": 46.16,
+          "meanTargetShotsSaved": 18.59,
+          "meanWindowExtraXp": 423.75,
+          "meanWindowExtraXpPerCoupon": 423.75,
+          "meanWindowExtraShots": 0,
+          "meanChalkRemainingAfterWindow": 0
+        }
+      ]
+    }
+  ],
+  "team": [
+    {
+      "gymLevel": 3,
+      "injuredPlayers": 3,
+      "restored": 30,
+      "price": 2,
+      "staminaPerCoupon": 15,
+      "singleDrinkCostForSameStamina": 3,
+      "discountPercent": 33.33
+    },
+    {
+      "gymLevel": 4,
+      "injuredPlayers": 4,
+      "restored": 40,
+      "price": 2,
+      "staminaPerCoupon": 20,
+      "singleDrinkCostForSameStamina": 4,
+      "discountPercent": 50
+    },
+    {
+      "gymLevel": 5,
+      "injuredPlayers": 5,
+      "restored": 50,
+      "price": 2,
+      "staminaPerCoupon": 25,
+      "singleDrinkCostForSameStamina": 5,
+      "discountPercent": 60
+    },
+    {
+      "gymLevel": 6,
+      "injuredPlayers": 6,
+      "restored": 60,
+      "price": 2,
+      "staminaPerCoupon": 30,
+      "singleDrinkCostForSameStamina": 6,
+      "discountPercent": 66.67
+    },
+    {
+      "gymLevel": 7,
+      "injuredPlayers": 7,
+      "restored": 70,
+      "price": 2,
+      "staminaPerCoupon": 35,
+      "singleDrinkCostForSameStamina": 7,
+      "discountPercent": 71.43
+    },
+    {
+      "gymLevel": 8,
+      "injuredPlayers": 8,
+      "restored": 80,
+      "price": 2,
+      "staminaPerCoupon": 40,
+      "singleDrinkCostForSameStamina": 8,
+      "discountPercent": 75
+    }
+  ],
+  "teamPerformance": [
+    {
+      "gymLevel": 3,
+      "injuredPlayers": 3,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "seedCount": 16,
+      "items": [
+        {
+          "name": "one-drink",
+          "price": 1,
+          "meanAllFinishedSecondsSaved": 10.05,
+          "meanAllFinishedSecondsSavedPerCoupon": 10.05,
+          "meanTotalPlayerSecondsSaved": 154.96,
+          "meanTotalPlayerSecondsSavedPerCoupon": 154.96
+        },
+        {
+          "name": "team-supply",
+          "price": 2,
+          "meanAllFinishedSecondsSaved": 150,
+          "meanAllFinishedSecondsSavedPerCoupon": 75,
+          "meanTotalPlayerSecondsSaved": 450,
+          "meanTotalPlayerSecondsSavedPerCoupon": 225
+        }
+      ]
+    },
+    {
+      "gymLevel": 5,
+      "injuredPlayers": 5,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "seedCount": 16,
+      "items": [
+        {
+          "name": "one-drink",
+          "price": 1,
+          "meanAllFinishedSecondsSaved": -0.21,
+          "meanAllFinishedSecondsSavedPerCoupon": -0.21,
+          "meanTotalPlayerSecondsSaved": 126.46,
+          "meanTotalPlayerSecondsSavedPerCoupon": 126.46
+        },
+        {
+          "name": "team-supply",
+          "price": 2,
+          "meanAllFinishedSecondsSaved": 130,
+          "meanAllFinishedSecondsSavedPerCoupon": 65,
+          "meanTotalPlayerSecondsSaved": 650,
+          "meanTotalPlayerSecondsSavedPerCoupon": 325
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "injuredPlayers": 8,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "seedCount": 16,
+      "items": [
+        {
+          "name": "one-drink",
+          "price": 1,
+          "meanAllFinishedSecondsSaved": -1.5,
+          "meanAllFinishedSecondsSavedPerCoupon": -1.5,
+          "meanTotalPlayerSecondsSaved": 78.44,
+          "meanTotalPlayerSecondsSavedPerCoupon": 78.44
+        },
+        {
+          "name": "team-supply",
+          "price": 2,
+          "meanAllFinishedSecondsSaved": 80,
+          "meanAllFinishedSecondsSavedPerCoupon": 40,
+          "meanTotalPlayerSecondsSaved": 640,
+          "meanTotalPlayerSecondsSavedPerCoupon": 320
+        }
+      ]
+    }
+  ],
+  "sensitivity": [
+    {
+      "gymLevel": 3,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 150,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 61.6,
+          "meanChalkShotsConsumed": 21
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 17.6,
+          "meanChalkShotsConsumed": 21
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 17.6,
+          "meanChalkShotsConsumed": 21
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 150,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 143.38,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 150,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 143.38,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 127.38,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 150,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 153.16,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 150,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 153.16,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 3,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 40.7,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 80,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 20.31,
+          "meanChalkShotsConsumed": 17
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 6.31,
+          "meanChalkShotsConsumed": 17
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 0,
+      "targetLevel": 10,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 6.31,
+          "meanChalkShotsConsumed": 17
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 80,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 46.59,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 18.81,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 20,
+      "targetLevel": 30,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 18.81,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "empty",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 80,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 45.59,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "half",
+      "items": [
+        {
+          "id": "drink",
+          "refused": null,
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 18.25,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    },
+    {
+      "gymLevel": 8,
+      "startLevel": 98,
+      "targetLevel": 99,
+      "initialStamina": "full",
+      "items": [
+        {
+          "id": "drink",
+          "refused": "当前体力已满",
+          "meanSecondsSaved": 0,
+          "meanChalkShotsConsumed": 0
+        },
+        {
+          "id": "chalk",
+          "refused": null,
+          "meanSecondsSaved": 18.25,
+          "meanChalkShotsConsumed": 50
+        }
+      ]
+    }
+  ],
+  "safeguards": {
+    "cappedChalk": "球员已达到 99 级训练上限，无需使用训练镁粉",
+    "fullDrink": "当前体力已满",
+    "fullTeam": "全体可训练球员体力已满"
+  }
+}
