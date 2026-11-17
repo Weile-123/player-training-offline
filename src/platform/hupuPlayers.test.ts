@@ -7,13 +7,20 @@ async function fixture(response:unknown) {
  return {request,api:await import('./hupuPlayers')};
 }
 describe('Hupu NBA profiles',()=>{
- it('uses the documented SDK, validated identity and returned name/photo, caching concurrent calls',async()=>{
+ it('uses validated native names while retaining the preloaded local portrait, caching concurrent calls',async()=>{
   const {api,request}=await fixture({code:200,data:{player:{playerId:'1901000000470668',name:'亚历克斯-卡鲁索',eng_name:'Alex Caruso',big_photo:'http://i11.hoopchina.com.cn/current.png'}}});
   const profiles=await Promise.all(Array.from({length:10},()=>api.loadPlayerProfile('caruso')));
   expect(request).toHaveBeenCalledTimes(1);
   expect(request).toHaveBeenCalledWith({playerId:'1901000000470668',leagueType:'NBA'});
-  expect(profiles[0]).toMatchObject({name:'亚历克斯-卡鲁索',avatar:'https://i11.hoopchina.com.cn/current.png',source:'hupu',message:''});
+  expect(profiles[0]).toMatchObject({name:'亚历克斯-卡鲁索',avatar:api.fallbackProfile('caruso')!.avatar,source:'hupu',message:''});
+  expect(profiles[0]!.avatar).toContain('art/poster-portraits/caruso.png');
   await api.loadPlayerProfile('caruso');expect(request).toHaveBeenCalledTimes(1);
+ });
+ it('keeps the decoded memory URL when native metadata returns another portrait or no photo',async()=>{
+  const {api}=await fixture({code:200,data:{player:{playerId:'1901000000470668',name:'亚历克斯-卡鲁索'}}});
+  const assets=await import('../presentation/assetUrls');assets.rememberAssetUrl('art/poster-portraits/caruso.png','blob:decoded-caruso');
+  expect(api.fallbackProfile('caruso')!.avatar).toBe('blob:decoded-caruso');
+  expect(await api.loadPlayerProfile('caruso')).toMatchObject({name:'亚历克斯-卡鲁索',avatar:'blob:decoded-caruso',source:'hupu',message:''});
  });
  it('does not request an invented player ID for retired/unmapped stars, or undiscovered players',async()=>{
   const {api,request}=await fixture({code:200});

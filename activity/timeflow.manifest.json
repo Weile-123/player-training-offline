@@ -1,0 +1,113 @@
+{
+  "applicationId": "app_847cdb589a",
+  "service": "legend-gym-authority",
+  "mode": "timeflow-clock-with-authoritative-gym-engine",
+  "deploymentStatus": "active",
+  "environmentId": "app-847cdb589a-d0gre00d5c6a5c8b6",
+  "publicApiBase": "https://app-847cdb589a-d0gre00d5c6a5c8b6-1252166086.ap-shanghai.app.tcloudbase.com/api",
+  "definition": "timeflow.definition.json",
+  "migration": "migrations/20261117000200_gym_authority.sql",
+  "registrationCommand": "node scripts/timeflow-register.mjs",
+  "serverEntrypoint": "server/run-gym-authority.mjs",
+  "cloudFunction": "activity_api",
+  "cloudFunctionRoutes": "../server/gymCloudBaseRoutes.json",
+  "deploymentPackage": "../outputs/backend-nickname-fix-20261117/cloudbase-package",
+  "deploymentEvidence": "../outputs/backend-nickname-fix-20261117/acceptance.json",
+  "runtime": "Nodejs18.15",
+  "deployedCodeSha256": "215ee8f024f3400abdddca7022b50c2d352ff9e6c9e2fe003b250921131dce15",
+  "routes": [
+    {
+      "method": "GET",
+      "path": "/api/gym/session",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/start",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/adopt",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/actions",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/resume",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/suspend",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/alumni",
+      "auth": true
+    },
+    {
+      "method": "POST",
+      "path": "/api/gym/rewards/prepare",
+      "auth": true
+    }
+  ],
+  "credentialSources": [
+    "server SHAPER_TOKEN",
+    "documented credentials.json.shaperToken"
+  ],
+  "requirements": [
+    "Official authenticated gateway overwrites identity context; direct function access disabled",
+    "Persistent application/environment/workspace and unique actor/scope bindings",
+    "Shared transactional business database",
+    "Six platform replay cases passed and definition activated",
+    "Signed live settlement plus durable business commit and ACK"
+  ],
+  "platformEvidence": "../outputs/home-timeflow-20261117/timeflow/provisioning.json",
+  "liveClockEvidence": "../outputs/home-timeflow-20261117/timeflow/live-clock-acceptance-5503ed1753a6f722.json",
+  "liveBusinessEvidence": "../outputs/home-timeflow-20261117/timeflow/live-authority-acceptance-eb4cdb8de79c7c73.json",
+  "productionBusinessEvidence": "../outputs/home-timeflow-20261117/cloudbase-mcp-audit/production-pg-timeflow-e2e.json",
+  "frontendEvidence": "../outputs/home-timeflow-20261117/review/live-page-e2e/report.json",
+  "frontendStatus": "local-build-pending-no-new-upload",
+  "publicationStatus": "temporary-preview-only-not-formally-published",
+  "verification": {
+    "localProtocolTests": true,
+    "platformValidation": true,
+    "platformActivated": true,
+    "liveClockSettlement": true,
+    "liveSettlement": true,
+    "gatewayVerified": true,
+    "databaseMigrationApplied": true,
+    "productionBusinessFlow": true,
+    "publishedPageVerified": false,
+    "responseLossRecovery": true,
+    "rewardClaimApi": true,
+    "nativeRewardUi": "user-will-verify",
+    "level99CappedBonus": true,
+    "actualBonusReceipt": true,
+    "coldHistoryBootstrapCodeDeployed": true,
+    "deployedCodeMatchesCurrentBackend": true
+  },
+  "invariants": [
+    "Timeflow timestamps define rewards; browser clock never does",
+    "Canonical state and settlement consumption commit before ACK",
+    "An unknown or failed remote operation never falls back to local rewards",
+    "Local legacy imports remain unverified historical inputs",
+    "Official native SDK completion is a client acknowledgement, not a signed server receipt; rewards use actor-bound one-time challenges and canonical business limits"
+  ],
+  "authorityUpgradeMigration": "migrations/20261117000300_gym_authority_rankings.sql",
+  "migrations": [
+    "migrations/20261117000100_gym_rankings.sql",
+    "migrations/20261117000200_gym_authority.sql",
+    "migrations/20261117000300_gym_authority_rankings.sql"
+  ],
+  "recoveryEvidence": "../outputs/release-functions-20261117/offline-recovery-live.json",
+  "latestBusinessEvidence": "../outputs/backend-update-20261117/business-acceptance.json",
+  "rewardConfirmation": "native-sdk-confirmation-with-actor-action-challenge-and-durable-once-only-claim",
+  "backendUpdatedAt": "2026-11-17T08:48:34.569Z"
+}

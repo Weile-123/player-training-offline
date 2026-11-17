@@ -1,11 +1,14 @@
 const http=require('node:http');
 const tcb=require('@cloudbase/node-sdk');
 const {createHandler}=require('./rankings.cjs');
+const {createActivityRequestHandler}=require('./activityHost.cjs');
+const {createDemoBaselineHandler}=require('./demoBaseline.cjs');
+const {resolve}=require('node:path');
 const {applicationId}=require('./project.json');
 const env=process.env.CLOUDBASE_ENV_ID||process.env.TCB_ENV;
 if(!env||process.env.BUSINESS_ACTIVITY_ID!==applicationId)throw Error('Missing project-specific activity binding');
 const app=tcb.init({env,accessKey:process.env.COLORBOX__ACCESS_KEY});
-const handle=createHandler({rpc:async(name,data)=>{
+const rankingsHandle=createHandler({rpc:async(name,data)=>{
  const credential=await app.auth().getClientCredential();
  const token=typeof credential==='string'?credential:credential?.access_token;
  if(!token)throw Error('服务暂不可用');
@@ -20,16 +23,15 @@ const handle=createHandler({rpc:async(name,data)=>{
  }
  return result;
 }});
-http.createServer(async(req,res)=>{
- // Gateway owns CORS and overwrites x-cloudbase-context. Disable the direct
- // public function URL; gateway auth is mandatory for /me and /submit.
- res.setHeader('Content-Type','application/json; charset=utf-8');
- if(req.method==='OPTIONS'){res.writeHead(204);res.end();return;}
- try{
-  let text='';for await(const chunk of req){text+=chunk;if(Buffer.byteLength(text)>16384)throw Object.assign(Error('请求内容过大'),{statusCode:413});}
-  let body;try{body=text?JSON.parse(text):undefined;}catch{throw Object.assign(Error('请求格式无效'),{statusCode:400});}
-  const url=new URL(req.url,'http://localhost');
-  const data=await handle({method:req.method,path:url.pathname.replace(/^\/api(?=\/|$)/,''),query:Object.fromEntries(url.searchParams),context:req.headers['x-cloudbase-context'],body});
-  res.writeHead(200);res.end(JSON.stringify({code:0,data}));
- }catch(error){const status=error.statusCode||503;res.writeHead(status);res.end(JSON.stringify({code:status,message:error.statusCode?error.message:'排行榜服务暂不可用'}));}
-}).listen(Number(process.env.PORT||9000),'0.0.0.0');
+const demoHandle=createDemoBaselineHandler({rdb:app.rdb({database:'public'})});
+const handle=request=>request.path.startsWith('/demo/')?demoHandle(request):rankingsHandle(request);
+async function start(){
+ let authorityHandle;
+ if(process.env.GYM_AUTHORITY_AUTH_MODE){
+  if(process.env.GYM_AUTHORITY_AUTH_MODE!=='cloudbase-gateway')throw Error('Unsupported gym identity mode');
+  const {createGymCloudBaseGatewayHandler}=await import('./gym/server/gymCloudBaseAdapter.mjs');
+  authorityHandle=await createGymCloudBaseGatewayHandler({app,env:process.env,runtimeRoot:resolve(__dirname,'gym')});
+ }
+ http.createServer(createActivityRequestHandler({legacyHandle:handle,authorityHandle})).listen(Number(process.env.PORT||9000),'0.0.0.0');
+}
+start().catch(()=>{console.error('activity_api startup failed: verify configured service resources and gateway identity mode');process.exitCode=1;});

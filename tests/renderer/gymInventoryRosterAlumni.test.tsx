@@ -62,7 +62,7 @@ it('selects a left equipment slot, locks the other slots, and replaces it from t
   expect(document.querySelector('.is-selected-slot')).toBeNull();
 });
 
-it('keeps same-family rules when replacing from the left and allows cancellation and tab reset', async () => {
+it('keeps same-family rules when replacing from the left and allows cancellation without extra backpack tabs', async () => {
   const state = newGym(at, 12);
   const basic = equipmentCatalog.find(item => item.effects.stamina > 0 && item.grade === 1)!;
   const advanced = equipment(basic.family, 2);
@@ -78,8 +78,8 @@ it('keeps same-family rules when replacing from the left and allows cancellation
   expect(slot(basic.id).disabled).toBe(false);
   expect(button(card(advanced.id), '装备').disabled).toBe(false);
   await press(slot(basic.id));
-  await press(button(document, '消耗品'));
-  await press(button(document, '器材仓库'));
+  expect(document.querySelector('[role="tablist"][aria-label="背包分类"]')).toBeNull();
+  await press(button(document, '取消替换'));
   expect(document.querySelector('.is-selected-slot')).toBeNull();
   await press(slot(basic.id));
   await press(button(card(advanced.id), '替换'));

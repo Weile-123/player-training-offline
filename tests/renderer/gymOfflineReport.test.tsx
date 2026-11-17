@@ -3,13 +3,13 @@ import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import type {OfflinePlayerReport, OfflineTrainingReport} from '../../src/game/gym/offline';
 import {templateById} from '../../src/game/templates';
-import {GymOfflineReport} from '../../src/components/GymOfflineReport';
+import {GymOfflineReport, offlineExperienceAnimationMs} from '../../src/components/GymOfflineReport';
 import {templateRules} from '../../src/game/contract/templates';
 import {presentationConfig} from '../../src/presentation/feedback';
 
 let root: Root | null = null;
 beforeEach(() => {localStorage.removeItem(presentationConfig.preferenceKey);});
-afterEach(() => {if (root) act(() => root!.unmount()); root = null;});
+afterEach(() => {if (root) act(() => root!.unmount()); root = null; vi.restoreAllMocks(); vi.unstubAllGlobals();});
 
 const player = (id: string): OfflinePlayerReport => ({id, name: `新秀 ${id}`, shots: 10, xpGained: 120,
   levelBefore: 4, levelAfter: 7, staminaBefore: 20, staminaAfter: 10,
@@ -19,9 +19,30 @@ const report = (players = [player('1')]): OfflineTrainingReport => ({
   capMs: 1_800_000, capped: true, totalShots: players.reduce((sum, entry) => sum + entry.shots, 0),
   totalExperience: players.reduce((sum, entry) => sum + entry.xpGained, 0), players,
 });
-async function mount(value: OfflineTrainingReport, close = vi.fn()) {
+
+it('disables the ad when all reported players are already level99',async()=>{
+ const onDoubleExperience=vi.fn(async()=>true);
+ await mount(report([{...player('1'),levelAfter:99}]),vi.fn(),{onDoubleExperience});
+ const button=document.querySelector<HTMLButtonElement>('.gm-offline-double-experience')!;
+ expect(button.disabled).toBe(true);expect(button.textContent).toContain('已满级');
+ await act(async()=>button.click());expect(onDoubleExperience).not.toHaveBeenCalled();
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+120');
+});
+
+it('animates and restores the actual capped bonus instead of inventing full double XP',async()=>{
+ localStorage.setItem(presentationConfig.preferenceKey,JSON.stringify({version:1,sound:true,reducedMotion:true}));
+ const value=report([{...player('1'),xpGained:20,levelAfter:98},{...player('2'),xpGained:120,levelAfter:99}]);
+ value.bonusExperience={'1':10,'2':0};
+ await mount(value,vi.fn(),{onDoubleExperience:vi.fn(async()=>true)});await claim();
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+150');
+ expect([...document.querySelectorAll('.athlete-xp')].map(node=>node.textContent)).toEqual(['经验 +30','经验 +120']);
+ act(()=>root!.unmount());root=null;
+ await mount(value,vi.fn(),{doubleExperienceClaimed:true});
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+150');
+});
+async function mount(value: OfflineTrainingReport, close = vi.fn(), extra: Partial<Parameters<typeof GymOfflineReport>[0]> = {}) {
   root = createRoot(document.getElementById('root')!);
-  await act(async () => root!.render(<GymOfflineReport report={value} onClose={close}/>));
+  await act(async () => root!.render(<GymOfflineReport report={value} onClose={close} {...extra}/>));
   return close;
 }
 
@@ -97,8 +118,9 @@ it('dismisses an already-saved report without claiming rewards or mutating its t
   expect(dialog.textContent).toContain('30分钟');
   expect(dialog.textContent).toContain('2小时');
   expect(dialog.textContent).toContain('超出时长仅恢复体力');
-  expect(dialog.textContent).toContain('已保存，无需领取');
-  expect([...dialog.querySelectorAll('button')].some(button => button.textContent?.includes('领取'))).toBe(false);
+  expect(dialog.textContent).toContain('已保存');
+  expect(dialog.querySelector('.gm-offline-saved')).toBeNull();
+  expect(dialog.querySelector<HTMLButtonElement>('.gm-offline-double-experience')?.disabled).toBe(true);
   const continueButton = [...dialog.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '继续培养')!;
   await act(async () => continueButton.click());
   expect(close).toHaveBeenCalledTimes(1);
@@ -123,4 +145,105 @@ it('omits a cap warning when uncapped and renders an honest empty report', async
   expect(document.querySelector('.gm-offline-xp-total')?.textContent).toContain('+0');
   expect(document.querySelector('.gm-offline-empty')?.textContent).toBe('本次没有产生有效训练。');
   expect(document.querySelectorAll('.gm-offline-athlete')).toHaveLength(0);
+});
+
+const doubleButton = () => document.querySelector<HTMLButtonElement>('.gm-offline-double-experience')!;
+const deferred = <T,>() => {let resolve!:(value:T)=>void;return {promise:new Promise<T>(done=>{resolve=done;}),resolve:(value:T)=>resolve(value)};};
+async function claim() {await act(async () => {doubleButton().click(); for(let index=0;index<10;index++)await Promise.resolve();});}
+
+it('places the gold-advertising action above Continue without the redundant saved summary', async () => {
+  await mount(report(),vi.fn(),{onDoubleExperience:vi.fn(async()=>true)});
+  const footer = document.querySelector('.gm-offline-footer')!;
+  expect(footer.querySelectorAll('button')[0]).toBe(doubleButton());
+  expect(doubleButton().textContent).toBe('领取双倍经验');
+  expect(doubleButton().querySelector('.gm-offline-ad-icon')).toBeTruthy();
+  expect(footer.querySelectorAll('button')[1].textContent).toBe('继续培养');
+  expect(document.querySelector('.gm-offline-saved,.offline-summary')).toBeNull();
+});
+
+it('waits for committed success, blocks duplicate clicks, then tweens every XP value once and marks it gold', async () => {
+  const pending=deferred<boolean>(),onDoubleExperience=vi.fn(()=>pending.promise),frames:FrameRequestCallback[]=[];
+  vi.spyOn(performance,'now').mockReturnValue(1000);
+  vi.stubGlobal('requestAnimationFrame',(callback:FrameRequestCallback)=>{frames.push(callback);return frames.length;});
+  vi.stubGlobal('cancelAnimationFrame',vi.fn());
+  const value=report([player('1'),{...player('2'),xpGained:80}]),before=structuredClone(value);
+  await mount(value,vi.fn(),{onDoubleExperience}); await claim(); await claim();
+  const footerChildren=document.querySelector('.gm-offline-footer')!.children.length;
+  expect(onDoubleExperience).toHaveBeenCalledOnce();expect(doubleButton().disabled).toBe(true);
+  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+200');
+  expect(document.querySelector('.is-double-experience')).toBeNull();expect(frames).toHaveLength(0);
+  expect(document.querySelector<HTMLElement>('.gm-offline-report')!.style.getPropertyValue('--offline-gold-progress')).toBe('0');
+  await act(async()=>{pending.resolve(true);for(let index=0;index<10;index++)await Promise.resolve();});
+  expect(document.querySelector('.is-double-experience')).toBeTruthy();expect(frames).toHaveLength(1);
+  expect(document.querySelector<HTMLElement>('.gm-offline-report')!.style.getPropertyValue('--offline-gold-progress')).toBe('0');
+  await act(async()=>{frames.shift()!(1000+offlineExperienceAnimationMs/2);});
+  const intermediate=Number(document.querySelector('.gm-offline-xp-total b')!.textContent!.slice(1));
+  expect(intermediate).toBeGreaterThan(200);expect(intermediate).toBeLessThan(400);
+  const halfway=Number(document.querySelector<HTMLElement>('.gm-offline-report')!.style.getPropertyValue('--offline-gold-progress'));
+  expect(halfway).toBeGreaterThan(0);expect(halfway).toBeLessThan(1);
+  expect([...document.querySelectorAll('.gm-offline-xp-value')].every(node=>node.getAttribute('data-xp-text')===node.textContent)).toBe(true);
+  await act(async()=>{frames.shift()!(1000+offlineExperienceAnimationMs);});
+  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+400');
+  expect(document.querySelector<HTMLElement>('.gm-offline-report')!.style.getPropertyValue('--offline-gold-progress')).toBe('1');
+  expect([...document.querySelectorAll('.athlete-xp')].map(node=>node.textContent)).toEqual(['经验 +240','经验 +160']);
+  expect(doubleButton().textContent).toBe('已领取双倍经验');await claim();expect(onDoubleExperience).toHaveBeenCalledOnce();
+  expect(document.querySelector('.gm-offline-footer')!.children.length).toBe(footerChildren);
+  expect(document.body.textContent).not.toContain('双倍经验已到账');
+  expect(frames).toHaveLength(0);expect(value).toEqual(before);
+});
+
+it.each(['cancelled','failed'])('does not animate or change original totals on %s reward', async result => {
+  const onDoubleExperience=vi.fn(async()=>{if(result==='failed')throw Error('广告未看完');return false;});
+  const requestFrame=vi.fn();vi.stubGlobal('requestAnimationFrame',requestFrame);
+  await mount(report(),vi.fn(),{onDoubleExperience});await claim();
+  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+120');
+  expect(document.querySelector('.is-double-experience')).toBeNull();expect(requestFrame).not.toHaveBeenCalled();
+  expect(document.querySelector('[role=alert]')?.textContent).toBeTruthy();expect(doubleButton().disabled).toBe(false);
+});
+
+it('shows a persisted claimed report at double XP immediately without replaying its animation', async () => {
+  const requestFrame=vi.fn(),onDoubleExperience=vi.fn(async()=>true);vi.stubGlobal('requestAnimationFrame',requestFrame);
+  await mount(report(),vi.fn(),{onDoubleExperience,doubleExperienceClaimed:true});
+  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+240');
+  expect(document.querySelector('.athlete-xp')?.textContent).toBe('经验 +240');
+  expect(document.querySelector('.is-double-experience')).toBeTruthy();expect(doubleButton().disabled).toBe(true);
+  expect(document.querySelector<HTMLElement>('.gm-offline-report')!.style.getPropertyValue('--offline-gold-progress')).toBe('1');
+  expect(requestFrame).not.toHaveBeenCalled();await claim();expect(onDoubleExperience).not.toHaveBeenCalled();
+});
+
+it('honors reduced motion for successful doubling without animation frames', async () => {
+  localStorage.setItem(presentationConfig.preferenceKey,JSON.stringify({version:1,sound:true,reducedMotion:true}));
+  const requestFrame=vi.fn();vi.stubGlobal('requestAnimationFrame',requestFrame);
+  await mount(report(),vi.fn(),{onDoubleExperience:vi.fn(async()=>true)});await claim();
+  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+240');expect(requestFrame).not.toHaveBeenCalled();
+});
+
+it('does not animate a completion returned after the report was dismissed', async () => {
+  const pending=deferred<boolean>(),requestFrame=vi.fn();vi.stubGlobal('requestAnimationFrame',requestFrame);
+  await mount(report(),vi.fn(),{onDoubleExperience:()=>pending.promise});await claim();
+  act(()=>root!.unmount());root=null;
+  await act(async()=>{pending.resolve(true);for(let index=0;index<10;index++)await Promise.resolve();});
+  expect(requestFrame).not.toHaveBeenCalled();
+});
+
+it('keeps the report open through pending ad/commit work, including an immediate close click before rendering busy state',async()=>{
+ const pending=deferred<boolean>(),closed=vi.fn();
+ await mount(report(),closed,{onDoubleExperience:()=>pending.promise});
+ const originalClose=document.querySelector<HTMLButtonElement>('[aria-label="关闭面板"]')!,continueButton=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='继续培养')!;
+ await act(async()=>{doubleButton().click();originalClose.click();continueButton.click();for(let index=0;index<10;index++)await Promise.resolve();});
+ expect(closed).not.toHaveBeenCalled();expect(continueButton.disabled).toBe(true);
+ expect(document.querySelector('[aria-label="关闭面板"]')).toBeNull();
+ await act(async()=>{document.querySelector('[role=dialog]')!.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));});
+ expect(closed).not.toHaveBeenCalled();
+ await act(async()=>{pending.resolve(false);for(let index=0;index<10;index++)await Promise.resolve();});
+ expect(continueButton.disabled).toBe(false);expect(document.querySelector('[aria-label="关闭面板"]')).toBeTruthy();
+ expect(doubleButton().disabled).toBe(false);
+ await act(async()=>continueButton.click());expect(closed).toHaveBeenCalledOnce();
+});
+
+it('also blocks dismissal while an externally managed reward commit is pending',async()=>{
+ const closed=vi.fn();await mount(report(),closed,{doubleExperiencePending:true,onDoubleExperience:vi.fn(async()=>true)});
+ const continueButton=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='继续培养')!;
+ expect(continueButton.disabled).toBe(true);expect(document.querySelector('[aria-label="关闭面板"]')).toBeNull();
+ await act(async()=>continueButton.click());expect(closed).not.toHaveBeenCalled();
 });

@@ -4,6 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "server:gym": "node server/run-gym-authority.mjs",
+    "build:gym-server": "node scripts/prepare-gym-authority.mjs",
+    "check:timeflow": "node scripts/check-gym-timeflow.mjs",
+    "register:timeflow": "node scripts/timeflow-register.mjs",
+    "typecheck:server": "tsc -p server/tsconfig.json",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",

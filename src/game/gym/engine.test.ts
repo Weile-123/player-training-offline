@@ -82,21 +82,21 @@ describe('manual gym training and original growth', () => {
     expect(playerValue(result.state)).toBe('2560');
   });
 
-  it('enforces each player one-second cooldown and refuses stale commands without consuming anything', () => {
+  it('enforces each player half-second cooldown and refuses stale commands without consuming anything', () => {
     const gym = newGym(start);
     const action = {type: 'train', id: gym.player!.id} as const;
     const first = act(gym, action);
-    for (const result of [dispatchGym(first, first.revision, action, start + 999), dispatchGym(first, gym.revision, action, start + 1000)]) {
+    for (const result of [dispatchGym(first, first.revision, action, start + 499), dispatchGym(first, gym.revision, action, start + 500)]) {
       expect(result.error).toBeTruthy();
       expect(result.state).toBe(first);
       expect(result.events).toEqual([]);
     }
-    expect(act(first, action, start + 1000).player!.shots).toBe(2);
+    expect(act(first, action, start + 500).player!.shots).toBe(2);
     const empty = act(first, {type: 'recommend', id: first.player!.id});
     const next = act(empty, {type: 'recruit'});
     expect(dispatchGym(next, next.revision, {type: 'train', id: first.player!.id}, start + 1000).error).toBeTruthy();
-    expect(dispatchGym(next, next.revision, {type: 'train', id: next.player!.id}, start + 999).state).toBe(next);
-    expect(act(next, {type: 'train', id: next.player!.id}, start + 1000).player!.shots).toBe(1);
+    expect(dispatchGym(next, next.revision, {type: 'train', id: next.player!.id}, start + 499).state).toBe(next);
+    expect(act(next, {type: 'train', id: next.player!.id}, start + 500).player!.shots).toBe(1);
   });
 
   it('clamps XP at level 99 and uses a bounded cubic display value without compounding the old book', () => {
@@ -173,7 +173,7 @@ describe('stamina and recovery boundaries', () => {
     const empty = act(upgraded, {type: 'recommend', id: upgraded.player!.id});
     const next = act(empty, {type: 'recruit'});
     expect(next.player!.stamina).toBe(25);
-    expect(next.player!.nextShotAt).toBe(start + 1000);
+    expect(next.player!.nextShotAt).toBe(start + 500);
   });
 
   it('recovers at the exact boundary, survives segmentation and discards time while full', () => {
@@ -275,17 +275,17 @@ describe('recommendation, enrollment and gym progression', () => {
     const empty = act(gym, {type: 'recommend', id: gym.player!.id});
     expect(empty).toMatchObject({credits: 0, fame: 0});
     const next = act(empty, {type: 'recruit'});
-    expect(next.player).toMatchObject({stamina: 20, shots: 0, nextShotAt: start + 1000});
-    for (const now of [start, start + 999]) {
+    expect(next.player).toMatchObject({stamina: 20, shots: 0, nextShotAt: start + 500});
+    for (const now of [start, start + 499]) {
       const denied = dispatchGym(next, next.revision, {type: 'train', id: next.player!.id}, now);
       expect(denied.error).toContain('准备');
       expect(denied.state).toBe(next);
       expect(denied.events).toEqual([]);
     }
-    const firstShot = act(next, {type: 'train', id: next.player!.id}, start + 1000);
+    const firstShot = act(next, {type: 'train', id: next.player!.id}, start + 500);
     expect(firstShot.player!.shots).toBe(1);
     const again = act(act(next, {type: 'recommend', id: next.player!.id}), {type: 'recruit'});
-    expect(again.player!.nextShotAt).toBe(start + 1000);
+    expect(again.player!.nextShotAt).toBe(start + 500);
     expect(dispatchGym(again, again.revision, {type: 'train', id: again.player!.id}, start).state).toBe(again);
   });
 
@@ -730,6 +730,31 @@ describe('multiple training positions and online automatic training', () => {
     return act({...newGym(start, seed), gymLevel: 2}, {type: 'recruit'});
   }
 
+  it('recruits and selects a new trainee in one revision without changing birth RNG or existing players', () => {
+    const original = {...newGym(start, 83), gymLevel: 2};
+    original.player!.autoEnabled = true;
+    const regular = act(original, {type: 'recruit'});
+    const selected = dispatchGym(original, original.revision, {type: 'recruit', expectedNextPlayer: original.nextPlayer, selectRecruited: true}, start);
+    expect(selected.error).toBeUndefined();
+    expect(selected.state.revision).toBe(original.revision + 1);
+    expect(selected.state.player).toEqual(regular.bench[0]);
+    expect(selected.state.bench).toEqual([original.player]);
+    expect(selected.state.rng).toEqual(regular.rng);
+    expect(selected.state.player!.nextShotAt).toBe(start + 500);
+    expect(selected.events).toEqual([{type: 'recruited', playerId: selected.state.player!.id}, {type: 'player-selected', playerId: selected.state.player!.id}]);
+  });
+
+  it('rejects stale or full quick recruitment before consuming RNG or replacing the selected athlete', () => {
+    const original = {...newGym(start, 83), gymLevel: 2};
+    const stale = dispatchGym(original, original.revision, {type: 'recruit', expectedNextPlayer: original.nextPlayer - 1, selectRecruited: true}, start);
+    expect(stale.error).toBe('招生名单已变化，请重新确认');
+    expect(stale.state).toBe(original);
+    const full = act(original, {type: 'recruit', selectRecruited: true});
+    const rejected = dispatchGym(full, full.revision, {type: 'recruit', expectedNextPlayer: full.nextPlayer, selectRecruited: true}, start);
+    expect(rejected.error).toContain('训练位已满');
+    expect(rejected.state).toBe(full);
+  });
+
   it('limits active recruits to gym level and preserves selected player when filling a position', () => {
     const first = newGym(start, 81);
     expect(dispatchGym(first, first.revision, {type: 'recruit'}, start).state).toBe(first);
@@ -756,9 +781,9 @@ describe('multiple training positions and online automatic training', () => {
     gym = act(gym, {type: 'train', id: secondId});
     expect(gym.player!.shots).toBe(1);
     gym = act(gym, {type: 'select-player', id: firstId});
-    expect(gym.player).toMatchObject({shots: 1, nextShotAt: start + 2000});
-    expect(dispatchGym(gym, gym.revision, {type: 'train', id: firstId}, start + 1999).state).toBe(gym);
-    expect(act(gym, {type: 'train', id: firstId}, start + 2000).player!.shots).toBe(2);
+    expect(gym.player).toMatchObject({shots: 1, nextShotAt: start + 1500});
+    expect(dispatchGym(gym, gym.revision, {type: 'train', id: firstId}, start + 1499).state).toBe(gym);
+    expect(act(gym, {type: 'train', id: firstId}, start + 1500).player!.shots).toBe(2);
     expect(dispatchGym(gym, gym.revision, {type: 'train', id: secondId}, start + 2000).state).toBe(gym);
   });
 
@@ -863,7 +888,7 @@ describe('multiple training positions and online automatic training', () => {
     let gym = {...newGym(start, 52), gymLevel: 2};
     gym = act(act(gym, {type: 'recommend', id: gym.player!.id}), {type: 'recruit'});
     const id = gym.player!.id;
-    expect(gym.player!.nextShotAt).toBe(start + 1000);
+    expect(gym.player!.nextShotAt).toBe(start + 500);
     gym = act(gym, {type: 'set-auto', id, enabled: true});
     expect(gym.player!.nextShotAt).toBe(start + 2000);
     expect(act(gym, {type: 'auto-step'}, start + 1000).player!.shots).toBe(0);

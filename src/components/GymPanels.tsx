@@ -29,7 +29,6 @@ import { groupGymAlumni, loadAllGymAlumni, type GymAlumniGroup } from '../presen
 import { EquipmentReplacementChanges } from './EquipmentReplacementChanges';
 import { TierBadge } from './TierBadge';
 import { AutoTrainingBorder } from './AutoTrainingBorder';
-import { GymConsumables } from './GymConsumables';
 import { AlbumIcon, MatchingRequirements } from './CollectionAlbum';
 import { alumniProgress, recommendationPayout } from '../game/gym/engine';
 import './GymPanels.css';
@@ -85,7 +84,7 @@ export function TrainingAdvice({ state, player = state.player, compact = false }
     {next ? <p className="gm-muted">下一档：Lv.{next.level}＋{next.tierName}及以上，额外奖金再增加 {next.additionalCredits} 券；{next.levelGap > 0 ? `还差 ${next.levelGap} 级` : '等级已达标'}{next.tierGap > 0 ? `，模板仍需达到${next.tierName}` : '，模板档次已达标'}。</p> : <p className="gm-inline-status">{atCap ? `训练等级已满，按当前实际模板结算培养奖金 ${guidance.currentBonus} 券，无法继续训练提升。` : '已达到最高培养奖金，继续升级不再增加培养奖金。'}</p>}
     {nextForecast && <p className="gm-muted">按当前配置连续{player.autoEnabled ? '自动' : '手动'}训练，约 {offlineDuration(nextForecast.estimatedMs)} 到 Lv.{next!.level}；模板仍需实际匹配，时间不是模板保证。</p>}
     {guidance.allStatsMax ? <p className="gm-recommend-warning">六维已满，继续训练不会增加属性。可核对奖金与合作后推荐签约，无需每名球员都练到99级。</p> : end?.finished ? <p className="gm-inline-status">已达到训练等级上限，可推荐签约。</p> : end && <p className="gm-muted">按当前配置连续训练，预计约 {offlineDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}（属性可能提前达到上限，可提前推荐）。{player.autoEnabled && !end.withinOfflineLimit ? '当前离线上限不足以覆盖这段训练。' : ''}</p>}
-    {!compact && <><h4>继续培养的剩余价值</h4><ul className="gm-remaining-value">{guidance.remainingValue.map(value => <li key={value}>{value}</li>)}</ul><p className="gm-muted">预计时间按当前体力、器材、课程与经验概率计算，不包含停留、换装或饮料，实际结果会波动；不会自动推荐球员。</p></>}
+    {!compact && <><h4>继续培养的剩余价值</h4><ul className="gm-remaining-value">{guidance.remainingValue.map(value => <li key={value}>{value}</li>)}</ul><p className="gm-muted">预计时间按当前体力、器材、课程与经验概率计算，不包含停留或换装，实际结果会波动；不会自动推荐球员。</p></>}
   </section>;
 }
 
@@ -232,6 +231,7 @@ export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni
   const maximum = staminaMax(state);
   const freeSeats = state.gymLevel - players.length;
   return <div className="gm-roster">
+    <div className="gm-roster-scroll" role="region" aria-label="球员列表" tabIndex={0}>
     {players.length > 0 && <div className="contract-cards roster-cards">{players.map((player, index) => {
       const selected = state.player?.id === player.id;
       const template = templateById(player.templateId);
@@ -246,7 +246,8 @@ export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni
       </article>;
     })}</div>}
     {freeSeats > 0 && <GymRecruitmentControls state={state} onAction={onAction} busy={busy} />}
-    {onAlumni && <button type="button" className="secondary gm-icon-button" onClick={onAlumni}><GameIcon name="career" /><span>查看校友档案 · {alumniProgress(state).total} 人</span></button>}
+    </div>
+    {onAlumni && <button type="button" className="secondary gm-icon-button gm-roster-alumni" onClick={onAlumni}><GameIcon name="career" /><span>查看校友档案 · {alumniProgress(state).total} 人</span></button>}
     {planningState && planningPlayer && <ComicDialog title="球员培养" onClose={() => setPlanningPlayerId(null)} className="gm-roster-planning-dialog"><div className="gym-panel gm-roster-planning"><p className="gm-roster-planning-name">{gymPlayerName(planningPlayer)} · Lv.{planningPlayer.level}</p><SlidingTabs labels={['训练计划', '赞助合作']} label="球员培养分页" index={planningTab} onChange={setPlanningTab}>{planningTab === 0 ? <GymTrainingPanel key={planningPlayer.id} state={planningState} onAction={planAction} busy={busy}/> : <GymCooperationPanel key={planningPlayer.id} state={planningState} onAction={planAction} onAdAction={onAdAction ? action => {if (action.type === 'complete-cooperation-ad') onAdAction({...action, scope: 'roster'});} : undefined} busy={busy} adAction={adAction}/>}</SlidingTabs></div></ComicDialog>}
   </div>;
 }
@@ -287,7 +288,7 @@ export function GymTrainingPanel({ state, onAction }: GymPanelProps) {
         <button type="button" className={`gm-button${current ? '' : ' gm-primary'}`} aria-label={current ? `当前计划：${plan.name}` : `选择${plan.name}`} disabled={current} onClick={() => selectPlan(plan.id)}>{current ? '已选用' : '选用'}</button>
       </article>;
     })}</div>
-    {progress.shots > 0 && <p className="gm-training-switch-note">切换将清空本课 {progress.shots}/10 球进度</p>}
+    <p className="gm-training-switch-note">{progress.shots>0?`切换将清空本课 ${progress.shots}/10 球进度`:'切换训练方向免费，当前课程尚无进度'}</p>
     <div className="gm-training-payout" aria-label="当前推荐收益"><span>当前推荐</span><strong>+{reward.credits} 券</strong><small>{reward.repeatTemplate ? '重复模板' : player.templateId ? '模板首次' : '未匹配模板'}</small></div>
     {showRules && <ComicDialog title="训练说明" className="gm-training-rules-dialog" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules">
       <section className="gm-stack"><h3>课程与恢复</h3><p>每10次投篮完成1课，完课时恢复部分体力，超出上限不计入<br />（当前：基础4点+器材额外{effects.courseRecovery}点）。</p></section>
@@ -309,7 +310,7 @@ function TrainingTimeComparison({ state, comparison, title, label }: { state: Gy
       : comparison.status === 'ended' ? <p className="gm-muted">当前球员已满级，训练已结束；此项投入仍适用于其他或未来球员。</p>
         : comparison.status === 'choose-replacement' ? <p className="gm-muted">馆内已满，请在替换确认中选择替换对象，再比较实际培养耗时。</p>
           : <>{comparison.rows.map(row => <p key={row.level} data-forecast-level={row.level}>到 Lv.{row.level}：约 {offlineDuration(row.beforeMs)} → {offlineDuration(row.afterMs)}{row.beforeMs === row.afterMs ? '（预计耗时不变）' : ''}</p>)}
-            <p className="gm-muted">按当前球员{state.player?.autoEnabled ? '自动' : '手动'}连续训练估算，沿用现有体力、课程与冷却，不包含停留、饮料或后续换装。实际结果会波动，不保证模板；专项属性成长不折算为等级提速，离线延时仅增加可结算时长。</p>
+            <p className="gm-muted">按当前球员{state.player?.autoEnabled ? '自动' : '手动'}连续训练估算，沿用现有体力、课程与冷却，不包含停留或后续换装。实际结果会波动，不保证模板；专项属性成长不折算为等级提速，离线延时仅增加可结算时长。</p>
           </>}
   </section>;
 }
@@ -437,7 +438,6 @@ function EquipmentCard({ item, state, onAction, onDetails, onEquip, selectedForE
 }
 
 export function GymShopPanel({ state, onAction, busy }: GymPanelProps) {
-  const [tab, setTab] = useState(0);
   const [selected, setSelected] = useState<GymEquipment | null>(null);
   const stock = [...equipmentCatalog].sort((first, second) => {
     const group = (item: GymEquipment) => state.ownedEquipment.includes(item.id) ? 3 : equipmentOffer(state, item.id).price === null ? 2 : state.credits >= item.price ? 0 : 1;
@@ -446,23 +446,22 @@ export function GymShopPanel({ state, onAction, busy }: GymPanelProps) {
   });
   return <div className="gym-panel gm-shop gm-shop-page">
     <div className="gm-shop-resources"><span className="gm-shop-club-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 13 16 5l12 8v15H4Z M1 13l15-10 15 10 M11 28V17h10v11" /></svg>球馆等级 <b>{state.gymLevel}</b></span><span className="gm-shop-coupon"><i aria-hidden="true">券</i><span>可用赞助券</span><b>{format(state.credits)}</b></span></div>
-    <SlidingTabs labels={['器材', '消耗品']} label="商店分类" index={tab} onChange={setTab}>
-      {tab === 0 ? <div className="gm-stack gm-shop-shelf">
+    <div className="collection-sections"><div className="collection-tab-panel">
+      <div className="gm-stack gm-shop-shelf">
         <div className="gm-shop-shelf-heading"><h3>器材货架</h3><span>已上架优先 · 已购买置后</span></div>
         <div className="gm-products gm-shop-grid" role="region" aria-label="器材货架" tabIndex={0}>{stock.map(item => <EquipmentCard key={item.id} {...{ item, state, onAction, busy }} onDetails={() => setSelected(item)} />)}</div>
-      </div> : <GymConsumables state={state} onAction={onAction} purchasing busy={busy} />}
-    </SlidingTabs>
+      </div>
+    </div></div>
     <footer className="gm-shop-bottom"><span>器材装备后全馆共享生效</span><b>同类只启用一件</b></footer>
     {selected && <EquipmentDetail item={selected} state={state} onClose={() => setSelected(null)} />}
   </div>;
 }
 
 export function GymInventoryPanel({ state, onAction, busy }: GymPanelProps) {
-  const [tab, setTab] = useState(0);
   const [selected, setSelected] = useState<GymEquipment | null>(null);
   const [pendingEquipment, setPendingEquipment] = useState<string | null>(null);
   const [replacementSlotId, setReplacementSlotId] = useState<string | null>(null);
-  const [management, setManagement] = useState<{ id: string; mode: 'remove' | 'sell' } | null>(null);
+  const [management, setManagement] = useState<{ id: string } | null>(null);
   const slots = useRef<HTMLDivElement>(null);
   const submitted = useRef(false);
   const capacity = equipmentCapacity(state);
@@ -473,10 +472,10 @@ export function GymInventoryPanel({ state, onAction, busy }: GymPanelProps) {
   const familyItem = pendingItem ? equippedFamilyEquipment(state, pendingItem.id) : undefined;
   const replacementIds = familyItem ? [familyItem.id] : state.equippedEquipment;
   const managed = management ? owned.find(item => item.id === management.id) : undefined;
-  const canManage = !!managed && (management?.mode === 'remove' ? state.equippedEquipment.includes(managed.id) : !state.equippedEquipment.includes(managed.id));
+  const canManage = !!managed && !state.equippedEquipment.includes(managed.id);
   useEffect(() => { submitted.current = false; }, [state.revision, busy]);
-  useEffect(() => { if (tab !== 0 || !pendingItem) setPendingEquipment(null); }, [tab, pendingItem]);
-  useEffect(() => { if (tab !== 0 || !replacementSlot) setReplacementSlotId(null); }, [tab, replacementSlot]);
+  useEffect(() => { if (!pendingItem) setPendingEquipment(null); }, [pendingItem]);
+  useEffect(() => { if (!replacementSlot) setReplacementSlotId(null); }, [replacementSlot]);
   useEffect(() => {
     if (!pendingItem) return;
     slots.current?.scrollIntoView?.({ block: 'nearest' });
@@ -510,8 +509,7 @@ export function GymInventoryPanel({ state, onAction, busy }: GymPanelProps) {
     setReplacementSlotId(replacementSlot?.id === id ? null : id);
   };
   return <div className="gym-panel gm-inventory">
-    <SlidingTabs labels={['器材仓库', '消耗品']} label="背包分类" index={tab} onChange={index => { setTab(index); setPendingEquipment(null); setReplacementSlotId(null); }}>
-      {tab === 0 ? <>
+    <div className="collection-sections"><div className="collection-tab-panel">
         <div className="gm-inventory-split-head"><h3>装备台<small>{state.equippedEquipment.length} / {capacity}</small></h3><h3>仓库<small>{owned.length} 件</small></h3></div>
         <div className="gm-inventory-workbench">
           <div ref={slots} className={`gm-slot-row${pendingItem || replacementSlot ? ' is-replacing' : ''}${replacementSlot ? ' is-slot-selected' : ''}`} role="group" aria-label="馆内生效的器材">{Array.from({ length: capacity }, (_, index) => {
@@ -527,12 +525,11 @@ export function GymInventoryPanel({ state, onAction, busy }: GymPanelProps) {
         {replacementSlot && <section className="gm-selected-drawer gm-replacement-note" role="status"><div className="gm-selected-drawer-heading"><span>待替换</span><h3>{replacementSlot.name}</h3><button type="button" className="gm-info-button" disabled={busy} onClick={() => setReplacementSlotId(null)}>取消替换</button></div><p>选择右侧仓库器材替换此位置；灰色按钮表示同类冲突。旧器材留在仓库。{replacementSlot.effects.stamina > 0 && '若体力上限降低，超出部分会截断。'}</p></section>}
         {Object.keys(state.legacyEquipmentCollection ?? {}).length > 0 && <p className="gm-muted gm-inventory-legacy">历史器材收藏 {Object.keys(state.legacyEquipmentCollection ?? {}).length} 件已留档，不计入当前 {equipmentCatalog.length} 件器材的收藏进度。</p>}
         <footer className="gm-inventory-bottom"><span>器材全馆共享 · 同类仅启用一件</span><small>详情内可移出 / 半价出售</small></footer>
-      </> : <GymConsumables state={state} onAction={onAction} busy={busy} />}
-    </SlidingTabs>
-    {selected && state.ownedEquipment.includes(selected.id) && <EquipmentDetail item={selected} state={state} onClose={() => setSelected(null)} actions={<div className="gm-inventory-management"><button type="button" className={`album-back${state.equippedEquipment.includes(selected.id) ? '' : ' gm-equipment-sell'}`} disabled={busy} onClick={() => { setManagement({ id: selected.id, mode: state.equippedEquipment.includes(selected.id) ? 'remove' : 'sell' }); setPendingEquipment(null); }}>{state.equippedEquipment.includes(selected.id) ? '移入仓库' : `半价出售 · 返 ${equipmentSaleValue(state, selected.id)} 券`}</button></div>} />}
-    {management && managed && canManage && <ComicDialog title={management.mode === 'remove' ? '移入器材仓库' : '出售仓库器材'} onClose={() => setManagement(null)} priority={2}><div className="gym-panel gm-stack">
-      {management.mode === 'remove' ? <><h3>移出「{managed.name}」</h3><p>移出后停止为全体球员提供效果，器材与收藏保留，可重新装备或半价出售。</p><p className="gm-paper gm-use-note">{equipmentPreview(state, managed)}</p>{managed.effects.stamina > 0 && <p className="gm-recommend-warning">体力超过新上限的部分会截断；再次放入不会补回体力。</p>}<EquipmentTrainingPreview state={state} item={managed} /></> : <><h3>出售「{managed.name}」返还 {equipmentSaleValue(state, managed.id)} 券</h3><p>按记录购入价的一半返还，向下取整；出售后收藏保留，需要时可按商店现价重新购买。</p></>}
-      <div className="gm-actions"><button type="button" className="gm-button" onClick={() => setManagement(null)}>{management.mode === 'remove' ? '保留馆内器材' : '保留器材'}</button><button type="button" className="gm-button gm-primary" disabled={busy} onClick={() => commit({ type: management.mode === 'remove' ? 'unequip' : 'sell-equipment', id: managed.id })}>{management.mode === 'remove' ? '确认移入仓库' : `确认出售 · 返 ${equipmentSaleValue(state, managed.id)} 券`}</button></div>
+    </div></div>
+    {selected && state.ownedEquipment.includes(selected.id) && <EquipmentDetail item={selected} state={state} onClose={() => setSelected(null)} actions={<div className="gm-inventory-management"><button type="button" className={`album-back${state.equippedEquipment.includes(selected.id) ? '' : ' gm-equipment-sell'}`} disabled={busy} onClick={() => { if (state.equippedEquipment.includes(selected.id)) commit({type: 'unequip', id: selected.id}); else { setManagement({id: selected.id}); setPendingEquipment(null); } }}>{state.equippedEquipment.includes(selected.id) ? '移入仓库' : `半价出售 · 返 ${equipmentSaleValue(state, selected.id)} 券`}</button></div>} />}
+    {management && managed && canManage && <ComicDialog title="出售仓库器材" onClose={() => setManagement(null)} priority={2}><div className="gym-panel gm-stack">
+      <h3>出售「{managed.name}」返还 {equipmentSaleValue(state, managed.id)} 券</h3><p>按记录购入价的一半返还，向下取整；出售后收藏保留，需要时可按商店现价重新购买。</p>
+      <div className="gm-actions"><button type="button" className="gm-button" onClick={() => setManagement(null)}>保留器材</button><button type="button" className="gm-button gm-primary" disabled={busy} onClick={() => commit({ type: 'sell-equipment', id: managed.id })}>确认出售 · 返 {equipmentSaleValue(state, managed.id)} 券</button></div>
     </div></ComicDialog>}
   </div>;
 }
@@ -636,8 +633,8 @@ function GymAlbumEntry({ template, collected, onSelect }: { template: TemplateRu
   return <button type="button" data-tier={template.tier} className={`album-card ${collected ? 'discovered' : 'collection-locked'}`} disabled={!collected} onClick={onSelect} aria-label={collected ? `查看${template.name}档案` : '未知球星'}><span className="collection-photo tier-portrait-frame" data-tier={template.tier}>{collected ? <StarPortrait src={profile?.avatar ?? templatePortrait(template.id)} fallbackSrc={templatePortrait(template.id)} name={profile?.name ?? template.name} /> : <svg className="album-unknown" viewBox="0 0 120 130" aria-hidden="true"><path d="m7 130 3-22q1-10 19-16l16-9V72q-8-8-9-22-6-2-5-10l3-3q-3-27 12-29 22-15 35 6 9 9 5 23l3 4q1 8-6 10-1 13-9 21v11l17 9q19 5 20 16l3 22Z" /><text x="60" y="81" textAnchor="middle">?</text></svg>}</span><b><span>{collected ? template.name : '未知球星'}</span></b></button>;
 }
 
-export function GymCollectionPanel({ state }: GymPanelProps) {
-  const [tab, setTab] = useState(0);
+export function GymCollectionPanel({ state, initialTab = 0 }: GymPanelProps & {initialTab?: 0 | 1}) {
+  const [tab, setTab] = useState<number>(initialTab);
   const [selected, setSelected] = useState<string | null>(null);
   const stars = albumTemplates.filter(template => !!state.collection[template.id]);
   const equipment = equipmentCatalog.filter(item => !!state.collectedEquipment[item.id]);

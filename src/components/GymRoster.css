@@ -7,16 +7,24 @@
  display: block; flex: none; align-self: center; width: 22px; height: 22px; margin: 0;
 }
 .game-screen.comic-dialog-layer .comic-dialog button.gm-icon-button > span { min-width: 0; line-height: 1.3; }
-.gm-roster { display: grid; gap: 12px; min-width: 0; }
-.gm-roster > .contract-cards { margin: 0; }
-.gm-roster > .gm-roster-recruit { margin: 0; }
+.gm-roster { display: flex; flex-direction: column; flex: 1; gap: 12px; min-width: 0; min-height: 0; }
+.gm-roster-scroll { flex: 1; min-height: 0; min-width: 0; padding: 4px 6px 6px 3px; overflow-x: hidden; overflow-y: scroll; overscroll-behavior: contain; scrollbar-gutter: stable; scrollbar-color: auto; }
+.gm-roster-scroll::-webkit-scrollbar { width: 10px; }
+.gm-roster-scroll::-webkit-scrollbar-track { background: #ead8b6; border: 1px solid #c5ad81; }
+.gm-roster-scroll::-webkit-scrollbar-thumb { background: #aa8c60; border: 2px solid #ead8b6; border-radius: 5px; }
+.gm-roster-scroll > .contract-cards { margin: 0; }
+.gm-roster-scroll > .gm-roster-recruit { margin: 12px 0 0; }
+.gm-roster > .gm-roster-alumni { flex: none; width: 100%; margin: 0; }
 .game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions { grid-template-columns: 1fr .85fr 1fr; gap: 8px; }
 .game-screen.comic-dialog-layer .comic-dialog .contract-roster-actions > button.gm-icon-button { padding-inline: 5px; gap: 5px; }
 .gm-roster-planning { gap: 9px; }
 .gm-roster-planning-name { margin: 0; padding-bottom: 8px; border-bottom: 1px solid #b59d71; font-size: 12px; }
 .gm-roster-planning .collection-tab-panel { padding-inline: 0; }
 .gm-roster-planning .leaderboard-tabs { margin-bottom: 12px; }
-.game-screen.comic-dialog-layer .comic-dialog.scheme-roster-dialog > .sheet-scroll { padding-top: 5px; }
+.game-screen.comic-dialog-layer .comic-dialog.scheme-roster-dialog { height: min(820px,calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom))); }
+.game-screen.comic-dialog-layer .comic-dialog.scheme-roster-dialog > .sheet-scroll { display: flex; flex-direction: column; overflow: hidden; padding: 5px 16px 12px; }
+.scheme-roster-dialog .contract-panel,.scheme-roster-dialog .contract-panel > [aria-busy] { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+.scheme-roster-dialog .contract-panel > .contract-notice { flex: none; }
 .gm-roster-meters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 10px; padding: 8px 9px; border-top: 1px solid #ae9568; background: #e9d8af; }
 .gm-roster-meter { display: grid; gap: 5px; min-width: 0; color: #17303b; font-size: 11px; font-weight: 850; font-variant-numeric: tabular-nums; }
 .gm-roster-meter > div:first-child { display: flex; justify-content: space-between; gap: 6px; }

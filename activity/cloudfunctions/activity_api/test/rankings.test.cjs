@@ -1,6 +1,6 @@
 const {test}=require('node:test');
 const assert=require('node:assert/strict');
-const {createHandler}=require('../rankings.cjs');
+const {createHandler,identity,cleanName}=require('../rankings.cjs');
 const context=Buffer.from(JSON.stringify({customUserId:'verified-coach',nickname:'本地教练',applicationId:'app_847cdb589a'})).toString('base64');
 test('health exposes only the current public project identity',async()=>{
  const handler=createHandler({rpc:()=>{throw Error('unexpected database call');}});
@@ -30,4 +30,44 @@ test('the independently locked CloudBase runtime dependency provides the expecte
  const tcb=require('@cloudbase/node-sdk');
  const app=tcb.init({env:'local-contract-test',accessKey:'local-not-a-real-credential'});
  assert.equal(typeof app.auth().getClientCredential,'function');
+});
+const noNickname=Buffer.from(JSON.stringify({customUserId:'verified-coach',applicationId:'app_847cdb589a'})).toString('base64');
+test('uses an SDK display nickname when the authenticated gateway has no nickname, retaining gateway identity',async()=>{
+ let received;const handler=createHandler({rpc:async(...args)=>{received=args;return{accepted:true};}});
+ const body={event:'gym-progress',runId:'1800000000000-23',revision:42,nickname:'  JR\u0000\u202e昵称🏀  '};
+ await handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body});
+ assert.deepEqual(received,['submit_gym_rank',{p_puid:'verified-coach',p_name:'JR昵称🏀',p_run:body.runId,p_revision:42}]);
+ assert.equal(identity(noNickname).name,'');
+});
+test('prefers a real gateway nickname and uses an explicit anonymous fallback only when both sources are absent',async()=>{
+ const calls=[],handler=createHandler({rpc:async(...args)=>{calls.push(args);return{accepted:true};}});
+ const body={event:'gym-progress',runId:'1800000000000-23',revision:42};
+ await handler({method:'POST',path:'/leaderboard/submit',context,body:{...body,nickname:'SDK昵称'}});
+ await handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body});
+ assert.equal(calls[0][1].p_name,'本地教练');assert.equal(calls[1][1].p_name,'匿名训练师');
+});
+test('profile sync calls only the name-maintenance RPC using authenticated actor identity',async()=>{
+ let received;const handler=createHandler({rpc:async(...args)=>{received=args;return{accepted:true,updated:2};}});
+ assert.deepEqual(await handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body:{event:'gym-profile',nickname:'我的虎扑昵称'}}),{accepted:true,updated:2});
+ assert.deepEqual(received,['update_gym_rank_name',{p_puid:'verified-coach',p_name:'我的虎扑昵称'}]);
+});
+test('profile sync rejects identity, score and progress injection without executing any RPC',async()=>{
+ let called=0;const handler=createHandler({rpc:async()=>{called++;return{accepted:true};}});
+ for(const extra of [{puid:'victim'},{actor:'victim'},{score:999},{best:{}},{runId:'1800000000000-23'},{revision:99}]){
+  await assert.rejects(handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body:{event:'gym-profile',nickname:'JR',...extra}}),{statusCode:400});
+ }
+ for(const nickname of ['', ' \u202e\u0000 ', {}, ['JR'], 3])await assert.rejects(handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body:{event:'gym-profile',nickname}}),{statusCode:400});
+ await assert.rejects(handler({method:'POST',path:'/leaderboard/submit',body:{event:'gym-profile',nickname:'JR'}}),{statusCode:401});
+ assert.equal(called,0);
+});
+test('a successful profile update invalidates public cache and never submits a score',async()=>{
+ const calls=[],handler=createHandler({rpc:async(name,args)=>{calls.push([name,args]);return name==='update_gym_rank_name'?{accepted:true,updated:0}:{entries:[]};}});
+ const query={method:'GET',path:'/leaderboard',query:{board:'fame',limit:'50'}};
+ await handler(query);await handler(query);
+ await handler({method:'POST',path:'/leaderboard/submit',context:noNickname,body:{event:'gym-profile',nickname:'JR'}});
+ await handler(query);
+ assert.deepEqual(calls.map(([name])=>name),['read_gym_rank','update_gym_rank_name','read_gym_rank']);
+});
+test('display nickname cleanup preserves emoji while removing control and directional spoofing characters',()=>{
+ assert.equal(cleanName(' \ud800\u0085\u2066'+'🏀'.repeat(70)+'\u2069 '),'🏀'.repeat(60));
 });

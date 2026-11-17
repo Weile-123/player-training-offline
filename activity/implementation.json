@@ -1,0 +1,8 @@
+{
+  "schemaVersion": "implementation_v1",
+  "runtime": "activity-api",
+  "persistence": "postgresql",
+  "activityApi": false,
+  "expectedVersion": "",
+  "note": "用户要求实装新版离线收益，已明确回答启用由你自动处理，授权证据见activity/confirmations/deploy.md；复用activity_api、共享PG和受保护网关，不要求手工参数。"
+}

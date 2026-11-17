@@ -5,10 +5,10 @@ const setup=(response:SdkResponse<{rewarded:boolean;reason?:string}>)=>{
  const sdk:HupuSdk={vatask:{completeRewardVideo:vi.fn().mockResolvedValue(response),getActivityTaskState:vi.fn().mockResolvedValue({})}};
  return {sdk,load:async()=>sdk};
 };
-afterEach(()=>vi.unstubAllEnvs());
+afterEach(()=>{vi.unstubAllEnvs();vi.unstubAllGlobals();});
 it('calls the parameterless official API and grants only confirmed completion, then refreshes tasks',async()=>{
  const {sdk,load}=setup({code:200,data:{rewarded:true}}),grant=vi.fn();
- await completeRewardedVideo(grant,{load});expect(sdk.vatask!.completeRewardVideo).toHaveBeenCalledWith();expect(grant).toHaveBeenCalledTimes(1);expect(sdk.vatask!.getActivityTaskState).toHaveBeenCalledOnce();expect(rewardVideoPending()).toBe(false);
+ await expect(completeRewardedVideo(grant,{load})).resolves.toEqual({rewarded:true,confirmation:'native-sdk-confirmation'});expect(sdk.vatask!.completeRewardVideo).toHaveBeenCalledWith();expect(grant).toHaveBeenCalledTimes(1);expect(sdk.vatask!.getActivityTaskState).toHaveBeenCalledOnce();expect(rewardVideoPending()).toBe(false);
 });
 it.each([
  {code:200,data:{rewarded:false},message:'未看完'},
@@ -61,4 +61,37 @@ it('reports a platform task refresh failure without revoking a confirmed reward'
  await completeRewardedVideo(grant,{load:async()=>({vatask:{completeRewardVideo:async()=>({code:200,data:{rewarded:true}}),getActivityTaskState:async()=>({code:429,message:'任务刷新过于频繁'})}}),onTaskStateError:warning});
  await Promise.resolve();await Promise.resolve();
  expect(grant).toHaveBeenCalledOnce();expect(warning).toHaveBeenCalledExactlyOnceWith('任务刷新过于频繁');
+});
+it('keeps all placements locked until asynchronous business reward persistence finishes',async()=>{
+ let saved!:()=>void;
+ const {load}=setup({code:200,data:{rewarded:true}}),grant=vi.fn(()=>new Promise<void>(resolve=>{saved=resolve;}));
+ const task=completeRewardedVideo(grant,{load});
+ await vi.waitFor(()=>expect(grant).toHaveBeenCalledOnce());
+ expect(rewardVideoPending()).toBe(true);
+ await expect(completeRewardedVideo(vi.fn(),{load})).rejects.toThrow('广告正在进行');
+ saved();await task;expect(rewardVideoPending()).toBe(false);
+});
+it.each(['NOT_REWARDED','LOGIN_REQUIRED','APP_REQUIRED','UNAVAILABLE','REQUEST_FAILED','REWARD_FLOW_FAILED'])('provides an actionable fallback for official failure reason %s without rewarding',async reason=>{
+ const {load}=setup({code:422,data:{rewarded:false,reason}}),grant=vi.fn();
+ await expect(completeRewardedVideo(grant,{load})).rejects.toThrow();expect(grant).not.toHaveBeenCalled();
+});
+it('rejects an activity switch while the official native flow is open',async()=>{
+ let finish!:(response:SdkResponse<{rewarded:boolean}>)=>void;
+ const {activityId}=await import('../../hupu-skills/activity.json');
+ vi.stubGlobal('window',{__COLORBOX_AI_CONFIG__:{projectId:activityId}});
+ const grant=vi.fn(),task=completeRewardedVideo(grant,{load:async()=>({vatask:{completeRewardVideo:()=>new Promise(resolve=>{finish=resolve;}),getActivityTaskState:async()=>({})}})});
+ await vi.waitFor(()=>expect(finish).toBeTypeOf('function'));
+ const rejected=expect(task).rejects.toThrow('虎扑活动配置与本项目不一致');
+ window.__COLORBOX_AI_CONFIG__={projectId:'app_0123456789'};finish({code:200,data:{rewarded:true}});await rejected;
+ expect(grant).not.toHaveBeenCalled();expect(rewardVideoPending()).toBe(false);
+});
+it('does not open another activity ad when SDK loading finishes after the host changed',async()=>{
+ const {activityId}=await import('../../hupu-skills/activity.json');
+ vi.stubGlobal('window',{__COLORBOX_AI_CONFIG__:{projectId:activityId}});
+ let ready!:(sdk:HupuSdk)=>void;
+ const {sdk}=setup({code:200,data:{rewarded:true}}),grant=vi.fn();
+ const task=completeRewardedVideo(grant,{load:()=>new Promise(resolve=>{ready=resolve;})});
+ const rejected=expect(task).rejects.toThrow('虎扑活动配置与本项目不一致');
+ window.__COLORBOX_AI_CONFIG__={projectId:'app_0123456789'};ready(sdk);await rejected;
+ expect(sdk.vatask!.completeRewardVideo).not.toHaveBeenCalled();expect(grant).not.toHaveBeenCalled();
 });

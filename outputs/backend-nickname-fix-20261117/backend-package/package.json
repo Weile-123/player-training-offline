@@ -1,0 +1,15 @@
+{
+  "name": "legend-gym-authority",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18.15"
+  },
+  "scripts": {
+    "start": "node server/start.mjs"
+  },
+  "dependencies": {
+    "@cloudbase/node-sdk": "^3.16.0"
+  }
+}

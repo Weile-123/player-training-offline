@@ -1,5 +1,5 @@
 {
-  "version": "1cb5b16c1899d4a8",
+  "version": "b5a7fe1790ed1970",
   "entries": [
     {
       "path": "art/career/album.png",
@@ -39,8 +39,8 @@
     },
     {
       "path": "art/collection/court-lines.svg",
-      "bytes": 345,
-      "hash": "b172b1cce0c5aaee",
+      "bytes": 339,
+      "hash": "1c9fb54828cf0f68",
       "local": true
     },
     {
@@ -128,81 +128,27 @@
       "local": true
     },
     {
+      "path": "art/home/background-b-landscape.webp",
+      "bytes": 1036624,
+      "hash": "ce3b26291c08818a",
+      "local": true
+    },
+    {
+      "path": "art/home/background-b-portrait.webp",
+      "bytes": 1015578,
+      "hash": "a07e21e601e84c0a",
+      "local": true
+    },
+    {
       "path": "art/home/background-continuous.png",
       "bytes": 784970,
       "hash": "1dc513abb188ead1",
       "local": true
     },
     {
-      "path": "art/home/background-portrait-simple-sky.png",
-      "bytes": 2867504,
-      "hash": "2772c0682a8324b1",
-      "local": true
-    },
-    {
-      "path": "art/home/background-portrait-simple-sky.webp",
-      "bytes": 745682,
-      "hash": "230b6ad181ed9ff5",
-      "local": true
-    },
-    {
-      "path": "art/home/background-simple-sky.png",
-      "bytes": 3072426,
-      "hash": "1125053c7042d15e",
-      "local": true
-    },
-    {
-      "path": "art/home/background-simple-sky.webp",
-      "bytes": 868290,
-      "hash": "8e91a72e8087042c",
-      "local": true
-    },
-    {
-      "path": "art/home/button-career.png",
-      "bytes": 972537,
-      "hash": "d94c1748bd50b9a1",
-      "local": true
-    },
-    {
-      "path": "art/home/button-collection.png",
-      "bytes": 652121,
-      "hash": "1a5a2561382ee5b3",
-      "local": true
-    },
-    {
-      "path": "art/home/button-new-career.png",
-      "bytes": 555484,
-      "hash": "1c1c9ae4a86a5db4",
-      "local": true
-    },
-    {
-      "path": "art/home/button-new-game.png",
-      "bytes": 485347,
-      "hash": "1a7f1db7865ebbb9",
-      "local": true
-    },
-    {
-      "path": "art/home/button-rank.png",
-      "bytes": 23924,
-      "hash": "1edaaac1ce82673f",
-      "local": true
-    },
-    {
       "path": "art/home/continue-frame.svg",
-      "bytes": 1005,
-      "hash": "a68a9df93d707fd7",
-      "local": true
-    },
-    {
-      "path": "art/home/title-comic.png",
-      "bytes": 1856307,
-      "hash": "f353aff2bef7ae4b",
-      "local": true
-    },
-    {
-      "path": "art/home/title-comic.webp",
-      "bytes": 475432,
-      "hash": "3606e02c9431ad86",
+      "bytes": 997,
+      "hash": "100ae5aa84faf84c",
       "local": true
     },
     {
@@ -212,27 +158,729 @@
       "local": true
     },
     {
-      "path": "art/products/basic.png",
-      "bytes": 563619,
-      "hash": "15e64edc82125172",
+      "path": "art/poster-portraits/al-jefferson.png",
+      "bytes": 14700,
+      "hash": "9241379eeb128536",
       "local": true
     },
     {
-      "path": "art/products/item_006.png",
-      "bytes": 613555,
-      "hash": "4c778c23590fe5c4",
+      "path": "art/poster-portraits/aldridge.png",
+      "bytes": 17341,
+      "hash": "6388878d143bc034",
       "local": true
     },
     {
-      "path": "art/products/item_007.png",
-      "bytes": 588688,
-      "hash": "6f4e42bd7144876b",
+      "path": "art/poster-portraits/amare-stoudemire.png",
+      "bytes": 17576,
+      "hash": "7d65a93c12431fb7",
       "local": true
     },
     {
-      "path": "art/products/relic_001.png",
-      "bytes": 567657,
-      "hash": "5592ccf743118566",
+      "path": "art/poster-portraits/andre-miller.png",
+      "bytes": 16304,
+      "hash": "a82f3f14a157e524",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/antetokounmpo.png",
+      "bytes": 14566,
+      "hash": "f4901360d50189e5",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/anthony-davis.png",
+      "bytes": 15734,
+      "hash": "47ef1eab28120af2",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/ariza.png",
+      "bytes": 18146,
+      "hash": "dcf34b1d12f347a4",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/battier.png",
+      "bytes": 207819,
+      "hash": "36705f1871fef636",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/ben-wallace.png",
+      "bytes": 17274,
+      "hash": "5f1355f9660483cd",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/beverley.png",
+      "bytes": 16312,
+      "hash": "cadb26e996fb05d4",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/bird.png",
+      "bytes": 15669,
+      "hash": "761552ea9a3b9942",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/birdman.png",
+      "bytes": 18073,
+      "hash": "dc668440dc49c668",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/booker.png",
+      "bytes": 15230,
+      "hash": "fd1ec437fff4c46a",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/boris-diaw.png",
+      "bytes": 15563,
+      "hash": "bfca0a53bf68f8dd",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/bowen.png",
+      "bytes": 17076,
+      "hash": "37e7416cff65486c",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/bradley-beal.png",
+      "bytes": 16778,
+      "hash": "876be2b484f1ae0b",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/brook-lopez.png",
+      "bytes": 15188,
+      "hash": "54dad699867ec5a7",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/bryant.png",
+      "bytes": 15401,
+      "hash": "443d92c40a1394f4",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/butler.png",
+      "bytes": 14411,
+      "hash": "cb50b0250f55f40e",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/capela.png",
+      "bytes": 17222,
+      "hash": "aff1a3caab09151c",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/carmelo.png",
+      "bytes": 16001,
+      "hash": "1f23564d00a28796",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/caruso.png",
+      "bytes": 14386,
+      "hash": "30c9e69d2ce77840",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/chris-bosh.png",
+      "bytes": 13236,
+      "hash": "19c902645b1f0dca",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/chris-paul.png",
+      "bytes": 13569,
+      "hash": "142e52680c1cc319",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/conley.png",
+      "bytes": 14781,
+      "hash": "f7fd896ad291b416",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/corey-maggette.png",
+      "bytes": 225073,
+      "hash": "44ad5332e6216bf6",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/curry.png",
+      "bytes": 14651,
+      "hash": "d629352dfe499782",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/danny-green.png",
+      "bytes": 15362,
+      "hash": "e3cad281dc82ad90",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/deandre-jordan.png",
+      "bytes": 16347,
+      "hash": "77211bfa16dd7115",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/dell-curry.png",
+      "bytes": 17488,
+      "hash": "87618b7992759a01",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/derozan.png",
+      "bytes": 16488,
+      "hash": "b241ce772539c1bc",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/derrick-rose.png",
+      "bytes": 17233,
+      "hash": "f9ffc68733e1445a",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/donovan-mitchell.png",
+      "bytes": 16151,
+      "hash": "de363702f9763434",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/draymond.png",
+      "bytes": 15924,
+      "hash": "c5874be67d981133",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/duncan-robinson.png",
+      "bytes": 15455,
+      "hash": "1aef9faf2705caf2",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/duncan.png",
+      "bytes": 16341,
+      "hash": "f409714881e72c4b",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/durant.png",
+      "bytes": 16535,
+      "hash": "1c5888a817f0e512",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/embiid.png",
+      "bytes": 16930,
+      "hash": "4a2f66a3cd4a2d19",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/eric-gordon.png",
+      "bytes": 16838,
+      "hash": "484182dc4382bca8",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/erving.png",
+      "bytes": 16878,
+      "hash": "4d11eafbd58e616e",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/gallinari.png",
+      "bytes": 15066,
+      "hash": "f965f9711024255b",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/garnett.png",
+      "bytes": 14686,
+      "hash": "4a0b5601d36cb3ea",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/gilbert-arenas.png",
+      "bytes": 17742,
+      "hash": "92420d24830e8a0f",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/gobert.png",
+      "bytes": 14564,
+      "hash": "4fb1c11ced5591db",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/gordon.png",
+      "bytes": 19351,
+      "hash": "66a8071e016f3939",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/grant-hill.png",
+      "bytes": 18944,
+      "hash": "dee597e43a397dad",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/greg-monroe.png",
+      "bytes": 16197,
+      "hash": "b01df68a4dcda0ff",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/hakeem.png",
+      "bytes": 16881,
+      "hash": "3ab15a39c39944f9",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/harden.png",
+      "bytes": 17581,
+      "hash": "141ae5acbb1948f1",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/harris.png",
+      "bytes": 16761,
+      "hash": "49246a4fef8bd8ea",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/haslem.png",
+      "bytes": 16520,
+      "hash": "3debfd2f5cb4865f",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/hedo-turkoglu.png",
+      "bytes": 17607,
+      "hash": "26c46b9222723bac",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/high-potential.png",
+      "bytes": 1084446,
+      "hash": "e9f353df2751b8f5",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/ibaka.png",
+      "bytes": 17431,
+      "hash": "03699281e8dbe839",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/iguodala.png",
+      "bytes": 17012,
+      "hash": "67a7cb6b68ee9254",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/irving.png",
+      "bytes": 15959,
+      "hash": "4d8702b65a33cd48",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/isiah.png",
+      "bytes": 19219,
+      "hash": "1dc7772f3ac10085",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/iverson.png",
+      "bytes": 17351,
+      "hash": "832e6d73f4a41653",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jason-terry.png",
+      "bytes": 15762,
+      "hash": "4a7c32f6b23671e3",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jerry-west.png",
+      "bytes": 15550,
+      "hash": "9f36fba858e954b0",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/joakim-noah.png",
+      "bytes": 17241,
+      "hash": "d293a8dd2ec47e9b",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/joe-harris.png",
+      "bytes": 16745,
+      "hash": "323cbebd2bc26916",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jokic.png",
+      "bytes": 15514,
+      "hash": "284f63686291b791",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jonathan-isaac.png",
+      "bytes": 15307,
+      "hash": "f14539bed4176db0",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jordan.png",
+      "bytes": 18550,
+      "hash": "975a313ae83829a9",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jose-calderon.png",
+      "bytes": 14381,
+      "hash": "3acea3abb06758aa",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/jrue.png",
+      "bytes": 17099,
+      "hash": "f4596861ce46b954",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/kareem.png",
+      "bytes": 17584,
+      "hash": "0f994f099d66abb5",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/karl-malone.png",
+      "bytes": 17535,
+      "hash": "0bf22546a3e06baa",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/kemba.png",
+      "bytes": 15810,
+      "hash": "d0bcf685f0e7a9f9",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/kevin-love.png",
+      "bytes": 16152,
+      "hash": "5326239aa19bae78",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/korver.png",
+      "bytes": 14986,
+      "hash": "c3b25ab9ca6797e2",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/lamar-odom.png",
+      "bytes": 266869,
+      "hash": "95ea308f164fb183",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/lebron.png",
+      "bytes": 17383,
+      "hash": "d7a4223ef4b8a716",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/leonard.png",
+      "bytes": 16672,
+      "hash": "6a2d7f1c3a55262a",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/lillard.png",
+      "bytes": 15143,
+      "hash": "93af639345ab2244",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/livingston.png",
+      "bytes": 15340,
+      "hash": "59639371ff9f7152",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/lou-williams.png",
+      "bytes": 16358,
+      "hash": "fe6e0334851f7215",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/lowry.png",
+      "bytes": 14561,
+      "hash": "d884610c19a3ace7",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/magic.png",
+      "bytes": 20226,
+      "hash": "6f9b8ae7b1e748ad",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/mccollum.png",
+      "bytes": 17045,
+      "hash": "f51908bd2914f090",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/mcgee.png",
+      "bytes": 16908,
+      "hash": "0308ba8676787299",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/mcgrady.png",
+      "bytes": 15942,
+      "hash": "43a199dd2e91f216",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/michael-beasley.png",
+      "bytes": 16127,
+      "hash": "12020a29793d82e0",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/millsap.png",
+      "bytes": 16792,
+      "hash": "3fd5b81c8ac9c2e8",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/monta-ellis.png",
+      "bytes": 16132,
+      "hash": "d2d802db7184172d",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/nash.png",
+      "bytes": 14052,
+      "hash": "8e8567a162a4a550",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/nowitzki.png",
+      "bytes": 16253,
+      "hash": "75e7b9318ccf15e5",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/oneal.png",
+      "bytes": 17308,
+      "hash": "9cf401dd099f4e16",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/oscar.png",
+      "bytes": 20288,
+      "hash": "7e8e4a2b52ee3993",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/patty-mills.png",
+      "bytes": 14621,
+      "hash": "845b1a5061049d88",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/pau-gasol.png",
+      "bytes": 14381,
+      "hash": "5c30c24be0039ee6",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/paul-george.png",
+      "bytes": 15878,
+      "hash": "f555b84fee5822aa",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/paul-pierce.png",
+      "bytes": 17363,
+      "hash": "2d504d395da60f35",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/peja.png",
+      "bytes": 16013,
+      "hash": "5c8fa0731d28de0f",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/pippen.png",
+      "bytes": 16245,
+      "hash": "d458ef26ae43f1c2",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/porzingis.png",
+      "bytes": 14182,
+      "hash": "d7f7c2c18ef82a04",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/rashard-lewis.png",
+      "bytes": 219817,
+      "hash": "cc936cc5e556b60c",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/ray-allen.png",
+      "bytes": 16917,
+      "hash": "a1a63df12462dbd3",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/redick.png",
+      "bytes": 13481,
+      "hash": "45d225fcf4985885",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/reggie-miller.png",
+      "bytes": 16962,
+      "hash": "7f16f837a1f38c8f",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/rondo.png",
+      "bytes": 15232,
+      "hash": "52e04c5898c00c72",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/rookie-atlas.png",
+      "bytes": 726628,
+      "hash": "1d800ff2286bf5ce",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/rubio.png",
+      "bytes": 16941,
+      "hash": "d8fd2452e154c5f6",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/seth-curry.png",
+      "bytes": 15140,
+      "hash": "dbca9d8ee3e72623",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/shannon-brown.png",
+      "bytes": 240479,
+      "hash": "f0218ef71c4c4e7e",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/shawn-marion.png",
+      "bytes": 298097,
+      "hash": "4e76273270cbbfec",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/steve-francis.png",
+      "bytes": 16285,
+      "hash": "b1f61e475b0c88ed",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/steven-adams.png",
+      "bytes": 16242,
+      "hash": "cc3110725e5c0b98",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/stockton.png",
+      "bytes": 17580,
+      "hash": "d68d84d7a1a5d841",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/thompson.png",
+      "bytes": 14402,
+      "hash": "581e218ed6fac9f1",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/toni-kukoc.png",
+      "bytes": 19052,
+      "hash": "64753cae048a5915",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/tony-allen.png",
+      "bytes": 15783,
+      "hash": "6b6c926c8f3dd785",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/tony-parker.png",
+      "bytes": 14688,
+      "hash": "a37bd7e996a8cea7",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/trae.png",
+      "bytes": 16927,
+      "hash": "8d28b56be0edf8e4",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/tucker.png",
+      "bytes": 17125,
+      "hash": "8ed5e67c2c03ea2b",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/valanciunas.png",
+      "bytes": 16753,
+      "hash": "34f7ca38f61209b9",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/vince-carter.png",
+      "bytes": 16184,
+      "hash": "956456c2546398af",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/wade.png",
+      "bytes": 12980,
+      "hash": "ddd86aeb5552681a",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/westbrook.png",
+      "bytes": 16726,
+      "hash": "59557b3cc237818c",
+      "local": true
+    },
+    {
+      "path": "art/poster-portraits/wilt.png",
+      "bytes": 18786,
+      "hash": "ab6896e3a3192525",
       "local": true
     },
     {
@@ -260,27 +908,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_006.png",
-      "bytes": 536620,
-      "hash": "2b2dac672fca2556",
-      "local": true
-    },
-    {
       "path": "art/products/relic_007.png",
       "bytes": 604612,
       "hash": "66700120b7c720e3",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_008.png",
-      "bytes": 556164,
-      "hash": "041f53adc2c8cc4e",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_009.png",
-      "bytes": 518396,
-      "hash": "6d831ed5ec189e4a",
       "local": true
     },
     {
@@ -296,18 +926,6 @@
       "local": true
     },
     {
-      "path": "art/products/relic_012.png",
-      "bytes": 579570,
-      "hash": "9390f7160fb029ed",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_013.png",
-      "bytes": 615404,
-      "hash": "18e59de4dd68a908",
-      "local": true
-    },
-    {
       "path": "art/products/relic_014.png",
       "bytes": 449311,
       "hash": "aa09044d77c15cb6",
@@ -320,21 +938,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_016.png",
-      "bytes": 529934,
-      "hash": "44ea592249770380",
-      "local": true
-    },
-    {
       "path": "art/products/relic_017.png",
       "bytes": 564404,
       "hash": "59993c33591b2259",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_018.png",
-      "bytes": 576029,
-      "hash": "24be4e7ebd7e6a6a",
       "local": true
     },
     {
@@ -344,57 +950,15 @@
       "local": true
     },
     {
-      "path": "art/products/relic_020.png",
-      "bytes": 687639,
-      "hash": "cfbdd5a86906bc58",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_021.png",
-      "bytes": 465883,
-      "hash": "961ff4773a31020f",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_022.png",
-      "bytes": 411989,
-      "hash": "24e960f4ab9c215b",
-      "local": true
-    },
-    {
       "path": "art/products/relic_023.png",
       "bytes": 208783,
       "hash": "b4f849459f98e58c",
       "local": true
     },
     {
-      "path": "art/products/relic_024.png",
-      "bytes": 326442,
-      "hash": "d586cf4c5541c34b",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_026.png",
-      "bytes": 555973,
-      "hash": "c8e5e98b150dfee4",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_027.png",
-      "bytes": 345801,
-      "hash": "61f1f2b2132320f3",
-      "local": true
-    },
-    {
       "path": "art/products/relic_028.png",
       "bytes": 674145,
       "hash": "50f8fc6c9610af0b",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_029.png",
-      "bytes": 505797,
-      "hash": "03d1e1cecf1ad797",
       "local": true
     },
     {
@@ -416,75 +980,15 @@
       "local": true
     },
     {
-      "path": "art/products/relic_034.png",
-      "bytes": 712624,
-      "hash": "e7998bdeee4da074",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_035.png",
-      "bytes": 540078,
-      "hash": "23528404dc1a27fc",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_036.png",
-      "bytes": 640487,
-      "hash": "bc91179b99e7e6b0",
-      "local": true
-    },
-    {
       "path": "art/products/relic_037.png",
       "bytes": 519557,
       "hash": "2270cea1937c35cd",
       "local": true
     },
     {
-      "path": "art/products/relic_038.png",
-      "bytes": 580951,
-      "hash": "9bf7fd79c40d2f51",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_039.png",
-      "bytes": 533037,
-      "hash": "d171b141f33ca71c",
-      "local": true
-    },
-    {
       "path": "art/products/relic_040.png",
       "bytes": 619830,
       "hash": "af53065ffb3ad924",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_041.png",
-      "bytes": 650822,
-      "hash": "812f259069ef62cf",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_042.png",
-      "bytes": 667283,
-      "hash": "c26ed0b6fa11aff6",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_043.png",
-      "bytes": 455557,
-      "hash": "5e08e75915f45aad",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_044.png",
-      "bytes": 651003,
-      "hash": "7772f7d23955d285",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_045.png",
-      "bytes": 482795,
-      "hash": "fb2536bb9dfd4ea9",
       "local": true
     },
     {
@@ -500,27 +1004,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_048.png",
-      "bytes": 245090,
-      "hash": "cc24abb35e9548fd",
-      "local": true
-    },
-    {
       "path": "art/products/relic_049.png",
       "bytes": 524238,
       "hash": "1e411fa5a10e415a",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_050.png",
-      "bytes": 628704,
-      "hash": "b432dcf1b43135d1",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_051.png",
-      "bytes": 656092,
-      "hash": "5be0f5f15afd79af",
       "local": true
     },
     {
@@ -530,39 +1016,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_053.png",
-      "bytes": 630532,
-      "hash": "36fc7d33aa5c61d2",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_054.png",
-      "bytes": 537886,
-      "hash": "f40c106ddc6803b2",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_055.png",
-      "bytes": 639729,
-      "hash": "86366f1eadfe3c55",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_056.png",
-      "bytes": 618131,
-      "hash": "73d52c56f1315f40",
-      "local": true
-    },
-    {
       "path": "art/products/relic_057.png",
       "bytes": 667168,
       "hash": "6db1350f9522e7b2",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_058.png",
-      "bytes": 633148,
-      "hash": "5913c7e669318c14",
       "local": true
     },
     {
@@ -584,63 +1040,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_062.png",
-      "bytes": 693623,
-      "hash": "63cfa3d5aa92998f",
-      "local": true
-    },
-    {
       "path": "art/products/relic_063.png",
       "bytes": 532196,
       "hash": "0252b5ec72d9a4c0",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_064.png",
-      "bytes": 481363,
-      "hash": "fd80f3d3dacabe3f",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_065.png",
-      "bytes": 626704,
-      "hash": "26ee4565d612c57a",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_066.png",
-      "bytes": 568839,
-      "hash": "24ea7e06879103af",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_067.png",
-      "bytes": 596227,
-      "hash": "3eb482a7c61dd9ed",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_068.png",
-      "bytes": 499958,
-      "hash": "3c9411a32ee22e83",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_069.png",
-      "bytes": 523121,
-      "hash": "f8ccf2cecfa88918",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_070.png",
-      "bytes": 421243,
-      "hash": "332b83978d282090",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_071.png",
-      "bytes": 343562,
-      "hash": "b839fe7f1ac36db9",
       "local": true
     },
     {
@@ -650,33 +1052,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_073.png",
-      "bytes": 360143,
-      "hash": "fdd8831c247c5905",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_074.png",
-      "bytes": 635483,
-      "hash": "88f96a4cfd764cde",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_075.png",
-      "bytes": 643982,
-      "hash": "20550e636e94881c",
-      "local": true
-    },
-    {
       "path": "art/products/relic_076.png",
       "bytes": 641095,
       "hash": "32f6114a60f0814f",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_077.png",
-      "bytes": 522923,
-      "hash": "644769fcf6162cbc",
       "local": true
     },
     {
@@ -686,57 +1064,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_079.png",
-      "bytes": 601753,
-      "hash": "2d2cd654d39e26d4",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_080.png",
-      "bytes": 586439,
-      "hash": "ee95d6fe29a9cd31",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_081.png",
-      "bytes": 362092,
-      "hash": "1524050df6eabd24",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_082.png",
-      "bytes": 471142,
-      "hash": "512e028a8764593b",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_083.png",
-      "bytes": 612450,
-      "hash": "d525f6b7e70720ce",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_084.png",
-      "bytes": 598648,
-      "hash": "3e199856be333637",
-      "local": true
-    },
-    {
       "path": "art/products/relic_085.png",
       "bytes": 533341,
       "hash": "23e374f9b9f79d00",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_086.png",
-      "bytes": 573476,
-      "hash": "b1f12b988acd9779",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_087.png",
-      "bytes": 614811,
-      "hash": "92a0cecc87012377",
       "local": true
     },
     {
@@ -746,21 +1076,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_089.png",
-      "bytes": 581415,
-      "hash": "de7257a95883ed80",
-      "local": true
-    },
-    {
       "path": "art/products/relic_090.png",
       "bytes": 700856,
       "hash": "96d266fa8e09d504",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_091.png",
-      "bytes": 441054,
-      "hash": "f782ac1d16396ec8",
       "local": true
     },
     {
@@ -770,45 +1088,9 @@
       "local": true
     },
     {
-      "path": "art/products/relic_093.png",
-      "bytes": 604381,
-      "hash": "12f7abef5ffdf8c1",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_094.png",
-      "bytes": 690259,
-      "hash": "31f8fe1c59d961ef",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_095.png",
-      "bytes": 627862,
-      "hash": "83365509062fec7a",
-      "local": true
-    },
-    {
       "path": "art/products/relic_096.png",
       "bytes": 656944,
       "hash": "a752f58b98883ad9",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_097.png",
-      "bytes": 714480,
-      "hash": "aa08ebd06a4acab1",
-      "local": true
-    },
-    {
-      "path": "art/products/relic_098.png",
-      "bytes": 695818,
-      "hash": "b76a2a5307d90e32",
-      "local": true
-    },
-    {
-      "path": "art/products/special.png",
-      "bytes": 556775,
-      "hash": "789f03bc330a57bc",
       "local": true
     },
     {
@@ -879,8 +1161,8 @@
     },
     {
       "path": "art/shot/player-data.json",
-      "bytes": 292738,
-      "hash": "480c9be0a9b6a6e6",
+      "bytes": 292737,
+      "hash": "aa98ad2156cb79f9",
       "local": true
     },
     {

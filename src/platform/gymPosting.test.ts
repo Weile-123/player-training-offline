@@ -22,8 +22,9 @@ const deferred = <T,>() => {
 it('acknowledges the opened editor as success without requiring a publish callback', async () => {
  const {api, get, open} = await setup();
  await expect(api.openGymPost('培养纪录', '我培养出了一位球星')).resolves.toEqual({editorOpened: true, simulated: false});
- expect(get).toHaveBeenCalledTimes(1);
- expect(open).toHaveBeenCalledExactlyOnceWith({title: '培养纪录', content: '我培养出了一位球星'});
+ expect(get).not.toHaveBeenCalled();
+ expect(api.gymPostDestination).toEqual({topicId:'871',tagId:'162117',topicName:'AI工坊',tagName:'传奇球馆'});
+ expect(open).toHaveBeenCalledExactlyOnceWith({...api.gymPostDestination,title: '培养纪录', content: '我培养出了一位球星'});
  expect(api.gymPostTitle).toContain(activity.activityName);
 });
 
@@ -34,31 +35,31 @@ it('never opens another activity editor or reads its BBS configuration', async (
  expect(get).not.toHaveBeenCalled(); expect(open).not.toHaveBeenCalled();
 });
 
-it.each([null, {}, {bbsTagId: undefined}, {bbsTagId: ''}, {bbsTagId: ' \t '}, {bbsTopicId: 'old-topic', bbsTopicName: '旧专区'}])('omits all four destination fields when the current tag is absent (%j)', async config => {
+it.each([null, {}, {bbsTagId: undefined}, {bbsTagId: ''}, {bbsTagId: ' \t '}, {bbsTopicId: 'old-topic', bbsTagId: 'old-tag', bbsTopicName: '旧专区'}])('uses the explicitly requested activity destination regardless of host defaults (%j)', async config => {
  const {api, get, open} = await setup();
  get.mockResolvedValue(config);
  await api.openGymPost('标题', '正文');
- expect(open).toHaveBeenCalledExactlyOnceWith({title: '标题', content: '正文'});
+ expect(open).toHaveBeenCalledExactlyOnceWith({...api.gymPostDestination,title: '标题', content: '正文'});
+ expect(get).not.toHaveBeenCalled();
 });
 
-it('reads the current host BBS destination for each user request without a cached old-game fallback', async () => {
+it('never queries or waits for host BBS configuration when the business destination is explicit', async () => {
  const {api, get, open} = await setup();
- get.mockResolvedValueOnce({bbsTopicId: 'first-topic', bbsTagId: 'first-tag', bbsTopicName: '篮球', bbsTagName: '首个话题'});
+ get.mockRejectedValue(Error('host configuration unavailable'));
  await api.openGymPost('第一次', '正文');
- expect(open.mock.calls[0][0]).toEqual({title: '第一次', content: '正文', topicId: 'first-topic', tagId: 'first-tag', topicName: '篮球', tagName: '首个话题'});
- get.mockResolvedValueOnce({bbsTopicId: 'current-topic', bbsTagId: 'current-tag', bbsTopicName: '本期专区', bbsTagName: '本期话题'});
+ expect(open.mock.calls[0][0]).toEqual({...api.gymPostDestination,title: '第一次', content: '正文'});
  await api.openGymPost('第二次', '正文');
- expect(get).toHaveBeenCalledTimes(2);
- expect(open.mock.calls[1][0]).toEqual({title: '第二次', content: '正文', topicId: 'current-topic', tagId: 'current-tag', topicName: '本期专区', tagName: '本期话题'});
+ expect(get).not.toHaveBeenCalled();
+ expect(open.mock.calls[1][0]).toEqual({...api.gymPostDestination,title: '第二次', content: '正文'});
 });
 
-it('rechecks activity identity after awaiting BBS configuration', async () => {
- const {api, get, open} = await setup(), config = deferred<null>();
- get.mockReturnValueOnce(config.promise);
- const result = expect(api.openGymPost('标题', '正文')).rejects.toThrow('虎扑活动配置与本项目不一致');
- await vi.waitFor(() => expect(get).toHaveBeenCalledTimes(1));
+it('rechecks activity identity after awaiting poster upload', async () => {
+ const {api, sdk, open} = await setup(), upload = deferred<{downloadUrl:string}>();
+ sdk.oss={uploadFile:vi.fn(()=>upload.promise)};
+ const result = expect(api.openGymPost('标题', '正文',undefined,{blob:new Blob(['png'],{type:'image/png'})})).rejects.toThrow('虎扑活动配置与本项目不一致');
+ await vi.waitFor(() => expect(sdk.oss!.uploadFile).toHaveBeenCalledTimes(1));
  window.__COLORBOX_AI_CONFIG__ = {projectId: 'app_0123456789'};
- config.resolve(null); await result;
+ upload.resolve({downloadUrl:'https://example.com/poster.png'}); await result;
  expect(open).not.toHaveBeenCalled();
 });
 
@@ -79,11 +80,11 @@ it.each([403, 408, 429, 503])('surfaces editor failure %s without inventing a re
  expect(open).toHaveBeenCalledTimes(1);
 });
 
-it('reports unavailable configuration or editor methods without pretending an editor opened', async () => {
+it('needs no BBS configuration method but rejects an unavailable editor', async () => {
  const {api, sdk, open} = await setup();
  delete sdk.bbsConfig;
- await expect(api.openGymPost('标题', '正文')).rejects.toThrow('发帖配置尚未就绪');
- expect(open).not.toHaveBeenCalled();
+ await expect(api.openGymPost('标题', '正文')).resolves.toEqual({editorOpened:true,simulated:false});
+ expect(open).toHaveBeenCalledExactlyOnceWith({...api.gymPostDestination,title:'标题',content:'正文'});
  delete sdk.request;
  await expect(api.openGymPost('标题', '正文')).rejects.toThrow('虎扑 App');
 });
@@ -95,12 +96,11 @@ it('cancels before starting without making any host request', async () => {
  expect(get).not.toHaveBeenCalled(); expect(open).not.toHaveBeenCalled();
 });
 
-it('cancels an awaiting configuration before opening the editor and allows a later explicit retry', async () => {
- const {api, get, open} = await setup(), config = deferred<null>(), controller = new AbortController();
- get.mockReturnValueOnce(config.promise);
+it('cancels before starting and allows a later explicit retry with the fixed destination', async () => {
+ const {api, open} = await setup(), controller = new AbortController();
+ controller.abort();
  const result = expect(api.openGymPost('标题', '正文', controller.signal)).rejects.toThrow('已取消分享');
- await vi.waitFor(() => expect(get).toHaveBeenCalledTimes(1));
- controller.abort(); config.resolve(null); await result;
+ await result;
  expect(open).not.toHaveBeenCalled();
  await expect(api.openGymPost('重试标题', '正文')).resolves.toEqual({editorOpened: true, simulated: false});
  expect(open).toHaveBeenCalledTimes(1);
@@ -115,13 +115,13 @@ it('does not return a reward receipt after the editor flow is cancelled while aw
  expect(open).toHaveBeenCalledTimes(1);
 });
 
-it('stops at failed BBS configuration without invoking the editor and releases the in-flight guard', async () => {
- const {api, get, open} = await setup();
- get.mockRejectedValueOnce(Error('发帖配置读取失败'));
- await expect(api.openGymPost('标题', '正文')).rejects.toThrow('发帖配置读取失败');
- expect(open).not.toHaveBeenCalled();
- await expect(api.openGymPost('重试标题', '正文')).resolves.toEqual({editorOpened: true, simulated: false});
+it('does not silently retry a rejected editor and releases the in-flight guard', async () => {
+ const {api, open} = await setup();
+ open.mockRejectedValueOnce(Error('编辑器请求失败'));
+ await expect(api.openGymPost('标题', '正文')).rejects.toThrow('编辑器请求失败');
  expect(open).toHaveBeenCalledTimes(1);
+ await expect(api.openGymPost('重试标题', '正文')).resolves.toEqual({editorOpened: true, simulated: false});
+ expect(open).toHaveBeenCalledTimes(2);
 });
 
 it('times out an unacknowledged editor without a reward or automatic second invocation', async () => {
@@ -150,7 +150,7 @@ it('blocks a simultaneous editor flow and releases its guard after completion', 
 it('clips title and content by Unicode code point rather than breaking emoji', async () => {
  const {api, open} = await setup();
  await api.openGymPost('🏀'.repeat(100), '🏀'.repeat(1600));
- expect(open.mock.calls[0][0]).toEqual({title: '🏀'.repeat(80), content: '🏀'.repeat(1500)});
+ expect(open.mock.calls[0][0]).toEqual({...api.gymPostDestination,title: '🏀'.repeat(80), content: '🏀'.repeat(1500)});
 });
 
 it('uses a local-only explicit posting bypass without calling the host', async () => {
@@ -169,7 +169,7 @@ it('uploads a PNG with the official OSS method before opening the configured edi
  await api.openGymPost('固定标题', '固定正文', undefined, {blob, onStage: stage});
  expect(order).toEqual(['upload', 'open']);
  expect(sdk.oss.uploadFile).toHaveBeenCalledWith({file: blob, filename: expect.stringMatching(/^legend-gym-\d+\.png$/)});
- expect(open).toHaveBeenCalledWith({title: '固定标题', content: '固定正文', imageUrl: 'https://i2.hoopchina.com.cn/my-gym-poster.png'});
+ expect(open).toHaveBeenCalledWith({...api.gymPostDestination,title: '固定标题', content: '固定正文', imageUrl: 'https://i2.hoopchina.com.cn/my-gym-poster.png'});
  expect(stage.mock.calls.map(call => call[0])).toEqual(['uploading', 'opening']);
 });
 

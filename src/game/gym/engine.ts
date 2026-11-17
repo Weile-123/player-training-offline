@@ -11,6 +11,7 @@ import {trainingBias, trainingPlans, type TrainingPlanId, type TrainingProgress}
 import {buildCooperationOffers, type Cooperation, type CooperationStatus} from './cooperation';
 import {experienceForLevel, playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
 import {chalkTrainingShots, consumableById, teamSupplyRecovery, type GymConsumableId} from './consumables';
+import type {OfflineTrainingReport} from './offline';
 
 export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
 export {trainingPlans} from './training';
@@ -30,6 +31,8 @@ export type GymPlayer = {
   greatShotsRemaining?: number;
   /** Per recruit, independent of which template is currently displayed. */
   shareLevelClaimed?: boolean;
+  /** Retired overflow field retained only to read older saves. New rewards stop at level 99. */
+  overflowExperience?: number;
   equipmentTraining: {brandTotal: number; brandShots: number; cooperationCourses: [number, number]; cooperationCourseShots: [number, number]};
 };
 export type EquipmentBonuses = {
@@ -55,6 +58,7 @@ export type GymState = {
   legacyEquipmentCollection?: Record<string, {firstAt: number}>;
   /** Absent on pre-offline saves; establish a fresh clock baseline before accruing shots. */
   offlineRulesVersion?: 1 | 2;
+  offlineReward?: {report: OfflineTrainingReport; claimed: boolean; dismissed: boolean};
   kind: 'gym-management'; version: 1; balanceVersion: 3; seed: number; revision: number; createdAt: number; updatedAt: number; nextPlayer: number;
   player: GymPlayer | null; bench: GymPlayer[]; credits: number; fame: number; gymLevel: number; projects: Record<ProjectId, number>;
   ownedEquipment: string[]; equippedEquipment: string[]; purchasePrices: Record<string, number>; inventory: {drink: number} & Partial<Record<Exclude<GymConsumableId, 'drink'>, number>>;
@@ -77,7 +81,7 @@ export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
   | {type: 'train' | 'recommend'; id: string}
   | {type: 'use-drink'; id: string}
-  | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number}
+  | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number; selectRecruited?: boolean}
   | {type: 'buy-equipment'; id: string; replaceId?: string; destination?: 'warehouse'}
   | {type: 'equip'; id: string; replaceId?: string}
   | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
@@ -85,6 +89,7 @@ export type GymAction =
   | {type: 'accept-cooperation'; id: string; playerId: string; scope?: 'roster'}
   | {type: 'abandon-cooperation'; playerId: string; scope?: 'roster'}
   | {type: 'share-player-levels'; playerId: string}
+  | {type: 'double-offline-experience' | 'dismiss-offline-report'; reportId: string}
   | {type: 'restore-stamina-reward'; playerId: string; method: 'share' | 'ad'; expectedCount: number}
   | {type: 'complete-cooperation-ad'; id: string; playerId: string; expectedCooperationId: string | null; expectedCooperationRevision: number | null; scope?: 'roster'}
   | {type: 'select-player'; id: string}
@@ -101,7 +106,7 @@ export type GymEvent = {
 };
 export type GymResult = {state: GymState; events: GymEvent[]; error?: string};
 
-export const shotCooldownMs = 1_000;
+export const shotCooldownMs = 500;
 export const drinkPrice = 1;
 export const drinkRecovery = 10;
 
@@ -583,6 +588,16 @@ export function trainPlayer(state: GymState, player: GymPlayer, now: number, eve
   }
 }
 
+/** Only credit the remaining XP before the existing player-level ceiling. */
+export function offlineBonusExperience(state:GymState,report:OfflineTrainingReport):Record<string,number>{
+  const players=activePlayers(state),ceiling=experienceForLevel(playerLevelCap);
+  return Object.fromEntries(report.players.map(earned=>{
+    const trainee=players.find(player=>player.id===earned.id);
+    const remaining=trainee?Math.max(0,ceiling-experienceForLevel(trainee.level)-trainee.experience):0;
+    return[earned.id,Math.min(earned.xpGained,remaining)];
+  }));
+}
+
 /** Commands are atomic. Call advanceGym first when natural recovery must persist even if a command is refused. */
 export function dispatchGym(original: GymState, expectedRevision: number, action: GymAction, now: number): GymResult {
   const fail = (error: string): GymResult => ({state: original, events: [], error});
@@ -593,12 +608,44 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
   const events: GymEvent[] = [];
   const player = next.player;
   switch (action.type) {
+    case 'double-offline-experience': {
+      const reward=next.offlineReward;
+      if(!reward || reward.report.reportId!==action.reportId) return fail('离线报告已变化，请重新打开后领取');
+      if(reward.claimed) return fail('这份报告已领取双倍经验');
+      if(reward.dismissed) return fail('这份离线报告已结束');
+      const bonusExperience=offlineBonusExperience(next,reward.report);
+      if(!Object.values(bonusExperience).some(value=>value>0))return fail('球员已达到99级，无需领取额外经验');
+      for(const earned of reward.report.players){
+        const trainee=activePlayers(next).find(entry=>entry.id===earned.id);
+        if(!trainee) return fail('报告中的球员已离馆，未发放奖励');
+        const bonus=bonusExperience[earned.id];
+        if(!bonus)continue;
+        const before={...trainee.stats};
+        const levelGain=addPlayerExperience(next,trainee,bonus);
+        if(trainee.level===playerLevelCap) trainee.autoEnabled=false;
+        const previousTemplate=trainee.templateId,matched=match(trainee);
+        trainee.templateId=matched.templateId;trainee.lastStyle=matched.lastStyle;
+        if(tierIds.indexOf(matched.tier)>tierIds.indexOf(trainee.highestTier))trainee.highestTier=matched.tier;
+        events.push({type:'offline-experience-doubled',playerId:trainee.id,experienceGain:bonus,levelGain,
+          changes:Object.fromEntries(statKeys.map(key=>[key,trainee.stats[key]-before[key]])) as Stats});
+        if(previousTemplate!==trainee.templateId)events.push({type:'template-changed',playerId:trainee.id,templateId:trainee.templateId??undefined});
+        rememberPlayer(next,events,trainee);
+      }
+      reward.report.bonusExperience=bonusExperience;
+      reward.claimed=true;
+      break;
+    }
+    case 'dismiss-offline-report': {
+      if(!next.offlineReward || next.offlineReward.report.reportId!==action.reportId)return fail('离线报告已变化');
+      next.offlineReward.dismissed=true;
+      break;
+    }
     case 'train': {
       if (!player || action.id !== player.id) return fail('当前球员已变化，请重新选择');
       if (player.autoEnabled) return fail('请先关闭该球员的自动训练');
       if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
       if (now < player.nextShotAt) return fail('下一球正在准备');
-      if (player.stamina < 1) return fail('体力不足，请等待恢复或使用饮料');
+      if (player.stamina < 1) return fail('体力不足，请等待体力恢复或领取体力奖励');
       trainPlayer(next, player, now, events);
       break;
     }
@@ -657,6 +704,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
     }
     case 'recruit': {
       if (action.mode !== undefined && action.mode !== 'selected') return fail('招生方式无效');
+      if (action.selectRecruited !== undefined && typeof action.selectRecruited !== 'boolean') return fail('招生选择无效');
       if (action.expectedNextPlayer !== undefined && (!Number.isSafeInteger(action.expectedNextPlayer) || action.expectedNextPlayer !== next.nextPlayer)) return fail('招生名单已变化，请重新确认');
       if (activePlayers(next).length >= next.gymLevel) return fail('训练位已满，升级球馆或推荐一名球员后再招募');
       const preference = action.preference ?? 'any';
@@ -672,9 +720,11 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       const trainee = recruit(next, preference, selected ? action.direction : undefined);
       if (selected) next.credits -= selectedRecruitmentPrice;
       trainee.nextShotAt = Math.max(trainee.nextShotAt, now + shotCooldownMs);
-      if (player) next.bench.push(trainee);
+      if (player && action.selectRecruited) {next.bench.push(player); next.player = trainee;}
+      else if (player) next.bench.push(trainee);
       else next.player = trainee;
       events.push({type: 'recruited', playerId: trainee.id});
+      if (action.selectRecruited) events.push({type: 'player-selected', playerId: trainee.id});
       if (selected) events.push({type: 'selected-recruited', playerId: trainee.id, id: action.direction, credits: selectedRecruitmentPrice});
       break;
     }

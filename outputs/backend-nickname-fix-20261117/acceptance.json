@@ -1,0 +1,31 @@
+{
+  "observedAt": "2026-11-17T09:53:30.670Z",
+  "applicationId": "app_847cdb589a",
+  "status": "nickname-fix-active",
+  "function": {
+    "name": "activity_api",
+    "status": "Active",
+    "runtime": "Nodejs18.15",
+    "deployedCodeSha256": "215ee8f024f3400abdddca7022b50c2d352ff9e6c9e2fe003b250921131dce15",
+    "approvedArchiveSha256": "83b38e005b5677731d765f72cfa4e1837dd2c1f748b058c85ee9be237bb362d5"
+  },
+  "preservation": {
+    "environmentUnchanged": true,
+    "gatewayUnchanged": true,
+    "playerProgressUnchanged": true
+  },
+  "verification": {
+    "isolatedSqlAssertionsPassed": true,
+    "syntheticRowsCleaned": true,
+    "authenticatedProfileHttpStatus": 200,
+    "emptyQaAccountCreatedNoRanking": true,
+    "nativeSdkUserVerification": "user-performs-device-test"
+  },
+  "rawEvidenceIgnored": {
+    "before": "2026-11-17T09-43-17-752Z-beebf864",
+    "after": "2026-11-17T09-51-34-888Z-53cc5380",
+    "code": "2026-11-17T09-50-32-645Z-e36545c6",
+    "sql": "2026-11-17T09-52-14-857Z-eadd8fc7"
+  },
+  "frontendBuiltOrUploaded": false
+}

@@ -12,6 +12,7 @@ let root:ReturnType<typeof createRoot>;
 afterEach(()=>{if(root)act(()=>root.unmount());vi.restoreAllMocks();});
 it('reports a canvas rendering failure through the completion callback instead of leaving a severe shot locked',async()=>{
  vi.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue({} as CanvasRenderingContext2D);
+ vi.spyOn(HTMLCanvasElement.prototype,'getBoundingClientRect').mockReturnValue({width:390,height:340} as DOMRect);
  const finish=vi.fn();root=createRoot(document.getElementById('root')!);
  await act(async()=>root.render(<ShotScene feedback={null} shots={[]} hot={false} busy={false} onFinish={finish}/>));
  await vi.waitFor(async()=>{

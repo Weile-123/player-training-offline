@@ -3,15 +3,16 @@ import animation from '../../public/config/animation.json';
 import manifest from '../data/runtime-assets.json';
 import {assetSource,configureAssets,hasAsset,rememberAssetUrl} from './assetUrls';
 import {applyAnimationConfig} from './animationConfig';
-import {selectStartupAssets} from './startupAssets';
+import {startupAssetBatches} from './startupAssets';
 
 /** Images use the browser's normal image cache; packaged JSON needs no HTTP API. */
 export async function preloadProductionAssets(done:Set<string>,report:()=>void){
  configureAssets(config);applyAnimationConfig(animation);
- const entries=selectStartupAssets(manifest.entries);
- let next=0;const failed:string[]=[];
+ const failed:string[]=[];
+ for(const entries of startupAssetBatches(manifest.entries)){
+ let next=0;
  await Promise.all(Array.from({length:4},async()=>{
-  while(next<entries.length){
+  while(next<entries.length&&!failed.length){
    const asset=entries[next++];
    if(hasAsset(asset.path)||asset.path.endsWith('.json')){done.add(asset.path);report();continue;}
    try{
@@ -29,6 +30,8 @@ export async function preloadProductionAssets(done:Set<string>,report:()=>void){
    }catch{failed.push(asset.path);}
   }
  }));
+ if(failed.length)break;
+ }
  if(failed.length)throw Error(`${failed.length} 项资源未能加载，请检查网络后重试；已加载资源会保留。`);
  await document.fonts.ready;
 }

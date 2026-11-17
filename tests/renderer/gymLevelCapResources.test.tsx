@@ -138,28 +138,14 @@ it.each([
   {label: 'shop 99', Panel: GymShopPanel, level: 99, shop: true},
   {label: 'inventory 98', Panel: GymInventoryPanel, level: 98, shop: false},
   {label: 'shop 98', Panel: GymShopPanel, level: 98, shop: true},
-] as const)('protects drink usage in $label while retaining purchases', async ({Panel, level, shop}) => {
+] as const)('keeps old drink inventory hidden and untouched in $label', async ({Panel, level}) => {
   const state = fixture(level);
   state.player!.stamina = 0; state.inventory.drink = 1;
   await mount(Panel, state);
-  await click(button('消耗品'));
-  const use = button('使用饮料');
-  expect(use.disabled).toBe(level === 99);
-  await click(use);
-  if (level === 99) {
-    expect(use.title).toContain('99 级训练上限');
-    expect(latest.inventory.drink).toBe(1);
-    expect(latest.player!.stamina).toBe(0);
-    expect(actions).toEqual([]);
-    if (shop) {
-      expect(button('购买 · 1 券').disabled).toBe(false);
-      await click(button('购买 · 1 券'));
-      expect(latest.inventory.drink).toBe(2);
-      expect(latest.credits).toBe(99);
-    }
-  } else {
-    expect(latest.inventory.drink).toBe(0);
-    expect(latest.player!.stamina).toBe(10);
-    expect(actions.map(action => action.type)).toEqual(['use-drink']);
-  }
+  expect(document.body.textContent).not.toMatch(/消耗品|运动饮料|使用饮料/);
+  expect(latest.inventory.drink).toBe(1);
+  expect(latest.player!.stamina).toBe(0);
+  expect(latest.player!.level).toBe(level);
+  expect(latest.credits).toBe(state.credits);
+  expect(actions).toEqual([]);
 });

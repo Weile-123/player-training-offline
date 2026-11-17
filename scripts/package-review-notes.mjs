@@ -1,7 +1,7 @@
 import {readFileSync,writeFileSync,readdirSync,copyFileSync} from 'node:fs';
 import {createHash} from 'node:crypto';
 
-copyFileSync('docs/渲染改造与回退-20261023.md','dist/REVIEW-NOTES.md');
+copyFileSync('docs/渲染与发布说明.md','dist/REVIEW-NOTES.md');
 writeFileSync('dist/THIRD-PARTY-NOTICES.txt','Preact 10.29.8 (locally adapted game renderer)\n'+readFileSync('vendor/preact/LICENSE','utf8')+'\nuse-sync-external-store (ESM compatibility adaptation)\n'+readFileSync('vendor/use-sync-external-store/LICENSE','utf8'));
 const files=[];
 for(const name of readdirSync('dist/assets').filter(name=>name.endsWith('.js')).sort()){

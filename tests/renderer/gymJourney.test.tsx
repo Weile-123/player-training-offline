@@ -74,6 +74,41 @@ async function mount(initial?: GymState) {
   await act(async () => root!.render(<GymHome/>));
   await act(async () => {await harness.store!.getState().hydrate();});
 }
+
+it('uses the upright B cover and exposes no new-gym control once a saved gym exists', async () => {
+  const saved = newGym(at, 42); saved.gymLevel = 4; saved.credits = 150;
+  await mount(saved);
+  expect(document.querySelector('.gym-home-b .b-masthead h1')?.textContent).toBe('传奇球馆');
+  expect(document.querySelector('.gym-home-background img')?.getAttribute('src')).toContain('background-b-portrait.webp');
+  expect(document.querySelector('.b-save')?.textContent).toContain('150');
+  expect([...document.querySelectorAll('.gym-home-b button')].map(button => button.getAttribute('aria-label'))).toEqual(['继续经营', '球星图鉴', '排行榜', '生涯', '设置']);
+  expect(document.querySelector('.b-new')).toBeNull();
+  // Background cropping must not define a control's layout box or z-order.
+  const backdrop=document.querySelector('.gym-home-backdrop')!;
+  const foreground=document.querySelector('.gym-home-design')!;
+  expect(backdrop.parentElement).toBe(foreground.parentElement);
+  expect(foreground.contains(backdrop)).toBe(false);
+  expect([...foreground.children].slice(0,3).map(node=>node.className)).toEqual(['b-masthead','b-lower','b-bottom-line']);
+  expect(document.querySelector('.b-actions')?.contains(document.querySelector('.b-command'))).toBe(true);
+  expect(document.querySelector('.b-actions')?.contains(document.querySelector('.b-menu'))).toBe(true);
+  const gear=document.querySelector('[aria-label="设置"] svg')!;
+  expect(gear.querySelector('path')?.getAttribute('fill-rule')).toBe('evenodd');
+  expect(gear.querySelector('circle')).toBeNull();
+});
+
+it('continues instead of resetting when a stale new-gym click observes a newly available save', async () => {
+  await mount();
+  const api = harness.store!.getState(), originalStart = api.start, start = vi.fn(originalStart);
+  harness.store!.setState({start});
+  // Model a save arriving after the button was rendered, before its event runs.
+  harness.store!.getState().hasSave = true;
+  try {
+    await press('开设训练馆');
+    expect(start).not.toHaveBeenCalled();
+    expect(document.querySelector('.gym-game')).toBeTruthy();
+    expect(state().seed).toBe(31);
+  } finally {harness.store!.setState({start: originalStart});}
+});
 function buttonWithin(scope: ParentNode, label: string) {
   const buttons = [...scope.querySelectorAll<HTMLButtonElement>('button')];
   const result = buttons.find(button => button.getAttribute('aria-label') === label) ?? buttons.find(button => button.textContent?.includes(label));
@@ -155,7 +190,7 @@ it('starts at home, completes a course, chooses a plan and cooperation, recommen
   expect(document.querySelector<HTMLButtonElement>('[aria-label="投篮训练"]')!.disabled).toBe(false);
   await press('打开背包');
   await press('保存并返回首页');
-  expect(document.querySelector('[aria-label="王牌训练师训练馆首页"]')).toBeTruthy();
+  expect(document.querySelector('[aria-label="传奇球馆首页"]')).toBeTruthy();
   expect(readGym(storage).state?.player?.id).toBe(nextId);
   await press('继续经营');
   expect(state().player!.id).toBe(nextId);
@@ -229,14 +264,13 @@ it('uses shop, inventory and projects before upgrading the gym and filling its s
   expect(readGym(storage).state?.bench[0].shots).toBe(1);
   await press('关闭面板');
   await press('保存并返回首页');
-  await press('开始新球馆');
-  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('背包、在训球员和校友档案将重新开始');
-  await press('确认开始');
-  expect(state().gymLevel).toBe(1);
-  expect(state().ownedEquipment).toEqual([]);
-  expect(state().alumni).toEqual([]);
+  expect(document.querySelector('[aria-label="开始新球馆"]')).toBeNull();
+  expect(document.querySelector('[aria-label="开设训练馆"]')).toBeNull();
+  await press('继续经营');
+  expect(state().gymLevel).toBe(2);
+  expect(state().ownedEquipment).toContain(capacity.id);
   expect(state().collectedEquipment[capacity.id]).toBeTruthy();
-  expect(state().player!.stamina).toBe(20);
+  expect(state().bench).toHaveLength(1);
 });
 
 it('saves a departure, advances only the automatic athlete at home and resumes once with a persisted report', async () => {

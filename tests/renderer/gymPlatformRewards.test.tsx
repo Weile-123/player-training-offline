@@ -1,13 +1,15 @@
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {cooperationOffers, cooperationStatus, gymUpgrade, newGym, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, experienceForLevel, gymUpgrade, newGym, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
+import {settleOfflineGym} from '../../src/game/gym/offline';
+import {offlineExperienceAnimationMs} from '../../src/components/GymOfflineReport';
 import {templateRules} from '../../src/game/contract/templates';
 import {positionLabels, templateById} from '../../src/game/templates';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
 
-const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[]}));
+const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[], proofs: [] as (Parameters<GymStore['act']>[1])[], order: [] as string[]}));
 vi.mock('../../src/gymStore', async () => {
   const {create} = await import('zustand');
   const {dispatchGym, newGym} = await import('../../src/game/gym/engine');
@@ -16,8 +18,9 @@ vi.mock('../../src/gymStore', async () => {
     loadAlumni: async (offset = 0, limit = 20) => ({players: [...get().state.alumni].reverse().slice(offset, offset + limit), total: get().state.alumni.length}),
     actionError: '', saveMessage: '', isSuspended: false, pendingOfflineReport: null,
     start: async () => ({state: get().state, events: []}),
-    act: async action => {
+    act: async (action, proof) => {
       harness.actions.push(action);
+      harness.proofs.push(proof); harness.order.push(`act:${action.type}`);
       const result = dispatchGym(get().state, get().state.revision, action, Date.now());
       set({state: result.state, actionError: result.error ?? ''}); return result;
     },
@@ -88,8 +91,8 @@ beforeEach(() => {
     vatask: {completeRewardVideo: rewardVideo, getActivityTaskState: refreshTask},
   };
   vi.stubGlobal('URL', class extends URL {static createObjectURL = vi.fn(() => 'blob:gym-share-preview'); static revokeObjectURL = vi.fn();});
-  harness.actions = [];
-  harness.store!.setState({state: newGym(at, 24), actionError: '', isSuspended: false, pendingOfflineReport: null});
+  harness.actions = []; harness.proofs = []; harness.order = [];
+  harness.store!.setState({state: newGym(at, 24), actionError: '', isSuspended: false, pendingOfflineReport: null, authorityMode:undefined,authorityMessage:'',authorityCapabilities:undefined,preparePlatformReward:undefined});
 });
 afterEach(async () => {
   if (root) act(() => root!.unmount()); root = null;
@@ -104,6 +107,7 @@ it('places a once-per-player +3 share button beside the tier and awards only aft
   await mount(initial);
   const shareButton = button('分享·等级+3')!;
   expect(shareButton.closest('.template-identity-meta')).toBeTruthy();
+  expect(document.querySelector('.template-player-level')).toBeNull();
   expect(shareButton.closest('.template-identity-meta')?.textContent).not.toContain(positionLabels[templateById(before.templateId)!.position]);
   await press('分享·等级+3');
   expect(document.querySelector('.gym-share-dialog h2')?.textContent).toBe('发帖分享');
@@ -111,15 +115,17 @@ it('places a once-per-player +3 share button beside the tier and awards only aft
   expect(state().player!.level).toBe(10);
   await press('发帖分享');
   expect(postEditor).toHaveBeenCalledTimes(1);
-  expect(postEditor).toHaveBeenCalledWith(expect.objectContaining({tagId: 'project-tag', topicId: 'project-topic'}));
+  expect(postEditor).toHaveBeenCalledWith(expect.objectContaining({tagId: '162117', topicId: '871', topicName: 'AI工坊', tagName: '传奇球馆'}));
   expect(state().player!.shareLevelClaimed).toBeUndefined(); expect(state().player!.level).toBe(10);
   expect(button('正在打开发帖…')?.disabled).toBe(true);
   await act(async () => {pending.resolve({code: 200}); await flushMicrotasks();});
   expect(state().player).toMatchObject({id: before.id, level: 13, peakLevel: 13, shareLevelClaimed: true, shots: before.shots, stamina: before.stamina});
   expect(button('分享·等级+3')).toBeUndefined();
-  expect(button('已领取')?.disabled).toBe(true);
+  expect(document.querySelector('.gym-share-dialog')).toBeNull();
+  const level = document.querySelector('.template-player-level');
+  expect(level?.textContent).toBe('Lv.13');
+  expect(level?.nextElementSibling?.classList.contains('tier-badge')).toBe(true);
   expect(harness.actions.filter(action => action.type === 'share-player-levels')).toHaveLength(1);
-  await press('关闭面板');
   expect(button('分享·等级+3')).toBeUndefined();
   expect(rewardVideo).not.toHaveBeenCalled();
 });
@@ -128,7 +134,8 @@ it('keeps the player and share opportunity unchanged when the editor rejects ope
   postEditor.mockResolvedValue({code: 403, message: '请登录后重试'});
   const initial = templateFixture(), before = structuredClone(initial.player!);
   await mount(initial); await press('分享·等级+3'); await press('发帖分享');
-  expect(document.querySelector('.gym-share-dialog [role="status"]')?.textContent).toBe('请登录后重试');
+  expect(document.querySelector('.action-notice.poster-share-notice[role="alert"]')?.textContent).toBe('请登录后重试');
+  expect(document.querySelector('.gym-share-dialog .poster-share-notice')).toBeNull();
   expect(state().player).toEqual(before); expect(harness.actions).toEqual([]);
   await press('关闭面板'); expect(button('分享·等级+3')).toBeTruthy();
 });
@@ -136,9 +143,16 @@ it('keeps the player and share opportunity unchanged when the editor rejects ope
 it('hides sharing until a template exists and at the level cap', async () => {
   const initial = newGym(at, 24); await mount(initial);
   expect(button('分享·等级+3')).toBeUndefined();
+  expect(document.querySelector('.template-player-level')?.textContent).toBe(`Lv.${initial.player!.level}`);
   const capped = templateFixture(); capped.player!.level = capped.player!.peakLevel = 99;
   await act(async () => harness.store!.setState({state: capped}));
   expect(button('分享·等级+3')).toBeUndefined();
+  expect(document.querySelector('.template-player-level')?.textContent).toBe('Lv.99');
+  const claimed = templateFixture(); Object.assign(claimed.player!, {level: 8, peakLevel: 8, shareLevelClaimed: true});
+  await act(async () => harness.store!.setState({state: claimed}));
+  expect(button('分享·等级+3')).toBeUndefined();
+  expect(document.querySelector('.template-player-level')?.textContent).toBe('Lv.8');
+  expect(document.querySelector('.template-player-level')?.nextElementSibling?.textContent).toBe('替补');
 });
 
 it('restores zero stamina by sharing once, then uses only rewarded advertisements for later refills', async () => {
@@ -149,7 +163,7 @@ it('restores zero stamina by sharing once, then uses only rewarded advertisement
   await press('分享发帖，体力回满'); await press('发帖分享');
   expect(state().player!.stamina).toBe(staminaMax(state())); expect(state().staminaRewardCount).toBe(1);
   expect(postEditor).toHaveBeenCalledTimes(1); expect(rewardVideo).not.toHaveBeenCalled();
-  await press('关闭面板');
+  expect(document.querySelector('.gym-share-dialog')).toBeNull();
   await act(async () => harness.store!.setState({state: {...state(), player: {...state().player!, stamina: 0}}}));
   expect(button('分享发帖，体力回满')).toBeUndefined(); expect(button('看广告，体力回满')).toBeTruthy();
   const pending = deferred<{code: number; data: {rewarded: boolean}}>(); rewardVideo.mockReturnValue(pending.promise);
@@ -232,7 +246,7 @@ it('releases the original cooperation button without completing anything when th
  await act(async () => {pending.resolve({code: 200, message: '广告未完整观看', data: {rewarded: false}}); await flushMicrotasks();});
  expect(state().player).toEqual(before); expect(harness.actions).toEqual([]); expect(refreshTask).not.toHaveBeenCalled();
  expect(ad.disabled).toBe(false); expect(ad.getAttribute('aria-busy')).toBe('false'); expect(ad.textContent).toBe('一键完成');
- expect(document.querySelector('.contract-panel .contract-notice')?.textContent).toBe('广告未完整观看');
+ expect(document.querySelector('.action-notice.contract-notice[role=alert]')?.textContent).toBe('广告未完整观看');
  expect(document.querySelector('.gym-reward-wait')).toBeNull();
 });
 
@@ -261,4 +275,152 @@ it('returns to the empty court after recommending the last player without openin
   expect(document.querySelector('[aria-label="新人招生"]')).toBeNull();
   expect(harness.actions.filter(action => action.type === 'recruit')).toHaveLength(0);
   expect(button('招募球员')).toBeTruthy();
+});
+
+it.each(['timeflow','connecting','error'] as const)('blocks share and ad entry before platform interaction without reward verification (%s)',async authorityMode=>{
+ const initial=templateFixture();initial.player!.stamina=0;
+ harness.store!.setState({authorityMode,authorityCapabilities:{platformRewards:false,legacyAdoption:false}});
+ await mount(initial);
+ expect(button('分享奖励暂不可用')?.disabled).toBe(true);
+ expect(button('体力奖励暂不可用')?.disabled).toBe(true);
+ await press('分享奖励暂不可用');await press('体力奖励暂不可用');
+ expect(document.querySelector('.gym-share-dialog')).toBeNull();
+ await press('赞助合作');
+ expect(document.body.textContent).toContain('广告奖励暂不可用');
+ expect([...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation-ad')].every(button=>button.disabled)).toBe(true);
+ expect(postEditor).not.toHaveBeenCalled();expect(rewardVideo).not.toHaveBeenCalled();expect(harness.actions).toEqual([]);
+});
+
+it.each([['local',false],['timeflow',true]] as const)('preserves rewarded play when the current mode allows it (%s)',async(authorityMode,platformRewards)=>{
+ const initial=templateFixture();initial.player!.stamina=0;initial.staminaRewardCount=1;
+ harness.store!.setState({authorityMode,authorityCapabilities:{platformRewards,legacyAdoption:false}});
+ await mount(initial);await press('看广告，体力回满');
+ expect(rewardVideo).toHaveBeenCalledOnce();expect(state().player!.stamina).toBe(staminaMax(state()));
+ expect(harness.actions.some(action=>action.type==='restore-stamina-reward')).toBe(true);
+});
+
+it('closes a share preview when the account becomes unable to verify platform rewards',async()=>{
+ const initial=templateFixture();await mount(initial);await press('分享·等级+3');
+ expect(document.querySelector('.gym-share-dialog')).toBeTruthy();
+ await act(async()=>harness.store!.setState({authorityMode:'timeflow',authorityCapabilities:{platformRewards:false,legacyAdoption:false}}));
+ expect(document.querySelector('.gym-share-dialog')).toBeNull();
+ expect(postEditor).not.toHaveBeenCalled();expect(harness.actions).toEqual([]);
+});
+
+it('rechecks reward availability after an ad callback before dispatching a reward action',async()=>{
+ const pending=deferred<{code:number;data:{rewarded:boolean}}>();rewardVideo.mockReturnValue(pending.promise);
+ const initial=templateFixture();initial.player!.stamina=0;initial.staminaRewardCount=1;
+ await mount(initial);await press('看广告，体力回满');expect(rewardVideo).toHaveBeenCalledOnce();
+ await act(async()=>harness.store!.setState({authorityMode:'error',authorityCapabilities:{platformRewards:false,legacyAdoption:false}}));
+ await act(async()=>{pending.resolve({code:200,data:{rewarded:true}});await flushMicrotasks();});
+ expect(harness.actions).toEqual([]);expect(state().player!.stamina).toBe(0);
+ expect(document.querySelector('.contract-status')?.textContent).toContain('奖励暂不可用');
+});
+
+function offlineFixture() {
+ const initial = newGym(at - 60_000, 24); initial.gymLevel = 2;
+ Object.assign(initial.player!, {level:4,peakLevel:4,autoEnabled:true,stamina:5});
+ initial.bench=[{...structuredClone(initial.player!),id:'gym-p2',name:'第二名新秀',stamina:3}]; initial.nextPlayer=3;
+ const settled=settleOfflineGym(initial,at);
+ for(const player of [settled.state.player!,...settled.state.bench])player.autoEnabled=false;
+ expect(settled.state.offlineReward?.report.reportId).toBeTruthy();
+ return {initial:settled.state,report:settled.state.offlineReward!.report};
+}
+
+it('integrates a local offline reward: waits for native confirmation, credits each athlete once, then animates all original XP to double',async()=>{
+ const native=deferred<{code:number;data:{rewarded:boolean}}>();rewardVideo.mockReturnValue(native.promise);
+ const {initial,report}=offlineFixture(),before=structuredClone(initial),frames:FrameRequestCallback[]=[];
+ vi.spyOn(performance,'now').mockReturnValue(2000);
+ vi.stubGlobal('requestAnimationFrame',(callback:FrameRequestCallback)=>{frames.push(callback);return frames.length;});
+ harness.store!.setState({pendingOfflineReport:report}); await mount(initial);
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe(`+${report.totalExperience}`);
+ await press('领取双倍经验');await press('正在领取…');
+ expect(rewardVideo).toHaveBeenCalledOnce();expect(state().offlineReward?.claimed).toBe(false);
+ expect(harness.actions).toEqual([]);expect(document.querySelector('.is-double-experience')).toBeNull();
+ await act(async()=>{native.resolve({code:200,data:{rewarded:true}});await flushMicrotasks();});await act(flushMicrotasks);
+ expect(state().offlineReward?.claimed).toBe(true);expect(harness.actions).toEqual([{type:'double-offline-experience',reportId:report.reportId}]);
+ for(const earned of report.players){
+  const earlier=[before.player!,...before.bench].find(player=>player.id===earned.id)!,current=[state().player!,...state().bench].find(player=>player.id===earned.id)!;
+  expect(experienceForLevel(current.level)+current.experience-experienceForLevel(earlier.level)-earlier.experience).toBe(earned.xpGained);
+ }
+ expect(document.querySelector('.is-double-experience')).toBeTruthy();
+ const advanceFrames=async(timestamp:number)=>{const queued=frames.splice(0);await act(async()=>{queued.forEach(callback=>callback(timestamp));await flushMicrotasks();});};
+ await advanceFrames(2000+offlineExperienceAnimationMs/2);
+ const intermediate=Number(document.querySelector('.gm-offline-xp-total b')!.textContent!.replace(/[+,]/g,''));
+ expect(intermediate).toBeGreaterThan(report.totalExperience);expect(intermediate).toBeLessThan(report.totalExperience*2);
+ await advanceFrames(2000+offlineExperienceAnimationMs);
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe(`+${report.totalExperience*2}`);
+ expect([...document.querySelectorAll('.athlete-xp')].map(node=>node.textContent)).toEqual(report.players.map(player=>`经验 +${player.xpGained*2}`));
+ const {bonusExperience,...originalReport}=state().offlineReward!.report;
+ expect(originalReport).toEqual(report);expect(bonusExperience).toEqual(Object.fromEntries(report.players.map(player=>[player.id,player.xpGained])));expect(button('已领取双倍经验')?.disabled).toBe(true);
+});
+
+it('keeps a local offline report and every athlete XP unchanged when the native advertisement is cancelled',async()=>{
+ const {initial,report}=offlineFixture();const before=structuredClone(initial);
+ rewardVideo.mockResolvedValue({code:200,message:'广告未完整观看',data:{rewarded:false,reason:'NOT_REWARDED'}});
+ harness.store!.setState({pendingOfflineReport:report});await mount(initial);await press('领取双倍经验');
+ expect(state().offlineReward?.claimed).toBe(false);expect(state().player).toEqual(before.player);expect(state().bench).toEqual(before.bench);
+ expect(harness.actions).toEqual([]);expect(document.querySelector('.is-double-experience')).toBeNull();
+ expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe(`+${report.totalExperience}`);
+ expect(button('领取双倍经验')?.disabled).toBe(false);expect(document.querySelector('[role=alert]')?.textContent).toBe('广告未完整观看');
+});
+
+const proof={challengeId:'12345678-1234-1234-1234-123456789abc',confirmation:'native-sdk-confirmation' as const};
+function enableRemote(prepare:NonNullable<GymStore['preparePlatformReward']>){
+ harness.store!.setState({authorityMode:'timeflow',authorityCapabilities:{platformRewards:true,legacyAdoption:false},preparePlatformReward:prepare});
+}
+
+it('prepares an account-bound remote challenge before showing an ad and sends its proof only after native completion',async()=>{
+ const initial=templateFixture();initial.player!.stamina=0;initial.staminaRewardCount=1;
+ const prepare=vi.fn(async()=>{harness.order.push('prepare');return proof;});
+ rewardVideo.mockImplementation(async()=>{harness.order.push('native');return{code:200,data:{rewarded:true}};});
+ enableRemote(prepare);await mount(initial);await press('看广告，体力回满');
+ const action={type:'restore-stamina-reward',playerId:initial.player!.id,method:'ad',expectedCount:1} as const;
+ expect(prepare).toHaveBeenCalledExactlyOnceWith(action);expect(harness.order).toEqual(['prepare','native','act:restore-stamina-reward']);
+ expect(harness.actions).toEqual([action]);expect(harness.proofs).toEqual([proof]);
+});
+
+it('does not show native ads or grant a remote reward if challenge preparation fails',async()=>{
+ const initial=templateFixture();initial.player!.stamina=0;initial.staminaRewardCount=1;
+ enableRemote(vi.fn(async()=>{throw Error('奖励准备暂不可用');}));await mount(initial);await press('看广告，体力回满');
+ expect(rewardVideo).not.toHaveBeenCalled();expect(harness.actions).toEqual([]);expect(state().player!.stamina).toBe(0);
+ expect(document.querySelector('.contract-status')?.textContent).toBe('奖励准备暂不可用');
+});
+
+it('binds a remote offline double-experience challenge to the displayed original report and sends its native confirmation proof',async()=>{
+ const {initial,report}=offlineFixture();
+ const prepare=vi.fn(async()=>{harness.order.push('prepare');return proof;});
+ rewardVideo.mockImplementation(async()=>{harness.order.push('native');return{code:200,data:{rewarded:true}};});
+ enableRemote(prepare);harness.store!.setState({pendingOfflineReport:report});await mount(initial);await press('领取双倍经验');
+ const action={type:'double-offline-experience',reportId:report.reportId!} as const;
+ expect(prepare).toHaveBeenCalledExactlyOnceWith(action);expect(harness.order).toEqual(['prepare','native','act:double-offline-experience']);
+ expect(harness.actions).toEqual([action]);expect(harness.proofs).toEqual([proof]);expect(state().offlineReward?.claimed).toBe(true);
+ const {bonusExperience,...originalReport}=state().offlineReward!.report;
+ expect(originalReport).toEqual(report);expect(bonusExperience).toEqual(Object.fromEntries(report.players.map(player=>[player.id,player.xpGained])));expect(button('已领取双倍经验')?.disabled).toBe(true);
+});
+
+it('keeps a prepared remote challenge unused when native completion is cancelled',async()=>{
+ const initial=templateFixture();initial.player!.stamina=0;initial.staminaRewardCount=1;
+ const prepare=vi.fn(async()=>proof);enableRemote(prepare);
+ rewardVideo.mockResolvedValue({code:200,message:'广告未看完',data:{rewarded:false}});
+ await mount(initial);await press('看广告，体力回满');
+ expect(prepare).toHaveBeenCalledOnce();expect(rewardVideo).toHaveBeenCalledOnce();expect(harness.actions).toEqual([]);expect(harness.proofs).toEqual([]);
+});
+
+it('prepares a remote share challenge before opening the fixed official destination and grants with that proof',async()=>{
+ const initial=templateFixture(),prepare=vi.fn(async()=>{harness.order.push('prepare');return proof;});
+ postEditor.mockImplementation(async()=>{harness.order.push('editor');return{code:200};});
+ enableRemote(prepare);await mount(initial);await press('分享·等级+3');await press('发帖分享');
+ const action={type:'share-player-levels',playerId:initial.player!.id} as const;
+ expect(prepare).toHaveBeenCalledExactlyOnceWith(action);expect(harness.order).toEqual(['prepare','editor','act:share-player-levels']);
+ expect(harness.proofs).toEqual([proof]);expect(state().player!.shareLevelClaimed).toBe(true);expect(document.querySelector('.gym-share-dialog')).toBeNull();
+ expect(postEditor).toHaveBeenCalledWith(expect.objectContaining({topicId:'871',tagId:'162117',topicName:'AI工坊',tagName:'传奇球馆'}));
+ expect(window.ColorboxAI!.bbsConfig!.get).not.toHaveBeenCalled();
+});
+
+it('keeps remote share preparation failures visible without opening an editor or awarding levels',async()=>{
+ const initial=templateFixture(),before=structuredClone(initial.player!);
+ enableRemote(vi.fn(async()=>{throw Error('分享奖励准备失败');}));await mount(initial);await press('分享·等级+3');await press('发帖分享');
+ expect(postEditor).not.toHaveBeenCalled();expect(harness.actions).toEqual([]);expect(harness.proofs).toEqual([]);
+ expect(state().player).toEqual(before);expect(document.querySelector('.action-notice.poster-share-notice[role=alert]')?.textContent).toBe('分享奖励准备失败');
 });

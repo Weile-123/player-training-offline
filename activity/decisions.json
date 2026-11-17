@@ -1,0 +1,20 @@
+{
+  "destination": "采用首页B，完整接入新版离线成长并复查现有游戏",
+  "decisions": [
+    {
+      "id": "D1",
+      "kind": "deployment",
+      "question": "是否现在由我启用游戏的线上离线成长与云端保存？",
+      "options": {
+        "A": "启用，由AI自动处理",
+        "B": "暂不启用线上服务"
+      },
+      "recommend": "A",
+      "depends_on": [],
+      "status": "resolved",
+      "note": "开发者明确回答：启用，由你自动处理；原话见activity/confirmations/deploy.md",
+      "presented": true,
+      "choice": "A"
+    }
+  ]
+}

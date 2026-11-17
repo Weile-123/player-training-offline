@@ -1,23 +1,71 @@
 {
- "activityId":"app_847cdb589a",
- "service":"activity_api",
- "version":"gym-rankings-v1",
- "deploymentStatus":"not-deployed",
- "environmentObserved":"not-activated",
- "envId":null,
- "publicBaseUrl":null,
- "routes":[
-  {"path":"/api/health","method":"GET","auth":false},
-  {"path":"/api/leaderboard","method":"GET","auth":false},
-  {"path":"/api/leaderboard/me","method":"GET","auth":true},
-  {"path":"/api/leaderboard/submit","method":"POST","auth":true}
- ],
- "gatewayRequirements":{"EnableSafeDomain":true,"enablePathTransmission":true,"upstreamResourceType":"WEB_SCF","directPublicFunctionAccess":false},
- "requiredEnvironment":["BUSINESS_ACTIVITY_ID=app_847cdb589a","CLOUDBASE_ENV_ID","COLORBOX__ACCESS_KEY"],
- "runtimeRequirement":"Node.js >=18; install dependencies with npm ci --omit=dev in activity/cloudfunctions/activity_api",
- "frontendPublicConfig":["VITE_GYM_LEADERBOARD_API_BASE","VITE_GYM_LEADERBOARD_ENV_ID"],
- "migration":"migrations/20261117000100_gym_rankings.sql",
- "scoreSource":"Verified server gym progress, never client-supplied score/stat values",
- "verification":{"localContractTests":true,"deployedHealth":false,"realGateway":false,"realHupuUI":false},
- "verificationPending":["Provision this application's environment and inspect the demo baseline","Apply migration and deploy activity_api behind the authenticated safe-domain gateway","Connect trusted game/Timeflow settlement progress to gym_verified_progress","Verify real Hupu login, public/personal reads, ranking updates and account switching"]
+  "activityId": "app_847cdb589a",
+  "service": "activity_api",
+  "version": "gym-rankings-v1",
+  "deploymentStatus": "active",
+  "environmentObserved": "activated",
+  "envId": "app-847cdb589a-d0gre00d5c6a5c8b6",
+  "publicBaseUrl": "https://app-847cdb589a-d0gre00d5c6a5c8b6-1252166086.ap-shanghai.app.tcloudbase.com/api",
+  "routes": [
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "auth": false
+    },
+    {
+      "path": "/api/leaderboard",
+      "method": "GET",
+      "auth": false
+    },
+    {
+      "path": "/api/leaderboard/me",
+      "method": "GET",
+      "auth": true
+    },
+    {
+      "path": "/api/leaderboard/submit",
+      "method": "POST",
+      "auth": true
+    }
+  ],
+  "gatewayRequirements": {
+    "EnableSafeDomain": true,
+    "enablePathTransmission": true,
+    "upstreamResourceType": "WEB_SCF",
+    "directPublicFunctionAccess": false
+  },
+  "requiredEnvironment": [
+    "BUSINESS_ACTIVITY_ID=app_847cdb589a",
+    "CLOUDBASE_ENV_ID",
+    "COLORBOX__ACCESS_KEY"
+  ],
+  "runtimeRequirement": "Node.js >=18; install dependencies with npm ci --omit=dev in activity/cloudfunctions/activity_api",
+  "frontendPublicConfig": [
+    "VITE_GYM_LEADERBOARD_API_BASE",
+    "VITE_GYM_LEADERBOARD_ENV_ID"
+  ],
+  "migration": "migrations/20261117000100_gym_rankings.sql",
+  "scoreSource": "Verified server gym progress, never client-supplied score/stat values",
+  "verification": {
+    "localContractTests": true,
+    "deployedHealth": true,
+    "realGateway": true,
+    "realHupuUI": false,
+    "databaseMigrationApplied": true,
+    "canonicalDatabaseAssertions": true,
+    "updatedAuthorityFunction": true,
+    "canonicalProductionBusinessFlow": true,
+    "functionCodeHashVerified": true,
+    "coldHistoryBootstrapCodeDeployed": true,
+    "nicknameProfileSync": true
+  },
+  "verificationPending": [
+    "User-operated Hupu end-user login, account switching and personal ranking acceptance"
+  ],
+  "deploymentEvidence": "../outputs/backend-nickname-fix-20261117/acceptance.json",
+  "authorityUpgradeMigration": "migrations/20261117000300_gym_authority_rankings.sql",
+  "functionDeploymentEvidence": "../outputs/backend-update-20261117/acceptance.json",
+  "businessFlowEvidence": "../outputs/release-functions-20261117/deployed-business-flow.json",
+  "deployedCodeSha256": "215ee8f024f3400abdddca7022b50c2d352ff9e6c9e2fe003b250921131dce15",
+  "nicknameMigration": "migrations/20261117000400_gym_rank_nicknames.sql"
 }

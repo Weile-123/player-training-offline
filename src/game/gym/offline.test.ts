@@ -9,7 +9,10 @@ import {equipmentCatalog} from './catalog';
 
 const start = 1_700_000_000_000;
 const copy = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
-const withoutRevision = (state: GymState) => ({...state, revision: 0});
+// Reports retain the first visible absence, so different polling/segmentation
+// schedules intentionally keep different receipt metadata. Compare every
+// actual game field here; receipt identity and replay rules have their own tests.
+const withoutRevision = ({offlineReward: _receipt, ...state}: GymState) => ({...state, revision: 0});
 function act(state: GymState, action: GymAction, now = state.updatedAt): GymState {
   const result = dispatchGym(state, state.revision, action, now);
   expect(result.error).toBeUndefined();

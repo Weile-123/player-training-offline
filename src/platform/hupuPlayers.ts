@@ -49,9 +49,10 @@ export function loadPlayerProfile(id: string): Promise<PlayerProfile | null> {
    }
    const player = response.data?.player;
    if (!player || (player.playerId && String(player.playerId)!==entry.hupuPlayerId)) throw Error('球员资料不匹配');
-   const avatar = safeAvatarUrl(player.big_photo) || safeAvatarUrl(player.photo);
-   if (!avatar) throw Error('该球员暂无可用头像');
-   return {name:player.name?.trim() || fallback.name,englishName:player.eng_name?.trim() || fallback.englishName,avatar,source:'hupu' as const,message:''};
+   // Native metadata must not replace an already preloaded local portrait with
+   // another network image. Identity/name validation stays the same; the game
+   // and share poster use the same immediately available visual asset.
+   return {name:player.name?.trim() || fallback.name,englishName:player.eng_name?.trim() || fallback.englishName,avatar:fallback.avatar,source:'hupu' as const,message:''};
   } catch (error) {
    return {...fallback,message:error instanceof Error?error.message:'球员资料暂不可用'};
   }

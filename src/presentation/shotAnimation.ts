@@ -10,7 +10,9 @@ export function loadShotAnimation(){
  if(!cached){
   const image=(file:string)=>new Promise<HTMLImageElement>((resolve,reject)=>{
    const img=new Image(),timer=setTimeout(()=>reject(new Error('投篮画面加载超时')),8000);
-   img.onload=()=>{clearTimeout(timer);resolve(img);};img.onerror=()=>{clearTimeout(timer);reject(new Error('投篮画面加载失败'));};img.src=shotArt(file);
+   // WebView may fire load before its decoded bitmap is available to drawImage.
+   // Idle scenes only paint once, so wait for decoding before exposing the canvas.
+   img.onload=()=>{void (typeof img.decode==='function'?img.decode():Promise.resolve()).then(()=>{clearTimeout(timer);resolve(img);},error=>{clearTimeout(timer);reject(error);});};img.onerror=()=>{clearTimeout(timer);reject(new Error('投篮画面加载失败'));};img.src=shotArt(file);
   });
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),8000);
   cached=Promise.all([

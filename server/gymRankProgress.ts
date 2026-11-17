@@ -31,3 +31,36 @@ export function verifiedGymRankingProgress({binding, evidenceId, state, alumni =
 }
 
 export type VerifiedGymRankingProgress = ReturnType<typeof verifiedGymRankingProgress>;
+
+export type AuthorityGymRankingProgress = VerifiedGymRankingProgress & {historyCount: number};
+type CanonicalRankingDocument = {
+ applicationId: string; actorId: string; provenance: 'server-created' | 'legacy-unverified' | null;
+ state: GymState | null; ranking?: AuthorityGymRankingProgress | null;
+};
+
+/** Called inside the authority settlement transaction, before alumni compaction.
+ * Imported saves never become trusted merely by spending time on the server.
+ * The previous checkpoint has already inspected archived players, so retaining
+ * its best avoids reloading unbounded cold history on every training action.
+ */
+export function buildAuthorityGymRankingProgress(document: CanonicalRankingDocument, evidenceId: string): AuthorityGymRankingProgress | null {
+ if (document.provenance !== 'server-created' || !document.state) return null;
+ const state = document.state, runId = `${state.createdAt}-${state.seed}`, previous = document.ranking;
+ if (document.applicationId !== activity.activityId || !validGym(state)) throw Error('Invalid canonical ranking state');
+ if (previous && (previous.puid !== document.actorId || previous.runId !== runId || previous.revision > state.revision
+  || !Number.isSafeInteger(previous.historyCount) || previous.historyCount < 0)) throw Error('Invalid ranking checkpoint binding');
+ const archived = state.alumniArchive?.count ?? 0;
+ if (archived > (previous?.historyCount ?? 0)) throw Error('Verified ranking history checkpoint is incomplete');
+ const hotState = {...state}; delete hotState.alumniArchive;
+ const progress = verifiedGymRankingProgress({
+  binding: {applicationId: document.applicationId, actor: document.actorId, runId}, evidenceId,
+  // The previous trusted maximum covers cold records. This view intentionally
+  // removes only the archive counter; the canonical document stays untouched.
+  state: hotState, alumni: state.alumni, previousBest: previous?.best,
+ });
+ if (previous?.revision === state.revision) {
+  if (previous.fame !== progress.fame || JSON.stringify(previous.best) !== JSON.stringify(progress.best)) throw Error('Ranking changed without a canonical revision');
+  return structuredClone(previous);
+ }
+ return {...progress, historyCount: state.alumni.length + archived};
+}

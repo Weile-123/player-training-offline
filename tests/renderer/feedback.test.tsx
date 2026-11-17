@@ -30,18 +30,21 @@ it('sends the entered feedback to the shared service through the actual form and
  expect(request).toHaveBeenCalledExactlyOnceWith({url:feedbackConfig.apiBase+'/feedback',method:'POST',envId:feedbackConfig.envId,auth:true,data:{applicationId:testApplicationId,content:'反馈测试内容',nickname:'测试玩家'}});
  expect(document.querySelector('[role="status"]')?.textContent).toContain('反馈已提交');
  expect(document.querySelector('[role="status"]')?.textContent).toContain('反馈编号：feedback-test-1');expect(input.value).toBe('');
+ expect(document.querySelector('.action-notice.feedback-notice')?.parentElement).toBe(document.body);
+ expect(document.querySelector('.hupu-feedback-form .action-notice')).toBeNull();
 });
 it('keeps the entered feedback and never submits when text detection fails',async()=>{
  const {input,request,checkAudit,submit}=mount();checkAudit.mockResolvedValue({code:500,data:null});await act(async()=>submit());
  expect(request).not.toHaveBeenCalled();expect(input.value).toBe('反馈测试内容');
- expect(document.querySelector('[role="status"]')?.textContent).toContain('内容检测暂不可用');
+ expect(document.querySelector('.action-notice[role="alert"]')?.textContent).toContain('内容检测暂不可用');
 });
 it('retains text after a service failure and does not auto retry or show success',async()=>{
  const {input,request,submit}=mount();request.mockResolvedValue({statusCode:500,code:500});await act(async()=>submit());
  expect(request).toHaveBeenCalledTimes(1);expect(input.value).toBe('反馈测试内容');
- expect(document.querySelector('[role="status"]')?.textContent).not.toContain('反馈已提交');
+ expect(document.querySelector('.action-notice[role="alert"]')?.textContent).toContain('提交结果暂不确定');
+ expect(document.body.textContent).not.toContain('反馈已提交');
 });
 it('keeps the feedback text when a nominal success has no service receipt',async()=>{
  const {input,request,submit}=mount();request.mockResolvedValue({statusCode:201,code:0,data:{}});await act(async()=>submit());
- expect(input.value).toBe('反馈测试内容');expect(document.querySelector('[role="status"]')?.textContent).toContain('未收到反馈编号');
+ expect(input.value).toBe('反馈测试内容');expect(document.querySelector('.action-notice[role="alert"]')?.textContent).toContain('未收到反馈编号');
 });

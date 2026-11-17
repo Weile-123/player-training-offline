@@ -1,5 +1,5 @@
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';
-const entries=[{path:'art/home/title-comic.png',bytes:20,hash:'a',local:true},{path:'art/shot/ball.png',bytes:30,hash:'b',local:false},{path:'art/shot/player-data.json',bytes:50,hash:'c',local:false}];
+const entries=[{path:'art/home/background-b-portrait.webp',bytes:20,hash:'a',local:true},{path:'art/shot/ball.png',bytes:30,hash:'b',local:false},{path:'art/shot/player-data.json',bytes:50,hash:'c',local:false}];
 let saved:Map<string,Response>,fetcher:ReturnType<typeof vi.fn>,cache:{match:ReturnType<typeof vi.fn>;put:ReturnType<typeof vi.fn>;delete:ReturnType<typeof vi.fn>};
 beforeEach(()=>{
  vi.resetModules();vi.doMock('../data/runtime-assets.json',()=>({default:{entries}}));
@@ -15,14 +15,31 @@ it('资源校验可用后累计进度，资源全部完成仍等待首页初始�
  const api=await import('./preloadAssets'),seen:number[]=[];api.subscribeLoading(p=>seen.push(p.percent));
  await api.preloadAssets();expect(cache.put).toHaveBeenCalledTimes(3);expect(Math.max(...seen)).toBe(99);
  expect(fetcher.mock.calls.some(([url])=>url==='https://cdn.test/game/art/shot/ball.png')).toBe(true);
- expect(fetcher.mock.calls.some(([url])=>url===new URL(import.meta.env.BASE_URL+'art/home/title-comic.png','https://game.test/app/').href)).toBe(true);
+ expect(fetcher.mock.calls.some(([url])=>url===new URL(import.meta.env.BASE_URL+'art/home/background-b-portrait.webp','https://game.test/app/').href)).toBe(true);
  api.finishLoading();expect(seen[seen.length-1]).toBe(100);
+});
+it('cannot force 100% before downloads, image decoding and fonts are actually ready',async()=>{
+ let release!:()=>void;const fonts=new Promise<void>(resolve=>{release=resolve;});
+ vi.stubGlobal('document',{documentElement:{style:{setProperty:vi.fn()}},fonts:{ready:fonts}});
+ const api=await import('./preloadAssets');let percent=0;api.subscribeLoading(p=>{percent=p.percent;});
+ expect(api.finishLoading()).toBe(false);expect(percent).toBe(0);
+ const pending=api.preloadAssets();await vi.waitFor(()=>expect(cache.put).toHaveBeenCalledTimes(3));
+ expect(api.finishLoading()).toBe(false);expect(percent).toBe(99);
+ release();await pending;expect(api.finishLoading()).toBe(true);expect(percent).toBe(100);
+});
+it('reuses the exact decoded blob URL without a second unbounded decode pass',async()=>{
+ const decoded:string[]=[];vi.stubGlobal('Image',class{src='';decode=async()=>{decoded.push(this.src);}});
+ const api=await import('./preloadAssets');await api.preloadAssets();
+ const {assetUrl}=await import('./assetUrls');
+ expect(decoded).toHaveLength(2);
+ expect(decoded).toContain(assetUrl('art/home/background-b-portrait.webp'));expect(decoded).toContain(assetUrl('art/shot/ball.png'));
 });
 it('失败不能到100%，重试只重新请求失败资源，成功资源复用',async()=>{
  const original=fetcher.getMockImplementation() as (url:string)=>Promise<Response>;let broken=true;fetcher.mockImplementation(async url=>{if(url.includes('art/shot/ball.png')&&broken)throw Error('offline');return original(url)});
  const api=await import('./preloadAssets'),seen:number[]=[];api.subscribeLoading(p=>seen.push(p.percent));
  await expect(api.preloadAssets()).rejects.toThrow('1 项资源');expect(Math.max(...seen)).toBeLessThan(100);broken=false;
- await api.preloadAssets();expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/title-comic.png'))).toHaveLength(1);expect(fetcher.mock.calls.filter(([url])=>url.includes('art/shot/ball.png'))).toHaveLength(2);
+ expect(api.finishLoading()).toBe(false);
+ await api.preloadAssets();expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/background-b-portrait.webp'))).toHaveLength(1);expect(fetcher.mock.calls.filter(([url])=>url.includes('art/shot/ball.png'))).toHaveLength(2);
 });
 it('按已完成资源体积增长，慢图片完成前持续等待，之后复用本地Blob',async()=>{
  const original=fetcher.getMockImplementation() as (url:string)=>Promise<Response>;
@@ -50,13 +67,13 @@ it('损坏的缓存会删除并重新下载，不会跳过校验进入首页',as
 it('逐文件CDN映射优先，保留本地资源且不修改下载URL，所有请求禁用referrer',async()=>{
  const original=fetcher.getMockImplementation() as (url:string)=>Promise<Response>;
  const remote='https://i2.hoopchina.com.cn/shaper-img/test.png?token=keep';
- fetcher.mockImplementation(async url=>url.endsWith('config/assets.json')?new Response(JSON.stringify({baseUrl:'https://unused.test/',urls:{'art/home/title-comic.png':remote,'art/shot/ball.png':remote}})):original(url));
+ fetcher.mockImplementation(async url=>url.endsWith('config/assets.json')?new Response(JSON.stringify({baseUrl:'https://unused.test/',urls:{'art/home/background-b-portrait.webp':remote,'art/shot/ball.png':remote}})):original(url));
  const api=await import('./preloadAssets');await api.preloadAssets();
  expect(fetcher.mock.calls.some(([url])=>url===remote)).toBe(true);
  expect(fetcher.mock.calls.filter(([url])=>url===remote)).toHaveLength(1);
  expect(cache.put.mock.calls.some(([key])=>key===remote+'&v=b')).toBe(true);
  for(const call of fetcher.mock.calls)expect(call[1]).toMatchObject({referrerPolicy:'no-referrer'});
- const {assetSource}=await import('./assetUrls');expect(assetSource('art/home/title-comic.png')).not.toBe(remote);
+ const {assetSource}=await import('./assetUrls');expect(assetSource('art/home/background-b-portrait.webp')).not.toBe(remote);
 });
 
 it.each(['open','match','put'])('缓存 %s 被禁用或空间耗尽时，仍可完成加载并复用内存资源',async(kind)=>{
@@ -80,7 +97,7 @@ it('HTTP错误可重试且成功的资源不重复下载',async()=>{
  let failed=true;fetcher.mockImplementation(async url=>url.includes('art/shot/ball.png')&&failed?new Response('unavailable',{status:503}):original(url));
  const api=await import('./preloadAssets');await expect(api.preloadAssets()).rejects.toThrow('1 项资源');
  failed=false;await api.preloadAssets();
- expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/title-comic.png'))).toHaveLength(1);
+ expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/background-b-portrait.webp'))).toHaveLength(1);
  expect(fetcher.mock.calls.filter(([url])=>url.includes('art/shot/ball.png'))).toHaveLength(2);
 });
 it('弱网45秒超时会中止请求，恢复后只重试失败资源',async()=>{
@@ -91,7 +108,7 @@ it('弱网45秒超时会中止请求，恢复后只重试失败资源',async()=>
  const api=await import('./preloadAssets');const result=api.preloadAssets().catch(error=>error);
  await vi.advanceTimersByTimeAsync(45000);expect(await result).toBeInstanceOf(Error);
  slow=false;await api.preloadAssets();
- expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/title-comic.png'))).toHaveLength(1);
+ expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/background-b-portrait.webp'))).toHaveLength(1);
  expect(fetcher.mock.calls.filter(([url])=>url.includes('art/shot/ball.png'))).toHaveLength(2);
  expect(vi.getTimerCount()).toBe(0);
 });
@@ -102,7 +119,7 @@ it('网络返回损坏图片时不能假装成功，修复后可重试',async()=
 });
 it('慢网不使用虚假进度且下载并发上限为4',async()=>{
  vi.useFakeTimers();
- vi.doMock('../data/runtime-assets.json',()=>({default:{entries:Array.from({length:12},(_,i)=>({path:'art/home/'+i+'.png',bytes:10,hash:String(i),local:false}))}}));
+ vi.doMock('../data/runtime-assets.json',()=>({default:{entries:Array.from({length:12},(_,i)=>({path:'art/game/startup-'+i+'.png',bytes:10,hash:String(i),local:false}))}}));
  const original=fetcher.getMockImplementation() as (url:string)=>Promise<Response>;
  let active=0,maxActive=0;
  fetcher.mockImplementation(async url=>{
@@ -121,7 +138,7 @@ it('动画配置断网重试不会重新下载已经完成的全部图片',async
  let failed=true;fetcher.mockImplementation(async url=>{if(url.endsWith('config/animation.json')&&failed)throw Error('offline');return original(url)});
  const api=await import('./preloadAssets');await expect(api.preloadAssets()).rejects.toThrow('offline');
  failed=false;await api.preloadAssets();
- expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/title-comic.png'))).toHaveLength(1);
+ expect(fetcher.mock.calls.filter(([url])=>url.includes('art/home/background-b-portrait.webp'))).toHaveLength(1);
 });
 it('延后加载的商店图片不参与启动下载和进度分母，打开功能时仍能获得原地址',async()=>{
  vi.doMock('../data/runtime-assets.json',()=>({default:{entries:[...entries,{path:'art/products/relic_001.png',bytes:60_000_000,hash:'deferred',local:false}]}}));

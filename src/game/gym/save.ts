@@ -74,6 +74,7 @@ function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boo
   if (has(value, 'greatShotReady') && typeof value.greatShotReady !== 'boolean') return false;
   if (has(value, 'greatShotsRemaining') && !integer(value.greatShotsRemaining, 1, maximumStoredChalkShots)) return false;
   if (has(value, 'shareLevelClaimed') && typeof value.shareLevelClaimed !== 'boolean') return false;
+  if (has(value, 'overflowExperience') && !integer(value.overflowExperience)) return false;
   if ((!legacy || has(value, 'cooperation')) && !agreement(value.cooperation, value)) return false;
   if ((!legacy || Object.prototype.hasOwnProperty.call(value, 'enteredGymLevel')) && !integer(value.enteredGymLevel, 1, gymLevel)) return false;
   if (!legacy || Object.prototype.hasOwnProperty.call(value, 'training')) {
@@ -137,6 +138,26 @@ function validPendingEffects(value: unknown, gymLevel: number): boolean {
 }
 
 function validGymShape(value: unknown, legacy = false): value is GymState {
+  if(record(value)&&has(value,'offlineReward')){
+    const reward=value.offlineReward;
+    if(!record(reward)||typeof reward.claimed!=='boolean'||typeof reward.dismissed!=='boolean'||!record(reward.report))return false;
+    const r=reward.report;
+    if(!text(r.reportId)||![r.from,r.to,r.elapsedMs,r.creditedMs,r.capMs,r.totalShots,r.totalExperience].every(v=>integer(v))
+      ||(r.to as number)>(value.updatedAt as number)||r.elapsedMs!==(r.to as number)-(r.from as number)||(r.creditedMs as number)>(r.elapsedMs as number)
+      ||typeof r.capped!=='boolean'||!Array.isArray(r.players)||r.players.length>8||new Set(r.players.map(p=>record(p)?p.id:null)).size!==r.players.length)return false;
+    let xp=0,shots=0;
+    for(const p of r.players){if(!record(p)||!text(p.id)||!text(p.name)||![p.shots,p.xpGained,p.courses,p.staminaBefore,p.staminaAfter].every(v=>integer(v))
+      ||!integer(p.levelBefore,0,99)||!integer(p.levelAfter,p.levelBefore,99)
+      ||!(p.templateBefore===null||typeof p.templateBefore==='string'&&templateIds.has(p.templateBefore))
+      ||!(p.templateAfter===null||typeof p.templateAfter==='string'&&templateIds.has(p.templateAfter)))return false;
+      xp+=p.xpGained as number;shots+=p.shots as number;
+    }
+    if(xp!==r.totalExperience||shots!==r.totalShots)return false;
+    if(has(r,'bonusExperience')){
+      if(!record(r.bonusExperience)||Object.keys(r.bonusExperience).length!==r.players.length)return false;
+      for(const p of r.players as Record<string,unknown>[]){if(!has(r.bonusExperience,p.id as string)||!integer(r.bonusExperience[p.id as string],0,p.xpGained as number))return false;}
+    }
+  }
   if (record(value) && has(value, 'staminaRewardCount') && !integer(value.staminaRewardCount)) return false;
   if (record(value) && has(value, 'recommendationRulesVersion') && value.recommendationRulesVersion !== 11) return false;
   if (record(value) && value.recommendationRulesVersion === 11 && !idList(value.postgameRecommendedTemplates, templateIds)) return false;

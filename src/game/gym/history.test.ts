@@ -5,6 +5,8 @@ import {activePlayers, alumniProgress, newGym, recommendation, recommendationPay
 import {createGymHistory, recentAlumniLimit} from './history';
 import {encodeGym, gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './save';
 import {templateRules} from '../contract/templates';
+import {exportGymCloudArchive} from '../../platform/gymCloudArchive';
+import {hupuProject} from '../../platform/hupuProject';
 
 function fixture(count: number) {
   const state = newGym(1_000, 17);
@@ -69,6 +71,65 @@ beforeEach(() => { vi.stubGlobal('IDBKeyRange', IDBKeyRange); });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('bounded recent alumni with durable history', () => {
+  it('restores a portable cloud snapshot for the same gym repeatedly without colliding with prior cold records', async () => {
+    const original = fixture(113), context = memory(original), indexedDB = new IDBFactory();
+    const options = {indexedDB, databaseName: 'history-test'};
+    const store = createGymStore(context.storage, 17, () => 1_000, options);
+    await store.getState().hydrate();
+    const initialArchive = store.getState().state.alumniArchive!.id;
+    const originalCold = await records(indexedDB, 'alumni');
+    const raw = await exportGymCloudArchive(store, 2_000);
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const {createdAt, seed, revision, updatedAt} = store.getState().state;
+      await store.getState().restoreCloudArchive!(raw, {createdAt, seed, revision, updatedAt}, raw);
+      expect(store.getState().state.alumniArchive!.id).not.toBe(initialArchive);
+      expect(await store.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+    }
+    expect(await records(indexedDB, 'alumni')).toEqual(expect.arrayContaining(originalCold));
+    const reloaded = createGymStore(context.storage, 17, () => 1_000, options);
+    await reloaded.getState().hydrate();
+    expect(await reloaded.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+  });
+
+  it('keeps different gyms and older same-gym cold history isolated when restoring a cloud snapshot', async () => {
+    const original = fixture(113), remote = fixture(117);
+    remote.seed = 88; remote.player!.name = '异地球馆';
+    remote.alumni.forEach(player => {player.name = '异地校友';});
+    const context = memory(original), indexedDB = new IDBFactory();
+    const options = {indexedDB, databaseName: 'history-test'};
+    const store = createGymStore(context.storage, 17, () => 1_000, options);
+    await store.getState().hydrate();
+    const before = await exportGymCloudArchive(store, 2_000), originalCold = await records(indexedDB, 'alumni');
+    const raw = JSON.stringify({format: 'legend-gym-cloud-v1', applicationId: hupuProject.applicationId, uploadedAt: 2_000, gym: encodeGym(remote)});
+    const {createdAt, seed, revision, updatedAt} = store.getState().state;
+    await store.getState().restoreCloudArchive!(raw, {createdAt, seed, revision, updatedAt}, before);
+    expect(await store.getState().loadAlumni(100, 17)).toEqual({players: remote.alumni.slice(0, 17).reverse(), total: 117});
+    expect(await records(indexedDB, 'alumni')).toEqual(expect.arrayContaining(originalCold));
+    const current = store.getState().state;
+    await store.getState().restoreCloudArchive!(before, {createdAt: current.createdAt, seed: current.seed, revision: current.revision, updatedAt: current.updatedAt}, raw);
+    expect(await store.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+  });
+
+  it('rolls back a failed cloud restore together with new cold records and leaves the original archive readable', async () => {
+    const original = fixture(113), context = memory(original), indexedDB = new IDBFactory();
+    const options = {indexedDB, databaseName: 'history-test'};
+    const store = createGymStore(context.storage, 17, () => 1_000, options);
+    await store.getState().hydrate();
+    const raw = await exportGymCloudArchive(store, 2_000), before = store.getState().state;
+    const originalCold = await records(indexedDB, 'alumni'), originalHot = await records(indexedDB, 'hot');
+    const put = IDBObjectStore.prototype.put;
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: globalThis.IDBObjectStore, value, key) {
+      if (this.name === 'hot' && key === 'current') throw new DOMException('quota', 'QuotaExceededError');
+      return put.call(this, value, key);
+    });
+    const {createdAt, seed, revision, updatedAt} = before;
+    await expect(store.getState().restoreCloudArchive!(raw, {createdAt, seed, revision, updatedAt}, raw)).rejects.toThrow();
+    expect(store.getState().state).toBe(before);
+    expect(await records(indexedDB, 'alumni')).toEqual(originalCold);
+    expect(await records(indexedDB, 'hot')).toEqual(originalHot);
+    expect(await store.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+  });
+
   it('migrates a valid 5,000-record old envelope and preserves the oldest complete page', async () => {
     const original = fixture(5_000);
     const context = memory(original);

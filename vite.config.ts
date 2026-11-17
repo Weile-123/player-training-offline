@@ -13,8 +13,8 @@ export default defineConfig({
     host: '127.0.0.1',
     port: 8800,
     strictPort: true,
-    watch: { ignored: ['**/public/config/animation.json','**/.tmp/**','**/output/**','**/hupu-ai-game-skills/**'] },
-    fs: { deny: ['**/.git/**','**/.env*','**/credentials.json','**/debug-context.json','**/debug-logs.json','**/hupu-ai-game-skills/**','**/.tmp/**'] },
+    watch: { ignored: ['**/public/config/animation.json','**/.tmp/**','**/output/**','**/hupu-skills/skills/**'] },
+    fs: { deny: ['**/.git/**','**/.env*','**/credentials.json','**/debug-context.json','**/debug-logs.json','**/hupu-skills/skills/**','**/.tmp/**'] },
   },
   preview: { host: '127.0.0.1', port: 4174, strictPort: true },
 });

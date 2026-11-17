@@ -1,0 +1,17 @@
+# 传奇球馆权威后端准备包
+
+自包含Node >=18.15运行包，运行时无需esbuild、TypeScript或工作区源码。npm ci --omit=dev --ignore-scripts安装锁定生产依赖后npm start。已使用官方Node18.15.0可执行文件验证实际bundle、签名SDK、业务训练、ACK恢复与CloudBase适配器。
+
+## 官方CloudBase接入
+
+优先使用同级cloudbase-package准备产物，复用activity_api的9000端口和CloudBase SDK实例。无需开发者提供外部authmodule。显式设置GYM_AUTHORITY_AUTH_MODE=cloudbase-gateway和BUSINESS_ACTIVITY_ID后，使用官方网关验证Bearer并覆盖注入的x-cloudbase-context。必须关闭函数直连，8条球馆路由全部auth=true；路由清单在server/gymCloudBaseRoutes.json。Base64/Gzip解析只在该受信部署边界内读取身份，本身不验Token。未配置身份模式或共享数据库时失败关闭。宿主替代集成仍可注入真正verified的GYM_AUTHORITY_AUTH_MODULE。
+
+通过官方流程应用activity/migrations中的SQL，业务表只授予service_role；共享仓库使用lease fencing、CAS和冷校友追加事务。H5只调用cloud.request({auth:true})，不得自报PUID。网关管理CORS并启用安全域名，函数不自行加生产CORS。
+
+SHAPER_TOKEN从服务端环境读取，其次读取显式挂载credentials.json的shaperToken或官方默认位置；凭据未打包，不读取其他token字段。完成平台定义注册、validate和激活后，再验收真实结算。受保护CloudBase宿主启用官方native SDK确认模式：先绑定账号、动作、报告的一次性挑战，再持久化领取；该确认不是签名凭据。其他宿主默认关闭奖励，除非显式启用或注入verifyReward。
+
+## 本地开发
+
+必须显式设置GYM_AUTHORITY_MODE=development、GYM_AUTHORITY_ENVIRONMENT和至少16字符GYM_DEV_SESSION；只监听127.0.0.1，调用带X-Gym-Dev-Session。文件仓库仅单进程开发验证。生产拒绝测试clock和GYM_AUTHORITY_TEST_ONLY。
+
+旧档一次迁入标legacy-unverified，不重开已有馆；业务进度与报告原子提交后才ACK。本地业务请求可去重；持有settlementId时可GET/ACK续办。上游响应丢失时保留未知尝试，以新的独立平台报告终点及上次已保存平台游标恢复同一业务操作；仅用于连续rate-one时钟，不伪造遗失报告、不重试旧POST。封顶或零时长恢复报告先保存检查点并ACK，再取明确终点。同一上游POST键不是永久重放保证；不使用浏览器时间补发收益。manifest.json列文件SHA256，无秘密和node_modules。

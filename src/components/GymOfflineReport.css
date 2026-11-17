@@ -1,4 +1,4 @@
-/* Directly ported from outputs/ui-redesign-20261116/designs.css, offline B.
+/* Approved offline report layout, retained as the production style source.
  * Only the explicitly requested single-row scrolling and template colors differ. */
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard {border:3px double #c7aa6d;background:var(--ink);color:#f6e6bf;padding:12px;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-dashboard-top {display:flex;align-items:center;justify-content:space-between;gap:8px;}
@@ -56,10 +56,17 @@
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-before, .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-change > i {color:#806847;font-weight:normal;font-style:normal;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-after {color:#b33226;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-template-unchanged {color:#8d3b28;}
-.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary {margin-top:11px;padding:10px;background:#e1dbc0;border:1px solid #99a889;display:flex;align-items:center;gap:9px;}
-.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary .tick {border:2px solid #55846a;color:#356c53;flex:none;width:27px;height:27px;display:grid;place-items:center;font-size:18px;font-weight:bold;border-radius:50%;}
-.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary strong {font-size:12px;color:#315a4e;}
-.game-screen.comic-dialog-layer .gym-design-surface.offline-b .offline-summary small {display:block;margin-top:4px;color:#697354;font-size:10px;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-bottom {margin-top:12px;padding-top:0;border:0;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .report-bottom p {font-size:10px;line-height:1.65;color:#806947;margin-bottom:10px;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-empty {padding:15px 10px;border:1px dashed #b69c70;color:#806847;text-align:center;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-double-experience {display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;}
+.game-screen.comic-dialog-layer .comic-dialog.gym-offline-dialog .gym-design-surface.offline-b .primary.gm-offline-double-experience {background:linear-gradient(125deg,#f5d47a 0%,#ffe7a4 28%,#dfac42 62%,#bb7a20 100%);color:#16353d;border-color:#5b451e;box-shadow:2px 3px #8f6a2a,inset 0 1px #fff1c5;text-shadow:0 1px #ffecb3;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-ad-icon {width:23px;height:20px;flex:none;fill:none;stroke:#22464b;stroke-width:1.8;filter:drop-shadow(0 1px #ffedb1);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-ad-icon path {fill:#22464b;stroke:none;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-xp-value {position:relative;display:inline-block;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-xp .gm-offline-xp-value {color:#9f382a;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .gm-offline-xp-value::after {content:attr(data-xp-text);position:absolute;inset:0;white-space:nowrap;pointer-events:none;color:#edba48;background-image:linear-gradient(115deg,#a96d17 0%,#ffe49a 25%,#f6bd49 48%,#fff0b1 70%,#b47b21 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;opacity:var(--offline-gold-progress,0);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-xp {transition:background-color .9s ease-out,color .9s ease-out;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b.is-double-experience .athlete-xp {background:#183c44;color:#ead8ae;border:1px solid #a17a37;padding:4px;}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b.reduce-motion .athlete-xp {transition:none;}
+@media(prefers-reduced-motion:reduce) {.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-xp {transition:none;}}

@@ -24,6 +24,10 @@ export type OfflinePlayerReport = {
   templateBefore: string | null; templateAfter: string | null; courses: number;
 };
 export type OfflineTrainingReport = {
+  reportId?: string;
+  experienceMultiplier?: 1 | 2;
+  /** Actual additional XP credited per player, bounded by the level-99 ceiling. */
+  bonusExperience?: Record<string,number>;
   from: number; to: number; elapsedMs: number; creditedMs: number; capMs: number; capped: boolean;
   totalShots: number; totalExperience: number; players: OfflinePlayerReport[];
 };
@@ -34,7 +38,8 @@ export type OfflineTrainingReport = {
  * cursor, including discarded time beyond the cap. It must not write a report
  * or show its rewards before committing this returned state.
  */
-export function settleOfflineGym(original: GymState, now: number, capMs = offlineLimitMs(original)): {state: GymState; report?: OfflineTrainingReport} {
+export function settleOfflineGym(original: GymState, now: number, capMs = offlineLimitMs(original),
+  collectEvents?: (events: readonly GymEvent[]) => void): {state: GymState; report?: OfflineTrainingReport} {
   if (!Number.isSafeInteger(now) || now <= original.updatedAt || now < 0) return {state: finishEquipmentMigration(original)};
   const elapsedMs = now - original.updatedAt;
   const limit = original.gymLevel < 2 || !Number.isSafeInteger(capMs) || capMs < 0 ? 0
@@ -68,6 +73,7 @@ export function settleOfflineGym(original: GymState, now: number, capMs = offlin
       trainPlayer(state, player, nextAt, events, matched.has(player.id));
       matched.add(player.id);
     }
+    if (events.length) collectEvents?.(events);
   }
   // The capped part trains; the discarded remainder may only restore stamina.
   // Advancing all the way to now prevents refreshing from consuming it again.
@@ -88,9 +94,15 @@ export function settleOfflineGym(original: GymState, now: number, capMs = offlin
     };
   });
   const report: OfflineTrainingReport = {
+    reportId: `offline_${state.seed}_${state.createdAt}_${original.updatedAt}_${now}`,
     from: original.updatedAt, to: now, elapsedMs, creditedMs, capMs: limit, capped: elapsedMs > limit,
     totalShots: players.reduce((sum, player) => sum + player.shots, 0),
     totalExperience: players.reduce((sum, player) => sum + player.xpGained, 0), players,
   };
+  // Preserve an open report while native ads/background heartbeats accrue new
+  // training. Its original XP is the immutable basis of the one-time bonus.
+  if(elapsedMs>=5000&&report.totalShots>0&&(!state.offlineReward||state.offlineReward.dismissed)){
+    state.offlineReward={report:cloneData(report),claimed:false,dismissed:false};
+  }
   return {state, report};
 }

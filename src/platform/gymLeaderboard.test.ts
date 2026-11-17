@@ -1,5 +1,5 @@
 import {afterEach, expect, it, vi} from 'vitest';
-import {createGymLeaderboardClient, gymRankReference, type GymRankRow} from './gymLeaderboard';
+import {cleanGymRankingNickname,createGymLeaderboardClient, gymRankReference, type GymRankRow} from './gymLeaderboard';
 import {newGym} from '../game/gym/engine';
 import {nbaTemplates} from '../game/templates';
 
@@ -15,6 +15,44 @@ it('submits only a canonical progress reference; scores and identity are not sen
  await expect(client.sync(reference)).resolves.toBe(true);
  expect(request).toHaveBeenCalledExactlyOnceWith('/leaderboard/submit', 'POST', {event: 'gym-progress', ...reference}, true);
  expect(client.getMessage()).toBe('最佳球员与声望成绩已同步');
+});
+it('uploads the current SDK nickname as display data with a progress reference, never a client identity or score',async()=>{
+ const request=vi.fn().mockResolvedValue({accepted:true});
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'private-owner',nickname:'  J\u0000R球迷\u202e🏀  '}),request});
+ await client.sync(reference);
+ expect(request).toHaveBeenCalledExactlyOnceWith('/leaderboard/submit','POST',{event:'gym-progress',...reference,nickname:'JR球迷🏀'},true);
+});
+it('cleans display controls and lone surrogates and caps nicknames by Unicode code points',()=>{
+ const nickname=cleanGymRankingNickname(' \ud800\u0085\u2066'+ '🏀'.repeat(70)+'\u2069 ');
+ expect(Array.from(nickname)).toHaveLength(60);expect(nickname).toBe('🏀'.repeat(60));
+ expect(cleanGymRankingNickname({nickname:'not-a-string'})).toBe('');expect(cleanGymRankingNickname('\u0000\u202e ')).toBe('');
+});
+it('repairs the signed-in user’s cached public display name by public row ID after profile sync and personal read',async()=>{
+ const mine={...fameRow,coach:'虎扑训练师'},other={...fameRow,id:'another-public-row',coach:'另一位用户'};
+ const renamed={...mine,coach:'真实虎扑昵称'};
+ const request=vi.fn(async(path:string)=>path.includes('/submit')?{accepted:true,updated:2}:path.includes('/me?')?{me:{rank:1,entry:renamed}}:{entries:[mine,other]});
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'private-owner',nickname:'真实虎扑昵称'}),request});
+ expect(await client.list('fame')).toEqual({entries:[renamed,other],me:{rank:1,entry:renamed}});
+ expect(request.mock.calls).toEqual([
+  ['/leaderboard?board=fame&limit=50','GET'],
+  ['/leaderboard/submit','POST',{event:'gym-profile',nickname:'真实虎扑昵称'},true],
+  ['/leaderboard/me?board=fame','GET',undefined,true],
+ ]);
+ expect(mine.coach).toBe('虎扑训练师');
+});
+it.each(['request-failed','unacknowledged'])('preserves public and personal results when display-name sync is unavailable (%s)',async failure=>{
+ const request=vi.fn(async(path:string)=>{
+  if(path.includes('/submit')){if(failure==='request-failed')throw Error('profile unavailable');return{accepted:false};}
+  return path.includes('/me?')?{me:{rank:1,entry:fameRow}}:{entries:[fameRow]};
+ });
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'owner',nickname:'我的昵称'}),request});
+ expect(await client.list('fame')).toEqual({entries:[fameRow],me:{rank:1,entry:fameRow},personalError:expect.stringContaining('昵称暂未同步')});
+});
+it('does not invent a ranking entry when profile sync succeeds without any existing scores',async()=>{
+ const request=vi.fn(async(path:string,_method:'GET'|'POST',_data?:Record<string,unknown>,_auth?:boolean)=>path.includes('/submit')?{accepted:true,updated:0}:path.includes('/me?')?{me:null}:{entries:[]});
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'owner',nickname:'JR'}),request});
+ expect(await client.list('player')).toEqual({entries:[],me:null});
+ expect(request.mock.calls.find(([path])=>String(path).includes('/submit'))?.[2]).toEqual({event:'gym-profile',nickname:'JR'});
 });
 it('keeps local references stable without imposing an end-of-career condition', () => {
  const state = newGym(1_800_000_000_000, 23);
@@ -41,13 +79,33 @@ it('preserves big integer player values and reads current-account personal ranki
  expect(data.me?.entry.score).toBe('12345678901234567890');
  expect(request.mock.calls).toEqual([['/leaderboard?board=player&limit=50', 'GET'], ['/leaderboard/me?board=player', 'GET', undefined, true]]);
 });
-it('rejects an account switch during personal lookup and submission', async () => {
+it('hides stale personal data but preserves public scores after an account switch; submission still rejects', async () => {
  const user = vi.fn().mockResolvedValueOnce({puid: 'one'}).mockResolvedValue({puid: 'two'});
  const request = vi.fn(async (path: string) => path.includes('/submit') ? {accepted: true} : path.includes('/me?') ? {me: {rank: 1, entry: fameRow}} : {entries: [fameRow]});
  const client = createGymLeaderboardClient({enabled: () => true, user, request});
- await expect(client.list('fame')).rejects.toThrow('账号已切换');
+ expect(await client.list('fame')).toEqual({entries: [fameRow], me: null, personalError: expect.stringContaining('个人排名暂不可用')});
  user.mockReset().mockResolvedValueOnce({puid: 'one'}).mockResolvedValue({puid: 'two'});
  await expect(client.sync(reference)).rejects.toThrow('账号已切换');
+});
+it('preserves public results when the account query fails without making a private request', async () => {
+ const request = vi.fn().mockResolvedValue({entries: [fameRow]});
+ const client = createGymLeaderboardClient({enabled: () => true, user: async () => {throw Error('account offline');}, request});
+ expect(await client.list('fame')).toEqual({entries: [fameRow], me: null, personalError: expect.stringContaining('公开榜单仍可查看')});
+ expect(request).toHaveBeenCalledExactlyOnceWith('/leaderboard?board=fame&limit=50', 'GET');
+});
+it.each(['request-failed', 'invalid-result'])('preserves public scores when personal ranking is unavailable (%s)', async failure => {
+ const request = vi.fn(async (path: string) => {
+  if (!path.includes('/me?')) return {entries: [playerRow]};
+  if (failure === 'request-failed') throw Error('personal offline');
+  return {me: {rank: -1, entry: playerRow}};
+ });
+ const client = createGymLeaderboardClient({enabled: () => true, user: async () => ({puid: 'one'}), request});
+ expect(await client.list('player')).toEqual({entries: [playerRow], me: null, personalError: expect.stringContaining('个人排名暂不可用')});
+});
+it('still rejects a failed public request before looking up an account', async () => {
+ const user = vi.fn(), request = vi.fn().mockRejectedValue(Error('public offline'));
+ const client = createGymLeaderboardClient({enabled: () => true, user, request});
+ await expect(client.list('fame')).rejects.toThrow('public offline'); expect(user).not.toHaveBeenCalled();
 });
 it.each([{entries: Array(51).fill(fameRow)}, {entries: [{...fameRow, score: 'NaN'}]}, {entries: [{...fameRow, score: '-1'}]}, {}])('rejects malformed/oversized public results (%j)', async response => {
  const client = createGymLeaderboardClient({enabled: () => true, user: async () => null, request: async () => response});

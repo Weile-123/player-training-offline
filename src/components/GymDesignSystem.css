@@ -1,4 +1,4 @@
-/* Shared frame and typography copied from outputs/ui-redesign-20261116/designs.css.
+/* Shared frame and typography for the approved offline report.
    Scoped to these two approved designs; existing game dialogs stay independent. */
 @font-face {font-family: GameDisplay; src: url('../fonts/black_bont.ttf') format('truetype'); font-display: block;}
 .game-screen.comic-dialog-layer .comic-dialog.gym-design-dialog {

@@ -105,7 +105,7 @@ async function twoPlayers() {
   return [state().player!.id, state().bench[0].id];
 }
 
-it.each([98, 99])('removes the main-court consumable shelf without consuming inventory at level %s', async level => {
+it.each([0, 98, 99])('removes the main-court consumable shelf without consuming inventory at level %s', async level => {
   const initial = newGym(at, 21);
   initial.player!.level = initial.player!.peakLevel = level;
   initial.player!.stamina = 0; initial.inventory.drink = 1;
@@ -327,6 +327,112 @@ it('keeps the quick-switch control out of a single-player court', async () => {
   expect(document.querySelector('[aria-label="切换训练球员"]')).toBeNull();
 });
 
+it('switches a two-position court to its empty position and recruits/selects there with the main button', async () => {
+  const initial = newGym(at, 21); initial.gymLevel = 2;
+  initial.player!.level = initial.player!.peakLevel = 8;
+  initial.player!.experience = 42;
+  initial.player!.templateId = 'bryant'; initial.player!.highestTier = 'legend';
+  const firstId = initial.player!.id;
+  await mount(initial);
+  expect(document.querySelector('.gym-player-share')).toBeTruthy();
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/2');
+  await press('切换训练球员');
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('2/2');
+  expect(state().player!.id).toBe(firstId);
+  expect(state().bench).toHaveLength(0);
+  expect(harness.actions).toEqual([]);
+  expect(document.querySelector('.gym-player-share')).toBeNull();
+  expect(document.querySelector('[aria-label="当前球员自动训练"]')).toBeNull();
+  expect(document.querySelector('[aria-label="当前球员训练经验"]')?.getAttribute('aria-valuetext')).toBe('空训练位，等待招募');
+  expect(document.querySelector('[aria-label="训练经验"]')?.textContent).toContain('等待招募');
+  expect(document.querySelector('[aria-label="训练经验"]')?.textContent).not.toContain('42');
+  expect(document.querySelector<HTMLButtonElement>('[aria-label="选择训练计划"]')!.disabled).toBe(true);
+  expect(document.querySelector<HTMLButtonElement>('[aria-label="推荐球员签约"]')!.disabled).toBe(true);
+  await press('招募球员');
+  expect(harness.actions).toEqual([{type: 'recruit', expectedNextPlayer: initial.nextPlayer, selectRecruited: true}]);
+  expect(state().player!.id).not.toBe(firstId);
+  expect(state().bench.map(trainee => trainee.id)).toEqual([firstId]);
+  expect(state().bench[0].level).toBe(8);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeNull();
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('2/2');
+  expect(state().player!.nextShotAt).toBe(at + 500);
+  expect(document.querySelector<HTMLButtonElement>('[aria-label="投篮训练"]')!.disabled).toBe(true);
+  await advance(500);
+  await press('投篮训练');
+  expect(state().player!.shots).toBe(1);
+  expect(state().bench[0].shots).toBe(0);
+});
+
+it('cycles all eight available positions while preserving the occupied entry order', async () => {
+  const initial = newGym(at, 21); initial.gymLevel = 8;
+  await mount(initial);
+  await act(async () => {
+    await harness.store!.getState().act({type: 'recruit'});
+    await harness.store!.getState().act({type: 'recruit'});
+  });
+  const ids = [state().player!, ...state().bench].sort((a,b) => a.enteredAt-b.enteredAt || a.id.localeCompare(b.id)).map(trainee => trainee.id);
+  for (let step = 1; step <= 8; step++) {
+    await press('切换训练球员');
+    const position = step % 8;
+    expect(document.querySelector('.gym-court-switch small')?.textContent).toBe(`${position + 1}/8`);
+    expect([state().player!, ...state().bench].map(trainee => trainee.id).sort()).toEqual([...ids].sort());
+    if (position < ids.length) {
+      expect(state().player!.id).toBe(ids[position]);
+      expect(document.querySelector('[aria-label="投篮训练"]')).toBeTruthy();
+    } else expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+  }
+  expect(harness.actions.filter(action => action.type === 'select-player')).toHaveLength(3);
+  expect(harness.actions.filter(action => action.type === 'recruit')).toHaveLength(2);
+});
+
+it('keeps capacity switching and direct recruitment usable when every position is empty', async () => {
+  const initial = newGym(at, 21); initial.gymLevel = 3; initial.player = null;
+  await mount(initial);
+  await press('关闭面板');
+  for (const position of [2,3,1]) {
+    await press('切换训练球员');
+    expect(document.querySelector('.gym-court-switch small')?.textContent).toBe(`${position}/3`);
+    expect(state().player).toBeNull();
+  }
+  await press('招募球员');
+  expect(state().player).toBeTruthy();
+  expect(state().bench).toHaveLength(0);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/3');
+});
+
+it('continues real automatic training while an empty position hides all player feedback', async () => {
+  const initial = newGym(at, 21); initial.gymLevel = 2;
+  initial.player!.autoEnabled = true; initial.player!.nextShotAt = at + 200;
+  initial.player!.shots = initial.player!.training.shots = 9;
+  await mount(initial);
+  await press('切换训练球员');
+  await advance(200);
+  expect(state().player!.shots).toBe(10);
+  expect(state().player!.training.completedCourses).toBe(1);
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+  expect(document.querySelector('[aria-label="当前球员训练经验"]')?.getAttribute('aria-valuenow')).toBe('0');
+  expect(document.querySelector('.contract-status')).toBeNull();
+  expect(document.querySelector('[aria-label="查看当前训练课程"]')).toBeNull();
+  await press('切换训练球员');
+  expect(document.querySelector('[aria-label="当前球员自动训练"]')?.getAttribute('aria-checked')).toBe('true');
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/2');
+});
+
+it('returns to the real selected athlete when opening a secondary panel from an empty position', async () => {
+  const initial = newGym(at, 21); initial.gymLevel = 2;
+  await mount(initial);
+  await press('切换训练球员');
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+  await press('打开背包');
+  await act(async () => harness.store!.setState({actionError: '存档写入失败，本次操作未生效'}));
+  expect(document.querySelector('.action-notice[role="alert"]')?.textContent).toContain('存档写入失败');
+  await press('关闭面板');
+  expect(document.querySelector('[aria-label="投篮训练"]')).toBeTruthy();
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/2');
+});
+
 it('shows a full experience slot at the level cap without a zero denominator', async () => {
   const initial = newGym(at, 21);
   initial.player!.level = 99;
@@ -397,7 +503,7 @@ it('keeps player records, training access and the album usable after template su
   expect(state()).toEqual(initial);
 });
 
-it('restores the live course card after a short automatic course-completion notice', async () => {
+it('keeps the live course card in place while an automatic completion notice floats above the page', async () => {
   const initial = newGym(at, 25);
   initial.gymLevel = 2;
   initial.player!.autoEnabled = true;
@@ -407,10 +513,26 @@ it('restores the live course card after a short automatic course-completion noti
   await mount(initial);
   await advance(200);
   expect(document.querySelector('.contract-status')?.textContent).toContain('训练课完成');
-  expect(document.querySelector('[aria-label="查看当前训练课程"]')).toBeNull();
+  expect(document.querySelector('[aria-label="查看当前训练课程"]')).toBeTruthy();
+  expect(document.querySelector('.contract-status')?.parentElement).toBe(document.body);
   await advance(4_000);
   expect(document.querySelector('[aria-label="查看当前训练课程"]')).toBeTruthy();
   expect(document.querySelector('.contract-status')).toBeNull();
+});
+
+it.each(['打开背包','器材商店','打开球员名册','查看球馆经营','打开图鉴','选择训练计划','赞助合作','推荐球员签约'])('keeps automatic course notices out of the secondary panel: %s', async label => {
+  const initial = newGym(at, 25); initial.gymLevel = 2;
+  initial.player!.autoEnabled = true; initial.player!.nextShotAt = at + 200;
+  initial.player!.training.shots = initial.player!.shots = 9;
+  await mount(initial);
+  await press(label);
+  await advance(200);
+  expect(state().player!.training.completedCourses).toBe(1);
+  expect(document.querySelector('[role="dialog"]')?.textContent).not.toContain('训练课完成');
+  expect(document.querySelector('.contract-status')).toBeNull();
+  await press('关闭面板');
+  expect(document.querySelector('.contract-status')).toBeNull();
+  expect(document.querySelector('[aria-label="查看当前训练课程"]')).toBeTruthy();
 });
 
 it('runs independent automatic switches and settles the enabled athlete once after returning from the background', async () => {

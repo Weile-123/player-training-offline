@@ -1,9 +1,11 @@
 import {create} from 'zustand';
 import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recoverySeconds, type GymAction, type GymResult, type GymState} from './game/gym/engine';
-import {gymSaveKeys, readGym, type GymStorage} from './game/gym/save';
+import {gymSaveKeys, readGym, validGym, type GymStorage} from './game/gym/save';
 import {createGymHistory, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
 import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
 import {parseGymCloudArchive} from './platform/gymCloudArchive';
+import {createGymAuthorityTransport} from './platform/gymAuthority';
+import {createGymLocalFirstStore} from './platform/gymLocalFirst';
 
 const lockName = 'gym-management-v1.writer';
 const queues = new WeakMap<GymStorage, Promise<unknown>>();
@@ -21,6 +23,11 @@ function exclusive<T>(storage: GymStorage, work: () => Promise<T>): Promise<T> {
 }
 
 export type GymStore = {
+  authorityMode?: 'local' | 'connecting' | 'timeflow' | 'error';
+  authorityMessage?: string;
+  authorityCapabilities?: {platformRewards: boolean; legacyAdoption: boolean};
+  retryAuthority?: () => Promise<void>;
+  preparePlatformReward?: (action: GymAction) => Promise<{challengeId: string; confirmation: 'native-sdk-confirmation'} | undefined>;
   state: GymState;
   hasSave: boolean;
   hydrating: boolean;
@@ -34,10 +41,11 @@ export type GymStore = {
   suspend: () => Promise<void>;
   dismissOfflineReport: () => void;
   start: () => Promise<GymResult>;
-  act: (action: GymAction) => Promise<GymResult>;
+  act: (action: GymAction, rewardProof?: {challengeId: string; confirmation: 'native-sdk-confirmation'}) => Promise<GymResult>;
   tick: () => Promise<GymResult>;
   flush: () => Promise<void>;
   restoreCloudArchive?: (raw: string, expected: {createdAt: number; seed: number; revision: number; updatedAt: number}, backup: string | null) => Promise<void>;
+  restorePlatformSnapshot?: (state:GymState,expected:{createdAt:number;seed:number;revision:number;updatedAt:number;hasSave:boolean},owner:string)=>Promise<void>;
 };
 
 const randomSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
@@ -72,6 +80,7 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
           const current = await history.transact(source => ({value: source}), true);
           const source = current.value;
           if (current.state) set({state: current.state, hasSave: true, actionError: '',
+            pendingOfflineReport: current.state.offlineReward&&!current.state.offlineReward.dismissed?current.state.offlineReward.report:null,
             saveMessage: !current.backupOk ? '进度已保存，启动镜像暂不可用。' : source.source === 'backup' ? '已读取备份存档。' : ''});
           else if (source.error) set({saveMessage: '存档校验失败，原数据已保留，可重新开始。'});
           hydrated = true;
@@ -130,7 +139,7 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
             return {state: result.state, value: {result, patch: {
               actionError: result.error ?? (automatic && get().actionError !== saveFailure ? get().actionError : ''),
               isSuspended: suspending ? true : restart || resumed ? false : get().isSuspended,
-              pendingOfflineReport: restart ? null : offlineReport ?? get().pendingOfflineReport,
+              pendingOfflineReport: restart ? null : result.state.offlineReward ? result.state.offlineReward.dismissed?null:result.state.offlineReward.report : offlineReport ?? get().pendingOfflineReport,
             }}};
           });
           const {result, patch} = committed.value;
@@ -159,7 +168,11 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
       act: action => run(action),
       tick: () => run(undefined, false, true),
       resume: () => run(undefined, false, false, true),
-      dismissOfflineReport: () => set({pendingOfflineReport: null}),
+      dismissOfflineReport: () => {
+        const report=get().pendingOfflineReport;
+        if(report?.reportId&&get().state.offlineReward?.report.reportId===report.reportId)void run({type:'dismiss-offline-report',reportId:report.reportId});
+        else set({pendingOfflineReport:null});
+      },
       suspend: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
       flush: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
       restoreCloudArchive: async (raw, expected, backup) => {
@@ -175,6 +188,21 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
           if (!committed.state) throw Error('云存档未能写入本地，原进度已保留');
           hydrated = true;
           set({state: committed.state, hasSave: true, hydrating: false, actionError: '', isSuspended: true, pendingOfflineReport: null, saveMessage: '已同步云存档'});
+        });
+      },
+      restorePlatformSnapshot:async(raw,expected,owner)=>{
+        if(!owner||!validGym(raw)||raw.alumniArchive?.count)throw Error('保存的球馆档案不完整，当前本地进度已保留');
+        const restored=structuredClone(raw);
+        await exclusive(storage,async()=>{
+          const committed=await history.transact(current=>{
+            const active=current.state;
+            if(!!active!==expected.hasSave||active&&(active.createdAt!==expected.createdAt||active.seed!==expected.seed||active.revision!==expected.revision||active.updatedAt!==expected.updatedAt))throw Error('本地进度已变化，未用云端状态覆盖当前游戏');
+            return{state:restored,value:undefined};
+          });
+          if(!committed.state)throw Error('球馆档案恢复失败，原进度已保留');
+          hydrated=true;
+          set({state:committed.state,hasSave:true,hydrating:false,actionError:'',isSuspended:true,
+            pendingOfflineReport:committed.state.offlineReward&&!committed.state.offlineReward.dismissed?committed.state.offlineReward.report:null,saveMessage:'已恢复本机球馆进度'});
         });
       },
     };
@@ -193,4 +221,5 @@ function browserStorage(): GymStorage {
   return {getItem: () => null, setItem: () => { throw new Error('storage-unavailable'); }};
 }
 
-export const useGym = createGymStore(browserStorage());
+const gymStorage = browserStorage();
+export const useGym = createGymLocalFirstStore(createGymStore(gymStorage), gymStorage, createGymAuthorityTransport());

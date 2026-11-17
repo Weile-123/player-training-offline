@@ -34,10 +34,15 @@ describe('equipment migration store commit', () => {
     expect(store.getState().pendingOfflineReport!.creditedMs).toBe(30 * 60_000);
     expect(result.state.pendingLegacyEquipmentEffects).toBeUndefined();
     expect(readGym(port).state).toEqual(result.state);
+    const reportId=store.getState().pendingOfflineReport!.reportId;
+    expect(reportId).toBeTruthy();
     const reloaded = createGymStore(port, 17, () => now);
     await reloaded.getState().resume();
-    expect(reloaded.getState().state.player!.shots).toBe(result.state.player!.shots);
-    expect(reloaded.getState().pendingOfflineReport).toBeNull();
+    expect(reloaded.getState().state.player).toEqual(result.state.player);
+    expect(reloaded.getState().state.rng).toEqual(result.state.rng);
+    expect(reloaded.getState().pendingOfflineReport?.reportId).toBe(reportId);
+    expect(reloaded.getState().pendingOfflineReport).toEqual(store.getState().pendingOfflineReport);
+    expect(reloaded.getState().state.offlineReward).toMatchObject({claimed:false,dismissed:false,report:{reportId}});
   });
 
   it('consumes the migration before the online idle throttle can skip it', async () => {

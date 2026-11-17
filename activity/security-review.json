@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "security_review_json_v1",
+  "validatorVersion": "source-package-static-v17",
+  "decision": "passed",
+  "summary": "未发现明显风险，发布安全门禁检查通过。",
+  "package": {
+    "packageId": "",
+    "archiveSha256": "f071479846e5d5796b3928dc211f815e562c946af8f43c9e6115cdeddc053c29",
+    "fileCount": 223,
+    "analyzedFileCount": 5,
+    "skippedFileCount": 218
+  },
+  "findings": [],
+  "preflightFindings": [],
+  "reviewPolicy": {
+    "executedCode": false,
+    "networkAccess": false,
+    "sandboxPath": "review-package"
+  }
+}

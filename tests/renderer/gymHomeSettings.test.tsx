@@ -23,6 +23,7 @@ let root: Root | null = null;
 let getUser: ReturnType<typeof vi.fn>, load: ReturnType<typeof vi.fn>, save: ReturnType<typeof vi.fn>;
 beforeEach(async () => {
  vi.clearAllMocks(); localStorage.clear(); saveSoundEnabled(true); gymCloudSync.cancelSync();
+ useGym.setState({authorityMode:undefined,authorityMessage:'',authorityCapabilities:undefined,retryAuthority:undefined});
  await useGym.getState().start();
  getUser = vi.fn(async () => ({code: 200, data: {islogin: 0}}));
  load = vi.fn(async () => ({code: 200, data: null})); save = vi.fn(async () => ({code: 200}));
@@ -52,6 +53,7 @@ it('reuses original account and cloud settings with a gym coordinator and omits 
  expect(document.querySelectorAll('.tutorial-switch')).toHaveLength(1);
  expect(document.body.textContent).toContain('云存档'); expect(document.body.textContent).toContain('游戏音效');
  expect(document.body.textContent).not.toContain('减少动态效果'); expect(document.body.textContent).not.toContain('新手教程');
+ expect(document.querySelector('[aria-label="离线训练"]')).toBeNull();
  expect(cloudSync.start).not.toHaveBeenCalled(); expect(cloudSync.getSnapshot).not.toHaveBeenCalled();
  expect(getUser).toHaveBeenCalledOnce(); expect(load).not.toHaveBeenCalled();
  await press('关闭面板'); expect(closed).toBe(1);
@@ -71,6 +73,8 @@ it('fetches the actual account and slot snapshot on open, then uploads gym data 
  expect(save.mock.calls[0][0]).toMatchObject({slot: 1});
  const uploaded = JSON.parse(save.mock.calls[0][0].value); expect(uploaded).toMatchObject({format: 'legend-gym-cloud-v1', applicationId: hupuProject.applicationId});
  expect(document.body.textContent).toContain('上传成功'); expect(cloudSync.start).not.toHaveBeenCalled();
+ expect(document.querySelector('.action-notice.settings-notice')?.parentElement).toBe(document.body);
+ expect(document.querySelector('.home-settings .settings-notice')).toBeNull();
 });
 it('shows a gym-specific preview and restores cloud progress only after confirmation', async () => {
  loggedIn(); const remote = newGym(900, 88); remote.fame = 345; remote.credits = 37;
@@ -88,4 +92,35 @@ it('keeps malformed cloud data from enabling an upload or replacing the local gy
  await mount(); expect(document.body.textContent).toContain('这不是有效的传奇球馆云存档');
  const upload = [...document.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === '上传')!;
  expect(upload.disabled).toBe(true); expect(useGym.getState().state).toBe(before); expect(save).not.toHaveBeenCalled();
+});
+
+it('omits the technical offline connection panel even when legacy connection metadata exists', async () => {
+ const retry=vi.fn().mockRejectedValue(Error('SHAPER_TOKEN backend detail'));
+ useGym.setState({authorityMode:'error',authorityMessage:'SHAPER_TOKEN config detail',retryAuthority:retry});
+ await mount();
+ expect(document.querySelector('[aria-label="离线训练"]')).toBeNull();
+ expect(document.body.textContent).not.toContain('重新连接');
+ expect(document.body.textContent).not.toContain('SHAPER_TOKEN');
+ expect(retry).not.toHaveBeenCalled();
+});
+
+it('keeps manual cloud backup and restore available without a platform gameplay lock', async () => {
+ loggedIn();useGym.setState({authorityMode:'timeflow',authorityMessage:'平台离线训练已连接'});
+ await mount();
+ const syncButton=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='同步')!;
+ const upload=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='上传')!;
+ expect(syncButton.disabled).toBe(false);expect(upload.disabled).toBe(false);
+ expect(document.body.textContent).toContain('进度自动保存在本机');
+ expect(document.body.textContent).not.toContain('重新连接');
+ await press('上传');expect(save).toHaveBeenCalledOnce();
+});
+
+it('refreshes only account/cloud information without awaiting gameplay connection',async()=>{
+ const retry=vi.fn(async()=>new Promise<void>(()=>{}));
+ useGym.setState({authorityMode:'local',retryAuthority:retry});await mount();
+ loggedIn();await press('刷新账号');
+ expect(document.body.textContent).toContain('球馆教练');
+ expect(retry).not.toHaveBeenCalled();
+ const refresh=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='刷新账号')!;
+ expect(refresh.disabled).toBe(false);
 });

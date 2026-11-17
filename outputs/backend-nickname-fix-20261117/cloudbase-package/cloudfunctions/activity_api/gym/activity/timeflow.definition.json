@@ -1,0 +1,28 @@
+{
+  "workspaceId": "app_847cdb589a",
+  "definitionVersion": 1,
+  "protocolVersion": 1,
+  "scopeTypes": ["gym"],
+  "metrics": [
+    {"metricId": "elapsed_ms", "precision": 0, "cap": null, "capScope": "stream", "shared": false}
+  ],
+  "maxOfflineTime": 2592000000,
+  "stream": [
+    {
+      "streamPattern": "clock:{id}",
+      "displayName": "球馆权威时间",
+      "metricId": "elapsed_ms",
+      "ruleKey": "gym_clock_ms",
+      "ruleVersion": 1,
+      "carrier": "interpreter",
+      "lifecycle": "continuous",
+      "phases": [
+        {"name": "running", "baseRate": "1", "capacity": null, "until": {"kind": "immortal"}}
+      ],
+      "decay": []
+    }
+  ],
+  "tasks": [],
+  "events": [],
+  "delivery": {"enabled": false, "mode": "shadow", "includeSourceStreams": false, "subscribers": []}
+}

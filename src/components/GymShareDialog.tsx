@@ -5,10 +5,11 @@ import {generateGymSharePoster, gymShareCopy} from '../presentation/gymSharePost
 import {openGymPost, type GymPostingStage} from '../platform/gymPosting';
 import {useGymDebug} from '../platform/gymDebug';
 import {ComicDialog} from './ComicDialog';
+import {ActionNotice} from './ActionNotice';
 import '../completion.css';
 import './GymRewards.css';
 
-export function GymShareDialog({player, value = '0', reason, onClose, onGranted}: {player: GymPlayer; value?: string; reason: 'levels' | 'stamina'; onClose: () => void; onGranted: () => Promise<boolean>}) {
+export function GymShareDialog({player, value = '0', reason, onClose, onGranted, onBeforeOpen}: {player: GymPlayer; value?: string; reason: 'levels' | 'stamina'; onClose: () => void; onGranted: () => Promise<boolean>; onBeforeOpen?: () => Promise<void>}) {
  const [snapshot] = useState(() => ({player: cloneData(player), value, reason}));
  const copy = gymShareCopy(snapshot), debug = useGymDebug();
  const [busy, setBusy] = useState(false), [rendering, setRendering] = useState(true), [message, setMessage] = useState(''), [done, setDone] = useState(false);
@@ -35,10 +36,15 @@ export function GymShareDialog({player, value = '0', reason, onClose, onGranted}
     if (!alive.current || controller.current.signal.aborted) return;
     const url = URL.createObjectURL(blob); imageUrl.current = url; ready = {url, blob}; setImage(ready); setRendering(false);
    }
-   const result = await openGymPost(copy.title, copy.content, controller.current.signal, ready ? {blob: ready.blob, onStage: next => {if (alive.current) setStage(next);}} : undefined);
-   if (!alive.current) return;
+   await onBeforeOpen?.();
+   if (!alive.current || controller.current.signal.aborted) return;
+   await openGymPost(copy.title, copy.content, controller.current.signal, ready ? {blob: ready.blob, onStage: next => {if (alive.current) setStage(next);}} : undefined);
+   if (!alive.current || controller.current.signal.aborted) return;
    const granted = await onGranted();
-   if (alive.current) {setDone(granted); setMessage(granted ? `${result.simulated ? '本地模拟：' : '已打开编辑器，'}${reason === 'levels' ? '升级奖励已到账' : '体力已回满'}` : '球员状态已变化，奖励未领取，请返回球场查看');}
+   if (alive.current) {
+    if (granted) {setDone(true); onClose();}
+    else setMessage('球员状态已变化，奖励未领取，请返回球场查看');
+   }
   } catch (error) {if (alive.current) setMessage(error instanceof Error ? error.message : '分享失败，请稍后重试');}
   finally {lock.current = false; if (alive.current) {setBusy(false); setRendering(false); setStage(null);}}
  };
@@ -48,6 +54,6 @@ export function GymShareDialog({player, value = '0', reason, onClose, onGranted}
   <p className="gym-share-reward poster-reward-note">{reward}</p>
   {rendering && !image ? <div className="poster-preview-loading" role="status">正在绘制球星海报…</div> : image && <img className="poster-preview-image gym-share-poster" src={image.url} alt={copy.content}/>}
   {debug.skipPosting && <p className="poster-share-notice">本地测试：免上传、免打开发帖编辑器。</p>}
-  {message && <p className="poster-share-notice" role="status" aria-live="polite">{message}</p>}
+  <ActionNotice message={message} role="alert" className="poster-share-notice"/>
  </div></ComicDialog>;
 }

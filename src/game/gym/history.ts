@@ -23,7 +23,10 @@ export function isBrowserGymStorage(storage: GymStorage): boolean {
 function compact(state: GymState): Compacted {
   const overflow = Math.max(0, state.alumni.length - recentAlumniLimit);
   if (!overflow) return {state, additions: []};
-  const archive = {...(state.alumniArchive ?? {id: `${state.createdAt}-${state.seed}`, count: 0,
+  // A portable cloud snapshot has no local archive pointer. Restoring it can
+  // recreate the same gym/run while older cold records still back a recovery
+  // snapshot, so every newly created archive needs its own storage namespace.
+  const archive = {...(state.alumniArchive ?? {id: `${state.createdAt}-${state.seed}-${Array.from(crypto.getRandomValues(new Uint32Array(4)), value => value.toString(16).padStart(8, '0')).join('')}`, count: 0,
     effectiveCount: 0, legendCount: 0, bestTier: 0})};
   const additions = state.alumni.slice(0, overflow).map((player, index) => {
     const reward = recommendation(player);

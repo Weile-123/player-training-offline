@@ -1,11 +1,19 @@
 node_modules/
 dist/
+/h5/
+/h5.zip
+/preview-qr.png
+/activity/security-review-source.zip
+/hupu-skills/skills/runbook/state/
+!hupu-skills/skills/shaper-timeflow/sdk/typescript/dist/
+!hupu-skills/skills/shaper-timeflow/sdk/typescript/dist/**
 .npm-cache/
 .tmp/
 *.tsbuildinfo
+__pycache__/
+*.py[cod]
 logs/
 output/
-/hupu-ai-game-skills/
 
 .env*
 credentials.json

@@ -14,6 +14,37 @@ const {ProtocolClient, FetchTransport, createHmacSigner, appliedDigest} = requir
 const activity = JSON.parse(readFileSync(new URL('../hupu-skills/activity.json', import.meta.url), 'utf8'));
 export const timeflowApplicationId = activity.activityId;
 
+/** Shared signed transport for trusted server adapters and provisioning tools. */
+export function createGymTimeflowUpstream({
+  token = process.env.SHAPER_TOKEN,
+  baseUrl = process.env.TIMEFLOW_BASE_URL ?? 'https://relay.hupu.com',
+  workspaceId = timeflowApplicationId,
+  transport, now, requestIdFactory, timeoutMs = 10_000,
+} = {}) {
+  if (typeof window !== 'undefined') throw new Error('Timeflow credentials are server-only');
+  if (typeof token !== 'string' || !token.trim()) throw new Error('Missing server SHAPER_TOKEN');
+  if (typeof workspaceId !== 'string' || !/^[\x21-\x7e]{1,64}$/.test(workspaceId)) throw new Error('Invalid Timeflow workspace');
+  if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 30_000) throw new Error('Invalid Timeflow timeout');
+  const origin = new URL(baseUrl);
+  if (origin.protocol !== 'https:' || origin.pathname !== '/' || origin.search || origin.hash
+    || origin.username || origin.password) throw new Error('TIMEFLOW_BASE_URL must be an HTTPS origin');
+  const underlying = transport ?? new FetchTransport(origin.origin);
+  if (typeof underlying?.send !== 'function') throw new Error('Invalid Timeflow transport');
+  // The bundled SDK accepts a JSON success body without an explicit ok flag.
+  // Enforce the published envelope here before SDK error/retry parsing.
+  const guarded = {async send(request) {
+    const response = await underlying.send(request);
+    if (response?.status >= 200 && response.status < 300) {
+      let body; try {body = JSON.parse(response.body);} catch {throw new Error('Malformed Timeflow protocol response');}
+      if (!body || typeof body !== 'object' || typeof body.ok !== 'boolean') throw new Error('Malformed Timeflow protocol response');
+    }
+    return response;
+  }};
+  return new ProtocolClient({workspaceId, protocolVersion: 1, accessToken: token,
+    signer: createHmacSigner(token), transport: guarded, timeoutMs,
+    ...(now ? {now} : {}), ...(requestIdFactory ? {requestIdFactory} : {})});
+}
+
 function identifier(value, label) {
   if (typeof value !== 'string' || !/^[A-Za-z0-9_:-]{1,128}$/.test(value)) throw new Error(`Invalid ${label}`);
   return value;
@@ -40,6 +71,9 @@ function assertReport(value, settlementId) {
   }
   return value;
 }
+
+export {assertReport as assertGymTimeflowReport};
+export {appliedDigest as gymTimeflowAppliedDigest};
 
 /**
  * scope is supplied by the trusted BFF's persistent binding, never by a browser.

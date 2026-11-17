@@ -6,6 +6,8 @@ let pending = false;
 /** The only success criterion is an acknowledged editor open; this never publishes a post. */
 const uploadedPosters = new WeakMap<Blob, {sdk: object; url: string}>();
 export type GymPostingStage = 'uploading' | 'opening';
+/** Explicit business destination supplied for this activity, independent of host defaults. */
+export const gymPostDestination = Object.freeze({topicId: '871', tagId: '162117', topicName: 'AI工坊', tagName: '传奇球馆'});
 export async function openGymPost(title: string, content: string, signal?: AbortSignal, poster?: {blob: Blob; onStage?: (stage: GymPostingStage) => void}) {
  if (pending) throw Error('发帖正在处理中，请稍候');
  pending = true;
@@ -33,14 +35,10 @@ export async function openGymPost(title: string, content: string, signal?: Abort
     imageUrl = url.href; uploadedPosters.set(poster.blob, {sdk, url: imageUrl});
    }
   }
-  // No destination from the old game: obtain this activity's configured BBS destination.
-  if (!sdk.bbsConfig?.get) throw Error('发帖配置尚未就绪，请稍后重试');
-  const bbs = await sdkDeadline(sdk.bbsConfig.get()); check();
-  const params: PostParams = {title: Array.from(title).slice(0, 80).join(''), content: Array.from(content).slice(0, 1500).join('')};
+  // The official contract gives explicitly configured business fields precedence.
+  // Do not query bbsConfig or let another host destination override this activity.
+  const params: PostParams = {...gymPostDestination, title: Array.from(title).slice(0, 80).join(''), content: Array.from(content).slice(0, 1500).join('')};
   if (imageUrl) params.imageUrl = imageUrl;
-  if (typeof bbs?.bbsTagId === 'string' && bbs.bbsTagId.trim()) {
-   params.topicId = bbs.bbsTopicId; params.tagId = bbs.bbsTagId; params.topicName = bbs.bbsTopicName; params.tagName = bbs.bbsTagName;
-  }
   assertHupuProject(); check();
   poster?.onStage?.('opening');
   const result = await sdkDeadline(sdk.request.bbs.openPostEditor(params), '发帖编辑器响应超时，请稍后重试');

@@ -4,36 +4,53 @@ import {alumniProgress, automaticIntervalMs, equipmentCapacity, type GymAlumnus,
 import {offlineLimitMs} from '../game/gym/offline';
 import {templateById} from '../game/templates';
 import {templateRules} from '../game/contract/templates';
+import {statKeys} from '../game/types';
+import {statLabels} from '../game/config';
 import {usePlayerProfile} from '../platform/usePlayerProfile';
 import {gymCareerSummary} from '../presentation/gymCareerSummary';
 import {loadAllGymAlumni, type GymAlumniLoader} from '../presentation/gymAlumniGroups';
 import {gymPlayerName} from '../presentation/gymPlayerName';
 import {decodePreferences, presentationConfig} from '../presentation/feedback';
+import {assetUrl} from '../presentation/assetUrls';
+import {ActionNotice} from './ActionNotice';
 import {money} from '../presentation/money';
 import {StarPortrait, templatePortrait} from './PlayerTemplatePanel';
-import {tierConfig} from '../game/matching';
-import './GymDesignSystem.css';
+import {GameIcon} from './GameIcon';
+import {ProductImage} from './ProductImage';
+import {TierBadge} from './TierBadge';
 import './GymCareerPanel.css';
 
-type Props = {state: GymState; loadAlumni?: GymAlumniLoader};
+type Props = {state: GymState; loadAlumni?: GymAlumniLoader; onCollection?: (tab: 0 | 1) => void};
 const number = new Intl.NumberFormat('zh-CN', {maximumFractionDigits: 1});
 const format = (value: number) => number.format(value);
-const careerValue = (value: string) => money(value).replace(/^\$/, '').replace(/\.00(?=[万亿兆京]|$)/, '');
+const statColors = ['#c82d25', '#e28b20', '#c39d28', '#26917c', '#258eb8', '#8b419e'];
+
+function Illustration({name}: {name: string}) {
+  return <span className="career-stat-illustration"><img src={assetUrl(`art/career/${name}.png`)} alt=""/></span>;
+}
+
+function Laurels() {
+  return <svg className="career-laurels" viewBox="0 0 240 100" aria-hidden="true"><g fill="#bf8b2f" stroke="#bf8b2f"><path d="M48 95Q2 57 22 9M192 95q46-38 26-86" fill="none" strokeWidth="2"/>{[0, 1, 2, 3, 4].map(i => <g key={i}><ellipse cx={17+i*4} cy={20+i*15} rx="4" ry="9" transform={`rotate(-38 ${17+i*4} ${20+i*15})`}/><ellipse cx={31+i*3} cy={25+i*14} rx="4" ry="9" transform={`rotate(35 ${31+i*3} ${25+i*14})`}/><ellipse cx={223-i*4} cy={20+i*15} rx="4" ry="9" transform={`rotate(38 ${223-i*4} ${20+i*15})`}/><ellipse cx={209-i*3} cy={25+i*14} rx="4" ry="9" transform={`rotate(-35 ${209-i*3} ${25+i*14})`}/></g>)}</g></svg>;
+}
 
 function BestCareerPlayer({player}: {player: GymAlumnus}) {
   const template = templateById(player.templateId);
   const profile = usePlayerProfile(player.templateId);
   const name = profile?.name ?? gymPlayerName(player);
   const tier = template?.tier ?? 'undiscovered';
-  return <article className="hall-of-fame gm-career-best" data-tier={tier} aria-label="最高最终身价球员">
-    <div className="best-portrait gm-career-best-portrait tier-portrait-frame" data-tier={tier}><span className="album-portrait-surface"><StarPortrait src={profile?.avatar ?? templatePortrait(player.templateId)} fallbackSrc={templatePortrait(player.templateId)} name={name}/></span></div>
-    <div className="gm-career-best-identity"><h3>{name}</h3><p><span className="chip">{template ? tierConfig(template.tier).label : '待发掘'}</span>　训练 Lv.{player.level}</p></div>
-    <div className="best-value gm-career-best-value"><span>最终身价</span><b title={player.finalValue}>{careerValue(player.finalValue)}</b></div>
+  const rating = statKeys.reduce((sum, key) => sum + player.stats[key], 0) / statKeys.length;
+  return <article className="career-best gm-career-best" data-tier={tier} aria-label="最高最终身价球员">
+    <div className="career-best-hero">
+      <div className="career-best-photo tier-portrait-frame" data-tier={tier}><StarPortrait src={profile?.avatar ?? templatePortrait(player.templateId)} fallbackSrc={templatePortrait(player.templateId)} name={name}/></div>
+      <div className="career-best-info"><strong>模板：{name}</strong><b className="career-best-value gm-career-best-value" title={player.finalValue}>{money(player.finalValue)}</b><span className="career-best-level">♜ 训练 Lv.{player.level}</span><span className="career-best-rating">★ 综评 {rating.toFixed(1)}</span></div>
+    </div>
+    <div className="career-peak-label"><span>校友最终身价 · 价值巅峰记录</span></div>
+    <div className="career-best-stats">{statKeys.map((key, index) => <div key={key} style={{'--stat-color': statColors[index]} as CSSProperties}><span>{statLabels[key]}</span><b>{player.stats[key]}</b><div className="career-stat-track"><i style={{width: `${player.stats[key] / 99 * 100}%`}}/></div></div>)}</div>
   </article>;
 }
 
-/** A read-only management dashboard. Detailed alumni remain in the in-game archive. */
-export function GymCareerPanel({state, loadAlumni}: Props) {
+/** The approved archive design, populated with complete hot and cold career records. */
+export function GymCareerPanel({state, loadAlumni, onCollection}: Props) {
   const [loaded, setLoaded] = useState<GymAlumnus[] | null>(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
@@ -58,21 +75,24 @@ export function GymCareerPanel({state, loadAlumni}: Props) {
   const summary = useMemo(() => gymCareerSummary(state, alumni), [state, alumni]);
   const gym = gymLevels[state.gymLevel - 1];
   const next = gymLevels[state.gymLevel];
-  const targetFame = next?.fame ?? gym.fame;
-  const fameRatio = next ? Math.min(100, state.fame / Math.max(1, targetFame) * 100) : 100;
-  const stars = Object.keys(state.collection).length;
-  const equipment = Object.keys(state.collectedEquipment).length;
+  const stars = templateRules.filter(template => !!state.collection[template.id]).length;
+  const equipment = equipmentCatalog.filter(item => !!state.collectedEquipment[item.id]).length;
   const historyValue = (value: number) => ready ? format(value) : '—';
-  return <div className={`gym-design-surface career-b gym-career${reduced ? ' reduce-motion' : ''}`} aria-label="球馆经营档案">
-    <section className="dashboard-hero gm-career-hero"><div><span className="eyebrow">当前球馆 · 经营总览</span><h2>{gym.name}</h2></div><b className="dashboard-level">Lv.{state.gymLevel}</b><div className="dashboard-fame"><div className="dashboard-fame-head"><span>累计声望</span><b>{format(state.fame)}{next && <small> / {format(targetFame)}</small>}</b></div><div className="bar gm-career-track" role="progressbar" aria-label="下级球馆声望进度" aria-valuemin={0} aria-valuemax={Math.max(1, targetFame)} aria-valuenow={Math.min(state.fame, Math.max(1, targetFame))}><i style={{width: `${fameRatio}%`}}/></div><p>{next ? `距下一馆级声望还差 ${format(Math.max(0, targetFame - state.fame))} · 升级还需满足其他条件` : '已达到最高球馆等级'}</p></div></section>
-    <div className="dashboard-counters gm-career-counters"><div className="counter"><span>可用赞助券</span><b>{format(state.credits)}</b></div><div className="counter"><span>在训 / 训练位</span><b>{summary.active}<small style={{font: "12px 'Microsoft YaHei'", color: '#806746'}}> / {state.gymLevel}</small></b></div></div>
-    {loadAlumni && !ready && !error && <p className="gm-career-loading" role="status">正在汇总完整球馆档案…</p>}
-    {error && <div className="gm-career-error"><p role="alert">{error}</p><button type="button" className="gm-button" onClick={() => setRetry(value => value + 1)}>重新读取档案</button></div>}
-    {!loadAlumni && !ready && <p className="gm-career-loading" role="status">历史档案尚未载入，请重新进入球馆后查看完整纪录。</p>}
-    <div className="dashboard-split gm-career-split"><section className="gm-career-recommendations"><h2>推荐成果 <span className="chip">{ready ? format(summary.recommended) : format(progress.total)} 人</span></h2><div className="distribution gm-career-distribution" aria-hidden="true">{summary.distribution.map(tier => <i key={tier.id} style={{width: ready && summary.recommended ? `${tier.count / summary.recommended * 100}%` : '0%'}}/>)}{!ready || !summary.recommended ? <i className="is-empty"/> : null}</div><div className="distribution-key gm-career-tier-key">{summary.distribution.map(tier => <div key={tier.id}><span>{tier.label}</span><b>{historyValue(tier.count)}</b></div>)}</div></section><section className="gm-career-records"><h2>培养纪录</h2><div className="stats-row"><span>最高训练</span><b>{ready ? `Lv.${summary.peakLevel}` : '—'}</b></div><div className="stats-row"><span>校友平均等级</span><b>{historyValue(summary.averageLevel)}</b></div><div className="stats-row"><span>最高校友身价</span><b>{ready ? summary.best ? careerValue(summary.best.finalValue) : '—' : '—'}</b></div></section></div>
-    <section className="block gm-career-best-section"><div className="section-title"><h2>最高身价纪录</h2><small>校友最终身价</small></div>{ready ? summary.best ? <BestCareerPlayer player={summary.best}/> : <p className="gm-career-empty">推荐首位已发掘模板的球员后，这里会留下最高身价纪录。</p> : <p className="gm-career-empty">{error ? '完整纪录读取后显示。' : '正在读取最高身价纪录…'}</p>}</section>
-    <section className="records-table gm-career-facilities"><header>训练与设施</header><div className="stats-row"><span>有效投篮 / 已完成课程</span><b>{historyValue(summary.shots)} <small>球</small> / {historyValue(summary.courses)} <small>课</small></b></div><div className="stats-row"><span>自动训练中的球员</span><b>{summary.automatic} <small>/ {summary.active} 人</small></b></div><div className="stats-row"><span>馆内器材 / 可用槽位</span><b>{state.equippedEquipment.length} <small>/ {equipmentCapacity(state)} 件</small></b></div><div className="stats-row"><span>经营项目已购等级合计</span><b>{summary.projectLevels} <small>级</small></b></div><div className="stats-row"><span>自动间隔 / 离线结算上限</span>{state.gymLevel < 2 ? <b className="gm-career-locked">球馆 Lv.2 开放</b> : <b>{format(automaticIntervalMs(state) / 1000)} <small>秒/球</small> / {format(offlineLimitMs(state) / 60_000)} <small>分钟</small></b>}</div></section>
-    <section className="block gm-career-collection"><div className="section-title"><h2>收藏足迹</h2><small>图鉴永久保留</small></div><div className="collection-rings"><div className="ring-card"><span className="ring" style={{'--progress': `${Math.min(100, stars / templateRules.length * 100)}%`} as CSSProperties}><b>{stars}</b></span><div><h3>球星模板</h3><small>已推荐 {historyValue(summary.recommendedTemplates)} 种模板</small></div></div><div className="ring-card"><span className="ring is-equipment" style={{'--progress': `${Math.min(100, equipment / equipmentCatalog.length * 100)}%`} as CSSProperties}><b>{equipment}</b></span><div><h3>器材收藏</h3><small>当前持有 {state.ownedEquipment.length} 件</small></div></div></div></section>
-    <p className="footnote gm-career-note">推荐分布按完整校友最终模板统计；有效投篮与课程为在馆＋校友记录，不含未留档球员，余额不代表累计收入。{ready && summary.unmatched > 0 && `包含历史待发掘校友 ${format(summary.unmatched)} 人。`}</p>
-  </div>;
+  return <article className={`career-statistics gym-career${reduced ? ' reduce-motion' : ''}`} aria-label="球馆经营档案" aria-busy={!!loadAlumni&&!ready&&!error}>
+    <header className="career-identity"><GameIcon name="career"/><strong>我的球馆经营档案</strong><span className="gm-career-header-status">{error?<button type="button" onClick={()=>setRetry(value=>value+1)}>重新读取档案</button>:'累计记录'}</span></header>
+    <section className="career-month-record"><div className="career-trophy"><img src={assetUrl('art/career/highest-month.png')} alt=""/></div><div className="career-month-copy"><h3>{gym.name}</h3><strong>球馆 <b>{state.gymLevel}</b> 级</strong><Laurels/></div><div className="gm-career-fame"><span>累计声望 <b>{format(state.fame)}</b>{next && <small> / {format(next.fame)}</small>}</span><progress value={next ? Math.min(state.fame, next.fame) : 1} max={next?.fame ?? 1} aria-label="下级球馆声望进度"/><small>{next ? `距下一馆级声望还差 ${format(Math.max(0, next.fame - state.fame))} · 升级还需满足其他条件` : '已达到最高球馆等级'}</small></div></section>
+    <dl className="career-totals gm-career-counters"><div><Illustration name="cash"/><dt>可用赞助券</dt><dd>{format(state.credits)}<small> 券</small></dd></div><div><Illustration name="calendar"/><dt>在训 / 训练位</dt><dd>{summary.active}<small> / {state.gymLevel} 人</small></dd></div><div><Illustration name="finish"/><dt>累计推荐</dt><dd>{ready ? format(summary.recommended) : format(progress.total)}<small> 人</small></dd></div><div><Illustration name="training"/><dt>最高训练</dt><dd>{historyValue(summary.peakLevel)}<small> 级</small></dd></div></dl>
+    <ActionNotice message={error||(!ready?(loadAlumni?'正在汇总完整球馆档案…':'历史档案尚未载入，请重新进入球馆后查看完整纪录。'):'')} role={error?'alert':'status'}/>
+    <section className="career-end-section gm-career-recommendations"><h3>推荐成果与培养纪录</h3><div className="gm-career-tier-grid">{summary.distribution.map(tier => <div key={tier.id} data-tier={tier.id}><TierBadge tier={tier.id}/><b>{historyValue(tier.count)}<small> 人</small></b></div>)}</div><div className="gm-career-record-row"><span>校友平均等级</span><b>{ready ? summary.averageLevel.toFixed(1) : '—'} 级</b></div><div className="gm-career-record-row"><span>最高校友身价</span><b>{ready && summary.best ? money(summary.best.finalValue) : '—'}</b></div></section>
+    <section className="career-end-section gm-career-best-section"><h3>最高身价纪录</h3>{ready ? summary.best ? <BestCareerPlayer player={summary.best}/> : <p className="career-stat-empty gm-career-empty">推荐首位球员后，这里会留下最高身价纪录。</p> : <p className="career-stat-empty gm-career-empty">{error ? '完整纪录读取后显示。' : '正在读取最高身价纪录…'}</p>}</section>
+    <section className="career-end-section gm-career-facilities"><h3>训练与设施</h3>{[
+      ['有效投篮 / 已完成课程', `${historyValue(summary.shots)} 球 / ${historyValue(summary.courses)} 课`],
+      ['自动训练中的球员', `${summary.automatic} / ${summary.active} 人`],
+      ['馆内器材 / 可用槽位', `${state.equippedEquipment.length} / ${equipmentCapacity(state)} 件`],
+      ['经营项目已购等级合计', `${summary.projectLevels} 级`],
+      ['自动间隔 / 离线结算上限', state.gymLevel < 2 ? '球馆 Lv.2 开放' : `${format(automaticIntervalMs(state) / 1000)} 秒 / ${format(offlineLimitMs(state) / 60_000)} 分钟`],
+    ].map(([label, value]) => <div className="gm-career-record-row" key={label}><span>{label}</span><b>{value}</b></div>)}</section>
+    <section className="career-collection-progress"><h3>收藏足迹</h3><div className="career-collection-links"><button type="button" onClick={() => onCollection?.(0)} aria-label="查看球星模板图鉴"><span className="career-collection-art"><img src={assetUrl('art/career/album.png')} alt=""/></span><strong>球星模板</strong><b>{stars}<small> / {templateRules.length}</small></b><progress value={stars} max={templateRules.length} aria-label="球星收藏进度"/><span className="collection-link-arrow" aria-hidden="true">›</span><small className="gm-career-collection-note">已推荐 {historyValue(summary.recommendedTemplates)} 种模板</small></button><button type="button" onClick={() => onCollection?.(1)} aria-label="查看器材收藏图鉴"><span className="career-collection-art"><ProductImage id="relic_002" name="器材"/></span><strong>器材收藏</strong><b>{equipment}<small> / {equipmentCatalog.length}</small></b><progress value={equipment} max={equipmentCatalog.length} aria-label="器材收藏进度"/><span className="collection-link-arrow" aria-hidden="true">›</span><small className="gm-career-collection-note">当前持有 {state.ownedEquipment.length} 件</small></button></div></section>
+    <p className="career-stat-note">推荐分布按完整校友最终模板统计；有效投篮与课程为在馆＋校友记录，不含未留档球员，余额不代表累计收入。{ready && summary.unmatched > 0 && `包含历史待发掘校友 ${format(summary.unmatched)} 人。`}</p>
+  </article>;
 }

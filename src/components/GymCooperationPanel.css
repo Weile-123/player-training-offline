@@ -16,6 +16,7 @@
 .gm-cooperation-equipment { display: grid; gap: 5px; padding: 9px 10px; border: 1px solid #b7a279; background: #efe3c2; font-size: 12px; }
 .gm-cooperation-equipment .gm-section-heading h4 { font-size: 13px; }
 .gm-cooperation-earned { color: #37604b; font-size: 12px; }
+.gm-cooperation-equipment-status {min-height:3.2em;line-height:1.6;}
 .gm-cooperation-panel .gm-cooperation-abandon { justify-self: end; min-height: 26px; }
 .gm-cooperation-rules > section + section { padding-top: 12px; border-top: 1px solid #c9b48a; }
 .gym-panel.gm-cooperation-rules h3 { font-size: 15px; }
@@ -28,4 +29,5 @@
 .gm-cooperation-ad {display: flex; align-items: center; justify-content: center; gap: 5px; background: #1a4745; color: #f8e8c1; border-color: #af8d51;}
 .gm-cooperation-ad > svg {width: 19px; height: 17px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5;}
 .gm-cooperation-ad > svg path {fill: currentColor; stroke: none;}
-.gm-cooperation-ad-done {margin: 8px 0; padding: 9px; background: #e2e8cc; color: #245947; font-size: 13px;}
+.gm-cooperation-objectives {position:relative;}
+.gm-cooperation-objectives .gm-cooperation-ad-done {position:absolute;inset:0;display:flex;align-items:center;justify-content:center;margin:0;padding:5px;background:#e2e8cc;color:#245947;font-size:12px;line-height:1.4;text-align:center;}

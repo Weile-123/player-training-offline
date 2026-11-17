@@ -44,7 +44,7 @@ describe('optional selected recruitment', () => {
       expect(paid.level).toBe(0);
       expect(paid.templateId).toBeNull();
       expect(paid.shots).toBe(0);
-      expect(paid.nextShotAt).toBe(now + 1_000);
+      expect(paid.nextShotAt).toBe(now + 500);
       expect(selected.credits).toBe(initial.credits - selectedRecruitmentPrice);
       expect(free.credits).toBe(initial.credits);
       expect(selected.rng.economy).toEqual(initial.rng.economy);

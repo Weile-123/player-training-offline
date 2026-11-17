@@ -2,15 +2,15 @@ import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import {nbaTemplates} from '../../src/game/templates';
-const api = vi.hoisted(() => ({list: vi.fn(), sync: vi.fn(), configured: false, message: ''}));
+const api = vi.hoisted(() => ({list: vi.fn(), sync: vi.fn(), configured: false, message: '',localMode:false}));
 vi.mock('../../src/platform/gymLeaderboard', () => ({gymLeaderboard: {list: api.list, sync: api.sync, subscribe: () => () => {}, getMessage: () => api.message}, gymLeaderboardConfigured: () => api.configured, gymRankReference: () => ({runId: 'run', revision: 1})}));
-vi.mock('../../src/gymStore', () => ({useGym: {getState: () => ({hasSave: true, state: {}})}}));
+vi.mock('../../src/gymStore', () => ({useGym: {getState: () => ({hasSave: true, state: {},authorityMode:api.localMode?'local':undefined})}}));
 import {GymLeaderboard} from '../../src/components/GymLeaderboard';
 let root: Root | null = null;
 const template = nbaTemplates[0], best = {playerId: 'gym-p1', templateId: template.id, value: '123456789', level: 25, stats: template.stats};
 const playerRow = {id: 'first', coach: '虎扑教练', score: best.value, best};
 const fameRow = {id: 'first', coach: '虎扑教练', score: '2580', best: null};
-beforeEach(() => {api.list.mockReset(); api.sync.mockReset().mockResolvedValue(true); api.configured = false; api.message = '';});
+beforeEach(() => {api.list.mockReset(); api.sync.mockReset().mockResolvedValue(true); api.configured = false; api.message = '';api.localMode=false;});
 afterEach(() => {if (root) act(() => root!.unmount()); root = null;});
 async function flush() {await act(async () => {for (let i = 0; i < 15; i++) await Promise.resolve();});}
 async function mount() {root = createRoot(document.getElementById('root')!); await act(async () => root!.render(<GymLeaderboard/>)); await flush();}
@@ -40,15 +40,38 @@ it('shows a real connection error and permits an explicit retry', async () => {
  await mount(); expect(document.querySelector('[role=alert]')?.textContent).toBe('排行榜服务尚未连接');
  await click('刷新排行榜'); expect(document.body.textContent).toContain('暂无已提交的成绩'); expect(api.list).toHaveBeenCalledTimes(2);
 });
+it('shows public scores and a personal-ranking error without claiming the user has no rank', async () => {
+ api.list.mockResolvedValue({entries: [playerRow], me: null, personalError: '个人排名暂不可用，请刷新重试；公开榜单仍可查看。'});
+ await mount();
+ expect(document.querySelector('.player-ranking > li')?.textContent).toContain('虎扑教练');
+ expect(document.querySelector('.online-personal')?.textContent).toContain('暂未获取排名');
+ expect(document.querySelector('.action-notice[role=alert]')?.textContent).toContain('个人排名暂不可用');
+ expect(document.querySelector('.action-notice')?.parentElement).toBe(document.body);
+ expect(document.querySelector('.leaderboard .action-notice')).toBeNull();
+});
 it('syncs only a reference when a real backend is configured, and still shows public scores with the explicit sync message', async () => {
  api.configured = true; api.message = '暂无已验证的球馆成绩'; api.sync.mockRejectedValue(Error(api.message));
  api.list.mockResolvedValue({entries: [playerRow], me: null});
  await mount(); expect(api.sync).toHaveBeenCalledExactlyOnceWith({runId: 'run', revision: 1});
- expect(document.querySelector('.player-ranking')).toBeTruthy(); expect(document.querySelector('[role=status]')?.textContent).toBe(api.message);
+ expect(document.querySelector('.player-ranking')).toBeTruthy(); expect(document.querySelector('.action-notice[role=alert]')?.textContent).toBe(api.message);
 });
 it('never replaces the selected tab with a late result from a different board', async () => {
  let release!: (result: unknown) => void;
  api.list.mockImplementationOnce(() => new Promise(resolve => {release = resolve;})).mockResolvedValue({entries: [fameRow], me: null});
  await mount(); await click('声望榜'); await act(async () => release({entries: [playerRow], me: null})); await flush();
  expect(document.querySelector('.endless-ranking')?.textContent).toContain('2580'); expect(document.querySelector('.player-ranking')).toBeNull();
+});
+it('keeps an explicit synchronization rejection as an alert regardless of message wording while retaining public results',async()=>{
+ api.configured=true;api.message='请求次数已用尽';api.sync.mockRejectedValue(Error(api.message));api.list.mockResolvedValue({entries:[playerRow],me:null});
+ await mount();
+ expect(document.querySelector('.action-notice.leaderboard-action-notice[role=alert]')?.textContent).toBe(api.message);
+ expect(document.querySelector('.player-ranking > li')).toBeTruthy();expect(document.querySelector('.leaderboard .action-notice')).toBeNull();
+});
+
+it('reads existing rankings without sending a local revision to the obsolete server game branch',async()=>{
+ api.localMode=true;api.configured=true;api.sync.mockImplementation(()=>new Promise(()=>{}));
+ api.list.mockResolvedValue({entries:[playerRow],me:null});await mount();
+ expect(api.sync).not.toHaveBeenCalled();expect(api.list).toHaveBeenCalledExactlyOnceWith('player');
+ expect(document.querySelector('.player-ranking > li')?.textContent).toContain('虎扑教练');
+ expect(document.body.textContent).toContain('本机新成绩尚未接入独立排行同步');
 });

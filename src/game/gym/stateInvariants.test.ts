@@ -12,6 +12,10 @@ function fixture(seed=17){
  return state;
 }
 function memory(){const values=new Map<string,string>();return{values,storage:{getItem:(key:string)=>values.get(key)??null,setItem:(key:string,value:string)=>{values.set(key,value);}}};}
+// A visible report keeps the first qualifying interval. Polling schedules may
+// therefore differ in receipt metadata, while every training/economy field,
+// player, course and RNG stream must remain identical.
+const trainingState=({offlineReward:_receipt,revision:_revision,...state}:GymState)=>state;
 
 describe('gym state invariants across operation sequences',()=>{
  it('keeps every equipment rebuy/sale cycle cash-negative and collection permanent',()=>{
@@ -58,8 +62,9 @@ describe('gym state invariants across operation sequences',()=>{
    }
    const whole=settleOfflineGym(state,at+123456).state;
    let split=state;for(const elapsed of [1,1987,17899,31117,95003,123456])split=settleOfflineGym(split,at+elapsed).state;
-   expect({...split,revision:0}).toEqual({...whole,revision:0});
+   expect(trainingState(split)).toEqual(trainingState(whole));
    expect(validGym(whole)).toBe(true);
+   expect(validGym(split)).toBe(true);
   }
  });
 

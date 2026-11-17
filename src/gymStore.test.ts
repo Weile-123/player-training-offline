@@ -2,7 +2,7 @@ import {afterEach, describe, expect, it, vi} from 'vitest';
 import {createGymStore} from './gymStore';
 import {gymSaveKeys, readGym, writeGym, type GymStorage} from './game/gym/save';
 import {hash} from './game/contract/random';
-import {dispatchGym, newGym, recommendation} from './game/gym/engine';
+import {dispatchGym, experienceForLevel, newGym, recommendation} from './game/gym/engine';
 import {legacyOfflineLimitMs, settleOfflineGym} from './game/gym/offline';
 
 function setup() {
@@ -33,6 +33,26 @@ async function trainedStore(context: ReturnType<typeof setup>, minimumCredits = 
 }
 
 describe('online multi-player training commits', () => {
+  it('persists quick recruitment and selection together, or preserves the old roster when the write fails', async () => {
+    const context = setup();
+    const original = {...newGym(context.clock(), 17), gymLevel: 2};
+    writeGym(context.storage, original);
+    const store = createGymStore(context.storage, 17, context.clock);
+    context.fail(true);
+    const rejected = await store.getState().act({type: 'recruit', expectedNextPlayer: original.nextPlayer, selectRecruited: true});
+    expect(rejected.error).toBe('save-failed');
+    expect(store.getState().state).toEqual(original);
+    expect(readGym(context.storage).state).toEqual(original);
+    context.fail(false);
+    const accepted = await store.getState().act({type: 'recruit', expectedNextPlayer: original.nextPlayer, selectRecruited: true});
+    expect(accepted.error).toBeUndefined();
+    expect(accepted.state.player!.id).not.toBe(original.player!.id);
+    expect(accepted.state.bench.map(player => player.id)).toEqual([original.player!.id]);
+    expect(accepted.state.nextPlayer).toBe(original.nextPlayer + 1);
+    expect(readGym(context.storage).state).toEqual(accepted.state);
+    expect(accepted.state.player!.nextShotAt).toBe(context.clock() + 500);
+  });
+
   it('throttles idle save writes while accepting an automatic shot at its exact 1.8-second boundary', async () => {
     const context = setup();
     const state = {...newGym(context.clock(), 17), gymLevel: 2};
@@ -323,7 +343,7 @@ describe('offline training settlement commits', () => {
 
   it('commits one catch-up across two tabs and preserves training after a failed write', async () => {
     const context = setup();
-    automated(context);
+    const original = automated(context);
     const first = createGymStore(context.storage, 17, context.clock);
     const second = createGymStore(context.storage, 17, context.clock);
     context.advance(60_000);
@@ -336,10 +356,17 @@ describe('offline training settlement commits', () => {
     await Promise.all([first.getState().resume(), second.getState().resume()]);
     const saved = readGym(context.storage).state!;
     expect(saved.player!.shots).toBe(30);
-    expect([first, second].filter(store => store.getState().pendingOfflineReport !== null)).toHaveLength(1);
+    const expected = settleOfflineGym(original, context.clock()).state;
+    expect(saved.player).toEqual(expected.player);
+    expect(saved.rng).toEqual(expected.rng);
+    const reportId = saved.offlineReward!.report.reportId;
+    expect(reportId).toBeTruthy();
+    expect([first, second].map(store => store.getState().pendingOfflineReport?.reportId)).toEqual([reportId, reportId]);
     const reloaded = createGymStore(context.storage, 17, context.clock);
     await reloaded.getState().resume();
     expect(readGym(context.storage).state!.player!.shots).toBe(30);
+    expect(reloaded.getState().pendingOfflineReport?.reportId).toBe(reportId);
+    expect(reloaded.getState().state.player).toEqual(expected.player);
   });
 
   it('keeps the first absence anchor through duplicate suspend callbacks', async () => {
@@ -356,7 +383,39 @@ describe('offline training settlement commits', () => {
     expect(store.getState().state.player!.shots).toBe(30);
     expect(store.getState().isSuspended).toBe(false);
     store.getState().dismissOfflineReport();
-    expect(store.getState().pendingOfflineReport).toBeNull();
+    await vi.waitFor(() => {
+      expect(store.getState().pendingOfflineReport).toBeNull();
+      expect(readGym(context.storage).state!.offlineReward?.dismissed).toBe(true);
+    });
+  });
+
+  it('persists a one-time bonus across concurrent tabs and reload without paying the same report again', async () => {
+    const context = setup();
+    automated(context);
+    const first = createGymStore(context.storage, 17, context.clock);
+    const second = createGymStore(context.storage, 17, context.clock);
+    context.advance(60_000);
+    await Promise.all([first.getState().resume(), second.getState().resume()]);
+    const paid = readGym(context.storage).state!;
+    const report = paid.offlineReward!.report;
+    const totalXp = (state: typeof paid) => experienceForLevel(state.player!.level) + state.player!.experience + (state.player!.overflowExperience ?? 0);
+    const beforeXp = totalXp(paid), beforeShots = paid.player!.shots;
+    const results = await Promise.all([first, second].map(store => store.getState().act({type: 'double-offline-experience', reportId: report.reportId!})));
+    expect(results.filter(result => !result.error)).toHaveLength(1);
+    const claimed = readGym(context.storage).state!;
+    expect(claimed.offlineReward).toMatchObject({claimed: true, dismissed: false, report: {reportId: report.reportId}});
+    expect(totalXp(claimed) - beforeXp).toBe(report.totalExperience);
+    expect(claimed.player!.shots).toBe(beforeShots);
+    expect(claimed.player!.training).toEqual(paid.player!.training);
+    expect(claimed.rng.economy).toEqual(paid.rng.economy);
+    const reloaded = createGymStore(context.storage, 17, context.clock);
+    await reloaded.getState().hydrate();
+    expect(reloaded.getState().pendingOfflineReport?.reportId).toBe(report.reportId);
+    expect(reloaded.getState().state.offlineReward?.claimed).toBe(true);
+    const duplicate = await reloaded.getState().act({type: 'double-offline-experience', reportId: report.reportId!});
+    expect(duplicate.error).toContain('已领取');
+    expect(totalXp(readGym(context.storage).state!)).toBe(totalXp(claimed));
+    expect(readGym(context.storage).state!.player!.shots).toBe(beforeShots);
   });
 
   it('establishes a new baseline for pre-offline saves without retroactive shots', async () => {
