@@ -1,0 +1,32 @@
+{
+  "applicationId": "app_847cdb589a",
+  "functionName": "activity_api",
+  "hostType": "HTTP",
+  "port": 9000,
+  "requiredNodeVersion": ">=18.15",
+  "deploymentRuntime": "Nodejs18.15",
+  "upstreamResourceType": "WEB_SCF",
+  "enablePathTransmission": true,
+  "enableSafeDomain": true,
+  "safeDomainSetup": "Use callCloudApi(service=tcb, action=ModifyHTTPServiceRoute) and verify; manageGateway does not expose EnableSafeDomain",
+  "identityMode": "cloudbase-gateway",
+  "prerequisites": [
+    "Gateway verifies platform Bearer and overwrites x-cloudbase-context",
+    "Direct public function URL is disabled",
+    "Select actual HTTPSERVICE domain after provisioning; do not use static hosting domain"
+  ],
+  "routes": [
+    {"path": "/api/health", "auth": false, "methods": ["GET"]},
+    {"path": "/api/leaderboard", "auth": false, "methods": ["GET"]},
+    {"path": "/api/leaderboard/me", "auth": true, "methods": ["GET"]},
+    {"path": "/api/leaderboard/submit", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/session", "auth": true, "methods": ["GET", "POST"]},
+    {"path": "/api/gym/start", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/adopt", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/actions", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/rewards/prepare", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/resume", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/suspend", "auth": true, "methods": ["POST"]},
+    {"path": "/api/gym/alumni", "auth": true, "methods": ["POST"]}
+  ]
+}

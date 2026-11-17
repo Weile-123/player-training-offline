@@ -1,0 +1,8 @@
+body>.action-notice {
+ position:fixed;display:block;z-index:1100;inset:auto;top:max(16px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+ box-sizing:border-box;width:max-content;min-width:0;height:auto;min-height:0;max-width:min(440px,calc(100vw - 32px));max-height:24vh;overflow:auto;
+ margin:0;padding:10px 14px;border:2px solid #d3b77f;background:#102d38f5;color:#fff0d0;
+ box-shadow:3px 4px #06131ac4;font:14px/1.5 var(--font-body,'Microsoft YaHei',sans-serif);
+ text-align:center;overflow-wrap:anywhere;pointer-events:none;
+}
+body>.action-notice[role=alert] {border-color:#dfac77;}
