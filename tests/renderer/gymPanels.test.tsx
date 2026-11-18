@@ -34,7 +34,7 @@ async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState, bus
       actionError = result.error;
       setState(result.state);
     };
-    return <ComicDialog title="经营面板" onClose={() => {}}><Panel state={state} onAction={onAction} onClose={() => {}} busy={busy}/></ComicDialog>;
+    return <ComicDialog title="经营面板" onClose={() => {}}><Panel state={state} onAction={onAction} onClose={() => {}} busy={busy} tutorialEnabled={false}/></ComicDialog>;
   }
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<Scene/>));
@@ -93,7 +93,7 @@ it('shows a compact alumni summary and opens complete records without generated 
   const cards = [...document.querySelectorAll<HTMLElement>('.gm-alumnus')];
   const matched = cards.find(card => card.dataset.tier === 'starter')!;
   expect(matched.querySelector('strong')?.textContent).toBe(template.name);
-  expect(matched.textContent).toContain('最终身价');
+  expect(matched.textContent).toContain('最高身价');
   expect(matched.textContent).toContain('$320.00');
   expect(matched.textContent).not.toContain('新秀 3');
   expect(matched.querySelector('.tier-portrait-frame')?.getAttribute('data-tier')).toBe('starter');
@@ -690,7 +690,7 @@ it('keeps archived equipment collection counts separate from the current thirty-
 
 it.each([false, true])('shows the active cooperation-equipment course progress without promising payment before all requirements (complete %s)', async complete => {
   const state = newGym(at, 11);
-  state.gymLevel = 2;
+  state.gymLevel = 3;
   const item = equipmentFor('cooperationBonus');
   own(state, [item.id]);
   const player = state.player!;
@@ -724,7 +724,7 @@ it.each([false, true])('shows the active cooperation-equipment course progress w
 
 it('explains why a partly equipped current course will not count as a full equipment course', async () => {
   const state = newGym(at, 11);
-  state.gymLevel = 2;
+  state.gymLevel = 3;
   own(state, [equipmentFor('cooperationBonus').id]);
   const player = state.player!;
   player.shots = 17;
@@ -761,7 +761,7 @@ it('shows retained cooperation-equipment eligibility after removing gear while k
 });
 
 it('does not add an equipment-progress section without active gear or previously earned eligibility', async () => {
-  await mount(GymCooperationPanel, newGym(at, 11));
+  await mount(GymCooperationPanel, {...newGym(at, 11), gymLevel: 3});
   expect(document.querySelector('[aria-label="合作器材培养进度"]')).toBeNull();
   expect(actions).toEqual([]);
 });
@@ -955,7 +955,7 @@ it('reads new-gym collection records separately from active ownership and opens 
   expect(actions).toEqual([]);
 });
 
-it('keeps uncollected album faces unknown while opening unlisted, historical and listed equipment details', async () => {
+it('keeps uncollected equipment inaccessible while opening collected historical equipment', async () => {
   const state = newGym(at, 18);
   const retained = equipmentFor('experience', 3);
   const unlisted = equipmentFor('stamina', 3);
@@ -963,25 +963,22 @@ it('keeps uncollected album faces unknown while opening unlisted, historical and
   state.collectedEquipment[retained.id] = {firstAt: at};
   await mount(GymCollectionPanel, state);
   await press(buttonWithin(document, '器材图鉴'));
-  const unavailable = document.querySelector<HTMLButtonElement>(`[aria-label="查看${unlisted.name}器材档案"]`)!;
-  expect(unavailable.disabled).toBe(false);
+  const unavailable = document.querySelector<HTMLButtonElement>(`[data-equipment-id="${unlisted.id}"]`)!;
+  expect(unavailable.disabled).toBe(true);
   expect(unavailable.textContent).toBe('未知器械');
   expect(unavailable.querySelector('img.product-image')).toBeNull();
   expect(unavailable.textContent).not.toContain(unlisted.name);
   await press(unavailable);
-  expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(unlisted.name);
-  expect(document.querySelector('.equipment-effect')?.textContent).toContain(unlisted.description);
-  expect(document.querySelector('.equipment-detail .gm-equipment-extra')).toBeNull();
-  await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
+  expect(document.querySelector('.equipment-detail')).toBeNull();
   const historical = document.querySelector<HTMLButtonElement>(`[aria-label="查看${retained.name}器材档案"]`)!;
   expect(historical.disabled).toBe(false);
   await press(historical);
   expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(retained.name);
   await press(buttonWithin(document.querySelector('.equipment-detail')!, '返回'));
-  const available = document.querySelector<HTMLButtonElement>(`[aria-label="查看${listed.name}器材档案"]`)!;
-  expect(available.disabled).toBe(false);
+  const available = document.querySelector<HTMLButtonElement>(`[data-equipment-id="${listed.id}"]`)!;
+  expect(available.disabled).toBe(true);
   await press(available);
-  expect(document.querySelector('.equipment-detail h3')?.textContent).toBe(listed.name);
+  expect(document.querySelector('.equipment-detail')).toBeNull();
   expect(actions).toEqual([]);
 });
 

@@ -300,7 +300,7 @@ describe('recommendation, enrollment and gym progression', () => {
     expect(gymUpgrade({...gym, fame: 60}).requirements.find(requirement => requirement.label === '有效推荐')).toMatchObject({current: 0, required: 2, met: false});
   });
 
-  it('applies enrollment training only to the next recruit and enforces height preference unlocks', () => {
+  it('applies enrollment training only to the next recruit and permits free height preference from gym one', () => {
     const gym = {...newGym(start, 12), gymLevel: 2, credits: 2};
     const upgraded = act(gym, {type: 'upgrade-project', id: 'recruitment'});
     expect(upgraded.player!.entryStats).toEqual(gym.player!.entryStats);
@@ -312,7 +312,9 @@ describe('recommendation, enrollment and gym progression', () => {
     expect(next.player!.height).toBeLessThanOrEqual(218);
     const initial = newGym(start);
     const firstEmpty = act(initial, {type: 'recommend', id: initial.player!.id});
-    expect(dispatchGym(firstEmpty, firstEmpty.revision, {type: 'recruit', preference: 'guard'}, start).state).toBe(firstEmpty);
+    const guard = act(firstEmpty, {type: 'recruit', preference: 'guard'});
+    expect(guard.player!.height).toBeGreaterThanOrEqual(178);
+    expect(guard.player!.height).toBeLessThanOrEqual(194);
   });
 
   it('opens gym two free after genuine results and charges construction for gym three', () => {

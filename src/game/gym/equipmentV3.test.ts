@@ -67,7 +67,7 @@ describe('V3 equipment behavior', () => {
     }
     const next = command(state, {type: 'train', id: state.player!.id});
     expect(next.player!.nextShotAt - state.updatedAt).toBe(shotCooldownMs);
-    expect(dispatchGym(next, next.revision, {type: 'train', id: next.player!.id}, next.updatedAt + 999).error).toBeTruthy();
+    expect(dispatchGym(next, next.revision, {type: 'train', id: next.player!.id}, next.updatedAt + shotCooldownMs - 1).error).toBeTruthy();
   });
 
   it('extends offline time without giving offline shots extra experience', () => {

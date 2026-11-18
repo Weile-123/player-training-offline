@@ -10,7 +10,7 @@ export type GymCloudProgress = {level: number; fame: number; shots: number; upda
 const failure = '这不是有效的传奇球馆云存档，本地进度已保留';
 const pick = <T extends object>(source: T, keys: readonly (keyof T)[]) => Object.fromEntries(keys.filter(key => Object.prototype.hasOwnProperty.call(source,key)).map(key => [key,source[key]]));
 function portablePlayer(player: GymPlayer): GymPlayer {
- const value = pick(player,['id','name','enteredAt','height','matchSeed','level','peakLevel','templateId','highestTier','shots','stamina','recoveryMs','enteredGymLevel','experience','nextShotAt','autoEnabled','greatShotReady','greatShotsRemaining','shareLevelClaimed']) as GymPlayer;
+ const value = pick(player,['id','name','enteredAt','height','matchSeed','level','peakLevel','templateId','highestTier','shots','stamina','recoveryMs','enteredGymLevel','experience','nextShotAt','autoEnabled','greatShotReady','greatShotsRemaining','shareLevelClaimed','highPotential']) as GymPlayer;
  for(const key of ['stats','entryStats','bias','lastStyle'] as const)value[key]=pick(player[key],statKeys) as GymPlayer[typeof key];
  value.book=Object.fromEntries(Object.entries(player.book).filter(([key])=>['base','greatBank','flat','permanent'].includes(key)).map(([key,fraction])=>[key,{n:fraction.n,d:fraction.d}])) as GymPlayer['book'];
  value.training={planId:player.training.planId,shots:player.training.shots,completedCourses:player.training.completedCourses};
@@ -51,12 +51,15 @@ export function gymCloudProgress(raw: string): GymCloudProgress {
  return {level: state.gymLevel, fame: state.fame, shots: [state.player, ...state.bench, ...state.alumni].reduce((total, player) => total + (player?.shots ?? 0), 0), updatedAt: state.updatedAt, uploadedAt: archive.uploadedAt};
 }
 export async function exportGymCloudArchive(store: {getState: () => GymStore}, now = Date.now()): Promise<string> {
+ if (store.getState().debugSessionActive) throw Error('独立测试球馆不能上传云存档，请先恢复正式球馆');
  await store.getState().flush();
  const before = store.getState(), key = `${before.state.createdAt}:${before.state.seed}:${before.state.revision}`;
+  if (before.debugSessionActive) throw Error('独立测试球馆不能上传云存档，请先恢复正式球馆');
  if (!before.hasSave) throw Error('请先开设球馆，再上传进度');
  if (before.actionError) throw Error(before.actionError);
  const alumni = await loadAllGymAlumni(before.loadAlumni);
  const live = store.getState().state;
+  if (store.getState().debugSessionActive) throw Error('球馆已进入独立测试模式，本次上传已取消');
  if (`${live.createdAt}:${live.seed}:${live.revision}` !== key) throw Error('球馆进度已变化，请重新上传');
  const state: GymState = portableGym({...live, alumni: [...alumni].reverse()});
  delete state.alumniArchive;

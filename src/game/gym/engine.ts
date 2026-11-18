@@ -13,7 +13,7 @@ import {experienceForLevel, playerLevelCap, requiredExperience, shotExperience, 
 import {chalkTrainingShots, consumableById, teamSupplyRecovery, type GymConsumableId} from './consumables';
 import type {OfflineTrainingReport} from './offline';
 
-export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
+export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, trainingPlanUnlockLevel, cooperationUnlockLevel, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
 export {trainingPlans} from './training';
 export type {TrainingPlanId, TrainingProgress} from './training';
 export type {Cooperation, CooperationOffer, CooperationStatus} from './cooperation';
@@ -26,6 +26,8 @@ export type GymPlayer = {
   templateId: string | null; highestTier: TemplateTier | null; shots: number;
   book: Ledger; stamina: number; recoveryMs: number; enteredGymLevel: number; training: TrainingProgress;
   experience: number; nextShotAt: number; autoEnabled: boolean; cooperation: Cooperation | null;
+  /** New selected recruits keep the original high-potential portrait appearance. */
+  highPotential?: boolean;
   /** One effective shot only; absent on older saves and consumed by online/offline training alike. */
   greatShotReady?: boolean;
   greatShotsRemaining?: number;
@@ -449,6 +451,7 @@ function recruit(state: GymState, preference: HeightPreference, direction?: Sele
   const sequence = state.nextPlayer++;
   const id = `gym-p${sequence}`;
   return {id, name: `新秀 ${sequence}`, enteredAt: state.updatedAt, height, stats, entryStats: {...stats}, bias,
+    ...(direction ? {highPotential: true} : {}),
     lastStyle: shape(stats), matchSeed: hash(`${state.seed}:${id}`), level: 0, peakLevel: 0, templateId: null,
     highestTier: null, shots: 0, book: ledger(), stamina: staminaMax(state), recoveryMs: 0, enteredGymLevel: state.gymLevel,
     training: {planId: 'balanced', shots: 0, completedCourses: 0}, experience: 0, nextShotAt: state.updatedAt,
@@ -709,7 +712,6 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (activePlayers(next).length >= next.gymLevel) return fail('训练位已满，升级球馆或推荐一名球员后再招募');
       const preference = action.preference ?? 'any';
       if (!['any', 'guard', 'forward', 'center'].includes(preference)) return fail('身高偏好无效');
-      if (preference !== 'any' && next.gymLevel < 2) return fail('球馆 2 级开放身高偏好');
       const selected = action.mode === 'selected';
       if (selected && action.expectedNextPlayer === undefined) return fail('请重新确认精选招生名单');
       if (selected && !isSelectedRecruitmentDirection(action.direction)) return fail('精选方向无效');

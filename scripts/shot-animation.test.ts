@@ -1,6 +1,6 @@
 import { describe,it,expect,vi } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { shotPlayback,loadShotAnimation,ConcurrentShots,spawnScale } from '../src/presentation/shotAnimation';
+import { shotPlayback,loadShotAnimation,ConcurrentShots,spawnScale,sampleShotFrame } from '../src/presentation/shotAnimation';
 import {drawMultiScene,sceneProjection} from '../src/presentation/shotRenderer.js';
 import type { ShotTimeline } from '../src/presentation/shotRenderer.js';
 const timeline:ShotTimeline=JSON.parse(readFileSync('public/art/shot/player-data.json','utf8'));
@@ -36,6 +36,14 @@ describe('approved front-shot animation in gameplay',()=>{
 });
 
 describe('concurrent basketball playback',()=>{
+ it('interpolates recorded ball poses without changing keyframe timing or net occlusion',()=>{
+  const frames=timeline.outcomes.success.frames,index=8,start=frames[index-1].endMs,end=frames[index].endMs;
+  const current=frames[index],next=frames[index+1],middle=sampleShotFrame(frames,(start+end)/2);
+  expect(sampleShotFrame(frames,start)).toBe(current);
+  expect(middle.x).toBeCloseTo((current.x+next.x)/2);expect(middle.y).toBeCloseTo((current.y+next.y)/2);
+  expect(middle.radius).toBeCloseTo((current.radius+next.radius)/2);expect(middle.occluded).toBe(current.occluded);
+  expect(sampleShotFrame(frames,end)).toBe(next);
+ });
  it('retains all batched clicks and leaves an older ball at its original flight position',()=>{
   const group=new ConcurrentShots();group.sync([{id:1,outcome:'success'}]);
   const first=group.step(600,1,timeline).frames[0];
@@ -82,6 +90,27 @@ describe('concurrent basketball playback',()=>{
 });
 
 describe('responsive court projection',()=>{
+ it('reuses a full-resolution court raster and refreshes it when size or hoop scale changes',()=>{
+  const sourceDraw=vi.fn(),surfaces:{width:number;height:number;getContext:()=>unknown}[]=[];
+  vi.stubGlobal('document',{});
+  vi.stubGlobal('OffscreenCanvas',class {
+   width:number;height:number;
+   constructor(width:number,height:number){this.width=width;this.height=height;surfaces.push(this);}
+   getContext(){return {scale(){},drawImage:sourceDraw};}
+  });
+  const ctx={clearRect(){},save(){},restore(){},scale(){},drawImage:vi.fn()};
+  const images={court:{width:1448,height:1086},net:{},rim:{},ball:{}};
+  try{
+   drawMultiScene(ctx as never,images as never,[],1,780,680);
+   drawMultiScene(ctx as never,images as never,[],1,780,680);
+   expect(sourceDraw).toHaveBeenCalledTimes(9);expect(surfaces).toHaveLength(1);
+   expect(surfaces[0]).toMatchObject({width:780,height:680});
+   expect(ctx.drawImage.mock.calls[0]).toEqual([surfaces[0],0,0,720,680/(780/720)]);
+   drawMultiScene(ctx as never,images as never,[],1,780,700);
+   drawMultiScene(ctx as never,images as never,[],1,780,700,.85);
+   expect(surfaces).toHaveLength(3);expect(sourceDraw).toHaveBeenCalledTimes(27);
+  }finally{vi.unstubAllGlobals();}
+ });
  it.each([[320,600],[640,330],[900,500]])('keeps a smaller hoop and animated ball aligned across %sx%s', (width,height)=>{
   const scale=.85,view=sceneProjection(width,height,scale);
   expect(view.x(720)*view.scale).toBeCloseTo(width);expect(view.y(540)*view.scale).toBeCloseTo(height);

@@ -34,38 +34,27 @@ function button(text: string) {
   expect(result, text).toBeTruthy(); return result!;
 }
 async function click(text: string) {await act(async () => button(text).click()); await act(async () => {await Promise.resolve();});}
-async function choose(label: string, value: string) {
-  await act(async () => {
-    const field = document.querySelector<HTMLSelectElement>(`[aria-label="${label}"]`)!;
-    field.value = value; field.dispatchEvent(new Event('change', {bubbles: true}));
-  });
-}
 function applicant(gymLevel = 6, credits = 8) {
   const state = newGym(at, 17); state.gymLevel = gymLevel; state.credits = credits; state.player = null;
   state.projects.recruitment = Math.min(2, Math.max(0, gymLevel - 2));
   return state;
 }
 
-it('quotes selected admission, cancels without generating a rookie, and confirms one paid transaction', async () => {
+it('uses direction buttons and immediately recruits one paid trainee without a second confirmation', async () => {
   const state = applicant(8, 8);
   state.collectionGoalId = 'hakeem';
   await mount(state);
-  const before = JSON.stringify(latest);
-  expect(document.querySelector<HTMLSelectElement>('[aria-label="名册新人身高偏好"]')?.value).toBe('any');
+  expect(document.querySelector('.gm-recruit-height [data-preference="any"]')?.getAttribute('aria-pressed')).toBe('true');
   expect(document.body.textContent).not.toContain('收藏目标');
   await click('精选招生');
-  expect(document.querySelector<HTMLSelectElement>('[aria-label="精选招生方向"]')?.value).toBe('shooting');
-  await choose('精选招生方向', 'interior');
-  await choose('名册新人身高偏好', 'center');
-  await click('精选招募');
-  expect(document.body.textContent).toContain('身高分组：内线型 · 206–218 cm');
-  expect(document.body.textContent).toContain('支付后 0 券');
-  expect(document.body.textContent).toContain('不保证传奇或指定球星');
-  await click('取消招生');
-  expect(actions).toEqual([]); expect(JSON.stringify(latest)).toBe(before);
-  await click('精选招募');
-  const confirm = button('确认支付 8 券并招募');
-  await act(async () => {confirm.click(); confirm.click();});
+  expect(document.querySelector('.gm-recruit-direction [data-direction="shooting"]')?.getAttribute('aria-pressed')).toBe('true');
+  expect(document.querySelectorAll('.gm-recruit-direction button')).toHaveLength(3);
+  await act(async()=>document.querySelector<HTMLButtonElement>('[data-direction="interior"]')!.click());
+  await click('内线型');
+  const recruit = button('精选招募');
+  await act(async () => {recruit.click(); recruit.click();});
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(document.body.textContent).not.toContain('不保证传奇或指定球星');
   expect(actions).toEqual([{type: 'recruit', mode: 'selected', preference: 'center', direction: 'interior', expectedNextPlayer: state.nextPlayer}]);
   expect(latest.credits).toBe(0);
   expect(latest.player!.entryStats.inside).toBeGreaterThanOrEqual(48);
@@ -76,34 +65,34 @@ it('quotes selected admission, cancels without generating a rookie, and confirms
 });
 
 it('keeps free admission usable while selected admission is locked or unaffordable', async () => {
-  await mount(applicant(5, 0));
-  expect(button('精选招生').disabled).toBe(true);
+  await mount(applicant(3, 0));
+  expect(document.querySelector('.gm-recruitment-modes')).toBeNull();
+  expect(document.body.textContent).not.toContain('精选招生');
   expect(button('免费招募新人').disabled).toBe(false);
   await click('免费招募新人');
   expect(latest.credits).toBe(0); expect(latest.player).not.toBeNull();
   expect(actions[0]).toMatchObject({type: 'recruit', expectedNextPlayer: 2});
-  await act(async () => replace(applicant(6, 7)));
+  await act(async () => replace(applicant(4, 7)));
   await click('精选招生');
   expect(button('精选招募').disabled).toBe(true);
   expect(document.body.textContent).toContain('还差 1 券');
 });
 
-it('refuses a confirmation after the admission sequence changed in another page', async () => {
+it('uses the current admission sequence after roster progress changes', async () => {
   const state = applicant(8, 100);
   await mount(state);
-  await click('精选招生'); await click('精选招募');
+  await click('精选招生');
   await act(async () => replace({...state, nextPlayer: state.nextPlayer + 1}));
-  expect(button('确认支付 8 券并招募').disabled).toBe(true);
-  expect(document.body.textContent).toContain('球员名册已变化');
-  await click('确认支付 8 券并招募');
-  expect(actions).toEqual([]); expect(latest.credits).toBe(100);
+  await click('精选招募');
+  expect(actions).toEqual([{type:'recruit',mode:'selected',preference:'any',direction:'shooting',expectedNextPlayer:state.nextPlayer+1}]);
+  expect(latest.credits).toBe(92);
 });
 
 it.each([1, 8])('ignores a saved template goal for free admission at gym level %s', async gymLevel => {
   const state = applicant(gymLevel, 0); state.collectionGoalId = 'hakeem';
   await mount(state);
   expect(document.body.textContent).not.toContain('收藏目标');
-  if (gymLevel >= 2) expect(document.querySelector<HTMLSelectElement>('[aria-label="名册新人身高偏好"]')?.value).toBe('any');
+  expect(document.querySelector('.gm-recruit-height [data-preference="any"]')?.getAttribute('aria-pressed')).toBe('true');
   await click('免费招募新人');
   expect(actions[0]).toMatchObject({type: 'recruit', preference: 'any'});
   expect(latest.player).not.toBeNull();

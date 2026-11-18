@@ -15,7 +15,9 @@ export type Project = { id: ProjectId; name: string; unlockLevel: number; maxLev
 export const gymEconomyVersion = 11 as const;
 /** Optional admission service; never changes free recruitment or recommendation rewards. */
 export const selectedRecruitmentPrice = 8;
-export const selectedRecruitmentUnlockLevel = 6;
+export const selectedRecruitmentUnlockLevel = 4;
+export const trainingPlanUnlockLevel = 1;
+export const cooperationUnlockLevel = 1;
 
 export const projects: readonly Project[] = [
   { id: 'endurance', name: '耐力训练', unlockLevel: 1, maxLevel: 8, basePrice: 1, prices: [1, 2, 3, 5, 7, 10, 14, 20], description: '每级增加 5 点体力上限，不补充当前体力。', available: true },
@@ -106,7 +108,7 @@ export const equipmentCatalog: readonly GymEquipment[] = [
   equipment(2, 'recovery', 1, 1, 3, { recovery: 1 }),
   equipment(42, 'recovery', 2, 3, 8, { recovery: 2 }),
   equipment(78, 'recovery', 3, 7, 30, { recovery: 4 }, 8),
-  equipment(17, 'course', 1, 1, 5, { courseRecovery: 1 }),
+  equipment(17, 'course', 1, trainingPlanUnlockLevel, 5, { courseRecovery: 1 }),
   equipment(37, 'course', 2, 3, 12, { courseRecovery: 2 }),
   equipment(85, 'course', 3, 8, 36, { courseRecovery: 3 }, 8),
   equipment(6, 'experience', 1, 1, 4, { experience: 1 }),

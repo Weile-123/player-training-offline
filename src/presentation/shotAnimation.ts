@@ -34,6 +34,19 @@ export function spawnScale(elapsed:number){
  return 1+.18*(1-(elapsed-75)/115)**2;
 }
 type ShotEvent={id:number;outcome:Outcome};
+/** Smooth the recorded poses at display refresh rate, preserving their exact
+ * timestamps, occlusion boundaries and the existing total playback duration. */
+export function sampleShotFrame(samples:readonly ShotFrame[],elapsed:number):ShotFrame {
+ const index=frameIndex(samples as ShotFrame[],elapsed),current=samples[index],next=samples[index+1];
+ if(!next)return current;
+ const start=index===0?0:samples[index-1].endMs,amount=Math.min(1,Math.max(0,(elapsed-start)/Math.max(1,current.endMs-start)));
+ if(amount===0)return current;
+ const mix=(first:number,second:number)=>first+(second-first)*amount;
+ return {...current,x:mix(current.x,next.x),y:mix(current.y,next.y),radius:mix(current.radius,next.radius),
+  alpha:mix(current.alpha,next.alpha),rotation:mix(current.rotation,next.rotation),netHeight:mix(current.netHeight,next.netHeight),
+  netGreen:mix(current.netGreen,next.netGreen),vignette:mix(current.vignette,next.vignette),
+  camera:current.camera&&next.camera?{x:mix(current.camera.x,next.camera.x),y:mix(current.camera.y,next.camera.y),angle:mix(current.camera.angle,next.camera.angle),zoom:mix(current.camera.zoom,next.camera.zoom)}:current.camera};
+}
 /** Each shot owns its own age. One shared court is composed around all balls. */
 export class ConcurrentShots {
  private active=new Map<number,ShotEvent&{elapsed:number}>();
@@ -49,7 +62,7 @@ export class ConcurrentShots {
   for(const [id,shot] of this.active){
    shot.elapsed+=Math.max(0,delta)*speed;
    if(shot.elapsed>=shotPlayback.duration){this.active.delete(id);this.completed.add(id);finished.push(id);continue;}
-   const samples=timeline.outcomes[shot.outcome].frames,frame=samples[frameIndex(samples,shot.elapsed)];
+   const samples=timeline.outcomes[shot.outcome].frames,frame=sampleShotFrame(samples,shot.elapsed);
    const scale=spawnScale(shot.elapsed);
    frames.push(scale===1?frame:{...frame,radius:frame.radius*scale});
   }

@@ -8,6 +8,7 @@ import {templateRules} from '../../src/game/contract/templates';
 import {positionLabels, templateById} from '../../src/game/templates';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
+import {gymFirstVisitTutorialKey, resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
 
 const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[], proofs: [] as (Parameters<GymStore['act']>[1])[], order: [] as string[]}));
 vi.mock('../../src/gymStore', async () => {
@@ -76,6 +77,7 @@ function deferred<T>() {
 }
 
 beforeEach(() => {
+  resetGymFirstVisitTutorials(); localStorage.setItem(gymFirstVisitTutorialKey, JSON.stringify(['training', 'cooperation']));
   vi.useFakeTimers(); vi.setSystemTime(at);
   Object.defineProperty(document, 'fonts', {configurable: true, value: {ready: Promise.resolve()}});
   vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible');

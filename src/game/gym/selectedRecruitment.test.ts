@@ -4,11 +4,14 @@ import {statKeys} from '../types';
 import {maximumRecommendationCredits, selectedRecruitmentPrice, selectedRecruitmentUnlockLevel} from './catalog';
 import {activePlayers, dispatchGym, newGym, recommendation, type GymAction, type GymState} from './engine';
 import {selectedRecruitmentDirections} from './selectedRecruitment';
+import {decodeGym, encodeGym, validGym} from './save';
+import {parseGymCloudArchive} from '../../platform/gymCloudArchive';
+import {hupuProject} from '../../platform/hupuProject';
 
 const now = 1_000;
 function fixture(seed = 1, project = 0): GymState {
   const state = newGym(now, seed);
-  state.gymLevel = selectedRecruitmentUnlockLevel;
+  state.gymLevel = Math.max(selectedRecruitmentUnlockLevel, project + 1);
   state.credits = 72;
   state.projects.recruitment = project;
   return state;
@@ -27,6 +30,8 @@ describe('optional selected recruitment', () => {
       const free = command(initial, {type: 'recruit', preference: 'forward'});
       const selected = command(initial, {type: 'recruit', preference: 'forward', mode: 'selected', direction: direction.id, expectedNextPlayer: initial.nextPlayer});
       const ordinary = lastPlayer(free), paid = lastPlayer(selected);
+      expect(ordinary.highPotential).toBeUndefined();
+      expect(paid.highPotential).toBe(true);
       const expectedStream = {...free.rng.recruits};
       for (const key of statKeys) {
         if (!direction.keys.includes(key)) expect(paid.stats[key]).toBe(ordinary.stats[key]);
@@ -60,6 +65,21 @@ describe('optional selected recruitment', () => {
     expect(high.credits).toBe(72);
   });
 
+  it('retains the selected portrait flag through local saves and the portable cloud whitelist', () => {
+    const state = fixture();
+    const selected = command(state, {type: 'recruit', mode: 'selected', direction: 'shooting', expectedNextPlayer: state.nextPlayer});
+    expect(validGym(selected)).toBe(true);
+    const restored = decodeGym(encodeGym(selected))!;
+    expect(restored.player!.highPotential).toBeUndefined();
+    expect(restored.bench[0].highPotential).toBe(true);
+    const portable = parseGymCloudArchive(JSON.stringify({format: 'legend-gym-cloud-v1', applicationId: hupuProject.applicationId,
+      uploadedAt: now, gym: encodeGym(selected)})).state;
+    expect(portable.bench[0].highPotential).toBe(true);
+    const malformed = structuredClone(selected);
+    malformed.bench[0].highPotential = 'true' as never;
+    expect(validGym(malformed)).toBe(false);
+  });
+
   it('rejects stale duplicate admissions even with a fresh state revision and vacant slots', () => {
     const state = fixture();
     const action = {type: 'recruit', mode: 'selected', direction: 'shooting', expectedNextPlayer: state.nextPlayer} as const;
@@ -84,7 +104,7 @@ describe('optional selected recruitment', () => {
   });
 
   it.each([
-    ['locked stage', (state: GymState) => {state.gymLevel = 5;}, {}],
+    ['locked stage', (state: GymState) => {state.gymLevel = selectedRecruitmentUnlockLevel - 1;}, {}],
     ['insufficient credits', (state: GymState) => {state.credits = 7;}, {}],
     ['missing confirmation', () => {}, {expectedNextPlayer: undefined}],
     ['invalid direction', () => {}, {direction: 'balanced'}],
@@ -114,7 +134,7 @@ describe('optional selected recruitment', () => {
   });
 
   it('keeps a normal first reward up to 33 and preserves training bonuses on a later selected repeat', () => {
-    const initial = {...fixture(), player: null};
+    const initial = {...fixture(), gymLevel: 6, player: null};
     const paid = command(initial, {type: 'recruit', preference: 'forward', mode: 'selected', direction: 'finishing', expectedNextPlayer: initial.nextPlayer});
     const player = paid.player!;
     // Isolate the published upper reward boundary after a real atomic paid admission.

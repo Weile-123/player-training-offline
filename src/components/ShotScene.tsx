@@ -30,21 +30,23 @@ export function ShotScene({feedback,shots=[],hot,reduced=false,hideOutcomeLabel=
  useEffect(()=>{
   if(!assets)return;
   const context=canvas.current?.getContext('2d');if(!context){setError(true);return;}
-  const active=new ConcurrentShots();let request=0,layoutRetry:ReturnType<typeof setTimeout>|undefined,previous=performance.now(),cancelled=false,hasPainted=false,lastSignature='',heatLevel=0;
+  const active=new ConcurrentShots();let request=0,layoutRetry:ReturnType<typeof setTimeout>|undefined,previous=performance.now(),cancelled=false,hasPainted=false,lastSignature='',heatLevel=0,layoutDirty=true;
   let lastFrames:ShotFrame[]=[],lastShots:ShotFeedback[]|undefined,lastReduced:boolean|undefined;
   let schedule=()=>{};
   const element=canvas.current!;
   const measure=()=>{
+   if(!layoutDirty)return true;
    const rect=element.getBoundingClientRect(),density=Math.min(window.devicePixelRatio||1,2);
    // A newly displayed WebView can report zero before its first layout. Do not
    // paint/cache a 1px idle scene and then wait for the player's first shot.
    if(rect.width<=0||rect.height<=0)return false;
    const width=Math.max(1,Math.round(rect.width*density)),height=Math.max(1,Math.round(rect.height*density));
    if(element.width!==width||element.height!==height){element.width=width;element.height=height;lastSignature='';}
+   layoutDirty=false;
    return true;
   };
   const invalidate=()=>{lastSignature='';schedule();};
-  const resize=()=>{measure();invalidate();};
+  const resize=()=>{layoutDirty=true;invalidate();};
   const observer=typeof ResizeObserver==='function'?new ResizeObserver(resize):null;
   observer?.observe(element);window.addEventListener('resize',resize);
   const tick=(now:number)=>{
@@ -85,10 +87,10 @@ export function ShotScene({feedback,shots=[],hot,reduced=false,hideOutcomeLabel=
   };
   schedule=()=>{if(!cancelled&&!request&&!document.hidden){previous=performance.now();request=requestAnimationFrame(tick);}};
   wake.current=invalidate;
-  const visibility=()=>{if(document.hidden){cancelAnimationFrame(request);request=0;clearTimeout(layoutRetry);}else invalidate();};
-  const unsubscribe=subscribeAnimationConfig(invalidate);
-  document.addEventListener('visibilitychange',visibility);window.addEventListener('pageshow',invalidate);element.addEventListener('contextrestored',invalidate);schedule();
-  return ()=>{cancelled=true;wake.current=()=>{};cancelAnimationFrame(request);clearTimeout(layoutRetry);unsubscribe();document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pageshow',invalidate);element.removeEventListener('contextrestored',invalidate);observer?.disconnect();window.removeEventListener('resize',resize);};
+  const visibility=()=>{if(document.hidden){cancelAnimationFrame(request);request=0;clearTimeout(layoutRetry);}else resize();};
+  const unsubscribe=subscribeAnimationConfig(resize);
+  document.addEventListener('visibilitychange',visibility);window.addEventListener('pageshow',resize);element.addEventListener('contextrestored',resize);schedule();
+  return ()=>{cancelled=true;wake.current=()=>{};cancelAnimationFrame(request);clearTimeout(layoutRetry);unsubscribe();document.removeEventListener('visibilitychange',visibility);window.removeEventListener('pageshow',resize);element.removeEventListener('contextrestored',resize);observer?.disconnect();window.removeEventListener('resize',resize);};
  },[assets]);
  return <div className={`front-shot-court ${hot?'hot-court':''}`} aria-label="正面投篮动画">
   {/* A local vector court is visible even before the first image response. Keep

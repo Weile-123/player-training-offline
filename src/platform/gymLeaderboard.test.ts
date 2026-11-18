@@ -127,12 +127,12 @@ it('never displays an unacknowledged submission as success and never retries imp
  await expect(client.sync(reference)).rejects.toThrow('未确认');
  expect(request).toHaveBeenCalledOnce(); expect(client.getMessage()).not.toBe('最佳球员与声望成绩已同步');
 });
-it('prevents simultaneous submissions and releases the lock after failure', async () => {
+it('joins simultaneous submissions so a rank-page refresh waits for a pending home submission, and releases after failure', async () => {
  let reject!: (reason: unknown) => void;
  const request = vi.fn().mockImplementationOnce(() => new Promise((_, fail) => {reject = fail;})).mockResolvedValue({accepted: true});
  const client = createGymLeaderboardClient({enabled: () => true, user: async () => ({puid: 'one'}), request});
- const first = client.sync(reference); await Promise.resolve();
- await expect(client.sync(reference)).rejects.toThrow('正在同步');
+ const first = client.sync(reference); for(let index=0;index<5;index++)await Promise.resolve();
+ expect(client.sync(reference)).toBe(first);
  const failure = expect(first).rejects.toThrow('offline'); reject(Error('offline')); await failure;
  await expect(client.sync(reference)).resolves.toBe(true); expect(request).toHaveBeenCalledTimes(2);
 });

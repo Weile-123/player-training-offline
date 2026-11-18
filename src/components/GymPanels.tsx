@@ -1,8 +1,8 @@
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { statLabels } from '../game/config';
 import { templateRules, type TemplateRule } from '../game/contract/templates';
-import { equipmentCatalog, equipmentFamilyLabels, gymLevels, projects, postgameRepeatTemplateCredits, type GymEquipment, type ProjectId } from '../game/gym/catalog';
-import { automaticIntervalMs, cooperationStatus, courseRecoveryCap, effectiveTrainingBias, equipmentCapacity, equipmentEffects, equipmentOffer, equipmentSaleValue, equippedFamilyEquipment, gymUpgrade, playerLevelCap, playerValue, projectOffer, recoverySeconds, requiredExperience, staminaMax, trainingCreditMilestones, trainingPlans, trainingStatus, type GymAction, type GymAlumnus, type GymPlayer, type GymState, type TrainingPlanId } from '../game/gym/engine';
+import { equipmentCatalog, equipmentFamilyLabels, gymLevels, projects, postgameRepeatTemplateCredits, selectedRecruitmentUnlockLevel, type GymEquipment, type ProjectId } from '../game/gym/catalog';
+import { activePlayers, automaticIntervalMs, cooperationStatus, courseRecoveryCap, effectiveTrainingBias, equipmentCapacity, equipmentEffects, equipmentOffer, equipmentSaleValue, equippedFamilyEquipment, gymUpgrade, playerLevelCap, playerValue, projectOffer, recoverySeconds, requiredExperience, staminaMax, trainingCreditMilestones, trainingPlans, trainingStatus, type GymAction, type GymAlumnus, type GymPlayer, type GymState, type TrainingPlanId } from '../game/gym/engine';
 import { offlineLimitMs } from '../game/gym/offline';
 import { trainingGuidance } from '../game/gym/guidance';
 import { forecastTraining } from '../game/gym/forecast';
@@ -16,6 +16,7 @@ import { money } from '../presentation/money';
 import { equipmentSummary } from '../presentation/equipmentSummary';
 import { gymPlayerName } from '../presentation/gymPlayerName';
 import { offlineDuration } from '../presentation/offlineDuration';
+import { useGymFirstVisitTutorial } from '../presentation/gymFeatureTutorialPreference';
 import { ComicDialog } from './ComicDialog';
 import { EquipmentMystery } from './EquipmentMystery';
 import { FittedAmount } from './FittedAmount';
@@ -25,6 +26,7 @@ import { ProductImage } from './ProductImage';
 import { SlidingTabs } from './SlidingTabs';
 import { GymRecruitmentControls } from './GymRecruitmentControls';
 import { GymCooperationPanel } from './GymCooperationPanel';
+import { GymFeatureTutorial } from './GymFeatureTutorial';
 import { groupGymAlumni, loadAllGymAlumni, type GymAlumniGroup } from '../presentation/gymAlumniGroups';
 import { EquipmentReplacementChanges } from './EquipmentReplacementChanges';
 import { TierBadge } from './TierBadge';
@@ -47,12 +49,16 @@ export type GymPanelProps = {
   adAction?: GymAction | null;
   onClose?: () => void;
   busy?: boolean;
+  tutorialEnabled?: boolean;
+  onTutorialActiveChange?: (active: boolean) => void;
   loadAlumni?: (offset?: number, limit?: number) => Promise<{ players: GymAlumnus[]; total: number }>;
 };
 
 const formatNumber = new Intl.NumberFormat('zh-CN', { maximumFractionDigits: 1 });
 const format = (value: number) => formatNumber.format(value);
 const rarityLabels = { common: '普通', rare: '稀有', legendary: '传说' };
+const rarityOrder = {common: 0, rare: 1, legendary: 2};
+const albumEquipment = [...equipmentCatalog].sort((first, second) => rarityOrder[first.rarity] - rarityOrder[second.rarity]);
 const equipmentById = new Map(equipmentCatalog.map(item => [item.id, item]));
 const tierOrder = ['rotation', 'starter', 'star', 'superstar', 'legend'];
 const albumTemplates = [...templateRules].sort((a, b) => tierOrder.indexOf(a.tier) - tierOrder.indexOf(b.tier));
@@ -94,9 +100,9 @@ function Wallet({ credits }: { credits: number }) {
   return <div className="gm-wallet"><span><i className="gm-coupon" aria-hidden="true">券</i>赞助券</span><b>{format(credits)}</b></div>;
 }
 
-function PlayerPortrait({ player }: { player: Pick<GymPlayer, 'templateId' | 'name'> }) {
+function PlayerPortrait({ player }: { player: Pick<GymPlayer, 'templateId' | 'name' | 'highPotential'> }) {
   const profile = usePlayerProfile(player.templateId);
-  return <StarPortrait src={profile?.avatar ?? templatePortrait(player.templateId)} fallbackSrc={templatePortrait(player.templateId)} name={profile?.name ?? gymPlayerName(player)} />;
+  return <StarPortrait src={profile?.avatar ?? templatePortrait(player.templateId)} fallbackSrc={templatePortrait(player.templateId)} name={profile?.name ?? gymPlayerName(player)} highPotential={player.highPotential} />;
 }
 
 function PlayerHeading({ player, value, alumnus = false }: { player: GymPlayer; value: string; alumnus?: boolean }) {
@@ -184,7 +190,7 @@ export function GymClubPanel({ state, onAction, busy }: GymPanelProps) {
       {tab === 0 ? upgrade.level ? <section className="gm-club-expansion gm-expansion-a" aria-label="下一球馆升级条件">
         <header><div><span className="gm-expansion-ribbon">扩建至 Lv.{upgrade.level.level}</span><h3>{upgrade.level.name}</h3></div><span className="gm-expansion-arrow">{state.gymLevel}<i>›</i>{upgrade.level.level}</span></header>
         <div className="gm-expansion-conditions">{upgrade.requirements.map(requirement => <div className={requirement.met ? 'is-met' : ''} key={requirement.label}><span>{requirement.label}{requirement.met && <i aria-label="已达成">✓</i>}</span><b>{requirement.label.includes('推荐档次') ? recommendationTierNames[requirement.current] : format(requirement.current)} <small>/ {requirement.label.includes('推荐档次') ? recommendationTierNames[requirement.required] : format(requirement.required)}</small></b><div role="progressbar" aria-label={requirement.label} aria-valuemin={0} aria-valuemax={requirement.required} aria-valuenow={Math.min(requirement.current, requirement.required)}><i style={{ width: `${Math.min(100, requirement.current / requirement.required * 100)}%` }} /></div></div>)}</div>
-        <footer><div className="gm-expansion-unlocks"><small>下一级新增</small><span><b>+1</b> 训练位{upgrade.level.level === 2 && <> <i>·</i> 自动训练 <i>·</i> 30分钟离线</>}{upgrade.level.level > 2 && !!unlocks?.newEquipment && <> <i>·</i> {unlocks.newEquipment}件器材上架</>}</span>{!!unlocks?.opened.length && <span className="gm-expansion-secondary">{upgrade.level.level === 2 ? '开放招生、器械管理、自动与离线项目' : `开放${unlocks.opened.join('、')}项目`}</span>}{upgrade.level.level > 2 && !!unlocks?.raised.length && <span className="gm-expansion-secondary">{unlocks.raised.join('、')}项目上限提高</span>}</div><button type="button" className="gm-button gm-primary gm-expansion-upgrade" title={upgrade.reason || `扩建花费 ${upgrade.price} 券`} disabled={busy || !upgrade.canUpgrade} onClick={() => onAction({ type: 'upgrade-gym', targetLevel: upgrade.level!.level })}>{upgrade.price === 0 ? '免费' : `升级 · ${format(upgrade.price)} 券`}</button></footer>
+        <footer><div className="gm-expansion-unlocks"><small>下一级新增</small><span><b>+1</b> {upgrade.level.level === 2 ? <strong><u>训练位</u></strong> : '训练位'}{upgrade.level.level === 2 && <> <i>·</i> <strong><u>自动训练</u></strong> <i>·</i> <strong><u>30分钟离线训练</u></strong></>}{upgrade.level.level > 2 && !!unlocks?.newEquipment && <> <i>·</i> {unlocks.newEquipment}件器材上架</>}</span>{upgrade.level.level === selectedRecruitmentUnlockLevel && <span><strong>解锁精选招生</strong></span>}{!!unlocks?.opened.length && <span className="gm-expansion-secondary">{upgrade.level.level === 2 ? '开放招生、器械管理、自动与离线项目' : `开放${unlocks.opened.join('、')}项目`}</span>}{upgrade.level.level > 2 && !!unlocks?.raised.length && <span className="gm-expansion-secondary">{unlocks.raised.join('、')}项目上限提高</span>}</div><button type="button" className="gm-button gm-primary gm-expansion-upgrade" title={upgrade.reason || `扩建花费 ${upgrade.price} 券`} disabled={busy || !upgrade.canUpgrade} onClick={() => onAction({ type: 'upgrade-gym', targetLevel: upgrade.level!.level })}>{upgrade.price === 0 ? '免费' : `升级 · ${format(upgrade.price)} 券`}</button></footer>
       </section> : <p className="gm-inline-status">已达到当前最高馆级，继续培养与收藏。</p> : <div className="gm-stack gm-club-project-page">
         <div className="gm-section-heading"><h3>经营项目</h3><small>全馆永久生效</small></div>
         <div className="gm-projects gm-project-list">{projects.map(project => {
@@ -201,7 +207,7 @@ export function GymClubPanel({ state, onAction, busy }: GymPanelProps) {
         })}</div></div>}
     </SlidingTabs>
     {selectedProject && selectedOffer && <ComicDialog title={`${selectedProject.name}详情`} onClose={() => setDetailProject(null)}><div className="gym-panel gm-stack"><h3>{selectedProject.name} · Lv.{selectedOffer.level}/{selectedProject.maxLevel}</h3><p>{selectedProject.description}</p><p>当前 · {projectEffect(state, selectedProject.id, selectedOffer.level)}</p>{selectedOffer.level < selectedProject.maxLevel && <p>下级 · {projectEffect({ ...state, gymLevel: Math.max(2, state.gymLevel) }, selectedProject.id, selectedOffer.level + 1)}</p>}<p className="gm-muted">馆级上限 Lv.{selectedOffer.maxLevel}。{selectedOffer.reason ?? (selectedOffer.price !== null && state.credits < selectedOffer.price ? `还差 ${selectedOffer.price - state.credits} 券` : '')}</p>{['endurance', 'recovery', 'automation'].includes(selectedProject.id) && selectedOffer.price !== null && <ProjectTrainingPreview state={state} id={selectedProject.id} />} {selectedProject.id === 'offline' && selectedOffer.price !== null && <OfflineProjectPreview state={state} />}<button type="button" className="gm-button" onClick={() => setDetailProject(null)}>返回经营项目</button></div></ComicDialog>}
-    {showRules && <ComicDialog title="球馆说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules"><section className="gm-stack"><h3>扩建球馆</h3><p>满足声望、培养成果与赞助券条件后扩建，每级新增1个空训练位，并提高项目上限、开放器材。升级保留累计声望；已有馆级不补收历史费用。</p><p>球馆2级免费解锁在线自动与离线训练，空位由你招募新人。</p></section><section className="gm-stack"><h3>经营项目</h3>{projects.map(project => <p key={project.id}><strong>{project.name}</strong> · {project.description}</p>)}</section><section className="gm-stack"><h3>获取赞助券</h3><RecommendationCreditRule state={state} /><p>未匹配模板的球员离馆不入校友档案；已发掘模板的推荐成果保存在校友簿。</p></section><button type="button" className="gm-button" onClick={() => setShowRules(false)}>返回球馆</button></div></ComicDialog>}
+    {showRules && <ComicDialog title="球馆说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules"><section className="gm-stack"><h3>扩建球馆</h3><p>满足声望、培养成果与赞助券条件后扩建，每级新增1个空训练位，并提高项目上限、开放器材。升级保留累计声望；已有馆级不补收历史费用。</p><p>训练计划与赞助合作从开馆即可使用。球馆2级开放<strong><u>多训练位、自动训练和30分钟离线训练</u></strong>，{selectedRecruitmentUnlockLevel}级开放精选招生。空位由你招募新人。</p></section><section className="gm-stack"><h3>经营项目</h3>{projects.map(project => <p key={project.id}><strong>{project.name}</strong> · {project.description}</p>)}</section><section className="gm-stack"><h3>获取赞助券</h3><RecommendationCreditRule state={state} /><p>未匹配模板的球员离馆不入校友档案；已发掘模板的推荐成果保存在校友簿。</p></section><button type="button" className="gm-button" onClick={() => setShowRules(false)}>返回球馆</button></div></ComicDialog>}
   </div>;
 }
 
@@ -217,12 +223,15 @@ function OfflineProjectPreview({ state }: { state: GymState }) {
   </section>;
 }
 
-export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni, busy }: GymPanelProps & { onAlumni?: () => void }) {
+export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni, busy, selectedPlayerId, tutorialEnabled = true, onTutorialActiveChange }: GymPanelProps & { onAlumni?: () => void; selectedPlayerId?: string | null }) {
   const [planningPlayerId, setPlanningPlayerId] = useState<string | null>(null);
   const [planningTab, setPlanningTab] = useState(0);
-  const players = state.player ? [state.player, ...state.bench] : [];
+  const [planningTutorialActive, setPlanningTutorialActive] = useState(false);
+  const players = activePlayers(state);
   const planningPlayer = players.find(player => player.id === planningPlayerId);
   useEffect(() => { if (planningPlayerId && !planningPlayer) setPlanningPlayerId(null); }, [planningPlayerId, planningPlayer]);
+  const planningTutorialChange = useCallback((active: boolean) => {setPlanningTutorialActive(active); onTutorialActiveChange?.(active);}, [onTutorialActiveChange]);
+  useEffect(() => () => onTutorialActiveChange?.(false), [onTutorialActiveChange]);
   const planningState = planningPlayer ? {...state, player: planningPlayer, bench: players.filter(player => player.id !== planningPlayer.id)} : null;
   const planAction = (action: GymAction) => {
     if (busy) return;
@@ -233,14 +242,14 @@ export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni
   return <div className="gm-roster">
     <div className="gm-roster-scroll" role="region" aria-label="球员列表" tabIndex={0}>
     {players.length > 0 && <div className="contract-cards roster-cards">{players.map((player, index) => {
-      const selected = state.player?.id === player.id;
+      const selected = (selectedPlayerId === undefined ? state.player?.id : selectedPlayerId) === player.id;
       const template = templateById(player.templateId);
       const capped = player.level >= playerLevelCap;
       const experience = requiredExperience(player.level);
       const name = gymPlayerName(player);
       const accessibleName = `${name} · 训练位${index + 1}`;
       return <article key={player.id} className={`contract-card roster-card${selected ? ' is-training' : ''}`} data-player-id={player.id} data-tier={template?.tier ?? 'undiscovered'}>
-        <div className="roster-card-body"><span data-tier={template?.tier ?? 'undiscovered'} className={`roster-portrait tier-portrait-frame${template ? ' album-portrait-surface' : ''}`}><StarPortrait src={templatePortrait(player.templateId)} name={name} /></span><div className="roster-identity"><h3>{name} <TierBadge tier={template?.tier} /></h3><p>训练 <b className="roster-level">{player.level}</b><i /> {player.height} cm</p></div><div className="roster-value"><small>球员身价</small><FittedAmount text={money(playerValue(state, player))} /></div><div className="roster-attributes"><div className="roster-rating"><small>综合评分</small><b>{overallRating(player.stats).toFixed(1)}</b></div>{statKeys.map(key => <div key={key}><small>{statLabels[key]}</small><b>{player.stats[key]}</b></div>)}</div></div>
+        <div className="roster-card-body"><span data-tier={template?.tier ?? 'undiscovered'} className={`roster-portrait tier-portrait-frame${template ? ' album-portrait-surface' : ''}`}><StarPortrait src={templatePortrait(player.templateId)} name={name} highPotential={player.highPotential} /></span><div className="roster-identity"><h3>{name} <TierBadge tier={template?.tier} /></h3><p>训练 <b className="roster-level">{player.level}</b><i /> {player.height} cm</p></div><div className="roster-value"><small>球员身价</small><FittedAmount text={money(playerValue(state, player))} /></div><div className="roster-attributes"><div className="roster-rating"><small>综合评分</small><b>{overallRating(player.stats).toFixed(1)}</b></div>{statKeys.map(key => <div key={key}><small>{statLabels[key]}</small><b>{player.stats[key]}</b></div>)}</div></div>
         <div className="gm-roster-meters"><div className="gm-roster-meter"><div><span>体力</span><b>{player.stamina}/{maximum}</b></div><div role="progressbar" aria-label={`${accessibleName}体力`} aria-valuemin={0} aria-valuemax={maximum} aria-valuenow={player.stamina}><i style={{ width: `${Math.min(100, player.stamina / maximum * 100)}%` }} /></div></div><div className="gm-roster-meter is-experience"><div><span>经验</span><b>{capped ? '已满级' : `${player.experience}/${experience}`}</b></div><div role="progressbar" aria-label={`${accessibleName}训练经验`} aria-valuemin={0} aria-valuemax={capped ? 1 : experience} aria-valuenow={capped ? 1 : player.experience} aria-valuetext={capped ? '已满级' : `${player.experience}/${experience} 经验`}><i style={{ width: `${capped ? 100 : Math.min(100, player.experience / experience * 100)}%` }} /></div></div></div>
         <div className="contract-actions contract-roster-actions"><button type="button" className="primary gm-icon-button" disabled={selected || busy} onClick={() => onAction({ type: 'select-player', id: player.id })}><GameIcon name="train" /><span>{selected ? '当前选中' : '选择训练'}</span></button><button type="button" className="secondary gm-icon-button gm-roster-plan" disabled={busy} aria-label={`${accessibleName}训练计划`} onClick={() => {setPlanningTab(0); setPlanningPlayerId(player.id);}}><span>训练计划</span></button><button type="button" className={`secondary gm-icon-button${player.autoEnabled ? ' signing-button' : ''}`} role="switch" aria-label={`${accessibleName}自动训练`} aria-checked={player.autoEnabled} disabled={busy || state.gymLevel < 2 || capped && !player.autoEnabled} onClick={() => onAction({ type: 'set-auto', id: player.id, enabled: !player.autoEnabled })}><GameIcon name="rest" /><span>{state.gymLevel < 2 ? 'Lv.2 免费解锁自动' : player.autoEnabled ? '暂停自动' : capped ? '已满级' : '开启自动'}</span>{player.autoEnabled && <AutoTrainingBorder />}</button></div>
       </article>;
@@ -248,14 +257,16 @@ export function GymRosterPanel({ state, onAction, onAdAction, adAction, onAlumni
     {freeSeats > 0 && <GymRecruitmentControls state={state} onAction={onAction} busy={busy} />}
     </div>
     {onAlumni && <button type="button" className="secondary gm-icon-button gm-roster-alumni" onClick={onAlumni}><GameIcon name="career" /><span>查看校友档案 · {alumniProgress(state).total} 人</span></button>}
-    {planningState && planningPlayer && <ComicDialog title="球员培养" onClose={() => setPlanningPlayerId(null)} className="gm-roster-planning-dialog"><div className="gym-panel gm-roster-planning"><p className="gm-roster-planning-name">{gymPlayerName(planningPlayer)} · Lv.{planningPlayer.level}</p><SlidingTabs labels={['训练计划', '赞助合作']} label="球员培养分页" index={planningTab} onChange={setPlanningTab}>{planningTab === 0 ? <GymTrainingPanel key={planningPlayer.id} state={planningState} onAction={planAction} busy={busy}/> : <GymCooperationPanel key={planningPlayer.id} state={planningState} onAction={planAction} onAdAction={onAdAction ? action => {if (action.type === 'complete-cooperation-ad') onAdAction({...action, scope: 'roster'});} : undefined} busy={busy} adAction={adAction}/>}</SlidingTabs></div></ComicDialog>}
+    {planningState && planningPlayer && <ComicDialog title="球员培养" dismissible={!planningTutorialActive} onClose={() => {if (!planningTutorialActive) setPlanningPlayerId(null);}} className="gm-roster-planning-dialog"><div className="gym-panel gm-roster-planning"><p className="gm-roster-planning-name">{gymPlayerName(planningPlayer)} · Lv.{planningPlayer.level}</p><SlidingTabs labels={['训练计划', '赞助合作']} label="球员培养分页" index={planningTab} onChange={setPlanningTab}>{planningTab === 0 ? <GymTrainingPanel key={planningPlayer.id} state={planningState} onAction={planAction} busy={busy} tutorialEnabled={tutorialEnabled} onTutorialActiveChange={planningTutorialChange}/> : <GymCooperationPanel key={planningPlayer.id} state={planningState} onAction={planAction} onAdAction={onAdAction ? action => {if (action.type === 'complete-cooperation-ad') onAdAction({...action, scope: 'roster'});} : undefined} busy={busy} adAction={adAction} tutorialEnabled={tutorialEnabled} onTutorialActiveChange={planningTutorialChange}/>}</SlidingTabs></div></ComicDialog>}
   </div>;
 }
 
-export function GymTrainingPanel({ state, onAction }: GymPanelProps) {
+export function GymTrainingPanel({ state, onAction, tutorialEnabled = true, onTutorialActiveChange }: GymPanelProps) {
   const [pendingPlan, setPendingPlan] = useState<{ id: TrainingPlanId; playerId: string } | null>(null);
   const [showRules, setShowRules] = useState(false);
   const player = state.player;
+  const firstVisit = useGymFirstVisitTutorial('training', tutorialEnabled && !!player);
+  useEffect(() => {onTutorialActiveChange?.(firstVisit.active); return () => onTutorialActiveChange?.(false);}, [firstVisit.active, onTutorialActiveChange]);
   if (!player) return <div className="gym-panel gm-empty"><GameIcon name="train" /><h3>先迎接一位新人</h3><p className="gm-muted">招募球员后，可以为他选择训练计划。</p></div>;
   const progress = trainingStatus(state);
   const topDimensions = (bias: Stats) => [...statKeys].sort((first, second) => bias[second] - bias[first]).slice(0, 2).map(key => statLabels[key]).join('、');
@@ -272,14 +283,14 @@ export function GymTrainingPanel({ state, onAction }: GymPanelProps) {
     else onAction({ type: 'set-training-plan', id, playerId: player.id });
   };
   return <div className="gym-panel gm-training-panel">
-    <section className="gm-plan-summary" aria-label="当前训练课程">
+    <section className="gm-plan-summary gm-training-current" aria-label="当前训练课程">
       <div className="gm-section-heading"><div><p className="gm-eyebrow">当前计划</p><h3>{progress.plan.name}</h3></div><div className="gm-training-summary-tools"><span className="gm-course-count">已完成 {progress.completedCourses} 课</span><button type="button" className="gm-training-help" aria-label="查看训练说明" title="训练说明" onClick={() => setShowRules(true)}>?</button></div></div>
       <div className="gm-condition"><span>本课进度</span><b>{progress.shots} / 10 球</b></div>
       <progress className="gm-progress" value={progress.shots} max={10} aria-label="本课有效投篮进度" />
       <p className="gm-training-course-note">{atCap ? '已满级，训练已结束' : <>完课恢复 <strong>+{progress.recovery}</strong> 体力</>}</p>
     </section>
     <section className="gm-paper gm-stack gm-training-player" aria-label="球员能力与成长倾向"><div className="gm-section-heading"><h4>球员能力</h4><small>{gymPlayerName(player)}{allStatsMax ? ' · 六维已满' : ''}</small></div><PlayerStats stats={player.stats} /><div className="gm-training-tendency"><p><span>成长偏向</span><b>{tendency}</b></p>{talent !== tendency && <small>天赋：{talent}</small>}</div></section>
-    <div className="gm-section-heading gm-training-plan-heading"><h3>训练方向</h3><small>免费切换</small></div>
+    <section className="gm-training-directions"><div className="gm-section-heading gm-training-plan-heading"><h3>训练方向</h3><small>免费切换</small></div>
     <div className="gm-plan-grid">{trainingPlans.map(plan => {
       const current = plan.id === progress.plan.id;
       return <article className={`gm-plan-card${current ? ' is-selected' : ''}`} key={plan.id}>
@@ -287,7 +298,7 @@ export function GymTrainingPanel({ state, onAction }: GymPanelProps) {
         <div className="gm-plan-targets">{plan.focusKeys.length ? plan.focusKeys.map(key => <span key={key}>{statLabels[key]}</span>) : <span>原生偏好</span>}</div>
         <button type="button" className={`gm-button${current ? '' : ' gm-primary'}`} aria-label={current ? `当前计划：${plan.name}` : `选择${plan.name}`} disabled={current} onClick={() => selectPlan(plan.id)}>{current ? '已选用' : '选用'}</button>
       </article>;
-    })}</div>
+    })}</div></section>
     <p className="gm-training-switch-note">{progress.shots>0?`切换将清空本课 ${progress.shots}/10 球进度`:'切换训练方向免费，当前课程尚无进度'}</p>
     <div className="gm-training-payout" aria-label="当前推荐收益"><span>当前推荐</span><strong>+{reward.credits} 券</strong><small>{reward.repeatTemplate ? '重复模板' : player.templateId ? '模板首次' : '未匹配模板'}</small></div>
     {showRules && <ComicDialog title="训练说明" className="gm-training-rules-dialog" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules">
@@ -298,6 +309,7 @@ export function GymTrainingPanel({ state, onAction }: GymPanelProps) {
     {pendingPlan && <ComicDialog title="切换训练计划" onClose={() => setPendingPlan(null)}>
       <div className="gym-panel"><p>切换至「{trainingPlans.find(plan => plan.id === pendingPlan.id)?.name}」？本课 {progress.shots}/10 球将清零。</p><p className="gm-muted">已完成的 {progress.completedCourses} 课和球员成长保留。</p><div className="gm-actions"><button type="button" className="gm-button" onClick={() => setPendingPlan(null)}>继续当前课程</button><button type="button" className="gm-button gm-primary" onClick={() => { onAction({ type: 'set-training-plan', id: pendingPlan.id, playerId: pendingPlan.playerId }); setPendingPlan(null); }}>确认切换</button></div></div>
     </ComicDialog>}
+    {firstVisit.active && <GymFeatureTutorial kind="training" onComplete={firstVisit.complete}/>}
   </div>;
 }
 
@@ -568,7 +580,7 @@ export function GymRecommendPanel({ state, onAction, onClose }: GymPanelProps) {
 
 function AlumnusDetail({ player, count = 1, onClose }: { player: GymAlumnus; count?: number; onClose: () => void }) {
   return <ComicDialog title="校友档案" variant="album" className="gm-detail-dialog" onClose={onClose}>
-    <div className="gym-panel"><PlayerHeading player={player} value={player.finalValue} alumnus />{count > 1 && <p className="gm-alumni-group-note">同模板共 {count} 份，当前展示最近一次推荐记录。</p>}<PlayerStats stats={player.stats} /><div className="gm-paper gm-stack"><h4>推荐记录</h4><p>{new Date(player.recommendedAt).toLocaleString('zh-CN')}</p><p>赞助券 +{player.rewardCredits} · 球馆声望 +{format(player.rewardFame)}</p><p className="gm-muted">累计出手 {format(player.shots)} 次 · 离馆体力 {player.stamina}</p></div><button type="button" className="gm-button" onClick={onClose}>返回校友簿</button></div>
+    <div className="gym-panel"><PlayerHeading player={player} value={player.finalValue} alumnus />{count > 1 && <p className="gm-alumni-group-note">同模板共 {count} 份，当前展示最高身价记录。</p>}<PlayerStats stats={player.stats} /><div className="gm-paper gm-stack"><h4>推荐记录</h4><p>{new Date(player.recommendedAt).toLocaleString('zh-CN')}</p><p>赞助券 +{player.rewardCredits} · 球馆声望 +{format(player.rewardFame)}</p><p className="gm-muted">累计出手 {format(player.shots)} 次 · 离馆体力 {player.stamina}</p></div><button type="button" className="gm-button" onClick={onClose}>返回校友簿</button></div>
   </ComicDialog>;
 }
 
@@ -591,7 +603,18 @@ export function GymAlumniPanel({ state, loadAlumni }: GymPanelProps) {
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [loadAlumni, progress.total, state.createdAt, state.seed, retry]);
-  const groups = useMemo(() => groupGymAlumni(loadAlumni ? loaded : state.alumni), [loadAlumni, loaded, state.alumni]);
+  const groups = useMemo(() => {
+    const records = loadAlumni ? loaded : state.alumni;
+    const grouped = groupGymAlumni(records);
+    const highest = new Map(grouped.map(group => [group.key, group.player]));
+    for (const record of records) {
+      const key = record.templateId ? `template:${record.templateId}` : `player:${record.id}`;
+      const current = highest.get(key)!;
+      const value = BigInt(record.finalValue), best = BigInt(current.finalValue);
+      if (value > best || value === best && record.recommendedAt > current.recommendedAt) highest.set(key, record);
+    }
+    return grouped.map(group => ({...group, player: highest.get(group.key)!}));
+  }, [loadAlumni, loaded, state.alumni]);
   const all = groups.slice(offset, offset + 20);
   useEffect(() => { setPage(value => Math.min(value, Math.max(0, Math.ceil(groups.length / 20) - 1))); }, [groups.length]);
   return <div className="gym-panel gm-alumni-panel">
@@ -603,7 +626,7 @@ export function GymAlumniPanel({ state, loadAlumni }: GymPanelProps) {
       const template = templateById(player.templateId);
       const tier = template?.tier ?? 'undiscovered';
       const name = `${gymPlayerName(player)}${count > 1 ? `(${count})` : ''}`;
-      return <button type="button" key={group.key} className="gm-alumnus" data-tier={tier} aria-label={`查看${name}校友档案`} onClick={() => setSelected(group)}><span className="gm-alumnus-image tier-portrait-frame" data-tier={tier}><span className="gm-alumni-portrait-surface album-portrait-surface"><PlayerPortrait player={player} /></span></span><div className="gm-alumnus-copy"><strong>{name}</strong><span><TierBadge tier={template?.tier}/> <small>Lv.{player.level}</small></span><small>最终身价</small><b>{money(player.finalValue)}</b></div><span className="gm-alumnus-open" aria-hidden="true">›</span></button>;
+      return <button type="button" key={group.key} className="gm-alumnus" data-tier={tier} aria-label={`查看${name}校友档案`} onClick={() => setSelected(group)}><div className="gm-alumnus-top"><span className="gm-alumnus-image tier-portrait-frame" data-tier={tier}><span className="gm-alumni-portrait-surface album-portrait-surface"><PlayerPortrait player={player} /></span></span><div className="gm-alumnus-copy"><strong>{name}</strong><span><TierBadge tier={template?.tier}/> <small>Lv.{player.level}</small></span></div></div><div className="gm-alumnus-value"><small>最高身价</small><FittedAmount text={money(player.finalValue)}/></div><span className="gm-alumnus-open" aria-hidden="true">›</span></button>;
     })}</div>}
     {loading && <p className="gm-muted" role="status">正在读取校友档案…</p>}
     {loadError && <div className="gm-stack"><p className="gm-recommend-warning" role="alert">{loadError}</p><button type="button" className="gm-button" onClick={() => setRetry(value => value + 1)}>重新读取档案</button></div>}
@@ -641,15 +664,15 @@ export function GymCollectionPanel({ state, initialTab = 0 }: GymPanelProps & {i
   const count = tab === 0 ? stars.length : equipment.length;
   const total = tab === 0 ? albumTemplates.length : equipmentCatalog.length;
   const selectedTemplate = tab === 0 ? albumTemplates.find(template => template.id === selected && !!state.collection[template.id]) : undefined;
-  const selectedEquipment = tab === 1 && selected ? equipmentById.get(selected) : undefined;
+  const selectedEquipment = tab === 1 && selected && state.collectedEquipment[selected] ? equipmentById.get(selected) : undefined;
   return <div className="gm-collection">
     <SlidingTabs labels={['球星图鉴', '器材图鉴']} label="图鉴分类" index={tab} onChange={index => { setTab(index); setSelected(null); }}>
       <div className={`album-view${tab === 1 ? ' equipment-album' : ''}`}>
         <div className="album-progress"><strong>收集进度</strong><progress value={count} max={total} aria-label={tab === 0 ? '球星收藏进度' : '器材收藏进度'} /><b>{count} / {total}</b></div>
         {tab === 1 && Object.keys(state.legacyEquipmentCollection ?? {}).length > 0 && <p className="gm-legacy-album-note">历史器材收藏 {Object.keys(state.legacyEquipmentCollection ?? {}).length} 件已留档，不计入当前 {equipmentCatalog.length} 件器材的收藏进度。</p>}
-        {tab === 0 ? <div key="stars" className="album-grid contract-collection" role="region" aria-label="全部球星图鉴" tabIndex={0}>{albumTemplates.map(template => <GymAlbumEntry key={template.id} template={template} collected={!!state.collection[template.id]} onSelect={() => setSelected(template.id)} />)}</div> : <div key="equipment" className="equipment-album-grid" role="region" aria-label="全部器械图鉴" tabIndex={0}>{equipmentCatalog.map(item => {
+        {tab === 0 ? <div key="stars" className="album-grid contract-collection" role="region" aria-label="全部球星图鉴" tabIndex={0}>{albumTemplates.map(template => <GymAlbumEntry key={template.id} template={template} collected={!!state.collection[template.id]} onSelect={() => setSelected(template.id)} />)}</div> : <div key="equipment" className="equipment-album-grid" role="region" aria-label="全部器械图鉴" tabIndex={0}>{albumEquipment.map(item => {
           const collected = !!state.collectedEquipment[item.id];
-          return <button type="button" key={item.id} className={`equipment-album-card ${collected ? `is-unlocked rarity-${item.rarity}` : 'is-unknown'}`} onClick={() => setSelected(item.id)} aria-label={`查看${item.name}器材档案`}>{collected ? <ProductImage id={item.artId} name={item.name} /> : <EquipmentMystery />}<strong>{collected ? item.name : '未知器械'}</strong></button>;
+          return <button type="button" key={item.id} data-equipment-id={item.id} className={`equipment-album-card ${collected ? `is-unlocked rarity-${item.rarity}` : 'is-unknown'}`} disabled={!collected} onClick={() => {if (collected) setSelected(item.id);}} aria-label={collected ? `查看${item.name}器材档案` : '未知器械，尚未解锁'}>{collected ? <ProductImage id={item.artId} name={item.name} /> : <EquipmentMystery />}<strong>{collected ? item.name : '未知器械'}</strong></button>;
         })}</div>}
       </div>
     </SlidingTabs>

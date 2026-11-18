@@ -76,3 +76,18 @@ it('keeps a capped player full and an empty training slot empty', async () => {
   expect(fill().style.width).toBe('0%');
   expect(document.querySelector('[role=progressbar]')?.getAttribute('aria-valuenow')).toBe('0');
 });
+
+it.each([false,true])('makes both shortcuts available whenever a player occupies the court (empty %s)',async empty=>{
+ const onTraining=vi.fn(),onCooperation=vi.fn();
+ await render({empty,onTraining,onCooperation,cooperationReady:true});
+ const [training,cooperation]=[...document.querySelectorAll<HTMLButtonElement>('.gym-training-ticket')];
+ expect(training.disabled).toBe(empty);
+ expect(cooperation.disabled).toBe(empty);
+ expect(training.classList.contains('is-locked')).toBe(false);
+ expect(cooperation.classList.contains('is-locked')).toBe(false);
+ expect(document.querySelector('.gym-ticket-lock')).toBeNull();
+ await act(async()=>{training.click();cooperation.click();});
+ expect(onTraining).toHaveBeenCalledTimes(empty?0:1);
+ expect(onCooperation).toHaveBeenCalledTimes(empty?0:1);
+ expect(!!cooperation.querySelector('[aria-label="合作已达成"]')).toBe(!empty);
+});

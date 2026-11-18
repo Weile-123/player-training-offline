@@ -6,6 +6,7 @@ import {templateRules} from '../../src/game/contract/templates';
 import {statKeys} from '../../src/game/types';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
+import {gymFirstVisitTutorialKey, resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
 
 const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[]}));
 vi.mock('../../src/gymStore', async () => {
@@ -65,6 +66,8 @@ beforeEach(() => {
   vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {frames.set(++frameId, callback); return frameId;});
   vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
   harness.actions = [];
+  resetGymFirstVisitTutorials();
+  localStorage.setItem(gymFirstVisitTutorialKey, JSON.stringify(['training', 'cooperation']));
   harness.store!.setState({state: newGym(at, 21), actionError: '', isSuspended: false, pendingOfflineReport: null});
 });
 afterEach(() => {
@@ -155,6 +158,7 @@ it('updates experience without adding shot-result or click-instruction copy belo
 
 it('places fixed-label plan and cooperation tickets beside experience and keeps both panel routes usable', async () => {
   const initial = newGym(at, 26);
+  initial.gymLevel = 3;
   await mount(initial);
   const toolbar = document.querySelector('[aria-label="训练快捷操作"]')!;
   const plan = document.querySelector<HTMLButtonElement>('[aria-label="选择训练计划"]')!;
@@ -181,6 +185,7 @@ it('places fixed-label plan and cooperation tickets beside experience and keeps 
 
 it.each([false, true])('keeps the cooperation ticket text stable and marks only an earned cooperation (complete %s)', async complete => {
   const initial = newGym(at, 27);
+  initial.gymLevel = 3;
   const template = templateRules.find(item => item.tier === 'rotation')!;
   Object.assign(initial.player!, {templateId: template.id, highestTier: template.tier,
     shots: complete ? 10 : 5, level: 10, peakLevel: 10});
@@ -271,6 +276,85 @@ it('locks automatic training at level one without changing the original main con
   expect(document.querySelector('.gm-roster-recruit')).toBeNull();
 });
 
+it('keeps both feature shortcuts and the course card available at gym level one',async()=>{
+ await mount(newGym(at,31));
+ const training=document.querySelector<HTMLButtonElement>('[aria-label="选择训练计划"]')!;
+ const cooperation=document.querySelector<HTMLButtonElement>('[aria-label="赞助合作"]')!;
+ for(const button of [training,cooperation]){expect(button.disabled).toBe(false);expect(button.classList.contains('is-locked')).toBe(false);}
+ expect(document.querySelector('.gym-ticket-lock')).toBeNull();
+ expect(document.querySelector('.court-equipment-status')).not.toBeNull();
+ await press('选择训练计划');expect(document.querySelector('.gm-training-panel')).not.toBeNull();
+ await press('关闭面板');await press('赞助合作');expect(document.querySelector('.gm-cooperation-panel')).not.toBeNull();
+ expect(harness.actions).toEqual([]);
+});
+
+it('stays on an empty court after one of several trainees is recommended and recruits only after choosing a height',async()=>{
+ const initial=newGym(at,32);initial.gymLevel=2;
+ initial.player!.templateId='haslem';initial.player!.highestTier='rotation';
+ const departingId=initial.player!.id,remaining={...structuredClone(initial.player!),id:'remaining-trainee'};
+ initial.bench=[remaining];initial.nextPlayer=3;
+ await mount(initial);await press('推荐球员签约');await press('确认推荐');
+ expect(state().player!.id).toBe(remaining.id);
+ expect(state().alumni[0].id).toBe(departingId);
+ expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+ expect(document.querySelector('[aria-label="投篮训练"]')).toBeNull();
+ expect(document.querySelector('[role="dialog"]')).toBeNull();
+ await press('招募球员');
+ expect(document.querySelector('[role="dialog"] h2')?.textContent).toBe('新人招生');
+ expect(harness.actions.filter(action=>action.type==='recruit')).toEqual([]);
+ expect(state().player!.id).toBe(remaining.id);
+ await press('后卫型');await press('免费招募下一位');
+ expect(harness.actions.filter(action=>action.type==='recruit')).toEqual([{type:'recruit',preference:'guard',expectedNextPlayer:3,selectRecruited:true}]);
+ expect(state().player!.id).not.toBe(remaining.id);
+ expect(state().player!.height).toBeGreaterThanOrEqual(178);expect(state().player!.height).toBeLessThanOrEqual(194);
+ expect(state().bench.map(player=>player.id)).toEqual([remaining.id]);
+ expect(document.querySelector('[role="dialog"]')).toBeNull();
+ expect(document.querySelector('[aria-label="投篮训练"]')).toBeTruthy();
+});
+
+it('guides the first plan and cooperation visits at Lv.1 and does not repeat after reopening them',async()=>{
+ resetGymFirstVisitTutorials();
+ const initial=newGym(at,33);await mount(initial);
+ expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ await press('选择训练计划');
+ expect(document.querySelector('.gym-feature-unlock')).toBeNull();
+ expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-training-1');
+ expect(document.querySelector('.gm-training-current[aria-describedby]')).not.toBeNull();
+ expect(document.querySelector('[aria-label="关闭面板"]')).toBeNull();expect(document.querySelector('.tutorial-skip')).toBeNull();
+ await press('下一步');
+ expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-training-2');
+ expect(document.querySelector('.gm-training-directions[aria-describedby]')).not.toBeNull();
+ await press('知道了');expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ expect(document.querySelector('[aria-label="关闭面板"]')).not.toBeNull();
+ await press('关闭面板');await press('选择训练计划');expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ await press('关闭面板');await press('赞助合作');
+ expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-cooperation-1');
+ expect(document.querySelector('.gm-cooperation-list[aria-describedby]')).not.toBeNull();
+ expect(document.querySelector('[aria-label="关闭面板"]')).toBeNull();expect(document.querySelector('.tutorial-skip')).toBeNull();
+ await press('知道了');await press('关闭面板');await press('赞助合作');
+ expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ expect(harness.actions).toEqual([]);expect(state()).toEqual(initial);
+});
+
+it('shares first-visit guidance between the roster planning pages and the main court, hiding both dialog closes during guidance',async()=>{
+ resetGymFirstVisitTutorials();
+ const initial=newGym(at,34);await mount(initial);await press('打开球员名册');
+ await act(async()=>document.querySelector<HTMLButtonElement>('.gm-roster-plan')!.click());
+ expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-training-1');
+ expect(document.querySelectorAll('[aria-label="关闭面板"]')).toHaveLength(0);
+ await press('下一步');await press('知道了');
+ expect(document.querySelectorAll('[aria-label="关闭面板"]')).toHaveLength(2);
+ await act(async()=>document.querySelector<HTMLButtonElement>('.gm-roster-planning-dialog [data-tab-index="1"]')!.click());
+ expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-cooperation-1');
+ expect(document.querySelectorAll('[aria-label="关闭面板"]')).toHaveLength(0);
+ await press('知道了');
+ await act(async()=>document.querySelector<HTMLButtonElement>('.gm-roster-planning-dialog [aria-label="关闭面板"]')!.click());
+ await press('关闭面板');
+ await press('选择训练计划');expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ await press('关闭面板');await press('赞助合作');expect(document.querySelector('.gym-tutorial-spotlight')).toBeNull();
+ expect(harness.actions).toEqual([]);expect(state()).toEqual(initial);
+});
+
 it('toggles only the selected athlete from the compact player-card automatic button', async () => {
   const [firstId, secondId] = await twoPlayers();
   await press('关闭面板');
@@ -349,8 +433,14 @@ it('switches a two-position court to its empty position and recruits/selects the
   expect(document.querySelector<HTMLButtonElement>('[aria-label="选择训练计划"]')!.disabled).toBe(true);
   expect(document.querySelector<HTMLButtonElement>('[aria-label="推荐球员签约"]')!.disabled).toBe(true);
   await press('招募球员');
-  expect(harness.actions).toEqual([{type: 'recruit', expectedNextPlayer: initial.nextPlayer, selectRecruited: true}]);
+  expect(harness.actions).toEqual([]);
+  expect(state().player!.id).toBe(firstId);
+  expect(document.querySelectorAll('.gm-recruit-height button')).toHaveLength(4);
+  await press('内线型');
+  await press('免费招募下一位');
+  expect(harness.actions).toEqual([{type: 'recruit', preference: 'center', expectedNextPlayer: initial.nextPlayer, selectRecruited: true}]);
   expect(state().player!.id).not.toBe(firstId);
+  expect(state().player!.height).toBeGreaterThanOrEqual(206);
   expect(state().bench.map(trainee => trainee.id)).toEqual([firstId]);
   expect(state().bench[0].level).toBe(8);
   expect(document.querySelector('[role="dialog"]')).toBeNull();
@@ -386,7 +476,7 @@ it('cycles all eight available positions while preserving the occupied entry ord
   expect(harness.actions.filter(action => action.type === 'recruit')).toHaveLength(2);
 });
 
-it('keeps capacity switching and direct recruitment usable when every position is empty', async () => {
+it('keeps capacity switching and the recruitment choice usable when every position is empty', async () => {
   const initial = newGym(at, 21); initial.gymLevel = 3; initial.player = null;
   await mount(initial);
   await press('关闭面板');
@@ -396,6 +486,9 @@ it('keeps capacity switching and direct recruitment usable when every position i
     expect(state().player).toBeNull();
   }
   await press('招募球员');
+  expect(state().player).toBeNull();
+  expect(harness.actions.filter(action => action.type === 'recruit')).toHaveLength(0);
+  await press('免费招募下一位');
   expect(state().player).toBeTruthy();
   expect(state().bench).toHaveLength(0);
   expect(document.querySelector('[role="dialog"]')).toBeNull();
@@ -420,7 +513,7 @@ it('continues real automatic training while an empty position hides all player f
   expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/2');
 });
 
-it('returns to the real selected athlete when opening a secondary panel from an empty position', async () => {
+it('keeps the chosen empty position after opening a secondary panel', async () => {
   const initial = newGym(at, 21); initial.gymLevel = 2;
   await mount(initial);
   await press('切换训练球员');
@@ -429,12 +522,13 @@ it('returns to the real selected athlete when opening a secondary panel from an 
   await act(async () => harness.store!.setState({actionError: '存档写入失败，本次操作未生效'}));
   expect(document.querySelector('.action-notice[role="alert"]')?.textContent).toContain('存档写入失败');
   await press('关闭面板');
-  expect(document.querySelector('[aria-label="投篮训练"]')).toBeTruthy();
-  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('1/2');
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+  expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('2/2');
 });
 
 it('shows a full experience slot at the level cap without a zero denominator', async () => {
   const initial = newGym(at, 21);
+  initial.gymLevel = 3;
   initial.player!.level = 99;
   initial.player!.peakLevel = 99;
   await mount(initial);
@@ -469,6 +563,8 @@ it('selects a bench athlete for manual training and recommends only that selecte
   expect(state().player!.id).toBe(firstId);
   expect(state().bench).toHaveLength(0);
   expect(document.querySelector('.gym-empty-court')).toBeNull();
+  expect(document.querySelector('[aria-label="招募球员"]')).toBeTruthy();
+  expect(document.querySelector('[aria-label="投篮训练"]')).toBeNull();
   await press('打开球员名册');
   expect(document.querySelector('.gm-roster-recruit')?.textContent).toContain('空余 1 个训练位');
   await press('查看校友档案');
@@ -477,6 +573,7 @@ it('selects a bench athlete for manual training and recommends only that selecte
 
 it('keeps player records, training access and the album usable after template suggestions are removed', async () => {
   const initial = newGym(at, 24);
+  initial.gymLevel = 2;
   const current = templateRules.find(template => template.id === 'bryant')!;
   initial.collectionGoalId = 'jordan';
   Object.assign(initial.player!, {level: 25, peakLevel: 25, height: 200, templateId: current.id});
@@ -521,7 +618,7 @@ it('keeps the live course card in place while an automatic completion notice flo
 });
 
 it.each(['打开背包','器材商店','打开球员名册','查看球馆经营','打开图鉴','选择训练计划','赞助合作','推荐球员签约'])('keeps automatic course notices out of the secondary panel: %s', async label => {
-  const initial = newGym(at, 25); initial.gymLevel = 2;
+  const initial = newGym(at, 25); initial.gymLevel = label === '赞助合作' ? 3 : 2;
   initial.player!.autoEnabled = true; initial.player!.nextShotAt = at + 200;
   initial.player!.training.shots = initial.player!.shots = 9;
   await mount(initial);

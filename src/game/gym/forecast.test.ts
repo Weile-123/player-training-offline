@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {forecastTraining, estimateShotTime} from './forecast';
 import {trainingGuidance} from './guidance';
-import {newGym} from './engine';
+import {dispatchGym, newGym} from './engine';
 import {statKeys} from '../types';
 
 describe('training forecasts and recommendation milestones', () => {
@@ -11,7 +11,7 @@ describe('training forecasts and recommendation milestones', () => {
     expect(forecast.expectedShots).toBeCloseTo(1.99, 10);
     expect(forecast.minShots).toBe(1);
     expect(forecast.maxShots).toBe(3);
-    expect(forecast.estimatedMs).toBe(1_000);
+    expect(forecast.estimatedMs).toBe(500);
     expect(forecast.automatic).toBe(false);
   });
 
@@ -19,9 +19,19 @@ describe('training forecasts and recommendation milestones', () => {
     const state = newGym(1_000, 17);
     state.player!.stamina = 0;
     state.player!.recoveryMs = 8_000;
+    state.player!.shots = 9;
     state.player!.training.shots = 9;
     expect(estimateShotTime(state, state.player!, 1)).toBe(12_000);
-    expect(estimateShotTime(state, state.player!, 2)).toBe(13_000);
+    expect(estimateShotTime(state, state.player!, 2)).toBe(12_500);
+
+    // Courses are available from the first gym level; compare the forecast to real shots.
+    for (const gym of [state, {...state, gymLevel: 2}]) {
+      const first = dispatchGym(gym, gym.revision, {type: 'train', id: gym.player!.id}, gym.updatedAt + 12_000);
+      const second = dispatchGym(first.state, first.state.revision, {type: 'train', id: gym.player!.id},
+        gym.updatedAt + estimateShotTime(gym, gym.player!, 2));
+      expect(second.error).toBeUndefined();
+      expect(second.state.player!.stamina).toBe(3);
+    }
   });
 
   it('predicts a shorter goal time with genuine automatic XP upgrades while preserving state and RNG', () => {

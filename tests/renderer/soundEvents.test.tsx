@@ -4,7 +4,7 @@ import {act} from 'preact/test-utils';
 import {MonthTransitionDialog} from '../../src/components/MonthTransitionDialog';
 import {gameAudio} from '../../src/presentation/audio';
 import {monthTransitionTiming} from '../../src/presentation/monthTransition';
-import {SampleAudio,saveSoundEnabled} from '../../src/presentation/sampleAudio';
+import {SampleAudio,audioSources,saveSoundEnabled} from '../../src/presentation/sampleAudio';
 vi.mock('../../src/presentation/audio',()=>({gameAudio:{play:vi.fn().mockResolvedValue(true)}}));
 let root:ReturnType<typeof createRoot>|undefined;
 beforeEach(()=>{vi.useFakeTimers();vi.mocked(gameAudio.play).mockClear();saveSoundEnabled(true);});
@@ -23,17 +23,21 @@ it('routes enabled buttons to click audio, without adding a click over shooting 
  play.mockClear();button.className='dock-shoot';button.click();expect(play).not.toHaveBeenCalled();
  button.className='';button.disabled=true;button.click();expect(play).not.toHaveBeenCalled();
  button.disabled=false;button.setAttribute('data-audio-silent','');button.click();expect(play).not.toHaveBeenCalled();
+ button.removeAttribute('data-audio-silent');saveSoundEnabled(false);button.click();expect(play).toHaveBeenCalledWith('click',false);
  remove();button.remove();
 });
-it('preloads click audio and starts it before button business handlers',()=>{
- const create=vi.fn(()=>new Audio());const audio=new SampleAudio(create);
+it('preloads the complete bounded media pool and starts clicks before button business handlers',()=>{
+ const create=vi.fn(()=>new Audio());const audio=new SampleAudio(create,{createContext:()=>null});
  const order:string[]=[];
  vi.spyOn(audio,'play').mockImplementation(async()=>{order.push('sound');return true;});
  vi.spyOn(audio,'unlock').mockImplementation(()=>{});
+ const mute=vi.spyOn(audio,'mute');
  const remove=audio.install(document);
- expect(create).toHaveBeenCalledTimes(2);
+ // Five shot pools of three, two clicks, one month and one shared upgrade.
+ expect(create).toHaveBeenCalledTimes(19);
+ expect(new Set(create.mock.results.map(result=>result.value.src))).toEqual(new Set(Object.values(audioSources).map(source=>new URL(source!,document.baseURI).href)));
  const button=document.createElement('button');document.body.append(button);
  button.addEventListener('click',()=>order.push('action'));button.click();
  expect(order).toEqual(['sound','action']);
- remove();button.click();expect(order).toEqual(['sound','action','action']);button.remove();
+ remove();expect(mute).toHaveBeenCalledOnce();button.click();expect(order).toEqual(['sound','action','action']);button.remove();
 });

@@ -11,6 +11,7 @@
 .gm-profile-rating > span { color: #66553c; font-size: clamp(9px, 2.5cqw, 13px); font-weight: 800; white-space: nowrap; }
 .gm-profile-rating > b { color: #a22f25; font: 900 clamp(25px, 7.6cqw, 43px)/1 var(--font-number,Impact),sans-serif; }
 .gm-profile-record { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 9px 3px; border-block: 1px solid #b69e70; background: #eedbb14d; }
+.gm-profile-record.is-basic {grid-template-columns:repeat(2,minmax(0,1fr));}
 .gm-profile-record > span { display: grid; justify-items: center; gap: 4px; color: #766145; font-size: 10px; }
 .gm-profile-record > span + span { border-left: 1px solid #c5ae82; }
 .gm-profile-record b { color: #1b3e48; font-size: clamp(15px, 4.6cqw, 23px); font-weight: 950; line-height: 1; }

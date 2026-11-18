@@ -28,8 +28,33 @@ export function sceneProjection(width,height,hoopScale=1){
  return {scale,width:w,height:h,extraX,extraY,
   x:value=>map(value,100,620,720,extraX,360),y:value=>map(value,24,420,540,extraY,112)};
 }
+const courtRasters=new WeakMap();
+function paintCourt(ctx,image,view,hoopScale){
+ if(view.extraX<.001&&view.extraY<.001&&hoopScale===1){ctx.drawImage(image,0,0,720,540);return;}
+ const xs=[0,100,620,720],ys=[0,24,420,540];
+ const sourceX=(image.naturalWidth||image.width)/720,sourceY=(image.naturalHeight||image.height)/540;
+ for(let row=0;row<3;row++)for(let col=0;col<3;col++){
+  const left=xs[col],top=ys[row],right=xs[col+1],bottom=ys[row+1];
+  ctx.drawImage(image,left*sourceX,top*sourceY,(right-left)*sourceX,(bottom-top)*sourceY,view.x(left),view.y(top),view.x(right)-view.x(left),view.y(bottom)-view.y(top));
+ }
+}
+/** Cache only the unchanging court projection, at the same backing resolution.
+ * Camera movement and all balls/net/effects remain live on the visible canvas. */
+function courtRaster(image,view,width,height,hoopScale){
+ if(typeof document==='undefined')return null;
+ const old=courtRasters.get(image);
+ if(old&&old.width===width&&old.height===height&&old.hoopScale===hoopScale)return old.surface;
+ try{
+  const surface=typeof OffscreenCanvas==='function'?new OffscreenCanvas(width,height):document.createElement('canvas');
+  surface.width=width;surface.height=height;
+  const context=surface.getContext('2d');if(!context)return null;
+  context.scale(view.scale,view.scale);paintCourt(context,image,view,hoopScale);
+  courtRasters.set(image,{surface,width,height,hoopScale});return surface;
+ }catch{return null;}
+}
 export function drawMultiScene(ctx,images,frames,ballScale,width=720,height=540,hoopScale=1,heat=null){
  const view=sceneProjection(width,height,hoopScale),x=view.x,y=view.y;
+ const court=courtRaster(images.court,view,width,height,hoopScale);
  // A single background/net; all independent balls stay visible in depth order.
  const dominant=frames.reduce((best,f)=>{
   const weight=x=>(x?.vignette||0)*10+Math.abs(x?.camera?.angle||0)+(x?.camera?.zoom||1)-1;
@@ -48,16 +73,8 @@ export function drawMultiScene(ctx,images,frames,ballScale,width=720,height=540,
   ctx.translate(width/2+camera.x,height/2+camera.y);ctx.rotate(camera.angle*Math.PI/180);
   ctx.scale(camera.zoom,camera.zoom);ctx.translate(-width/2,-height/2);
  }
- if(view.extraX<.001&&view.extraY<.001&&hoopScale===1)ctx.drawImage(images.court,0,0,720,540);
- else{
-  // Nine contiguous slices from ONE scene: no second hoop or repeated tiles.
-  const xs=[0,100,620,720],ys=[0,24,420,540];
-  const sourceX=(images.court.naturalWidth||images.court.width)/720,sourceY=(images.court.naturalHeight||images.court.height)/540;
-  for(let row=0;row<3;row++)for(let col=0;col<3;col++){
-   const left=xs[col],top=ys[row],right=xs[col+1],bottom=ys[row+1];
-   ctx.drawImage(images.court,left*sourceX,top*sourceY,(right-left)*sourceX,(bottom-top)*sourceY,x(left),y(top),x(right)-x(left),y(bottom)-y(top));
-  }
- }
+ if(court)ctx.drawImage(court,0,0,view.width,view.height);
+ else paintCourt(ctx,images.court,view,hoopScale);
  drawHeatCourt(ctx,view,heat,hoopScale);
  const net=()=>{
   ctx.drawImage(images.net,x(316),y(112),89*hoopScale,f.netHeight*hoopScale);

@@ -1,18 +1,22 @@
-import {useState} from 'react';
+import {useEffect,useState} from 'react';
 import {postgameRepeatTemplateCredits} from '../game/gym/catalog';
 import {cooperationOffers, cooperationStatus, equipmentEffects, playerLevelCap, recommendationPayout, type CooperationOffer} from '../game/gym/engine';
 import {ComicDialog} from './ComicDialog';
 import {GameIcon} from './GameIcon';
+import {GymFeatureTutorial} from './GymFeatureTutorial';
+import {useGymFirstVisitTutorial} from '../presentation/gymFeatureTutorialPreference';
 import type {GymPanelProps} from './GymPanels';
 import './GymCooperationPanel.css';
 
 const tiers = ['待发掘', '替补', '首发', '全明星', '巨星', '传奇'];
 const number = new Intl.NumberFormat('zh-CN', {maximumFractionDigits: 1});
 
-export function GymCooperationPanel({state, onAction, onAdAction, adAction, busy = false}: GymPanelProps) {
+export function GymCooperationPanel({state, onAction, onAdAction, adAction, busy = false, tutorialEnabled = true, onTutorialActiveChange}: GymPanelProps) {
   const [pending, setPending] = useState<{offer: CooperationOffer | null; playerId: string; ad?: boolean} | null>(null);
   const [showRules, setShowRules] = useState(false);
   const player = state.player;
+  const firstVisit = useGymFirstVisitTutorial('cooperation', tutorialEnabled && !!player);
+  useEffect(() => {onTutorialActiveChange?.(firstVisit.active); return () => onTutorialActiveChange?.(false);}, [firstVisit.active, onTutorialActiveChange]);
   if (!player) return <div className="gym-panel gm-empty"><GameIcon name="handshake"/><h3>先迎接一位新人</h3><p className="gm-muted">招募球员后可选择合作。</p></div>;
   const offers = cooperationOffers(state);
   const status = cooperationStatus(state);
@@ -73,5 +77,6 @@ export function GymCooperationPanel({state, onAction, onAdAction, adAction, busy
       {pending.ad&&!onAdAction&&<p role="status">广告奖励暂不可用，请稍后再试。</p>}
       <div className="gm-actions"><button type="button" className="gm-button" disabled={busy} onClick={() => setPending(null)}>保留当前合作</button><button type="button" className="gm-button gm-primary" disabled={busy || !!pending.offer && ended && !pending.ad || !!pending.ad&&!onAdAction} onClick={() => {if (busy || pending.offer && ended && !pending.ad || pending.ad&&!onAdAction || pending.playerId !== player.id) return; if (pending.ad && pending.offer) completeWithAd(pending.offer); else onAction(pending.offer ? {type: 'accept-cooperation', id: pending.offer.id, playerId: pending.playerId} : {type: 'abandon-cooperation', playerId: pending.playerId}); setPending(null);}}>{pending.ad ? '观看广告并完成' : pending.offer ? '确认更换' : '确认放弃'}</button></div>
     </div></ComicDialog>}
+    {firstVisit.active && <GymFeatureTutorial kind="cooperation" onComplete={firstVisit.complete}/>}
   </div>;
 }

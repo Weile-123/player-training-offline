@@ -28,7 +28,7 @@ async function mount(Panel: ComponentType<GymPanelProps>, state: GymState) {
   function Scene() {
     const [current, setCurrent] = useState(state);
     latest = current;
-    return <ComicDialog title="测试面板" onClose={() => {}}><Panel state={current} onAction={action => {
+    return <ComicDialog title="测试面板" onClose={() => {}}><Panel state={current} tutorialEnabled={false} onAction={action => {
       actions.push(action);
       const result = dispatchGym(current, current.revision, action, ++time);
       error = result.error;
@@ -89,7 +89,7 @@ it('keeps same-family rules when replacing from the left and allows cancellation
 
 it('opens plan and cooperation tabs for a bench player without selecting them for main-court training', async () => {
   const state = newGym(at, 13);
-  state.gymLevel = 2;
+  state.gymLevel = 3;
   const mainId = state.player!.id;
   const bench = {...structuredClone(state.player!), id: 'bench-player', training: {...state.player!.training, shots: 4}};
   state.bench = [bench];
@@ -134,7 +134,7 @@ it('does not bypass the original current-player confirmation guard for non-roste
   expect(result.state).toEqual(state);
 });
 
-it('groups the same template across all archive pages and opens the most recent representative record', async () => {
+it('groups the same template across all archive pages and opens its highest-value representative record', async () => {
   const state = newGym(at, 15);
   const [first, second] = templateRules.filter(item => item.tier === 'starter');
   const records: GymAlumnus[] = Array.from({length: 122}, (_, index) => ({...structuredClone(state.player!), id: `alumnus-${index}`, templateId: index === 121 ? second.id : first.id, recommendedAt: at + index, rewardCredits: index, rewardFame: index, finalValue: '320'})).reverse();
@@ -151,9 +151,34 @@ it('groups the same template across all archive pages and opens the most recent 
   expect(document.querySelector('[aria-label="校友档案分页"]')).toBeNull();
   await press(cards[1]);
   const detail = document.querySelector('.gm-detail-dialog')!;
-  expect(detail.textContent).toContain('同模板共 121 份，当前展示最近一次推荐记录');
+  expect(detail.textContent).toContain('同模板共 121 份，当前展示最高身价记录');
   expect(detail.textContent).toContain('赞助券 +120');
   expect(actions).toEqual([]);
+});
+
+it('puts identity and a fixed portrait together, with the highest template value on a separate full-width row', async () => {
+  const state = newGym(at, 15), template = templateRules.find(item => item.tier === 'legend')!;
+  const record: GymAlumnus = {...structuredClone(state.player!), id: 'expensive-alumnus', templateId: template.id,
+    level: 32, peakLevel: 32, recommendedAt: at, rewardCredits: 27, rewardFame: 150, finalValue: '12649800'};
+  const later: GymAlumnus = {...structuredClone(record), id: 'recent-cheaper-alumnus', level: 2, peakLevel: 2,
+    recommendedAt: at + 1, finalValue: '9504', rewardCredits: 1};
+  state.alumni = [record, later];
+  await mount(GymAlumniPanel, state);
+  const entry = document.querySelector<HTMLButtonElement>('.gm-alumnus')!;
+  const top = entry.querySelector('.gm-alumnus-top')!, price = entry.querySelector('.gm-alumnus-value')!;
+  expect(top.querySelector('.gm-alumnus-image')?.getAttribute('data-tier')).toBe('legend');
+  expect(top.querySelector('.gm-alumnus-copy')?.textContent).toContain(`${template.name}(2)`);
+  expect(top.querySelector('.gm-alumnus-copy')?.textContent).toContain('Lv.32');
+  expect(top.querySelector('.fitted-amount')).toBeNull();
+  expect(price.parentElement).toBe(entry);
+  expect(price.querySelector('small')?.textContent).toBe('最高身价');
+  expect(price.querySelector('.fitted-amount')?.getAttribute('title')).toBe('$1,264.98万');
+  expect(top.nextElementSibling).toBe(price);
+  await press(entry);
+  const detail = document.querySelector('.gm-detail-dialog')!;
+  expect(detail.textContent).toContain('最高身价记录');
+  expect(detail.textContent).toContain('赞助券 +27');
+  expect(detail.textContent).not.toContain('最近一次推荐记录');
 });
 
 it('shows a retry instead of an incomplete archive count if a later page cannot be loaded', async () => {

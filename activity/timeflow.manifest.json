@@ -11,10 +11,10 @@
   "serverEntrypoint": "server/run-gym-authority.mjs",
   "cloudFunction": "activity_api",
   "cloudFunctionRoutes": "../server/gymCloudBaseRoutes.json",
-  "deploymentPackage": "../outputs/backend-nickname-fix-20261117/cloudbase-package",
-  "deploymentEvidence": "../outputs/backend-nickname-fix-20261117/acceptance.json",
+  "deploymentPackage": "../outputs/prelaunch-20261118/cloudbase",
+  "deploymentEvidence": "../outputs/prelaunch-20261118/function-deployment.json",
   "runtime": "Nodejs18.15",
-  "deployedCodeSha256": "215ee8f024f3400abdddca7022b50c2d352ff9e6c9e2fe003b250921131dce15",
+  "deployedCodeSha256": "c7cf62d8f3993333c59a1d13005125f3fca059f8b88c8b07aee36419ae4dee15",
   "routes": [
     {
       "method": "GET",
@@ -68,12 +68,12 @@
     "Six platform replay cases passed and definition activated",
     "Signed live settlement plus durable business commit and ACK"
   ],
-  "platformEvidence": "../outputs/home-timeflow-20261117/timeflow/provisioning.json",
+  "platformEvidence": "../outputs/prelaunch-20261118/timeflow-provisioning.json",
   "liveClockEvidence": "../outputs/home-timeflow-20261117/timeflow/live-clock-acceptance-5503ed1753a6f722.json",
   "liveBusinessEvidence": "../outputs/home-timeflow-20261117/timeflow/live-authority-acceptance-eb4cdb8de79c7c73.json",
   "productionBusinessEvidence": "../outputs/home-timeflow-20261117/cloudbase-mcp-audit/production-pg-timeflow-e2e.json",
   "frontendEvidence": "../outputs/home-timeflow-20261117/review/live-page-e2e/report.json",
-  "frontendStatus": "local-build-pending-no-new-upload",
+  "frontendStatus": "source-prepared-current-H5-not-published",
   "publicationStatus": "temporary-preview-only-not-formally-published",
   "verification": {
     "localProtocolTests": true,
@@ -109,5 +109,11 @@
   "recoveryEvidence": "../outputs/release-functions-20261117/offline-recovery-live.json",
   "latestBusinessEvidence": "../outputs/backend-update-20261117/business-acceptance.json",
   "rewardConfirmation": "native-sdk-confirmation-with-actor-action-challenge-and-durable-once-only-claim",
-  "backendUpdatedAt": "2026-11-17T08:48:34.569Z"
+  "backendUpdatedAt": "2026-11-17T08:48:34.569Z",
+  "deployedCodeHashTarget": "cloudfunctions/activity_api/gym/server/main.mjs",
+  "deployedArchiveSha256": "88c2cfea7642d55ab4c3e91569ab941be5487ead43ca953ed53c69b0f1fec4d0",
+  "currentFrontendMode": "local-first",
+  "currentOfflineGameplaySettlement": "local-engine",
+  "timeflowUsage": "compatible canonical saves, recovery and platform clock; not the source of new local-gym offline rewards",
+  "updatedAt": "2026-11-17T16:27:41.065Z"
 }

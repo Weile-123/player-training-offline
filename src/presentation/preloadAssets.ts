@@ -3,6 +3,7 @@ import {assetSource,configureAssets,hasAsset,localAsset,rememberAsset,rememberAs
 import {applyAnimationConfig} from './animationConfig';
 import {preloadProductionAssets} from './productionAssets';
 import {selectStartupAssets,startupAssetBatches} from './startupAssets';
+import {gameAudio} from './audio';
 
 export type LoadingProgress={percent:number;completed:number;total:number;error:string};
 const entries=selectStartupAssets(manifest.entries);
@@ -27,6 +28,8 @@ async function validate(blob:Blob,path:string){
 /** Count validated, usable assets. Persistent caching is optional in mobile WebViews. */
 export function preloadAssets(){
  if(task)return task;
+ // Audio preparation is optional and parallel: missing audio never blocks entry.
+ void gameAudio.preload();
  report();
  task=(async()=>{
   if(import.meta.env.PROD)return preloadProductionAssets(done,report);

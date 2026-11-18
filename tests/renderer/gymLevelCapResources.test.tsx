@@ -1,4 +1,4 @@
-import {afterEach, expect, it} from 'vitest';
+import {afterEach, beforeEach, expect, it} from 'vitest';
 import {useState, type ComponentType} from 'react';
 import {act} from 'preact/test-utils';
 import {createRoot, type Root} from 'react-dom/client';
@@ -6,12 +6,14 @@ import {cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendatio
 import {statKeys} from '../../src/game/types';
 import {GymInventoryPanel, GymShopPanel, type GymPanelProps} from '../../src/components/GymPanels';
 import {GymCooperationPanel} from '../../src/components/GymCooperationPanel';
+import {gymFirstVisitTutorialKey, resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
 
 const at = 1_800_000_000_000;
 let root: Root | undefined;
 let latest: GymState;
 let actions: GymAction[];
 let applyAction: (action: GymAction) => void;
+beforeEach(() => {resetGymFirstVisitTutorials(); localStorage.setItem(gymFirstVisitTutorialKey, JSON.stringify(['training', 'cooperation']));});
 afterEach(() => {if (root) act(() => root!.unmount()); root = undefined;});
 
 function fixture(level: 98 | 99, complete = false) {

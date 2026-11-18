@@ -1,11 +1,12 @@
 import {create} from 'zustand';
 import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recoverySeconds, type GymAction, type GymResult, type GymState} from './game/gym/engine';
-import {gymSaveKeys, readGym, validGym, type GymStorage} from './game/gym/save';
+import {gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './game/gym/save';
 import {createGymHistory, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
 import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
 import {parseGymCloudArchive} from './platform/gymCloudArchive';
 import {createGymAuthorityTransport} from './platform/gymAuthority';
 import {createGymLocalFirstStore} from './platform/gymLocalFirst';
+import {gymDebugAvailable} from './platform/gymDebug';
 
 const lockName = 'gym-management-v1.writer';
 const queues = new WeakMap<GymStorage, Promise<unknown>>();
@@ -28,6 +29,10 @@ export type GymStore = {
   authorityCapabilities?: {platformRewards: boolean; legacyAdoption: boolean};
   retryAuthority?: () => Promise<void>;
   preparePlatformReward?: (action: GymAction) => Promise<{challengeId: string; confirmation: 'native-sdk-confirmation'} | undefined>;
+  /** Local developer-only disposable gym; never persisted to the real repository. */
+  debugSessionActive?: boolean;
+  debugSetGymLevel?: (level: number) => Promise<GymResult>;
+  debugRestoreGym?: () => Promise<GymResult>;
   state: GymState;
   hasSave: boolean;
   hydrating: boolean;
@@ -222,4 +227,22 @@ function browserStorage(): GymStorage {
 }
 
 const gymStorage = browserStorage();
-export const useGym = createGymLocalFirstStore(createGymStore(gymStorage), gymStorage, createGymAuthorityTransport());
+
+/** Valid test fixtures own a separate memory repository, including their history. */
+export function createGymDebugStore(level: number, now: () => number = Date.now) {
+  if (!Number.isInteger(level) || level < 1 || level > 8) throw Error('请选择1至8级球馆');
+  const values = new Map<string, string>();
+  const storage: GymStorage = {getItem: key => values.get(key) ?? null, setItem: (key, value) => {values.set(key, value);}};
+  const state = newGym(now(), 20_261_117 + level);
+  state.gymLevel = level;
+  state.credits = 999;
+  state.player!.enteredGymLevel = level;
+  state.offlineRulesVersion = 2;
+  if (!writeGym(storage, state).ok) throw Error('测试球馆初始化失败');
+  return createGymStore(storage, state.seed, now);
+}
+
+export const useGym = createGymLocalFirstStore(createGymStore(gymStorage), gymStorage, createGymAuthorityTransport(), {
+  debugAvailable: gymDebugAvailable,
+  debugFactory: level => createGymDebugStore(level),
+});

@@ -8,6 +8,8 @@ import {equipmentCatalog} from '../../src/game/gym/catalog';
 import {readGym, writeGym} from '../../src/game/gym/save';
 import {templateRules} from '../../src/game/contract/templates';
 import {statKeys, type Stats} from '../../src/game/types';
+import {completeGymTutorial} from '../../src/presentation/gymTutorialPreference';
+import {resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
 
 const harness = vi.hoisted(() => ({
   values: new Map<string, string>(),
@@ -45,6 +47,8 @@ const frames = new Map<number, FrameRequestCallback>();
 const state = () => harness.store!.getState().state;
 
 beforeEach(() => {
+  completeGymTutorial();
+  resetGymFirstVisitTutorials();
   vi.useFakeTimers();
   vi.setSystemTime(at);
   Object.defineProperty(document, 'fonts', {configurable: true, value: {ready: Promise.resolve()}});
@@ -86,7 +90,10 @@ it('uses the upright B cover and exposes no new-gym control once a saved gym exi
   // Background cropping must not define a control's layout box or z-order.
   const backdrop=document.querySelector('.gym-home-backdrop')!;
   const foreground=document.querySelector('.gym-home-design')!;
-  expect(backdrop.parentElement).toBe(foreground.parentElement);
+  const foregroundFrame=foreground.closest('.gym-home-fit')!;
+  expect(foregroundFrame).toBeTruthy();
+  expect(backdrop.parentElement).toBe(foregroundFrame.parentElement);
+  expect(foregroundFrame.contains(backdrop)).toBe(false);
   expect(foreground.contains(backdrop)).toBe(false);
   expect([...foreground.children].slice(0,3).map(node=>node.className)).toEqual(['b-masthead','b-lower','b-bottom-line']);
   expect(document.querySelector('.b-actions')?.contains(document.querySelector('.b-command'))).toBe(true);
@@ -166,9 +173,14 @@ it('starts at home, completes a course, chooses a plan and cooperation, recommen
   expect(state().player!.training.completedCourses).toBe(1);
   expect(state().player!.stamina).toBe(14);
   await press('选择训练计划');
+  expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-training-1');
+  await press('下一步');
+  await press('知道了');
   await press('选用', card('.gm-plan-card', '持球突破'));
   expect(state().player!.training.planId).toBe('finishing');
   await press('赞助合作');
+  expect(document.querySelector('.gym-tutorial-spotlight')?.getAttribute('data-step')).toBe('feature-cooperation-1');
+  await press('知道了');
   await press('接取合作', card('.gm-cooperation', '基础培养合作'));
   expect(state().player!.cooperation?.acceptedShots).toBe(10);
   expect(state().player!.cooperation?.acceptedCourses).toBe(1);

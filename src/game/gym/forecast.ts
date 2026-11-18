@@ -1,4 +1,4 @@
-import {automaticIntervalMs, experienceForLevel, guaranteedGreatShots, playerLevelCap, recoverySeconds, staminaMax, trainingShotExperience, trainingStatus, type GymPlayer, type GymState} from './engine';
+import {automaticIntervalMs, experienceForLevel, guaranteedGreatShots, playerLevelCap, recoverySeconds, shotCooldownMs, staminaMax, trainingShotExperience, trainingStatus, type GymPlayer, type GymState} from './engine';
 import {offlineLimitMs} from './offline';
 
 export type TrainingForecast = {
@@ -30,7 +30,7 @@ export function estimateShotTime(state: GymState, player: GymPlayer, shots: numb
   if (shots <= 0) return 0;
   const capacity = staminaMax(state);
   const recovery = recoverySeconds(state) * 1_000;
-  const interval = player.autoEnabled ? automaticIntervalMs(state) : 1_000;
+  const interval = player.autoEnabled ? automaticIntervalMs(state) : shotCooldownMs;
   const courseReturn = trainingStatus(state, player).nextRecovery;
   let stamina = player.stamina;
   let remainder = player.recoveryMs;

@@ -26,7 +26,7 @@ it('keeps club rules and forecasts out of the main purchase flow until requested
   expect(document.querySelector('[aria-label="项目培养耗时对比"]')).toBeNull();
   expect(document.body.textContent).not.toContain('每级使下一名新人出生六维各增加');
   await act(async () => document.querySelector<HTMLButtonElement>('[aria-label="查看球馆说明"]')!.click());
-  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('球馆2级免费解锁在线自动与离线训练');
+  expect(document.querySelector('[role="dialog"]')?.textContent).toContain('球馆2级开放多训练位、自动训练和30分钟离线训练');
   await act(async () => document.querySelector<HTMLButtonElement>('[aria-label="关闭面板"]')!.click());
   expect(document.querySelector('[role="dialog"]')).toBeNull();
   expect(action).not.toHaveBeenCalled();

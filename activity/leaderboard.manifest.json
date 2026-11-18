@@ -45,7 +45,7 @@
     "VITE_GYM_LEADERBOARD_ENV_ID"
   ],
   "migration": "migrations/20261117000100_gym_rankings.sql",
-  "scoreSource": "Verified server gym progress, never client-supplied score/stat values",
+  "scoreSource": "local-validated portable game archive: server derives values and checks fame; canonical replay path remains supported",
   "verification": {
     "localContractTests": true,
     "deployedHealth": true,
@@ -57,15 +57,24 @@
     "canonicalProductionBusinessFlow": true,
     "functionCodeHashVerified": true,
     "coldHistoryBootstrapCodeDeployed": true,
-    "nicknameProfileSync": true
+    "nicknameProfileSync": true,
+    "localProgressSubmission": true,
+    "localProgressIdentityIsolation": true,
+    "localProgressIdempotent": true,
+    "deployedSourceCodeVerified": true,
+    "syntheticTestCleanupVerified": true
   },
   "verificationPending": [
     "User-operated Hupu end-user login, account switching and personal ranking acceptance"
   ],
-  "deploymentEvidence": "../outputs/backend-nickname-fix-20261117/acceptance.json",
+  "deploymentEvidence": "../outputs/prelaunch-20261118/function-deployment.json",
   "authorityUpgradeMigration": "migrations/20261117000300_gym_authority_rankings.sql",
-  "functionDeploymentEvidence": "../outputs/backend-update-20261117/acceptance.json",
-  "businessFlowEvidence": "../outputs/release-functions-20261117/deployed-business-flow.json",
-  "deployedCodeSha256": "215ee8f024f3400abdddca7022b50c2d352ff9e6c9e2fe003b250921131dce15",
-  "nicknameMigration": "migrations/20261117000400_gym_rank_nicknames.sql"
+  "functionDeploymentEvidence": "../outputs/prelaunch-20261118/deployed-source-verification.json",
+  "businessFlowEvidence": "../outputs/prelaunch-20261118/live-http-smoke.json",
+  "deployedCodeSha256": "c7cf62d8f3993333c59a1d13005125f3fca059f8b88c8b07aee36419ae4dee15",
+  "nicknameMigration": "migrations/20261117000400_gym_rank_nicknames.sql",
+  "deployedCodeHashTarget": "cloudfunctions/activity_api/gym/server/main.mjs",
+  "deployedArchiveSha256": "88c2cfea7642d55ab4c3e91569ab941be5487ead43ca953ed53c69b0f1fec4d0",
+  "localProgressMigration": "migrations/20261117000500_gym_local_rank_progress.sql",
+  "updatedAt": "2026-11-17T16:27:41.062Z"
 }

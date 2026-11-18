@@ -74,6 +74,7 @@ function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boo
   if (has(value, 'greatShotReady') && typeof value.greatShotReady !== 'boolean') return false;
   if (has(value, 'greatShotsRemaining') && !integer(value.greatShotsRemaining, 1, maximumStoredChalkShots)) return false;
   if (has(value, 'shareLevelClaimed') && typeof value.shareLevelClaimed !== 'boolean') return false;
+  if (has(value, 'highPotential') && typeof value.highPotential !== 'boolean') return false;
   if (has(value, 'overflowExperience') && !integer(value.overflowExperience)) return false;
   if ((!legacy || has(value, 'cooperation')) && !agreement(value.cooperation, value)) return false;
   if ((!legacy || Object.prototype.hasOwnProperty.call(value, 'enteredGymLevel')) && !integer(value.enteredGymLevel, 1, gymLevel)) return false;

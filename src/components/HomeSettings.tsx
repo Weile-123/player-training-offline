@@ -21,9 +21,9 @@ const progressText=(month:number|null,shots:number)=>month===null?'暂无进行�
 type HomeSettingsProps={onClose:()=>void;onTutorial?:()=>void;cloudEnabled?:boolean};
 /** The gym uses its own slot, archive schema and restoration coordinator. */
 export function HomeSettings({cloudEnabled=true,...props}:HomeSettingsProps){
- return cloudEnabled?<CloudHomeSettings {...props}/>:<LocalHomeSettings onClose={props.onClose}/>;
+ return cloudEnabled?<CloudHomeSettings {...props}/>:<LocalHomeSettings onClose={props.onClose} onTutorial={props.onTutorial}/>;
 }
-function LocalHomeSettings({onClose}:{onClose:()=>void}){
+function LocalHomeSettings({onClose,onTutorial}:{onClose:()=>void;onTutorial?:()=>void}){
  const store=useGym(),sync=useSyncExternalStore(gymCloudSync.subscribe,gymCloudSync.getSnapshot,gymCloudSync.getSnapshot);
  const [notice,setNotice]=useState(''),[feedback,setFeedback]=useState(false),[failedAvatar,setFailedAvatar]=useState('');
  useEffect(()=>gymCloudSync.start(),[]);
@@ -44,12 +44,16 @@ function LocalHomeSettings({onClose}:{onClose:()=>void}){
     <small className="cloud-auto-status"><i data-active={sync.phase==='ready'&&!sync.preview}/>{sync.preview?'等待同步确认':sync.phase==='loading'?'正在连接云存档':sync.phase==='guest'?'登录后可手动上传或同步':'进度自动保存在本机；云存档仅在手动上传或同步时更新'}</small>
    </section>
    <SettingsSoundSwitch gym/>
+   {onTutorial&&<GymTutorialSettings onTutorial={onTutorial} disabled={busy||!!sync.preview}/>}
    <button className="settings-feedback-entry" onClick={()=>setFeedback(true)}><GameIcon name="feedback"/><span><strong>意见反馈</strong><small>遇到问题或建议，告诉我们</small></span><b aria-hidden="true">›</b></button>
    <ActionNotice message={notice||sync.message} role={cloudNoticeRole(sync.phase,sync.message,!!notice)} className="settings-notice"/>
   </div>
   {sync.preview&&<ComicDialog title="同步云存档" onClose={gymCloudSync.cancelSync} dismissible={!busy} className="cloud-confirm-dialog"><p>同步会用以下云端进度替换当前球馆、球员、背包、图鉴和校友档案。</p><div className="save-comparison"><GymSaveProgress label="当前本地" progress={local}/><GymSaveProgress label="将同步的云端" progress={gymCloudProgress(sync.preview)} remote/></div><p>确认前不会修改进度；同步前保留一份完整本地备份。</p><div className="settings-actions"><button className="secondary" disabled={busy} onClick={gymCloudSync.cancelSync}>取消</button><button className="primary" disabled={busy} onClick={()=>void run(gymCloudSync.confirmSync)}>{sync.busy==='restore'?'同步中…':'确认同步'}</button></div></ComicDialog>}
   {feedback&&<FeedbackPage onClose={()=>setFeedback(false)}/>}
  </ComicDialog>;
+}
+function GymTutorialSettings({onTutorial,disabled}:{onTutorial:()=>void;disabled:boolean}){
+ return <button type="button" className="secondary" disabled={disabled} onClick={onTutorial}>重玩新手引导</button>;
 }
 function GymSaveProgress({label,progress,known=true,remote=false}:{label:string;progress:GymCloudProgress|null;known?:boolean;remote?:boolean}){
  return <div className={`save-progress${remote?' is-cloud':''}`}><strong>{label}</strong><b>{!known?'尚未读取':progress?`球馆 Lv.${progress.level} · 声望 ${progress.fame.toLocaleString()}`:remote?'暂无云存档':'尚未开设球馆'}</b><small>{remote?'上次上传':'上次更新'}：{progress?timeText(remote?progress.uploadedAt:progress.updatedAt):'—'}</small></div>;

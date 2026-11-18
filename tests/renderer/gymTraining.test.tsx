@@ -32,7 +32,7 @@ async function mount(Panel: ComponentType<GymPanelProps>, initial: GymState) {
       actionError = result.error;
       setState(result.state);
     };
-    return <><button type="button" onClick={() => { if (state.player) onAction({ type: 'train', id: state.player.id }); }}>测试投篮</button><ComicDialog title="经营面板" onClose={() => { }}><Panel state={state} onAction={onAction} /></ComicDialog></>;
+    return <><button type="button" onClick={() => { if (state.player) onAction({ type: 'train', id: state.player.id }); }}>测试投篮</button><ComicDialog title="经营面板" onClose={() => { }}><Panel state={state} onAction={onAction} tutorialEnabled={false}/></ComicDialog></>;
   }
   root = createRoot(document.getElementById('root')!);
   await act(async () => root!.render(<Scene />));
@@ -67,7 +67,7 @@ function trainingRules() {
 }
 
 it('chooses a specialization and completes a real ten-shot course with immediate stamina recovery', async () => {
-  await mount(GymTrainingPanel, newGym(at, 11));
+  await mount(GymTrainingPanel, {...newGym(at, 11), gymLevel: 2});
   expect(document.body.textContent).toContain('成长偏向');
   expect(document.body.textContent).not.toContain('升级总属性点数不变');
   const before = structuredClone(latest);
@@ -91,7 +91,7 @@ it('chooses a specialization and completes a real ten-shot course with immediate
   expect(document.querySelector('.gm-plan-summary')?.textContent).toContain('完课恢复 +4 体力');
 });
 
-it.each([[1, 5], [2, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 7]])('applies actual course equipment recovery at gym level %s', async (gymLevel, totalRecovery) => {
+it.each([[2, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 7]])('applies actual course equipment recovery at gym level %s', async (gymLevel, totalRecovery) => {
   const state = newGym(at, 16);
   state.gymLevel = gymLevel;
   const equipment = equipmentCatalog.filter(item => item.effects.courseRecovery > 0 && item.unlockLevel <= gymLevel).sort((first, second) => second.effects.courseRecovery - first.effects.courseRecovery)[0];
@@ -115,7 +115,7 @@ it.each([[1, 5], [2, 5], [3, 6], [4, 6], [5, 6], [6, 6], [7, 6], [8, 7]])('appli
 });
 
 it('asks before discarding an unfinished course and keeps completed courses and growth', async () => {
-  await mount(GymTrainingPanel, newGym(at, 12));
+  await mount(GymTrainingPanel, {...newGym(at, 12), gymLevel: 2});
   await shoot(13);
   const stats = { ...latest.player!.stats };
   await press(buttonWithin(card('.gm-plan-card', '内线防守'), '选用'));
@@ -133,6 +133,7 @@ it('asks before discarding an unfinished course and keeps completed courses and 
 
 it('keeps earned cultivation coupons in the compact repeated-template reward even at the level cap', async () => {
   const state = newGym(at, 17);
+  state.gymLevel = 2;
   Object.assign(state.player!, { level: 25, peakLevel: 25, templateId: 'bryant', highestTier: 'legend' });
   state.postgameRecommendedTemplates = ['bryant'];
   expect(recommendation(state).credits).toBe(23);
@@ -152,6 +153,7 @@ it('keeps earned cultivation coupons in the compact repeated-template reward eve
 
 it('starts cooperation at acceptance and pays the completed bonus only through recommendation', async () => {
   const state = newGym(at, 13);
+  state.gymLevel = 3;
   const template = templateRules.find(entry => entry.tier === 'rotation')!;
   state.player!.height = template.height[0];
   state.player!.templateId = template.id;
@@ -192,6 +194,7 @@ it('starts cooperation at acceptance and pays the completed bonus only through r
 
 it('keeps replacing a cooperation optional until confirmation and starts the new baseline then', async () => {
   const state = newGym(at, 14);
+  state.gymLevel = 3;
   await mount(GymCooperationPanel, state);
   const specialist = cooperationOffers(state).find(offer => offer.kind === 'specialist')!;
   for (const key of specialist.focusKeys) expect(card('.gm-cooperation', '专项培养合作').textContent).toContain(`${state.player!.stats[key]} / ${specialist.requiredAttribute}`);

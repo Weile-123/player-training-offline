@@ -8,7 +8,10 @@ const {applicationId}=require('./project.json');
 const env=process.env.CLOUDBASE_ENV_ID||process.env.TCB_ENV;
 if(!env||process.env.BUSINESS_ACTIVITY_ID!==applicationId)throw Error('Missing project-specific activity binding');
 const app=tcb.init({env,accessKey:process.env.COLORBOX__ACCESS_KEY});
-const rankingsHandle=createHandler({rpc:async(name,data)=>{
+const rankingsHandle=createHandler({validateLocalProgress:async(...args)=>{
+ const {validateLocalGymRankingArchive}=await import('./gym/server/main.mjs');
+ return validateLocalGymRankingArchive(...args);
+},rpc:async(name,data)=>{
  const credential=await app.auth().getClientCredential();
  const token=typeof credential==='string'?credential:credential?.access_token;
  if(!token)throw Error('服务暂不可用');
@@ -18,8 +21,8 @@ const rankingsHandle=createHandler({rpc:async(name,data)=>{
  const result=await response.json();
  if(!response.ok){
   const code=String(result.message??'');
-  const statusCode=code.includes('rate-limit')?429:code.includes('verified-progress-required')?409:503;
-  throw Object.assign(Error(statusCode===429?'提交过于频繁，请稍后重试':statusCode===409?'暂无已验证的球馆成绩，本地进度已保留':'排行榜服务暂不可用'),{statusCode});
+  const statusCode=code.includes('rate-limit')?429:code.includes('verified-progress-required')||code.includes('local-progress-')?409:503;
+  throw Object.assign(Error(statusCode===429?'提交过于频繁，请稍后重试':code.includes('local-progress-')?'球馆成绩与上次提交不一致，请保留存档并重新打开排行榜':statusCode===409?'暂无已验证的球馆成绩，本地进度已保留':'排行榜服务暂不可用'),{statusCode});
  }
  return result;
 }});

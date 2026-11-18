@@ -4,7 +4,7 @@ import {act} from 'preact/test-utils';
 import {nbaTemplates} from '../../src/game/templates';
 const api = vi.hoisted(() => ({list: vi.fn(), sync: vi.fn(), configured: false, message: '',localMode:false}));
 vi.mock('../../src/platform/gymLeaderboard', () => ({gymLeaderboard: {list: api.list, sync: api.sync, subscribe: () => () => {}, getMessage: () => api.message}, gymLeaderboardConfigured: () => api.configured, gymRankReference: () => ({runId: 'run', revision: 1})}));
-vi.mock('../../src/gymStore', () => ({useGym: {getState: () => ({hasSave: true, state: {},authorityMode:api.localMode?'local':undefined})}}));
+vi.mock('../../src/gymStore', () => {const getState=()=>({hasSave:true,state:{},authorityMode:api.localMode?'local':undefined});return{useGym:Object.assign((selector:(state:ReturnType<typeof getState>)=>unknown)=>selector(getState()),{getState})};});
 import {GymLeaderboard} from '../../src/components/GymLeaderboard';
 let root: Root | null = null;
 const template = nbaTemplates[0], best = {playerId: 'gym-p1', templateId: template.id, value: '123456789', level: 25, stats: template.stats};
@@ -68,10 +68,24 @@ it('keeps an explicit synchronization rejection as an alert regardless of messag
  expect(document.querySelector('.player-ranking > li')).toBeTruthy();expect(document.querySelector('.leaderboard .action-notice')).toBeNull();
 });
 
-it('reads existing rankings without sending a local revision to the obsolete server game branch',async()=>{
- api.localMode=true;api.configured=true;api.sync.mockImplementation(()=>new Promise(()=>{}));
+it('submits current local-first progress before reading rankings rather than displaying an obsolete cloud branch',async()=>{
+ api.localMode=true;api.configured=true;api.sync.mockResolvedValue(true);
  api.list.mockResolvedValue({entries:[playerRow],me:null});await mount();
- expect(api.sync).not.toHaveBeenCalled();expect(api.list).toHaveBeenCalledExactlyOnceWith('player');
+ expect(api.sync).toHaveBeenCalledExactlyOnceWith({runId:'run',revision:1});expect(api.list).toHaveBeenCalledExactlyOnceWith('player');
+ expect(api.sync.mock.invocationCallOrder[0]).toBeLessThan(api.list.mock.invocationCallOrder[0]);
  expect(document.querySelector('.player-ranking > li')?.textContent).toContain('虎扑教练');
- expect(document.body.textContent).toContain('本机新成绩尚未接入独立排行同步');
+ expect(document.body.textContent).toContain('本机培养成果经服务器校验后更新排名');
+});
+
+it('shares one confirmed submission across both boards and submits again only on explicit refresh',async()=>{
+ api.localMode=true;api.configured=true;
+ let confirm!:(accepted:boolean)=>void;
+ api.sync.mockImplementationOnce(()=>new Promise(resolve=>{confirm=resolve;}));
+ api.list.mockImplementation(async board=>({entries:[board==='player'?playerRow:fameRow],me:null}));
+ await mount();await click('声望榜');
+ expect(api.sync).toHaveBeenCalledTimes(1);expect(api.list).not.toHaveBeenCalled();
+ await act(async()=>confirm(true));await flush();
+ expect(document.querySelector('.endless-ranking')?.textContent).toContain('2580');
+ await click('球员榜');expect(api.sync).toHaveBeenCalledTimes(1);
+ await click('刷新排行榜');expect(api.sync).toHaveBeenCalledTimes(2);
 });

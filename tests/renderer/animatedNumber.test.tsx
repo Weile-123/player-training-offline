@@ -19,3 +19,25 @@ it('schedules no frame for settled numbers and preserves every displayed animati
  act(()=>root.render(<AnimatedNumber value={51} decimals={1}/>));
  expect(document.querySelector('b')!.textContent).toBe('51.0');expect(frame).toBeUndefined();
 });
+it('retargets continuous updates, keeps live text through rerenders and cancels on reduced motion or departure',()=>{
+ let now=0,next=0;
+ const pending=new Map<number,FrameRequestCallback>();
+ vi.spyOn(performance,'now').mockImplementation(()=>now);
+ vi.stubGlobal('requestAnimationFrame',(callback:FrameRequestCallback)=>{pending.set(++next,callback);return next;});
+ vi.stubGlobal('cancelAnimationFrame',(id:number)=>pending.delete(id));
+ const tick=(time:number)=>{now=time;const callbacks=[...pending.values()];pending.clear();act(()=>callbacks.forEach(callback=>callback(now)));};
+ root=createRoot(document.getElementById('root')!);
+ act(()=>root.render(<AnimatedNumber value={10} decimals={1}/>));
+ act(()=>root.render(<AnimatedNumber value={20} decimals={1}/>));
+ tick(210);expect(document.querySelector('b')!.textContent).toBe('18.8');
+ act(()=>root.render(<AnimatedNumber value={20} decimals={1} tone="neutral"/>));
+ expect(document.querySelector('b')!.textContent).toBe('18.8');
+ act(()=>root.render(<AnimatedNumber value={30} decimals={1}/>));
+ expect(pending.size).toBe(1);tick(420);
+ expect(document.querySelector('b')!.textContent).toBe('28.6');
+ act(()=>root.render(<AnimatedNumber value={30} decimals={1} reduced/>));
+ expect(document.querySelector('b')!.textContent).toBe('30.0');expect(pending.size).toBe(0);
+ act(()=>root.render(<AnimatedNumber value={40} decimals={1}/>));expect(pending.size).toBe(1);
+ act(()=>root.render(<AnimatedNumber key="other-player" value={5} decimals={1}/>));
+ expect(pending.size).toBe(0);expect(document.querySelector('b')!.textContent).toBe('5.0');
+});

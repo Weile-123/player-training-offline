@@ -36,12 +36,29 @@ function profileNickname(body){
  if(!nickname)throw fail('排行昵称无效');
  return nickname;
 }
-function createHandler({rpc,now=Date.now}){
+function localProgressReference(body){
+ if(!body||Array.isArray(body)||Object.keys(body).some(key=>!['event','runId','revision','nickname','archive'].includes(key))
+  ||body.event!=='gym-local-progress'||typeof body.archive!=='string'||Buffer.byteLength(body.archive,'utf8')>2*1024*1024
+  ||typeof body.runId!=='string'||!/^\d{1,16}-\d{1,10}$/.test(body.runId)||!Number.isSafeInteger(body.revision)||body.revision<0
+  ||body.nickname!==undefined&&typeof body.nickname!=='string')throw fail('本地球馆成绩档案无效');
+ return{runId:body.runId,revision:body.revision,nickname:cleanName(body.nickname),archive:body.archive};
+}
+function createHandler({rpc,now=Date.now,validateLocalProgress}){
  const publicCache=new Map();
  return async({method,path,query={},context,body})=>{
   if(method==='GET'&&path==='/health')return {applicationId,version:'gym-rankings-v1',boards:['player','fame']};
   if(method==='POST'&&path==='/leaderboard/submit'){
    const user=identity(context);
+   if(body?.event==='gym-local-progress'){
+    const submission=localProgressReference(body);
+    if(typeof validateLocalProgress!=='function')throw fail('本地成绩同步服务尚未更新，请稍后重试',503);
+    let progress;try{progress=await validateLocalProgress(submission.archive,submission,now());}
+    catch(error){throw fail(error instanceof Error?error.message:'本地球馆成绩未通过校验');}
+    const result=await rpc('submit_local_gym_rank',{p_puid:user.puid,p_name:user.name||submission.nickname||'匿名训练师',
+     p_run:progress.runId,p_revision:progress.revision,p_updated:progress.updatedAt,p_evidence:progress.evidenceId,p_fame:progress.fame,p_best:progress.best});
+    if(!result||result.accepted!==true||result.source!=='local-validated')throw fail('本地成绩同步尚未确认，原进度已保留',503);
+    publicCache.clear();return result;
+   }
    if(body?.event==='gym-profile'){
     const nickname=profileNickname(body);
     const result=await rpc('update_gym_rank_name',{p_puid:user.puid,p_name:user.name||nickname});
@@ -58,16 +75,16 @@ function createHandler({rpc,now=Date.now}){
    publicCache.clear();return result;
   }
   if(method==='GET'&&['/leaderboard','/leaderboard/me'].includes(path)){
-   if(Object.keys(query).some(key=>!['board','limit'].includes(key)))throw fail('排行查询参数无效');
+   if(Object.keys(query).some(key=>!['board','limit','fresh'].includes(key))||query.fresh!==undefined&&query.fresh!=='1')throw fail('排行查询参数无效');
    const board=query.board??'player',limit=Number(query.limit??50);
    if(!['player','fame'].includes(board)||!Number.isInteger(limit)||limit<1||limit>100)throw fail('排行查询参数无效');
    if(path.endsWith('/me'))return rpc('read_gym_rank',{p_board:board,p_limit:limit,p_puid:identity(context).puid});
    const key=`${board}:${limit}`,cached=publicCache.get(key);
-   if(cached&&cached.until>now())return cached.value;
+   if(query.fresh!=='1'&&cached&&cached.until>now())return cached.value;
    const result=await rpc('read_gym_rank',{p_board:board,p_limit:limit,p_puid:null});
    publicCache.set(key,{value:result,until:now()+3000});return result;
   }
   throw fail('接口不存在',404);
  };
 }
-module.exports={createHandler,identity,progressReference,profileNickname,cleanName};
+module.exports={createHandler,identity,progressReference,localProgressReference,profileNickname,cleanName};

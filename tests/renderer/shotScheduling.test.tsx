@@ -20,7 +20,7 @@ it('parks idle animation, wakes for shots and heat, and preserves completion',as
  vi.stubGlobal('requestAnimationFrame',(cb:FrameRequestCallback)=>{pending.set(++next,cb);return next;});
  vi.stubGlobal('cancelAnimationFrame',(id:number)=>pending.delete(id));
  vi.spyOn(HTMLCanvasElement.prototype,'getContext').mockReturnValue({} as CanvasRenderingContext2D);
- vi.spyOn(HTMLCanvasElement.prototype,'getBoundingClientRect').mockReturnValue({width:390,height:340} as DOMRect);
+ const measure=vi.spyOn(HTMLCanvasElement.prototype,'getBoundingClientRect').mockReturnValue({width:390,height:340} as DOMRect);
  const sync=vi.spyOn(ConcurrentShots.prototype,'sync'),finish=vi.fn(),root=createRoot(document.getElementById('root')!);
  const tick=async(n:number)=>{for(let i=0;i<n;i++){now+=1000/60;const work=[...pending.values()];pending.clear();callbacks+=work.length;await act(async()=>work.forEach(cb=>cb(now)));}};
  const render=async(shots:ShotFeedback[],hot=false)=>{await act(async()=>root.render(<ShotScene feedback={shots[0]??null} shots={shots} hot={hot} busy={!!shots.length} onFinish={finish}/>));};
@@ -34,6 +34,8 @@ it('parks idle animation, wakes for shots and heat, and preserves completion',as
   expect(drawing.draw.mock.calls.length).toBeGreaterThan(hotStart);
   await render([],false);await tick(60);const coolCallbacks=callbacks;await tick(60);
   const cooledIdleCallbacks=callbacks-coolCallbacks;
+  // Hundreds of active animation frames must reuse the last valid layout.
+  expect(measure).toHaveBeenCalledTimes(1);
   if(process.env.GAME_PERF_LABEL){mkdirSync('output/performance',{recursive:true});writeFileSync('output/performance/animation-'+process.env.GAME_PERF_LABEL+'.json',JSON.stringify({idleCallbacks,resumedIdleCallbacks,cooledIdleCallbacks,syncCalls:sync.mock.calls.length,completionCalls:finish.mock.calls.length}));}
   if(process.env.GAME_PERF_LABEL!=='before'){expect(idleCallbacks).toBe(1);expect(resumedIdleCallbacks).toBe(0);expect(cooledIdleCallbacks).toBe(0);}
  }finally{act(()=>root.unmount());expect(pending.size).toBe(0);vi.restoreAllMocks();vi.unstubAllGlobals();}

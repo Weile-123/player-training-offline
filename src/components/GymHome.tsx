@@ -10,6 +10,9 @@ import {HomeSettings} from './HomeSettings';
 import {GymCollectionPanel} from './GymPanels';
 import {GymCareerPanel} from './GymCareerPanel';
 import {GymLeaderboard} from './GymLeaderboard';
+import {GymTutorial} from './GymTutorial';
+import {completeGymTutorial,shouldOfferGymTutorial} from '../presentation/gymTutorialPreference';
+import {gymLeaderboard,gymLeaderboardConfigured,gymRankReference} from '../platform/gymLeaderboard';
 import type {GymAction} from '../game/gym/engine';
 import GymGame from './GymGame';
 import './GymGame.css';
@@ -23,14 +26,26 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
  const [panel, setPanel] = useState<HomePanel>(null);
  const [collectionTab, setCollectionTab] = useState<0 | 1>(0);
  const [busy, setBusy] = useState(false);
+ const [tutorialMode,setTutorialMode]=useState<'new'|'replay'|null>(null);
+ const [tutorialError,setTutorialError]=useState('');
+ const tutorialTransition=useRef(false);
  const [hydrationFinished,setHydrationFinished]=useState(false);
  const homeFrame=useRef<HTMLDivElement>(null),homeDesign=useRef<HTMLDivElement>(null);
  useLayoutEffect(()=>{
   const frame=homeFrame.current,design=homeDesign.current;
-  if(playing||!frame||!design)return;
+  if(playing||tutorialMode||!frame||!design)return;
   let request=0,active=true;
   const fit=()=>{
    request=0;
+   if(design.querySelector('.b-actions')&&design.clientWidth>0){
+    const style=getComputedStyle(design);
+    const pixels=(value:string,fallback=0)=>{const parsed=Number.parseFloat(value);return Number.isFinite(parsed)?parsed:fallback;};
+    const contentWidth=design.clientWidth-pixels(style.paddingLeft)-pixels(style.paddingRight);
+    const sideGap=contentWidth-pixels(style.getPropertyValue('--home-command-width'),240)-pixels(style.getPropertyValue('--home-menu-width'),88);
+    const menuGap=pixels(style.getPropertyValue('--home-wide-menu-gap'),12);
+    design.dataset.layout=sideGap<menuGap?'narrow':'wide';
+   }
+   // Layout is resolved first. These dimensions are unscaled, unlike screen bounds.
    const available=frame.clientHeight,natural=Math.max(design.scrollHeight,design.clientHeight);
    if(available>0&&natural>0)design.style.setProperty('--home-fit-scale',String(Math.min(1,available/natural)));
   };
@@ -42,8 +57,8 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   void document.fonts?.ready.then(schedule);
   fit();
   return()=>{active=false;cancelAnimationFrame(request);observer?.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);};
- },[playing,store.hasSave]);
- useModalAccessibility(!playing);
+ },[playing,store.hasSave,tutorialMode]);
+ useModalAccessibility(!playing&&!tutorialMode);
  useEffect(() => gameAudio.install(document), []);
  useEffect(() => {
   let active=true;
@@ -52,7 +67,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
  }, []);
  const businessReady=()=>{
   const current=useGym.getState();
-  return startupAssetsReady&&hydrationFinished&&!busy&&!current.hydrating
+  return !tutorialMode&&startupAssetsReady&&hydrationFinished&&!busy&&!current.hydrating
    &&!current.actionError
    &&!/失败|不可用|限制|无法读取|同步暂停/.test(current.saveMessage);
  };
@@ -69,6 +84,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   if (busy || current.hydrating) return;
   // A late click from the pre-hydration screen can only continue an existing gym.
   if (current.hasSave) {setPlaying(true); return;}
+  if(shouldOfferGymTutorial()){setTutorialError('');setPanel(null);setTutorialMode('new');return;}
   setBusy(true);
   try {
    const result = await useGym.getState().start();
@@ -79,8 +95,32 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   } finally { setBusy(false); }
  };
 
+ const finishTutorial=async()=>{
+  if(tutorialTransition.current)return;
+  tutorialTransition.current=true;
+  setTutorialError('');
+  try{
+   if(tutorialMode==='replay'){completeGymTutorial();setTutorialMode(null);setPanel('settings');return;}
+   setBusy(true);
+   const current=useGym.getState();
+   const result=current.hasSave?null:await current.start();
+   if(!result?.error){completeGymTutorial();setTutorialMode(null);setPanel(null);setPlaying(true);}
+  }catch(error){setTutorialError(error instanceof Error?error.message:'开馆暂未成功，请重试');}
+  finally{tutorialTransition.current=false;setBusy(false);}
+ };
+
+ useEffect(()=>{
+  if(!playing&&!tutorialMode&&hydrationFinished&&!store.hydrating&&store.hasSave&&!store.debugSessionActive&&gymLeaderboardConfigured()){
+   void gymLeaderboard.sync(gymRankReference(useGym.getState().state)).catch(()=>{/* The ranking screen displays retryable submission errors. */});
+  }
+ },[playing,tutorialMode,hydrationFinished,store.hydrating,store.hasSave,store.debugSessionActive]);
+
+ if(tutorialMode)return <GymTutorial onComplete={()=>void finishTutorial()} onSkip={()=>void finishTutorial()} error={tutorialError||store.actionError}/>;
+
  if (playing) return <GymGame onHome={() => {
-  void useGym.getState().flush();
+  const current = useGym.getState();
+  if (current.debugSessionActive) {void current.debugRestoreGym?.().then(() => setPlaying(false)); return;}
+  void current.flush();
   setPlaying(false);
  }}/>;
 
@@ -111,7 +151,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    <ActionNotice message={!panel||panel==='collection'?homeError||(store.hydrating?'正在恢复球馆与历史档案…':''):''} role={homeError?'alert':'status'}/>
   </div>
   </div>
-  {panel === 'settings' && <HomeSettings cloudEnabled={false} onClose={() => setPanel(null)}/>}
+  {panel === 'settings' && <HomeSettings cloudEnabled={false} onClose={() => setPanel(null)} onTutorial={()=>{setPanel(null);setTutorialMode('replay');}}/>}
   {panel && panel !== 'settings' && <ComicDialog title={titles[panel]} onClose={() => setPanel(null)} variant="album" className={panel === 'collection' ? 'collection-album-dialog' : panel === 'rank' ? 'leaderboard-dialog' : 'career-statistics-dialog gym-career-dialog'}>
    {panel === 'alumni' ? <GymCareerPanel state={store.state} loadAlumni={store.hasSave ? store.loadAlumni : undefined} onCollection={tab => {setCollectionTab(tab); setPanel('collection');}}/> : <div className="contract-panel gym-panels">
     {panel === 'collection' && <GymCollectionPanel state={store.state} initialTab={collectionTab} onAction={action => void homeAction(action)} busy={busy || store.hydrating || !store.hasSave}/>}

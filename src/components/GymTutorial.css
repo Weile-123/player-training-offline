@@ -1,0 +1,23 @@
+.gym-tutorial-practice {width: 100%; height: 100%;}
+.gym-tutorial-spotlight {z-index: 150;}
+.gym-tutorial-spotlight .tutorial-mask-shade {fill: rgba(2,9,15,.32);}
+.gym-tutorial-spotlight .tutorial-instruction-content {padding: 10px 13px;}
+.gym-tutorial-spotlight .tutorial-instruction-content > strong {font-family: var(--font-display, 'Microsoft YaHei'); font-size: 18px;}
+.gym-tutorial-spotlight .tutorial-instruction p {margin-block: 6px 0; line-height: 1.55;}
+.gym-tutorial-spotlight .tutorial-next {min-height: 38px; padding-block: 8px;}
+.gym-tutorial-welcome .gym-tutorial-welcome-content {display: grid; gap: 11px; color: #17313d;}
+.gym-tutorial-welcome-content > h3 {margin: 0; font: 22px/1.3 var(--font-display, 'Microsoft YaHei');}
+.gym-tutorial-welcome-content > p {margin: 0; font: 13px/1.6 var(--font-body, 'Microsoft YaHei');}
+.gym-tutorial-ball {font-size: 32px; line-height: 1;}
+.gym-tutorial-welcome-content > ol {list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0; padding: 0;}
+.gym-tutorial-welcome-content > ol > li {padding: 9px 7px; border: 1px solid #b59c68; background: #edddb5; font-size: 13px;}
+.gym-tutorial-welcome-content li > b {margin-right: 7px; color: #b63025; font-family: var(--font-number, Impact);}
+.gym-tutorial-welcome-content > .gym-tutorial-practice-note {padding: 8px; border-left: 3px solid #b63025; background: #e7d4a4; color: #766043; font-size: 12px;}
+.gym-tutorial-welcome-content > .primary {width: 100%; min-height: 42px;}
+.gym-tutorial-emphasis {font-weight: 900; text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 2px; color: #a52b22;}
+.gym-feature-unlock .gym-tutorial-welcome-content {gap: 15px;}
+.gym-feature-unlock .gym-tutorial-welcome-content > h3 {font-size: 20px;}
+body.gym-tutorial-active .gm-cooperation-ad {display: none;}
+body.gym-tutorial-active .gm-cooperation-actions {grid-template-columns: 1fr;}
+body.gym-tutorial-active .gm-cooperation-panel > p[role="status"] {display: none;}
+@media(max-height: 520px) {.gym-tutorial-welcome-content {gap: 6px;}.gym-tutorial-ball {display: none;}.gym-tutorial-spotlight .tutorial-instruction-content > strong {font-size: 15px;}.gym-tutorial-spotlight .tutorial-instruction p {font-size: 12px;}}

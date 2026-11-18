@@ -11,20 +11,26 @@ export function GymLeaderboard() {
  const [tab, setTab] = useState(0), [refresh, setRefresh] = useState(0), [data, setData] = useState<GymRanking | null>(null);
  const [loading, setLoading] = useState(true), [error, setError] = useState('');
  const [syncFailed,setSyncFailed]=useState(false);
- const localOnly=useGym.getState().authorityMode==='local';
+ const localOnly=useGym(store=>store.authorityMode==='local');
+ const debugging=useGym(store=>!!store.debugSessionActive);
  const id = useId(), buttons = useRef<(HTMLButtonElement | null)[]>([]);
+ const syncAttempt=useRef<{refresh:number;localOnly:boolean;result:Promise<boolean>}|null>(null);
  const message = useSyncExternalStore(gymLeaderboard.subscribe, gymLeaderboard.getMessage, gymLeaderboard.getMessage);
  useEffect(() => {
   let active = true; setLoading(true); setData(null); setError(''); setSyncFailed(false);
   void (async () => {
-   if (!localOnly && gymLeaderboardConfigured() && useGym.getState().hasSave) {
-    try {await gymLeaderboard.sync(gymRankReference(useGym.getState().state));}
+   if (gymLeaderboardConfigured() && useGym.getState().hasSave && !debugging) {
+    // Both tabs belong to one refresh. Reuse its submission (including while
+    // pending) so switching boards cannot race the write or trigger throttling.
+    if(!syncAttempt.current||syncAttempt.current.refresh!==refresh||syncAttempt.current.localOnly!==localOnly)
+     syncAttempt.current={refresh,localOnly,result:gymLeaderboard.sync(gymRankReference(useGym.getState().state))};
+    try {await syncAttempt.current.result;}
     catch {if(active)setSyncFailed(true); /* Public reads remain available; the failure stays visible. */}
    }
    return gymLeaderboard.list(tab === 0 ? 'player' : 'fame');
   })().then(result => {if (active) setData(result);}).catch(error => {if (active) setError(error instanceof Error ? error.message : '排行榜读取失败');}).finally(() => {if (active) setLoading(false);});
   return () => {active = false;};
- }, [tab, refresh, localOnly]);
+ }, [tab, refresh, localOnly, debugging]);
  const bestName = (templateId?: string) => templateById(templateId)?.name ?? '球员';
  const bestTags = (player: NonNullable<GymRanking['entries'][number]['best']>) => <><span>训练 +{player.level}</span><span>综评 {overallRating(player.stats).toFixed(1)}</span></>;
  return <div className="leaderboard gym-leaderboard">
@@ -38,6 +44,7 @@ export function GymLeaderboard() {
   <button type="button" className="secondary" disabled={loading} onClick={() => setRefresh(value => value + 1)}>刷新排行榜</button>
   <ActionNotice message={data?.personalError||message} role={data?.personalError||syncFailed||/失败|不可用|未确认|未连接|切换|暂无已验证/.test(message)?'alert':'status'} className="leaderboard-action-notice"/>
   <p className="leaderboard-note">每人保留最高身价、最高声望 · 同分先达到者在前。</p>
-  <p className="leaderboard-note">{localOnly?'当前展示此前已同步的排名；本机新成绩尚未接入独立排行同步。':'排行榜仅记录平台新建球馆的已验证成绩；迁入的旧球馆保留经营进度，不参与排名。'}</p>
+  {debugging && <p className="leaderboard-note">当前处于独立测试球馆，测试成绩不提交。</p>}
+  <p className="leaderboard-note">{localOnly?'本机培养成果经服务器校验后更新排名；同步不会覆盖球馆进度。':'每次同步当前球馆培养成果，历史最高成绩保留。'}</p>
  </div>;
 }

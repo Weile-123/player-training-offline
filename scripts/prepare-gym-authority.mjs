@@ -4,15 +4,24 @@ import {createHash} from 'node:crypto';
 import {dirname,relative,resolve} from 'node:path';
 import {fileURLToPath,pathToFileURL} from 'node:url';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const migrations=['20261117000100_gym_rankings.sql','20261117000200_gym_authority.sql','20261117000300_gym_authority_rankings.sql','20261117000400_gym_rank_nicknames.sql'].map(name=>'activity/migrations/'+name);
+const migrations=['20261117000100_gym_rankings.sql','20261117000200_gym_authority.sql','20261117000300_gym_authority_rankings.sql','20261117000400_gym_rank_nicknames.sql','20261117000500_gym_local_rank_progress.sql'].map(name=>'activity/migrations/'+name);
+/** Windows Git checkouts may apply CRLF. Restore bytes only if that exact LF
+ * representation matches the official immutable checksum; never waive it. */
+export function verifiedOfficialSdkBytes(bytes,expected){
+ const sha=value=>createHash('sha256').update(value).digest('hex');
+ if(sha(bytes)===expected)return bytes;
+ const original=Buffer.from(bytes.toString('utf8').replace(/\r\n/g,'\n'),'utf8');
+ if(sha(original)===expected)return original;
+ throw Error('Official Timeflow SDK integrity check failed');
+}
 export async function prepareGymAuthority({outDir=resolve(root,'outputs/home-timeflow-20261117/backend-package')}={}){
- const output=resolve(outDir),sdkFiles=[];
- for(const line of (await readFile(resolve(root,'hupu-skills/skills/shaper-timeflow/sdk/SHA256SUMS'),'utf8')).trim().split(/\r?\n/)){const [hash,name]=line.trim().split(/\s+/);if(!name.startsWith('typescript/'))continue;if(name.includes('..'))throw Error('Invalid official SDK checksum path');const source='hupu-skills/skills/shaper-timeflow/sdk/'+name;if(createHash('sha256').update(await readFile(resolve(root,source))).digest('hex')!==hash)throw Error('Official Timeflow SDK integrity check failed');sdkFiles.push(source);}
+ const output=resolve(outDir),sdkFiles=[],sdkBytes=new Map();
+ for(const line of (await readFile(resolve(root,'hupu-skills/skills/shaper-timeflow/sdk/SHA256SUMS'),'utf8')).trim().split(/\r?\n/)){const [hash,name]=line.trim().split(/\s+/);if(!name.startsWith('typescript/'))continue;if(name.includes('..'))throw Error('Invalid official SDK checksum path');const source='hupu-skills/skills/shaper-timeflow/sdk/'+name;sdkBytes.set(source,verifiedOfficialSdkBytes(await readFile(resolve(root,source)),hash));sdkFiles.push(source);}
  const known=new Set(['server/main.mjs','server/start.mjs','server/gymAuthorityRuntime.mjs','server/gymCloudBaseAdapter.mjs','server/gymCloudBaseRoutes.json','server/gymTimeflowClock.mjs','server/timeflow.mjs','activity/timeflow.definition.json','hupu-skills/activity.json',...migrations,'package.json','package-lock.json','README.md','.gitignore','env.example','manifest.json',...sdkFiles]);
  async function checkExisting(dir){let entries;try{entries=await readdir(dir,{withFileTypes:true});}catch(error){if(error.code==='ENOENT')return;throw error;}for(const entry of entries){if(entry.isSymbolicLink())throw Error('Refusing linked package contents');const file=resolve(dir,entry.name);if(entry.isDirectory())await checkExisting(file);else if(!known.has(relative(output,file).replaceAll('\\','/')))throw Error('Package directory contains an unreviewed file; build to a clean directory');}}
  await checkExisting(output);await mkdir(resolve(output,'server'),{recursive:true});
- const copy=async name=>{await mkdir(dirname(resolve(output,name)),{recursive:true});await writeFile(resolve(output,name),await readFile(resolve(root,name)));};
- await build({stdin:{contents:"export {createGymAuthorityService} from './gymAuthorityService.ts';export {createFileGymAuthorityRepository,createCloudBaseGymAuthorityRepository} from './gymAuthorityRepository.ts';export {createGymAuthorityHttpHandler} from './gymAuthorityHttp.ts';",resolveDir:resolve(root,'server'),loader:'ts'},bundle:true,platform:'node',format:'esm',target:'node18.15',external:['./gymTimeflowClock.mjs'],outfile:resolve(output,'server/main.mjs')});
+ const copy=async name=>{await mkdir(dirname(resolve(output,name)),{recursive:true});await writeFile(resolve(output,name),sdkBytes.get(name)??await readFile(resolve(root,name)));};
+ await build({stdin:{contents:"export {createGymAuthorityService} from './gymAuthorityService.ts';export {createFileGymAuthorityRepository,createCloudBaseGymAuthorityRepository} from './gymAuthorityRepository.ts';export {createGymAuthorityHttpHandler} from './gymAuthorityHttp.ts';export {validateLocalGymRankingArchive} from './gymLocalRankProgress.ts';",resolveDir:resolve(root,'server'),loader:'ts'},bundle:true,platform:'node',format:'esm',target:'node18.15',external:['./gymTimeflowClock.mjs'],outfile:resolve(output,'server/main.mjs')});
  for(const file of ['server/gymTimeflowClock.mjs','server/timeflow.mjs','server/gymAuthorityRuntime.mjs','server/gymCloudBaseAdapter.mjs','server/gymCloudBaseRoutes.json','activity/timeflow.definition.json','hupu-skills/activity.json',...migrations])await copy(file);
  for(const file of sdkFiles)await copy(file);
  const original=JSON.parse(await readFile(resolve(root,'activity/cloudfunctions/activity_api/package.json'),'utf8'));

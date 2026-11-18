@@ -4,6 +4,7 @@ import type {GymAction,GymState} from '../game/gym/engine';
 import {validGym,validGymAlumnus,type GymStorage} from '../game/gym/save';
 import {hupuProject} from './hupuProject';
 import {parseGymAuthoritySnapshot,type GymAuthoritySnapshot,type GymAuthorityTransport} from './gymAuthority';
+import {gymDebugAvailable} from './gymDebug';
 
 type Hook=UseBoundStore<StoreApi<GymStore>>;
 type Expected={hasSave:boolean;createdAt:number;seed:number;revision:number;updatedAt:number};
@@ -21,11 +22,13 @@ const sameCloud=(a:GymAuthoritySnapshot,b:GymAuthoritySnapshot)=>a.epoch===b.epo
  * action queue and no returned server game snapshot is published over a save.
  */
 export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport:GymAuthorityTransport,
- options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number}={}):Hook{
+ options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number;debugAvailable?:()=>boolean;debugFactory?:(level:number)=>Hook}={}):Hook{
  const now=options.now??Date.now,requestId=options.requestId??(()=>crypto.randomUUID());
  const clockInterval=Math.max(60_000,options.minClockIntervalMs??60_000);
  let generation=0,hydration:Promise<void>|null=null,background:Promise<void>|null=null,hydrated=false;
  let clockAt=Number.NEGATIVE_INFINITY,backgroundAt=Number.NEGATIVE_INFINITY;
+ let debug:Hook|null=null,stopDebug:(()=>void)|null=null;
+ const debugAllowed=options.debugAvailable??gymDebugAvailable;
  const read=<T>(key:string):T|null=>{try{const value=storage.getItem(key);return value===null?null:JSON.parse(value) as T;}catch{return null;}};
  const write=(key:string,value:unknown)=>{try{storage.setItem(key,JSON.stringify(value));}catch{/* Optional metadata cannot refuse local gameplay. */}};
  const modeKey=`${gymLocalFirstPrefix}.local-mode`;
@@ -38,7 +41,7 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
   try{criticalWrite(modeKey,{version:1,status:'active',...stamp(local.getState())});}catch{/* Keep playing locally; do not perform a recovery overwrite in this session. */}
  };
  const hasLocalRun=()=>{try{const value=storage.getItem(`${gymLocalFirstPrefix}.new-run`);return value!==null&&value!=='null';}catch{return true;}};
- const canImport=(expected:Expected,version:number,replace=false)=>!hasLocalRun()&&!localModeActive
+ const canImport=(expected:Expected,version:number,replace=false)=>!debug&&!hasLocalRun()&&!localModeActive
   &&(!local.getState().hasSave||replace)&&generation===version&&same(stamp(local.getState()),expected);
  const candidate=(owner:string,snapshot:GymAuthoritySnapshot)=>{
   write(`${gymLocalFirstPrefix}.recovery.${encodeURIComponent(owner)}`,{applicationId:hupuProject.applicationId,owner,epoch:snapshot.epoch,
@@ -47,31 +50,62 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
  };
  const store=create<GymStore>(()=>({...local.getState(),authorityMode:'local',authorityMessage:'进度保存在本地',
   authorityCapabilities:{platformRewards:true,legacyAdoption:false},
-  hydrate:()=>hydrate(),retryAuthority:()=>refresh(),
+  hydrate:()=>debug?debug.getState().hydrate():hydrate(),retryAuthority:()=>refresh(),
+  loadAlumni:(offset,limit)=>(debug??local).getState().loadAlumni(offset,limit),
+  debugSessionActive:false,
+  debugSetGymLevel:async level=>{
+   if(!debugAllowed()||!options.debugFactory)throw Error('仅本地开发环境可切换测试球馆');
+   if(!Number.isInteger(level)||level<1||level>8)throw Error('请选择1至8级球馆');
+   const version=++generation;
+   const next=options.debugFactory(level);
+   await next.getState().hydrate();
+   if(version!==generation)throw Error('球馆状态已变化，本次测试切换已取消');
+   if(!validGym(next.getState().state)||next.getState().state.gymLevel!==level)throw Error('测试球馆初始化失败');
+   stopDebug?.();debug=next;
+   const publish=()=>store.setState({...copy(next.getState()),debugSessionActive:true,
+    authorityCapabilities:{platformRewards:false,legacyAdoption:false},authorityMessage:'独立测试球馆'});
+   stopDebug=next.subscribe(publish);publish();
+   return{state:next.getState().state,events:[]};
+  },
+  debugRestoreGym:async()=>{
+   if(!debugAllowed())throw Error('仅本地开发环境可恢复测试球馆');
+   generation++;stopDebug?.();stopDebug=null;debug=null;
+   store.setState({...copy(local.getState()),debugSessionActive:false,
+    authorityCapabilities:{platformRewards:true,legacyAdoption:false},authorityMessage:'进度保存在本地'});
+   return{state:local.getState().state,events:[]};
+  },
   start:async()=>{
+   if(debug)return debug.getState().start();
    generation++;ownLocalMode();
    const result=await local.getState().start();
    if(!result.error)write(`${gymLocalFirstPrefix}.new-run`,{version:1,createdAt:result.state.createdAt,seed:result.state.seed});
    return result;
   },
-  act:(action:GymAction)=>{generation++;ownLocalMode();return local.getState().act(action);},
-  tick:()=>{generation++;ownLocalMode();return local.getState().tick();},
-  resume:()=>{generation++;ownLocalMode();return local.getState().resume();},
-  suspend:()=>{generation++;ownLocalMode();return local.getState().suspend();},
-  flush:()=>{generation++;ownLocalMode();return local.getState().flush();},
-  dismissOfflineReport:()=>{generation++;ownLocalMode();local.getState().dismissOfflineReport();},
+  act:(action:GymAction)=>{if(debug)return debug.getState().act(action);generation++;ownLocalMode();return local.getState().act(action);},
+  tick:()=>{if(debug)return debug.getState().tick();generation++;ownLocalMode();return local.getState().tick();},
+  resume:()=>{if(debug)return debug.getState().resume();generation++;ownLocalMode();return local.getState().resume();},
+  suspend:()=>{if(debug)return debug.getState().suspend();generation++;ownLocalMode();return local.getState().suspend();},
+  flush:()=>{if(debug)return debug.getState().flush();generation++;ownLocalMode();return local.getState().flush();},
+  dismissOfflineReport:()=>{if(debug){debug.getState().dismissOfflineReport();return;}generation++;ownLocalMode();local.getState().dismissOfflineReport();},
   restoreCloudArchive:async(...args)=>{
+   if(debug)throw Error('请先恢复测试前球馆，再同步云存档');
    generation++;ownLocalMode();
    const restore=local.getState().restoreCloudArchive;
    if(!restore)throw Error('当前无法恢复云存档，原进度已保留');
+   await restore(...args);
+  },
+  restorePlatformSnapshot:async(...args)=>{
+   if(debug)throw Error('请先恢复测试前球馆，再恢复平台进度');
+   const restore=local.getState().restorePlatformSnapshot;
+   if(!restore)throw Error('当前无法恢复平台进度');
    await restore(...args);
   },
   // Official native SDK success is handled by the caller; business rewards are
   // committed by the same local engine transaction as every other game action.
   preparePlatformReward:async()=>undefined,
  }));
- local.subscribe(value=>store.setState(copy(value)));
- const status=(message:string)=>store.setState({authorityMode:'local',authorityMessage:message});
+ local.subscribe(value=>{if(!debug)store.setState(copy(value));});
+ const status=(message:string)=>{if(!debug)store.setState({authorityMode:'local',authorityMessage:message});};
  async function backupLocal(expected:Expected,version:number){
   if(!expected.hasSave)return;
   const before=structuredClone(local.getState().state),all:typeof before.alumni=[];
@@ -146,9 +180,9 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
   return state;
  }
  async function recordClock(owner:string,snapshot:GymAuthoritySnapshot){
-  if(!snapshot.hasSave||snapshot.pending||now()-clockAt<clockInterval)return;
+  if(debug||!snapshot.hasSave||snapshot.pending||now()-clockAt<clockInterval)return;
   clockAt=now();
-  if(await transport.account()!==owner)return;
+  if(debug||await transport.account()!==owner)return;
   const key=`${gymLocalFirstPrefix}.clock-pending.${encodeURIComponent(owner)}`;
   const previous=read<{epoch?:string;requestId?:string}>(key);
   const body={epoch:snapshot.epoch,requestId:previous?.epoch===snapshot.epoch&&typeof previous.requestId==='string'?previous.requestId:requestId()};
@@ -161,7 +195,7 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
   if(!result.pending)write(key,null);
  }
  async function refresh(){
-  if(!hydrated||!transport.enabled())return;
+  if(debug||!hydrated||!transport.enabled())return;
   if(background)return background;
   backgroundAt=now();
   const expected=stamp(local.getState()),version=generation;
