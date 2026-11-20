@@ -4,6 +4,7 @@ import {createServer,request as httpRequest} from 'node:http';
 import {createHash} from 'node:crypto';
 import {expect,it,vi} from 'vitest';
 import {newGym,playerValue,type GymState} from '../src/game/gym/engine';
+import {playerLevelCap} from '../src/game/gym/progression';
 import {encodeGym,validGym} from '../src/game/gym/save';
 import {validateLocalGymRankingArchive} from '../server/gymLocalRankProgress';
 import {createGymLeaderboardClient} from '../src/platform/gymLeaderboard';
@@ -42,6 +43,13 @@ it('does not apply today’s gear to historical value, but verifies that saved v
  expect(validateLocalGymRankingArchive(archive(state),reference(state),now).best?.value).toBe(state.alumni[0].finalValue);
  state.alumni[0].finalValue='999999999999999999';
  expect(()=>validateLocalGymRankingArchive(archive(state),reference(state),now)).toThrow('最终身价');
+});
+it('validates the actual final value of a level-2000 alumnus with a historical equipment bonus',()=>{
+ const state=fixture();
+ const alumnus=state.alumni[0];
+ alumnus.level=alumnus.peakLevel=playerLevelCap;
+ alumnus.finalValue=(480n*BigInt(playerLevelCap+1)**3n).toString();
+ expect(validateLocalGymRankingArchive(archive(state),reference(state),now).best).toMatchObject({level:2000,value:'3845762880480'});
 });
 it.each([{puid:'victim'},{score:'99999999'},{best:{}},{fame:99999}])('rejects direct score or identity injection (%j)',async extra=>{
  const state=fixture(),rpc=vi.fn(),handler=createHandler({rpc,now:()=>now,validateLocalProgress:validateLocalGymRankingArchive});
@@ -120,7 +128,7 @@ it('bypasses another function instance’s short public cache on the first post-
  const player=fixture().player!,row={id:'public-one',coach:'教练',score:playerValue(fixture()),best:{playerId:player.id,templateId:player.templateId!,level:player.level,stats:player.stats,value:playerValue(fixture())}};
  const calls:string[]=[],client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'one'}),request:async(path)=>{calls.push(path);return path.endsWith('/submit')?{accepted:true}:path.includes('/me?')?{me:null}:{entries:path.includes('board=player')?[row]:[]};}});
  await client.sync({runId:'1800000000000-23',revision:1});await client.list('player');await client.list('fame');await client.list('player');
- expect(calls.filter(path=>path.includes('limit=50'))).toEqual(['/leaderboard?board=player&limit=50&fresh=1','/leaderboard?board=fame&limit=50&fresh=1','/leaderboard?board=player&limit=50']);
+ expect(calls.filter(path=>path.includes('limit=50'))).toEqual(['/leaderboard?board=player&levels=extended&limit=50&fresh=1','/leaderboard?board=fame&limit=50&fresh=1','/leaderboard?board=player&levels=extended&limit=50']);
  let score='121';const handler=createHandler({rpc:async()=>({entries:[{score}]}),now:()=>now});
  const query={method:'GET',path:'/leaderboard',query:{board:'fame',limit:'50'}};
  await handler(query);score='420';expect((await handler(query)).entries[0].score).toBe('121');

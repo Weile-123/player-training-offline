@@ -2,7 +2,7 @@ import {mkdir, writeFile} from 'node:fs/promises';
 import {equipmentCatalog, equipmentCatalogVersion, equipmentArtVersion, equipmentFamilyLabels, gymEconomyVersion, gymLevels, previousEquipmentCatalog, projects, selectedRecruitmentPrice, selectedRecruitmentUnlockLevel, postgameRepeatTemplateCredits, type GymEquipment} from '../src/game/gym/catalog';
 import {shopCatalog} from '../src/game/contract/commerce';
 import originalEquipment from '../src/game/contract/runtime/equipment.json';
-import {courseRecoveryCap, newGym, projectCost} from '../src/game/gym/engine';
+import {courseRecoveryCap, newGym, playerLevelCap, projectCost} from '../src/game/gym/engine';
 
 const rarityLabels = {common: '普通', rare: '稀有', legendary: '传说'};
 const statLabels = {three: '三分', mid: '中投', drive: '突破', inside: '篮下', handle: '控球', defense: '防守'};
@@ -117,7 +117,7 @@ ${constructionSchedule.map(level => `| ${level.level} | ${level.price} |`).join(
 ## 生效规则
 
 - 每球基础经验为维持8、成功12、大成功20，基础概率30%/60%/10%；仅历史存档已启用的镁粉效果按剩余有效球保证大成功。通用经验与自动经验按整数相加；自动项目仍每级额外+1经验。手动冷却固定1秒，器材不更改概率、模板匹配或每级经验曲线。
-- 在线自动与离线每球经验一致。离线器材只延长结算时长：项目基础30/45/60/90/120/180分钟，加器材15/30/60分钟，合计封顶240分钟。达到99级停止训练；提前练满时，剩余时长不会再产生收益，也不会自动推荐招新。
+- 在线自动与离线每球经验一致。离线器材只延长结算时长：项目基础30/45/60/90/120/180分钟，加器材15/30/60分钟，合计封顶240分钟。达到${playerLevelCap}级停止训练；提前练满时，剩余时长不会再产生收益，也不会自动推荐招新。
 - 器材容量最高+20、自然恢复最高缩短4秒；课程基础恢复4，器材额外上限按馆1–8为${Array.from({length:8},(_,i)=>courseRecoveryCap({...newGym(0),gymLevel:i+1})).join('/')}。新库单课额外最高3，总返体力最高7。
 - 合作加券档位+1/+2，必须接取后实际启用相应档位完成2个完整课程，每课10球均启用才计。资格已取得可换下；重新接合作则重新累计。只完成合作本身不自动取得器材加券。
 - 品牌声望按球员每次实际训练的品牌值平均计算，合计上限50%；不增加基础推荐券、培养奖金或固定合作声望。当前展示身价按当前器材显示，不能兑换现金。
@@ -140,7 +140,7 @@ ${constructionSchedule.map(level => `| ${level.level} | ${level.price} |`).join(
 
 旧版尚未领取的离线时间使用迁移前器材快照结算，完成后启用新效果，不追溯新经验或新离线上限。旧球员已有训练按旧品牌建立均值基线，合作资格从更新后的实际课程累计；已领取推荐奖励不重算。
 
-器材迁移映射见[旧目录到当前目录变更CSV](器材新版变更表.csv)，其中下架和退差仍供旧档恢复使用。当前馆${selectedRecruitmentUnlockLevel}开放每名${selectedRecruitmentPrice}券的精选招生，免费招生保留。重复推荐仍可取得基础券及符合条件的附加奖励，未消费时余额可以增长。背包可主动入仓，详情／替换预览可比较到25／99级的预计耗时，不保证模板。执行 \`node scripts/export-gym-equipment.mjs\` 从当前配置生成本表、CSV与当前目录数据，不生成历史说明或历史快照。
+器材迁移映射见[旧目录到当前目录变更CSV](器材新版变更表.csv)，其中下架和退差仍供旧档恢复使用。当前馆${selectedRecruitmentUnlockLevel}开放每名${selectedRecruitmentPrice}券的精选招生，免费招生保留。重复推荐仍可取得基础券及符合条件的附加奖励，未消费时余额可以增长。背包可主动入仓，详情／替换预览可比较到25／${playerLevelCap}级的预计耗时，不保证模板。执行 \`node scripts/export-gym-equipment.mjs\` 从当前配置生成本表、CSV与当前目录数据，不生成历史说明或历史快照。
 
 `;
 await writeFile('docs/新版器械表.md', report);

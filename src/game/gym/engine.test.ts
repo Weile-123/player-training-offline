@@ -99,20 +99,31 @@ describe('manual gym training and original growth', () => {
     expect(act(next, {type: 'train', id: next.player!.id}, start + 500).player!.shots).toBe(1);
   });
 
-  it('clamps XP at level 99 and uses a bounded cubic display value without compounding the old book', () => {
+  it('clamps XP at level 2000 and uses the original cubic value without compounding the old book', () => {
     const gym = withOutcome(newGym(start, 9), 'great');
-    gym.player!.level = 98;
-    gym.player!.peakLevel = 98;
-    gym.player!.experience = requiredExperience(98) - 1;
+    gym.player!.level = playerLevelCap - 1;
+    gym.player!.peakLevel = playerLevelCap - 1;
+    gym.player!.experience = requiredExperience(playerLevelCap - 1) - 1;
     const trained = act(gym, {type: 'train', id: gym.player!.id});
-    expect(trained.player!.level).toBe(99);
+    expect(trained.player!.level).toBe(playerLevelCap);
     expect(sum(trained.player!.stats) - sum(gym.player!.stats)).toBe(10);
     expect(trained.player!.experience).toBe(0);
-    expect(playerValue(trained)).toBe('320000000');
+    expect(playerValue(trained)).toBe('2563841920320');
+    const brand = {...trained, ownedEquipment: ['relic_082'], equippedEquipment: ['relic_082']};
+    expect(playerValue(brand)).toBe('3845762880480');
     expect(trained.player!.book).toEqual(gym.player!.book);
     const failed = dispatchGym(trained, trained.revision, {type: 'train', id: trained.player!.id}, start + 1000);
-    expect(failed.error).toContain('99');
+    expect(failed.error).toContain(String(playerLevelCap));
     expect(failed.state).toBe(trained);
+  });
+
+  it('keeps training through the former level 99 cap with the original stat ceiling', () => {
+    const gym = withOutcome(newGym(start, 9), 'great');
+    gym.player!.level = gym.player!.peakLevel = 99;
+    gym.player!.experience = requiredExperience(99) - 1;
+    for (const key of statKeys) gym.player!.stats[key] = 99;
+    const trained = act(gym, {type: 'train', id: gym.player!.id});
+    expect(trained.player).toMatchObject({level: 100, peakLevel: 100, experience: 19, stats: gym.player!.stats});
   });
 
   it('keeps the earned template appearance and records each first unlock once', () => {
@@ -492,8 +503,8 @@ describe('specialist training and courses', () => {
     expect(dispatchGym(changed, changed.revision, {type: 'set-training-plan', id: 'shooting', playerId: gym.player!.id}, start).state).toBe(changed);
 
     const capped = copy(finished.state);
-    capped.player!.level = 99;
-    capped.player!.peakLevel = 99;
+    capped.player!.level = playerLevelCap;
+    capped.player!.peakLevel = playerLevelCap;
     capped.player!.training.shots = 9;
     const blocked = dispatchGym(capped, capped.revision, action, start + 1000);
     expect(blocked.state).toBe(capped);
@@ -681,10 +692,10 @@ describe('optional sponsorship cooperation', () => {
 });
 
 describe('increasing experience progression', () => {
-  it('uses exact integer level requirements and a cumulative sum through the 99 cap', () => {
+  it('uses exact integer level requirements and cumulative experience through the 2000 cap', () => {
     expect([0, 1, 2, 5, 10, 50, 98].map(requiredExperience)).toEqual([20, 27, 33, 54, 95, 695, 2049]);
     expect(['hold', 'success', 'great'].map(outcome => shotExperience(outcome as 'hold' | 'success' | 'great'))).toEqual([8, 12, 20]);
-    expect(playerLevelCap).toBe(99);
+    expect(playerLevelCap).toBe(2000);
     let cumulative = 0;
     for (let level = 0; level < playerLevelCap; level++) {
       expect(requiredExperience(level)).toBe(Math.ceil(20 + 6 * level + .15 * level * level));
@@ -692,10 +703,12 @@ describe('increasing experience progression', () => {
       cumulative += requiredExperience(level);
       expect(requiredExperience(level + 1) || Infinity).toBeGreaterThan(requiredExperience(level));
     }
-    expect(experienceForLevel(99)).toBe(cumulative);
+    expect(experienceForLevel(playerLevelCap)).toBe(cumulative);
     expect([1, 5, 10, 18, 30, 99].map(experienceForLevel)).toEqual([20, 167, 518, 1555, 4509, 78920]);
-    expect(requiredExperience(99)).toBe(0);
-    expect(() => experienceForLevel(100)).toThrow();
+    expect(requiredExperience(99)).toBe(2085);
+    expect(experienceForLevel(playerLevelCap)).toBe(411_735_100);
+    expect(requiredExperience(playerLevelCap)).toBe(0);
+    expect(() => experienceForLevel(playerLevelCap + 1)).toThrow();
   });
 
   it('banks partial XP without spending attribute randomness and carries excess across a level', () => {
@@ -846,22 +859,22 @@ describe('multiple training positions and online automatic training', () => {
     expect(activePlayers(reopened).every(player => player.shots === 2 && player.nextShotAt === reopened.updatedAt + 2000)).toBe(true);
   });
 
-  it('turns automatic training off at level ninety-nine while other positions continue training', () => {
+  it('turns automatic training off at the level cap while other positions continue training', () => {
     let gym = twoPlayers(59);
     const cappedId = gym.player!.id;
     const continuingId = gym.bench[0].id;
-    gym.player!.level = gym.player!.peakLevel = 98;
-    gym.player!.experience = requiredExperience(98) - 1;
+    gym.player!.level = gym.player!.peakLevel = playerLevelCap - 1;
+    gym.player!.experience = requiredExperience(playerLevelCap - 1) - 1;
     for (const player of activePlayers(gym)) gym = act(gym, {type: 'set-auto', id: player.id, enabled: true});
     const first = dispatchGym(gym, gym.revision, {type: 'auto-step'}, start + 2000);
     expect(first.error).toBeUndefined();
-    expect(first.state.player).toMatchObject({id: cappedId, level: 99, experience: 0, autoEnabled: false, shots: 1});
+    expect(first.state.player).toMatchObject({id: cappedId, level: playerLevelCap, experience: 0, autoEnabled: false, shots: 1});
     expect(first.state.bench[0]).toMatchObject({id: continuingId, autoEnabled: true, shots: 1});
     const expectedEconomy = copy(first.state.rng.economy);
     random(expectedEconomy);
     const second = dispatchGym(first.state, first.state.revision, {type: 'auto-step'}, start + 4000);
     expect(second.events.filter(event => event.type === 'trained').map(event => event.playerId)).toEqual([continuingId]);
-    expect(second.state.player).toMatchObject({level: 99, experience: 0, autoEnabled: false, shots: 1, stats: first.state.player!.stats});
+    expect(second.state.player).toMatchObject({level: playerLevelCap, experience: 0, autoEnabled: false, shots: 1, stats: first.state.player!.stats});
     expect(second.state.bench[0]).toMatchObject({autoEnabled: true, shots: 2});
     expect(second.state.rng.economy).toEqual(expectedEconomy);
     expect(dispatchGym(second.state, second.state.revision, {type: 'set-auto', id: cappedId, enabled: true}, start + 4000).state).toBe(second.state);

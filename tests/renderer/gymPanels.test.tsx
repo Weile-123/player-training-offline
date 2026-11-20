@@ -1,8 +1,8 @@
-import {afterEach, beforeEach, expect, it} from 'vitest';
+import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {useState, type ComponentType} from 'react';
 import {act} from 'preact/test-utils';
-import {cooperationOffers, newGym, dispatchGym, staminaMax, type GymAction, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, newGym, dispatchGym, playerLevelCap, staminaMax, type GymAction, type GymState} from '../../src/game/gym/engine';
 import {equipmentCatalog, type EquipmentEffects} from '../../src/game/gym/catalog';
 import {templateRules} from '../../src/game/contract/templates';
 import {ComicDialog} from '../../src/components/ComicDialog';
@@ -64,21 +64,45 @@ function equipmentFor(effect: keyof EquipmentEffects, grade = 1) {
 
 function TrainingAdvicePanel({state}: GymPanelProps) {return <TrainingAdvice state={state}/>;}
 
-it.each([12, 99])('uses stamina and experience meters without compact bonus advice in roster at level %s', async level => {
+it('uses packaged album thumbnails and fetches native player details when an entry opens', async () => {
+  const state = newGym(at, 19);
+  const templates = ['caruso', 'conley', 'curry'].map(id => templateRules.find(entry => entry.id === id)!);
+  for (const template of templates) state.collection[template.id] = {firstAt: at, highestRating: 40, highestValue: '320'};
+  const previousSdk = window.ColorboxAI, previousConfig = window.__COLORBOX_AI_CONFIG__;
+  const playerInfo = vi.fn(async () => ({code: 200, data: {player: {name: '虎扑球员资料'}}}));
+  window.ColorboxAI = {request: {basketball: {playerInfo}}};
+  try {
+    await mount(GymCollectionPanel, state);
+    const cards = [...document.querySelectorAll<HTMLButtonElement>('.album-card.discovered')];
+    expect(cards).toHaveLength(3);
+    expect(playerInfo).toHaveBeenCalledTimes(0);
+    for (const card of cards) expect(card.querySelector('img')?.getAttribute('loading')).toBe('lazy');
+    await press(cards[0]);
+    await act(async () => {await new Promise(resolve => setTimeout(resolve, 0));});
+    expect(playerInfo).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('.album-hero-info h3')?.textContent).toContain('虎扑球员资料');
+  } finally {
+    window.ColorboxAI = previousSdk;
+    window.__COLORBOX_AI_CONFIG__ = previousConfig;
+  }
+});
+
+it.each([12, playerLevelCap - 1, playerLevelCap])('uses stamina and experience meters without compact bonus advice in roster at level %s', async level => {
   Object.defineProperty(document, 'fonts', {configurable: true, value: {ready: Promise.resolve()}});
   const state = newGym(at, 19);
   state.player!.level = state.player!.peakLevel = level;
   state.player!.stamina = 7;
-  state.player!.experience = level === 99 ? 0 : 10;
+  const capped = level === playerLevelCap;
+  state.player!.experience = capped ? 0 : 10;
   await mount(GymRosterPanel, state);
   const row = document.querySelector('.roster-card')!;
   const stamina = row.querySelector('[role="progressbar"][aria-label$="体力"]')!;
   const experience = row.querySelector('[role="progressbar"][aria-label$="训练经验"]')!;
   expect(stamina.getAttribute('aria-valuenow')).toBe('7');
   expect(stamina.getAttribute('aria-valuemax')).toBe('20');
-  expect(experience.getAttribute('aria-valuenow')).toBe(level === 99 ? '1' : '10');
+  expect(experience.getAttribute('aria-valuenow')).toBe(capped ? '1' : '10');
   expect(Number(experience.getAttribute('aria-valuemax'))).toBeGreaterThan(0);
-  expect(parseFloat(experience.querySelector<HTMLElement>('i')!.style.width)).toBeCloseTo(level === 99 ? 100 : 10 / Number(experience.getAttribute('aria-valuemax')) * 100);
+  expect(parseFloat(experience.querySelector<HTMLElement>('i')!.style.width)).toBeCloseTo(capped ? 100 : 10 / Number(experience.getAttribute('aria-valuemax')) * 100);
   expect(row.textContent).not.toContain('手动 1秒/球');
   expect(row.querySelector('.gm-training-advice')).toBeNull();
   expect(actions).toEqual([]);
@@ -198,7 +222,7 @@ it('keeps equipment archives focused on the original art and effect without prev
   expect(actions).toEqual([]);
 });
 
-it.each([25, 99])('shows actual effect changes without training-time predictions in level-%s replacements', async level => {
+it.each([25, playerLevelCap])('shows actual effect changes without training-time predictions in level-%s replacements', async level => {
   const state = newGym(at, 11); state.player!.level = state.player!.peakLevel = level;
   state.gymLevel = 3; state.credits = 20;
   const basic = equipmentFor('experience'), item = equipmentFor('experience', 2);
@@ -1005,16 +1029,16 @@ it('shows that a maxed athlete has no further attribute or training-bonus value 
   const advice = document.querySelector('.gm-training-advice')!;
   expect(advice.textContent).toContain('已达到最高培养奖金');
   expect(advice.textContent).toContain('继续训练不会增加属性');
-  expect(advice.textContent).toContain('无需每名球员都练到99级');
+  expect(advice.textContent).toContain(`达到 ${playerLevelCap} 级前也可推荐签约`);
   expect(advice.textContent).not.toContain('预计约');
   expect(latest.player).not.toBeNull();
   expect(actions).toEqual([]);
 });
 
-it('does not label a level-99 starter as having reached the highest training bonus', async () => {
+it('does not label a capped starter as having reached the highest training bonus', async () => {
   const state = newGym(at, 31);
   const template = templateRules.find(item => item.tier === 'starter')!;
-  Object.assign(state.player!, {level: 99, peakLevel: 99, templateId: template.id, height: template.height[0], stats: {...template.stats}});
+  Object.assign(state.player!, {level: playerLevelCap, peakLevel: playerLevelCap, templateId: template.id, height: template.height[0], stats: {...template.stats}});
   await mount(TrainingAdvicePanel, state);
   const advice = document.querySelector('.gm-training-advice')!;
   expect(advice.textContent).toContain('按当前实际模板结算培养奖金 3 券');

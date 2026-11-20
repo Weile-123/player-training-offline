@@ -54,15 +54,15 @@
 .gym-home-b .b-continue>i {display:block;flex:none;width:26px;height:26px;}
 .gym-home-b .b-new strong {font:400 30px/1.2 var(--display);white-space:nowrap;}
 .gym-home-b .b-new>i {display:block;flex:none;width:22px;height:22px;}
-.gym-home-b .b-menu {position:relative;display:grid;grid-template-columns:var(--home-menu-width);grid-template-rows:repeat(4,88px);gap:var(--home-wide-menu-gap);width:var(--home-menu-width);margin:0;padding:0;}
+.gym-home-b .b-menu {--home-menu-row:88px;position:relative;display:grid;grid-template-columns:var(--home-menu-width);grid-template-rows:44px;grid-auto-rows:var(--home-menu-row);gap:var(--home-wide-menu-gap);width:var(--home-menu-width);margin:0;padding:0;}
 .gym-home-b .b-menu>button {
  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;position:relative;flex:none;
- width:var(--home-menu-width);min-width:var(--home-menu-width);max-width:var(--home-menu-width);height:88px;min-height:88px;max-height:88px;
+ width:var(--home-menu-width);min-width:var(--home-menu-width);max-width:var(--home-menu-width);height:var(--home-menu-row);min-height:var(--home-menu-row);max-height:var(--home-menu-row);
  padding:8px;border:3px solid #081a24;background:#e8d5aa;color:#102b36;box-shadow:4px 4px #0009;
 }
 .gym-home-b .b-menu>button::before {content:'';position:absolute;inset:4px;border:1px solid #887552;pointer-events:none;}
-.gym-home-b .b-menu>button:nth-child(2) {background:#b92e24;color:#fff0d0;}
-.gym-home-b .b-menu>button:nth-child(2)::before {border-color:#e4bd83;}
+.gym-home-b .b-menu>button.b-rank {background:#b92e24;color:#fff0d0;}
+.gym-home-b .b-menu>button.b-rank::before {border-color:#e4bd83;}
 .gym-home-b .b-menu>button>span {display:block;flex:none;width:30px;height:30px;}
 .gym-home-b .b-menu strong {font:400 19px/24px var(--display);white-space:nowrap;}
 .gym-home-b .b-bottom-line {display:flex;align-items:center;gap:16px;flex:none;margin-top:24px;color:#cfa762;}
@@ -75,8 +75,8 @@
 .gym-home-b .gym-home-design[data-layout=narrow] .b-command {width:100%;align-items:stretch;}
 .gym-home-b .gym-home-design[data-layout=narrow] .b-save {width:100%;}
 .gym-home-b .gym-home-design[data-layout=narrow] .b-continue,.gym-home-b .gym-home-design[data-layout=narrow] .b-new {width:100%;min-width:0;max-width:none;}
-.gym-home-b .gym-home-design[data-layout=narrow] .b-menu {grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(2,64px);width:100%;}
-.gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {flex-direction:row;gap:14px;width:100%;min-width:0;max-width:none;height:64px;min-height:64px;max-height:64px;}
+.gym-home-b .gym-home-design[data-layout=narrow] .b-menu {--home-menu-row:64px;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;}
+.gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {flex-direction:row;gap:14px;width:100%;min-width:0;max-width:none;}
 @media(max-height:800px) {
  .gym-home-b .gym-home-design {padding-top:max(20px,env(safe-area-inset-top));padding-bottom:max(16px,env(safe-area-inset-bottom));}
  .gym-home-b .b-masthead {padding-bottom:12px;}
@@ -95,8 +95,7 @@
 }
 @media(max-height:800px) {
  .gym-home-b .gym-home-design[data-layout=narrow] .b-actions {gap:16px;}
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {grid-template-rows:repeat(2,60px);gap:10px;}
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {height:60px;min-height:60px;max-height:60px;}
+ .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {--home-menu-row:60px;gap:10px;}
 }
 @media(max-height:680px) {
  .gym-home-b .gym-home-design {padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(12px,env(safe-area-inset-bottom));}
@@ -120,8 +119,7 @@
 }
 @media(max-height:680px) {
  .gym-home-b .gym-home-design[data-layout=narrow] .b-actions {gap:12px;}
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {grid-template-rows:repeat(2,56px);}
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {height:56px;min-height:56px;max-height:56px;}
+ .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {--home-menu-row:56px;}
 }
 @media(max-height:600px) {
  .gym-home-b .gym-home-design {padding-top:max(12px,env(safe-area-inset-top));}
@@ -130,8 +128,8 @@
  .gym-home-b .b-bottom-line {margin-top:12px;}
 }
 @media(max-height:600px) {
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {grid-template-rows:repeat(2,52px);gap:8px;}
- .gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {height:52px;min-height:52px;max-height:52px;gap:10px;}
+ .gym-home-b .gym-home-design[data-layout=narrow] .b-menu {--home-menu-row:52px;gap:8px;}
+ .gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button {gap:10px;}
  .gym-home-b .gym-home-design[data-layout=narrow] .b-menu>button>span {width:26px;height:26px;}
  .gym-home-b .gym-home-design[data-layout=narrow] .b-menu strong {font-size:18px;line-height:22px;}
 }
@@ -154,8 +152,8 @@
  .gym-home-b .gym-home-design[data-layout=wide] .b-continue>span {font-size:24px;}
  .gym-home-b .gym-home-design[data-layout=wide] .b-new strong {font-size:22px;}
  .gym-home-b .gym-home-design[data-layout=wide] .b-continue>i {width:20px;height:20px;}
- .gym-home-b .gym-home-design[data-layout=wide] .b-menu {grid-template-rows:repeat(4,44px);}
- .gym-home-b .gym-home-design[data-layout=wide] .b-menu>button {height:44px;min-height:44px;max-height:44px;flex-direction:row;gap:4px;padding:4px;}
+ .gym-home-b .gym-home-design[data-layout=wide] .b-menu {--home-menu-row:44px;}
+ .gym-home-b .gym-home-design[data-layout=wide] .b-menu>button {flex-direction:row;gap:4px;padding:4px;}
  .gym-home-b .gym-home-design[data-layout=wide] .b-menu>button>span {width:16px;height:16px;}
  .gym-home-b .gym-home-design[data-layout=wide] .b-menu strong {font-size:14px;line-height:18px;}
  .gym-home-b .gym-home-design[data-layout=wide] .b-bottom-line {margin-top:8px;}
@@ -176,3 +174,14 @@
  .gym-home-b button {transition:filter .15s,translate .15s;}
  .gym-home-b button:hover:not(:disabled) {filter:brightness(1.07);}
 }
+
+.gym-home-b .gym-home-design .b-menu>button.b-announcement {--home-menu-row:44px;grid-column:1/-1;flex-direction:row;gap:5px;padding:4px;}
+.gym-home-b .gym-home-design .b-menu>button.b-announcement>span {width:18px;height:18px;}
+.gym-home-b .gym-home-design .b-menu>button.b-announcement>strong {font-size:15px;line-height:20px;}
+
+.gym-update-notice-list {display:grid;gap:10px;list-style:none;margin:0;padding:0;}
+.gym-update-notice-list li {border:1px solid #ad945e;background:#f9edcf;padding:9px 11px;}
+.gym-update-notice-list strong {font-size:15px;}
+.gym-update-notice-list p {margin:2px 0 0;font-size:13px;}
+.gym-update-notice-list b {color:#a4261b;white-space:nowrap;}
+.gym-update-notice-actions {display:grid;padding:0 16px 16px;}

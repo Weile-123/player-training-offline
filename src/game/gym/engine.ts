@@ -33,7 +33,7 @@ export type GymPlayer = {
   greatShotsRemaining?: number;
   /** Per recruit, independent of which template is currently displayed. */
   shareLevelClaimed?: boolean;
-  /** Retired overflow field retained only to read older saves. New rewards stop at level 99. */
+  /** Retired overflow field retained only to read older saves. New rewards stop at the level cap. */
   overflowExperience?: number;
   equipmentTraining: {brandTotal: number; brandShots: number; cooperationCourses: [number, number]; cooperationCourseShots: [number, number]};
 };
@@ -617,7 +617,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if(reward.claimed) return fail('这份报告已领取双倍经验');
       if(reward.dismissed) return fail('这份离线报告已结束');
       const bonusExperience=offlineBonusExperience(next,reward.report);
-      if(!Object.values(bonusExperience).some(value=>value>0))return fail('球员已达到99级，无需领取额外经验');
+      if(!Object.values(bonusExperience).some(value=>value>0))return fail(`球员已达到${playerLevelCap}级，无需领取额外经验`);
       for(const earned of reward.report.players){
         const trainee=activePlayers(next).find(entry=>entry.id===earned.id);
         if(!trainee) return fail('报告中的球员已离馆，未发放奖励');
@@ -646,7 +646,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
     case 'train': {
       if (!player || action.id !== player.id) return fail('当前球员已变化，请重新选择');
       if (player.autoEnabled) return fail('请先关闭该球员的自动训练');
-      if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限`);
       if (now < player.nextShotAt) return fail('下一球正在准备');
       if (player.stamina < 1) return fail('体力不足，请等待体力恢复或领取体力奖励');
       trainPlayer(next, player, now, events);
@@ -676,7 +676,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (!trainee) return fail('该球员已不在训练馆');
       if (typeof action.enabled !== 'boolean') return fail('自动训练设置无效');
       if (action.enabled && next.gymLevel < 2) return fail('球馆 2 级开放自动训练');
-      if (action.enabled && trainee.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      if (action.enabled && trainee.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限`);
       if (trainee.autoEnabled === action.enabled) return fail('当前已使用该训练模式');
       trainee.autoEnabled = action.enabled;
       // Toggling cannot create a shot, clear an existing cooldown or bank elapsed time.
@@ -767,7 +767,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       if (!player || action.playerId !== player.id) return fail('当前球员已变化，请重新选择');
       if (!templateById(player.templateId)) return fail('获得球员模板后才能分享升级');
       if (player.shareLevelClaimed) return fail('该球员已领取分享升级奖励');
-      if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限`);
       const beforeStats = {...player.stats}, beforeTemplate = player.templateId;
       const cooperationWasComplete = cooperationStatus(next, player).complete;
       const targetLevel = Math.min(playerLevelCap, player.level + 3);
@@ -791,7 +791,7 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       const count = next.staminaRewardCount ?? 0;
       if (!Number.isSafeInteger(action.expectedCount) || action.expectedCount !== count) return fail('体力奖励已领取，请重新打开');
       if (action.method !== staminaRewardMethod(next)) return fail('体力奖励领取方式已变化，请重试');
-      if (player.level >= playerLevelCap) return fail('球员已达到 99 级训练上限');
+      if (player.level >= playerLevelCap) return fail(`球员已达到 ${playerLevelCap} 级训练上限`);
       if (player.stamina >= staminaMax(next)) return fail('该球员体力已满');
       if (!Number.isSafeInteger(count + 1)) return fail('体力奖励次数已达到上限');
       const restoredStamina = staminaMax(next) - player.stamina;

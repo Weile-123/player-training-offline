@@ -1,7 +1,7 @@
 import {describe, expect, it} from 'vitest';
 import {forecastTraining, estimateShotTime} from './forecast';
 import {trainingGuidance} from './guidance';
-import {dispatchGym, newGym} from './engine';
+import {dispatchGym, experienceForLevel, newGym, playerLevelCap, recoverySeconds} from './engine';
 import {statKeys} from '../types';
 
 describe('training forecasts and recommendation milestones', () => {
@@ -47,6 +47,20 @@ describe('training forecasts and recommendation milestones', () => {
     expect(JSON.stringify(state)).toBe(before);
   });
 
+  it('forecasts the full progression and skips repeated course timing on a long horizon', () => {
+    const state = newGym(1_000, 17);
+    const player = state.player!;
+    player.stamina = 0;
+    const firstCourseMs = 10 * recoverySeconds(state) * 1_000;
+    const laterCourseMs = 6 * recoverySeconds(state) * 1_000;
+    expect(estimateShotTime(state, player, 20_000)).toBe(firstCourseMs + 1999 * laterCourseMs);
+    const forecast = forecastTraining(state)!;
+    expect(forecast.targetLevel).toBe(playerLevelCap);
+    expect(forecast.expectedShots).toBeCloseTo(experienceForLevel(playerLevelCap) / 11.6);
+    expect(forecast.estimatedMs).toBeGreaterThan(0);
+    expect(Number.isSafeInteger(forecast.estimatedMs)).toBe(true);
+  });
+
   it('gives a template gap rather than promising a bonus just for reaching its level', () => {
     const state = newGym(1_000, 17);
     state.player!.level = 15;
@@ -67,7 +81,7 @@ describe('training forecasts and recommendation milestones', () => {
     expect(guidance.allStatsMax).toBe(true);
     expect(guidance.remainingValue.join('')).toContain('继续训练不会增加属性');
     expect(forecastTraining(state)!.finished).toBe(false);
-    state.player!.level = 99;
+    state.player!.level = state.player!.peakLevel = playerLevelCap;
     state.player!.experience = 0;
     expect(forecastTraining(state)!).toMatchObject({finished: true, estimatedMs: 0});
     const ended = trainingGuidance(state)!;

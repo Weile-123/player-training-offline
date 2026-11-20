@@ -26,6 +26,21 @@ test('public reads use no account ID and reject arbitrary query identities',asyn
  assert.deepEqual(received,['read_gym_rank',{p_board:'player',p_limit:50,p_puid:null}]);
  await assert.rejects(handler({method:'GET',path:'/leaderboard',query:{board:'player',puid:'other'}}),{statusCode:400});
 });
+
+test('uses separate caches and consistently routes level-aware public and personal reads',async()=>{
+ const calls=[];
+ const handler=createHandler({rpc:async(name,params)=>{calls.push([name,params]);return {entries:[name]};}});
+ const legacy={method:'GET',path:'/leaderboard',query:{board:'player',limit:'50'}};
+ const extended={...legacy,query:{...legacy.query,levels:'extended'}};
+ assert.deepEqual(await handler(legacy),{entries:['read_gym_rank']});
+ assert.deepEqual(await handler(extended),{entries:['read_gym_rank_v2']});
+ assert.deepEqual(await handler(legacy),{entries:['read_gym_rank']});
+ assert.deepEqual(await handler(extended),{entries:['read_gym_rank_v2']});
+ assert.equal(calls.length,2);
+ await handler({...extended,path:'/leaderboard/me',context});
+ assert.deepEqual(calls[2],['read_gym_rank_v2',{p_board:'player',p_limit:50,p_puid:'verified-coach',p_extended:true}]);
+ await assert.rejects(handler({...extended,query:{...extended.query,board:'fame'}}),{statusCode:400});
+});
 test('the independently locked CloudBase runtime dependency provides the expected auth API',()=>{
  const tcb=require('@cloudbase/node-sdk');
  const app=tcb.init({env:'local-contract-test',accessKey:'local-not-a-real-credential'});

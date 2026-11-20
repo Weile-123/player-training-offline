@@ -1,4 +1,4 @@
-export const playerLevelCap = 99;
+export const playerLevelCap = 2_000;
 export type TrainingOutcome = 'hold' | 'success' | 'great';
 
 /** Experience needed to leave the given level; all units are integer XP. */
@@ -9,11 +9,14 @@ export function requiredExperience(level: number): number {
 }
 
 /** Total experience from level zero to the start of targetLevel. */
+const cumulativeExperience = [0];
+for (let level = 0; level < playerLevelCap; level++) {
+  cumulativeExperience.push(cumulativeExperience[level] + requiredExperience(level));
+}
+
 export function experienceForLevel(targetLevel: number): number {
   if (!Number.isInteger(targetLevel) || targetLevel < 0 || targetLevel > playerLevelCap) throw new Error('球员等级无效');
-  let experience = 0;
-  for (let level = 0; level < targetLevel; level++) experience += requiredExperience(level);
-  return experience;
+  return cumulativeExperience[targetLevel];
 }
 
 export function shotExperience(outcome: TrainingOutcome): number {

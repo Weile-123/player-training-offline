@@ -1,9 +1,20 @@
+import {useState} from 'react';
 import {assetUrl} from '../presentation/assetUrls';
+import {landscapeHomeBackground,portraitHomeBackground} from '../presentation/startupAssets';
 
 /** The background owns the viewport; foreground content never follows its crop. */
 export function GymHomeBackground() {
+ const [failed,setFailed]=useState<string[]>([]);
+ const portrait=assetUrl(portraitHomeBackground),landscape=assetUrl(landscapeHomeBackground);
+ const usable=(url:string)=>typeof document==='undefined'||!failed.includes(new URL(url,document.baseURI).href);
+ const portraitUrl=usable(portrait)?portrait:usable(landscape)?landscape:undefined;
+ const landscapeUrl=usable(landscape)?landscape:portraitUrl;
  return <div className="gym-home-backdrop" aria-hidden="true">
-  <picture className="gym-home-background"><source media="(min-aspect-ratio: 1/1)" srcSet={assetUrl('art/home/background-b-landscape.webp')}/><img src={assetUrl('art/home/background-b-portrait.webp')} alt=""/></picture>
+  {portraitUrl&&<picture className="gym-home-background"><source media="(min-aspect-ratio: 1/1)" srcSet={landscapeUrl}/><img src={portraitUrl} alt="" onError={event=>{
+   const {currentSrc,src}=event.currentTarget;
+   const failedUrl=currentSrc||src;
+   setFailed(previous=>previous.includes(failedUrl)?previous:[...previous,failedUrl]);
+  }}/></picture>}
   <div className="b-ink-side"/>
  </div>;
 }

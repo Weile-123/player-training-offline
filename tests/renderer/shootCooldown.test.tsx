@@ -4,28 +4,20 @@ import {expect, it, vi} from 'vitest';
 import {ShootButton} from '../../src/components/ShootButton';
 
 it('blocks shots for one second and lowers the gray mask while the cooldown elapses', async () => {
- let now = 10000;
- let frameId = 0;
- const frames = new Map<number, FrameRequestCallback>();
- vi.spyOn(Date, 'now').mockImplementation(() => now);
- vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
-  frames.set(++frameId, callback);
-  return frameId;
- });
- vi.stubGlobal('cancelAnimationFrame', (id: number) => frames.delete(id));
+ vi.useFakeTimers();
+ vi.setSystemTime(10000);
+ const animationFrame = vi.fn();
+ vi.stubGlobal('requestAnimationFrame', animationFrame);
  const root = createRoot(document.getElementById('root')!);
  const shoot = vi.fn();
- const step = async (milliseconds: number) => {
-  now += milliseconds;
-  const callbacks = [...frames.values()];
-  frames.clear();
-  await act(async () => callbacks.forEach(callback => callback(now)));
- };
+ const step = async (milliseconds: number) => act(async () => vi.advanceTimersByTimeAsync(milliseconds));
  try {
   await act(async () => root.render(<ShootButton disabled={false} reduced={false} onShoot={shoot} cooldownUntil={11000}/>));
   const button = document.querySelector<HTMLButtonElement>('[aria-label="投篮训练"]')!;
   expect(button.disabled).toBe(true);
-  expect(document.querySelector<HTMLElement>('.dock-shoot-cooldown')!.style.height).toBe('100%');
+  const mask = document.querySelector<HTMLElement>('.dock-shoot-cooldown')!;
+  expect(mask.style.getPropertyValue('--shoot-cooldown-height')).toBe('100%');
+  expect(mask.style.getPropertyValue('--shoot-cooldown-duration')).toBe('1000ms');
   const timer = document.querySelector<HTMLElement>('.dock-shoot-timer')!;
   expect(timer.textContent).toBe('1.0s');
   expect(button.contains(timer)).toBe(false);
@@ -34,7 +26,8 @@ it('blocks shots for one second and lowers the gray mask while the cooldown elap
   expect(shoot).not.toHaveBeenCalled();
   await step(500);
   expect(button.disabled).toBe(true);
-  expect(document.querySelector<HTMLElement>('.dock-shoot-cooldown')!.style.height).toBe('50%');
+  expect(mask.style.getPropertyValue('--shoot-cooldown-height')).toBe('100%');
+  expect(mask.style.height).toBe('');
   expect(timer.textContent).toBe('0.5s');
   await step(499);
   expect(button.disabled).toBe(true);
@@ -44,11 +37,40 @@ it('blocks shots for one second and lowers the gray mask while the cooldown elap
   expect(document.querySelector('.dock-shoot-timer')).toBeNull();
   await act(async () => button.click());
   expect(shoot).toHaveBeenCalledOnce();
+  expect(animationFrame).not.toHaveBeenCalled();
  } finally {
   act(() => root.unmount());
-  expect(frames.size).toBe(0);
+  expect(vi.getTimerCount()).toBe(0);
+  vi.useRealTimers();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+ }
+});
+
+it('keeps the full mask until the manual interval when automatic mode leaves a longer deadline', async () => {
+ vi.useFakeTimers();
+ vi.setSystemTime(10000);
+ const root = createRoot(document.getElementById('root')!);
+ const shoot = vi.fn();
+ try {
+  await act(async () => root.render(<ShootButton disabled reduced={false} onShoot={shoot}/>));
+  const button = document.querySelector<HTMLButtonElement>('.dock-shoot')!;
+  await act(async () => root.render(<ShootButton disabled={false} reduced={false} onShoot={shoot} cooldownUntil={11200} cooldownDurationMs={500}/>));
+  const mask = document.querySelector<HTMLElement>('.dock-shoot-cooldown')!;
+  expect(mask.style.getPropertyValue('--shoot-cooldown-height')).toBe('100%');
+  expect(mask.style.getPropertyValue('--shoot-cooldown-duration')).toBe('500ms');
+  expect(mask.style.getPropertyValue('--shoot-cooldown-delay')).toBe('700ms');
+  await act(async () => vi.advanceTimersByTimeAsync(700));
+  expect(button.disabled).toBe(true);
+  expect(document.querySelector('.dock-shoot-timer')?.textContent).toBe('0.5s');
+  await act(async () => vi.advanceTimersByTimeAsync(499));
+  expect(button.disabled).toBe(true);
+  await act(async () => vi.advanceTimersByTimeAsync(1));
+  expect(button.disabled).toBe(false);
+  expect(document.querySelector('.dock-shoot-cooldown')).toBeNull();
+ } finally {
+  act(() => root.unmount());
+  vi.useRealTimers();
  }
 });
 

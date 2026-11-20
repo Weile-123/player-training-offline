@@ -1,7 +1,7 @@
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {cooperationOffers, cooperationStatus, experienceForLevel, gymUpgrade, newGym, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, experienceForLevel, gymUpgrade, newGym, playerLevelCap, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
 import {settleOfflineGym} from '../../src/game/gym/offline';
 import {offlineExperienceAnimationMs} from '../../src/components/GymOfflineReport';
 import {templateRules} from '../../src/game/contract/templates';
@@ -146,10 +146,10 @@ it('hides sharing until a template exists and at the level cap', async () => {
   const initial = newGym(at, 24); await mount(initial);
   expect(button('分享·等级+3')).toBeUndefined();
   expect(document.querySelector('.template-player-level')?.textContent).toBe(`Lv.${initial.player!.level}`);
-  const capped = templateFixture(); capped.player!.level = capped.player!.peakLevel = 99;
+  const capped = templateFixture(); capped.player!.level = capped.player!.peakLevel = playerLevelCap;
   await act(async () => harness.store!.setState({state: capped}));
   expect(button('分享·等级+3')).toBeUndefined();
-  expect(document.querySelector('.template-player-level')?.textContent).toBe('Lv.99');
+  expect(document.querySelector('.template-player-level')?.textContent).toBe(`Lv.${playerLevelCap}`);
   const claimed = templateFixture(); Object.assign(claimed.player!, {level: 8, peakLevel: 8, shareLevelClaimed: true});
   await act(async () => harness.store!.setState({state: claimed}));
   expect(button('分享·等级+3')).toBeUndefined();

@@ -44,6 +44,7 @@
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-cover small {display:block;margin-top:5px;font-size:9px;color:#e2bc71;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-growth {padding:9px;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level {display:flex;align-items:baseline;justify-content:space-between;font:25px/1 var(--display);}
+.game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level[data-long-level] {gap:4px;white-space:nowrap;font-size:17px;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level small {font:10px 'Microsoft YaHei',sans-serif;color:#88734f;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-level strong {font-weight:normal;color:#24674f;}
 .game-screen.comic-dialog-layer .gym-design-surface.offline-b .athlete-xp {font-size:11px;color:#9f382a;text-align:center;background:#e9d5aa;padding:5px;margin-top:7px;font-weight:bold;line-height:normal;}

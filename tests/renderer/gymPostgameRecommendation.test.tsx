@@ -3,7 +3,7 @@ import {createRoot, type Root} from 'react-dom/client';
 import {useState} from 'react';
 import {act} from 'preact/test-utils';
 import {GymCooperationPanel, GymRecommendPanel, TrainingAdvice} from '../../src/components/GymPanels';
-import {cooperationOffers, dispatchGym, newGym, recommendation, type GymResult, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, dispatchGym, newGym, playerLevelCap, recommendation, type GymResult, type GymState} from '../../src/game/gym/engine';
 import {trainingGuidance} from '../../src/game/gym/guidance';
 import {statKeys, type Stats} from '../../src/game/types';
 
@@ -150,14 +150,14 @@ it('shows the payable current reward and next cultivation bonus for a repeated t
   await act(async () => root!.render(<TrainingAdvice state={state}/>));
   expect(document.body.textContent).toContain('重复模板 · 推荐合计 4 券');
   expect(document.body.textContent).not.toContain('培养与合作不追加');
-  state.player!.level = state.player!.peakLevel = 99;
+  state.player!.level = state.player!.peakLevel = playerLevelCap;
   expect(trainingGuidance(state)!.suggestion).toContain('训练已结束');
   expect(trainingGuidance(state)!.suggestion).not.toContain('继续培养可提高');
 });
 
 it('offers advertising or recommendation after training ends instead of suggesting more training', async () => {
   const state = fixture(8, 100, true), player = state.player!;
-  player.level = player.peakLevel = 99;
+  player.level = player.peakLevel = playerLevelCap;
   player.cooperation = {id: cooperationOffers(state, player)[0].id, playerId: player.id,
     acceptedShots: player.shots, acceptedCourses: player.training.completedCourses};
   const guidance = trainingGuidance(state)!;

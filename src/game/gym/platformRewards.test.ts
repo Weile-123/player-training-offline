@@ -2,7 +2,7 @@ import {describe, expect, it} from 'vitest';
 import {grow, match, templateRules} from '../contract/templates';
 import {statKeys, type Stats} from '../types';
 import {
-  cooperationOffers, cooperationStatus, dispatchGym, effectiveTrainingBias, newGym,
+  cooperationOffers, cooperationStatus, dispatchGym, effectiveTrainingBias, newGym, playerLevelCap,
   recommendationPayout, staminaMax, staminaRewardMethod, type GymAction, type GymState,
 } from './engine';
 import {decodeGym, encodeGym, validGym} from './save';
@@ -63,10 +63,10 @@ describe('per-player sharing reward', () => {
     expect(repeated.state).toBe(state); expect(repeated.error).toContain('已领取');
   });
 
-  it('caps sharing at 99, clears overflow XP and pauses automatic training', () => {
-    const state = fixture(); state.player!.level = state.player!.peakLevel = 98; state.player!.autoEnabled = true;
+  it('caps sharing at 2000, clears overflow XP and pauses automatic training', () => {
+    const state = fixture(); state.player!.level = state.player!.peakLevel = playerLevelCap - 1; state.player!.autoEnabled = true;
     const result = act(state, {type: 'share-player-levels', playerId: state.player!.id});
-    expect(result.player).toMatchObject({level: 99, peakLevel: 99, experience: 0, autoEnabled: false, shareLevelClaimed: true});
+    expect(result.player).toMatchObject({level: playerLevelCap, peakLevel: playerLevelCap, experience: 0, autoEnabled: false, shareLevelClaimed: true});
     expect(result.player!.shots).toBe(0);
   });
 
@@ -75,8 +75,8 @@ describe('per-player sharing reward', () => {
     expect(dispatchGym(state, state.revision, {type: 'share-player-levels', playerId: 'old'}, at).state).toBe(state);
     state.player!.templateId = null;
     expect(dispatchGym(state, state.revision, {type: 'share-player-levels', playerId: id}, at).error).toContain('模板');
-    state.player!.templateId = templateRules[0].id; state.player!.level = state.player!.peakLevel = 99; state.player!.experience = 0;
-    expect(dispatchGym(state, state.revision, {type: 'share-player-levels', playerId: id}, at).error).toContain('99');
+    state.player!.templateId = templateRules[0].id; state.player!.level = state.player!.peakLevel = playerLevelCap; state.player!.experience = 0;
+    expect(dispatchGym(state, state.revision, {type: 'share-player-levels', playerId: id}, at).error).toContain(String(playerLevelCap));
     expect(state.player!.shareLevelClaimed).toBeUndefined();
   });
 });
@@ -106,14 +106,14 @@ describe('stamina posting and advertisement rewards', () => {
     expect(dispatchGym(state, state.revision, {...action, expectedCount: 1}, at).error).toContain('方式');
   });
 
-  it('allows natural recovery during the reward dialog but never wastes a full-stamina or level-99 reward', () => {
+  it('allows natural recovery during the reward dialog but never consumes a reward at full stamina or the cap', () => {
     const state = fixture(); state.player!.stamina = 0;
     const action: GymAction = {type: 'restore-stamina-reward', playerId: state.player!.id, method: 'share', expectedCount: 0};
     const restored = act(state, action, at + 21_000);
     expect(restored.player!.stamina).toBe(staminaMax(state)); expect(restored.staminaRewardCount).toBe(1);
     const full = dispatchGym(restored, restored.revision, {...action, method: 'ad', expectedCount: 1}, restored.updatedAt);
     expect(full.state).toBe(restored); expect(full.error).toContain('已满');
-    state.player!.level = state.player!.peakLevel = 99; state.player!.experience = 0;
+    state.player!.level = state.player!.peakLevel = playerLevelCap; state.player!.experience = 0;
     expect(dispatchGym(state, state.revision, action, at).state).toBe(state);
     expect(state.staminaRewardCount).toBeUndefined();
   });
@@ -182,7 +182,7 @@ describe('advertisement cooperation completion', () => {
 
   it('supports roster targets and max-level players without affecting the selected player', () => {
     let state = act(fixture(), {type: 'recruit'});
-    state.bench[0].level = state.bench[0].peakLevel = 99; state.bench[0].experience = 0;
+    state.bench[0].level = state.bench[0].peakLevel = playerLevelCap; state.bench[0].experience = 0;
     const before = structuredClone(state.player), player = state.bench[0];
     const action: GymAction = {type: 'complete-cooperation-ad', playerId: player.id,
       id: cooperationOffers(state, player)[0].id, expectedCooperationId: null, expectedCooperationRevision: null, scope: 'roster'};

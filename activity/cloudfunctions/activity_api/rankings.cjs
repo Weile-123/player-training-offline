@@ -75,13 +75,18 @@ function createHandler({rpc,now=Date.now,validateLocalProgress}){
    publicCache.clear();return result;
   }
   if(method==='GET'&&['/leaderboard','/leaderboard/me'].includes(path)){
-   if(Object.keys(query).some(key=>!['board','limit','fresh'].includes(key))||query.fresh!==undefined&&query.fresh!=='1')throw fail('排行查询参数无效');
+   if(Object.keys(query).some(key=>!['board','limit','fresh','levels'].includes(key))||query.fresh!==undefined&&query.fresh!=='1')throw fail('排行查询参数无效');
    const board=query.board??'player',limit=Number(query.limit??50);
    if(!['player','fame'].includes(board)||!Number.isInteger(limit)||limit<1||limit>100)throw fail('排行查询参数无效');
-   if(path.endsWith('/me'))return rpc('read_gym_rank',{p_board:board,p_limit:limit,p_puid:identity(context).puid});
-   const key=`${board}:${limit}`,cached=publicCache.get(key);
+   if(query.levels!==undefined&&(board!=='player'||query.levels!=='extended'))throw fail('排行查询参数无效');
+   const extended=query.levels==='extended';
+   const read=(puid)=>extended
+    ?rpc('read_gym_rank_v2',{p_board:board,p_limit:limit,p_puid:puid,p_extended:true})
+    :rpc('read_gym_rank',{p_board:board,p_limit:limit,p_puid:puid});
+   if(path.endsWith('/me'))return read(identity(context).puid);
+   const key=`${board}:${limit}:${extended}`,cached=publicCache.get(key);
    if(query.fresh!=='1'&&cached&&cached.until>now())return cached.value;
-   const result=await rpc('read_gym_rank',{p_board:board,p_limit:limit,p_puid:null});
+   const result=await read(null);
    publicCache.set(key,{value:result,until:now()+3000});return result;
   }
   throw fail('接口不存在',404);

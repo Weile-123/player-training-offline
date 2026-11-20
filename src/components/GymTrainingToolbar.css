@@ -38,6 +38,11 @@
 .gym-experience-readout { margin-left: auto; white-space: nowrap; }
 .gym-experience-readout > b { font: clamp(15px, 2.8cqw, 20px)/1 var(--font-number); font-variant-numeric: tabular-nums; }
 .gym-experience-readout small { font-size: .75em; color: #b4c3bb; }
+@container (max-width: 340px) {
+ .gym-experience-upper[data-long-readout] { gap: 3px; }
+ .gym-experience-upper[data-long-readout] > strong { padding-inline: 4px; }
+ .gym-experience-upper[data-long-readout] .gym-experience-readout > b { font-size: 13px; }
+}
 .gym-experience-track { height: clamp(7px, 1.4cqw, 10px); flex: none; min-width: 0; border: 1px solid #ae9250; background: #071921; box-shadow: inset 0 2px 3px #0009; overflow: hidden; }
 .gym-experience-track > i { display: block; height: 100%; background: linear-gradient(#fff0aa, #e2ab37 65%, #ab731d); transition: width var(--experience-transition-ms, 280ms) ease-out; }
 .gym-experience-track > i.is-instant { transition: none; }

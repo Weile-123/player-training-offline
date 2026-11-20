@@ -7,6 +7,7 @@ import {gameAudio} from '../presentation/audio';
 import {soundEnabled} from '../presentation/sampleAudio';
 import {decodePreferences, presentationConfig, type ShotFeedback} from '../presentation/feedback';
 import {getAnimationConfig, subscribeAnimationConfig, watchAnimationConfig} from '../presentation/animationConfig';
+import {money} from '../presentation/money';
 import {useModalAccessibility} from '../presentation/useModalAccessibility';
 import {valueTone} from '../presentation/valueTone';
 import {ComicDialog} from './ComicDialog';
@@ -57,7 +58,7 @@ function formatValue(value: string) {
  if (amount < 10000n) return amount.toLocaleString();
  if (amount < 100000000n) return `${Number(amount / 100n) / 100}万`;
  if (amount < 1000000000000n) return `${Number(amount / 1000000n) / 100}亿`;
- return `${Number(amount / 10000000000n) / 100}万亿`;
+ return money(amount).slice(1);
 }
 
 export default function GymGame({onHome,storeHook,tutorial=false,onTutorialAction,onTutorialPanel}: {onHome: () => void;storeHook?:typeof defaultGym;tutorial?:boolean;onTutorialAction?:(action:GymAction,result:GymResult)=>void;onTutorialPanel?:(panel:Panel)=>void}) {
@@ -288,7 +289,7 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
     <button className="month-stamp" aria-label="查看球馆经营" onClick={() => setPanel('club')}><span>球馆 <b>Lv.{state.gymLevel}</b></span></button>
     <button className="credit-display gym-home-control" aria-label="保存并返回首页" onClick={onHome}><small>返回首页</small><GameIcon name="home"/></button>
    </header>
-   <GymScoreboard state={state} onClub={() => setPanel('club')} onPlayer={() => setPanel('roster')}/>
+   <GymScoreboard state={state} upgradeReady={upgradeReady} onClub={() => setPanel('club')} onPlayer={() => setPanel('roster')}/>
    <section className="game-player"><div className="player-value-card" data-tier={templateById(player?.templateId)?.tier ?? 'undiscovered'}>
     <PlayerTemplatePanel player={player ? displayedPlayer(player) : undefined} feedback={feedback} reduced={reduced} disabled={!player} showTrainingLevel={false} showLevelBeforeTier={!canSharePlayerLevels} showPosition={false} onDetails={() => setPanel('player')} identityAction={canSharePlayerLevels ? <button type="button" className="gym-player-share" aria-label={rewardsEnabled?'分享·等级+3':'分享奖励暂不可用'} title={rewardsEnabled?undefined:rewardsUnavailable} disabled={busy||!rewardsEnabled} onClick={event => {event.stopPropagation(); openShare('levels');}}>{rewardsEnabled?'分享·等级+3':'分享暂不可用'}</button> : undefined}/>
     <div className="player-value-footer"><div className={`player-value-amount value-tone-${valueTone(templateById(player?.templateId)?.tier)}`}><small>身价</small><FittedAmount fitHeight text={player ? formatValue(playerValue(state, player)) : '—'}/></div>

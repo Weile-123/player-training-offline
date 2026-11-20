@@ -1,7 +1,7 @@
 import {create} from 'zustand';
 import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recoverySeconds, type GymAction, type GymResult, type GymState} from './game/gym/engine';
 import {gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './game/gym/save';
-import {createGymHistory, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
+import {createGymHistory, gymCloudRestoreBackupKey, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
 import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
 import {parseGymCloudArchive} from './platform/gymCloudArchive';
 import {createGymAuthorityTransport} from './platform/gymAuthority';
@@ -56,6 +56,12 @@ export type GymStore = {
 const randomSeed = () => crypto.getRandomValues(new Uint32Array(1))[0];
 const saveFailure = '本地保存失败，本次操作未生效，请检查存储空间后重试。';
 const historyFailure = '历史档案暂时无法读取，原有数据已保留，请关闭其他页面或恢复浏览器存储后重试。';
+const isStorageQuotaError = (error: unknown) => {
+  if (!error || typeof error !== 'object') return false;
+  const value = error as {name?: unknown; code?: unknown; message?: unknown};
+  return value.name === 'QuotaExceededError' || value.name === 'NS_ERROR_DOM_QUOTA_REACHED'
+    || value.code === 22 || value.code === 1014 || typeof value.message === 'string' && /quota/i.test(value.message);
+};
 const errorMessages: Record<string, string> = {
   'no-save': '请先从首页开启训练馆。',
   'invalid-save': '存档校验失败，请从首页重新开始。',
@@ -182,18 +188,22 @@ export function createGymStore(storage: GymStorage, seed: number | (() => number
       flush: async () => { if (get().hasSave) await run(undefined, false, false, false, true); },
       restoreCloudArchive: async (raw, expected, backup) => {
         const {state: restored} = parseGymCloudArchive(raw);
-        await exclusive(storage, async () => {
-          const committed = await history.transact(current => {
-            const active = current.state;
-            if (active && (active.createdAt !== expected.createdAt || active.seed !== expected.seed || active.revision !== expected.revision || active.updatedAt !== expected.updatedAt)) throw Error('本地进度已变化，请重新同步确认');
-            // Retain a complete, portable local recovery copy before changing authoritative state.
-            if (backup !== null) storage.setItem('gym-management-v1.cloud-restore.backup', backup);
-            return {state: restored, value: undefined};
+        try {
+          await exclusive(storage, async () => {
+            const committed = await history.transact(current => {
+              const active = current.state;
+              if (active && (active.createdAt !== expected.createdAt || active.seed !== expected.seed || active.revision !== expected.revision || active.updatedAt !== expected.updatedAt)) throw Error('本地进度已变化，请重新同步确认');
+              return {state: restored, value: undefined,
+                ...(backup !== null ? {recoverySnapshot: {key: gymCloudRestoreBackupKey, value: backup}} : {})};
+            });
+            if (!committed.state) throw Error('云存档未能写入本地，原进度已保留');
+            hydrated = true;
+            set({state: committed.state, hasSave: true, hydrating: false, actionError: '', isSuspended: true, pendingOfflineReport: null, saveMessage: '已同步云存档'});
           });
-          if (!committed.state) throw Error('云存档未能写入本地，原进度已保留');
-          hydrated = true;
-          set({state: committed.state, hasSave: true, hydrating: false, actionError: '', isSuspended: true, pendingOfflineReport: null, saveMessage: '已同步云存档'});
-        });
+        } catch (error) {
+          if (isStorageQuotaError(error)) throw Error('本机存储空间不足，本次同步未生效，本地和云端进度均已保留。');
+          throw error;
+        }
       },
       restorePlatformSnapshot:async(raw,expected,owner)=>{
         if(!owner||!validGym(raw)||raw.alumniArchive?.count)throw Error('保存的球馆档案不完整，当前本地进度已保留');

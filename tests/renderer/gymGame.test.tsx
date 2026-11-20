@@ -1,12 +1,13 @@
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {cooperationOffers, cooperationStatus, newGym, type GymAction, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, newGym, playerLevelCap, playerValue, requiredExperience, type GymAction, type GymState} from '../../src/game/gym/engine';
 import {templateRules} from '../../src/game/contract/templates';
 import {statKeys} from '../../src/game/types';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
 import {gymFirstVisitTutorialKey, resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
+import {money} from '../../src/presentation/money';
 
 const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[]}));
 vi.mock('../../src/gymStore', async () => {
@@ -108,7 +109,7 @@ async function twoPlayers() {
   return [state().player!.id, state().bench[0].id];
 }
 
-it.each([0, 98, 99])('removes the main-court consumable shelf without consuming inventory at level %s', async level => {
+it.each([0, playerLevelCap - 1, playerLevelCap])('removes the main-court consumable shelf without consuming inventory at level %s', async level => {
   const initial = newGym(at, 21);
   initial.player!.level = initial.player!.peakLevel = level;
   initial.player!.stamina = 0; initial.inventory.drink = 1;
@@ -377,7 +378,7 @@ it('toggles only the selected athlete from the compact player-card automatic but
 
 it('keeps a full-level athlete from enabling automatic training on the player card', async () => {
   const initial = newGym(at, 21); initial.gymLevel = 2;
-  initial.player!.level = initial.player!.peakLevel = 99;
+  initial.player!.level = initial.player!.peakLevel = playerLevelCap;
   await mount(initial);
   const button = document.querySelector<HTMLButtonElement>('[aria-label="当前球员自动训练"]')!;
   expect(button.disabled).toBe(true);
@@ -526,12 +527,30 @@ it('keeps the chosen empty position after opening a secondary panel', async () =
   expect(document.querySelector('.gym-court-switch small')?.textContent).toBe('2/2');
 });
 
+it.each([99, playerLevelCap - 1])('can advance from level %s with manual training', async level => {
+  const initial = newGym(at, 21);
+  const required = requiredExperience(level);
+  initial.player!.level = initial.player!.peakLevel = level;
+  initial.player!.experience = required - 1;
+  await mount(initial);
+  const toolbar = document.querySelector('[aria-label="训练经验"]')!;
+  expect(toolbar.querySelector('strong')?.textContent).toBe(`Lv.${level}`);
+  expect(toolbar.querySelector('.gym-experience-readout')?.textContent).toBe(`${required - 1} / ${required}`);
+  await press('投篮训练');
+  expect(state().player!.level).toBe(level + 1);
+  expect(toolbar.querySelector('strong')?.textContent).toBe(`Lv.${level + 1}`);
+});
+
 it('shows a full experience slot at the level cap without a zero denominator', async () => {
   const initial = newGym(at, 21);
   initial.gymLevel = 3;
-  initial.player!.level = 99;
-  initial.player!.peakLevel = 99;
+  initial.player!.level = playerLevelCap;
+  initial.player!.peakLevel = playerLevelCap;
+  for (const key of statKeys) initial.player!.stats[key] = 99;
   await mount(initial);
+  const price = document.querySelector('.player-value-amount .fitted-amount');
+  expect(price?.textContent).toBe(money(playerValue(initial)).slice(1));
+  expect(price?.textContent).toContain('兆');
   const progress = document.querySelector<HTMLElement>('[aria-label="当前球员训练经验"]')!;
   expect(progress.getAttribute('aria-valuetext')).toBe('已满级');
   expect(progress.getAttribute('aria-valuemax')).toBe('1');

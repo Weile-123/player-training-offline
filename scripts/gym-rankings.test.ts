@@ -1,6 +1,7 @@
 import {createRequire} from 'node:module';
 import {expect, it, vi} from 'vitest';
 import {newGym} from '../src/game/gym/engine';
+import {playerLevelCap} from '../src/game/gym/progression';
 import {templateRules} from '../src/game/contract/templates';
 import {buildAuthorityGymRankingProgress, verifiedGymRankingProgress} from '../server/gymRankProgress';
 import {gzipSync} from 'node:zlib';
@@ -52,6 +53,14 @@ it('derives player value and fame from canonical state, retaining a higher earli
  const earlier = {...result.best!, value: '9999999999999999999'};
  expect(verifiedGymRankingProgress({...input, previousBest: earlier}).best?.value).toBe(earlier.value);
  expect(input.state.player).not.toHaveProperty('value');
+});
+it('derives and retains a verified level-2000 checkpoint at its exact value', () => {
+ const input=fixture();
+ input.state.player!.level=input.state.player!.peakLevel=playerLevelCap;
+ const result=verifiedGymRankingProgress(input);
+ expect(result.best).toMatchObject({level:2000,value:'2563841920320'});
+ expect(verifiedGymRankingProgress({...input,previousBest:result.best}).best).toEqual(result.best);
+ expect(() => verifiedGymRankingProgress({...input,previousBest:{...result.best!,level:playerLevelCap+1}})).toThrow('Invalid previous verified player record');
 });
 it('rejects another project/run, invalid state or incomplete archived history', () => {
  const input = fixture();

@@ -1,5 +1,5 @@
 import {describe, expect, it} from 'vitest';
-import {newGym, requiredExperience, type GymPlayer} from './engine';
+import {newGym, playerLevelCap, requiredExperience, type GymPlayer} from './engine';
 import {offlineUpgradeGuidance} from './offlineUpgradeGuidance';
 
 const minute = 60_000;
@@ -10,8 +10,8 @@ function state() {
   return result;
 }
 function almostFinished(player: GymPlayer) {
-  player.level = player.peakLevel = 98;
-  player.experience = requiredExperience(98) - 1;
+  player.level = player.peakLevel = playerLevelCap - 1;
+  player.experience = requiredExperience(player.level) - 1;
 }
 
 describe('offline project upgrade guidance', () => {

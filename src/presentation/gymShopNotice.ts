@@ -21,8 +21,11 @@ export function useGymShopNotice(state: GymState, shopOpen: boolean, enabled=tru
   const saved = useMemo(() => enabled?readSeen(key):[], [key,enabled]);
   const [record, setRecord] = useState({key, ids: saved});
   const seen = record.key === key ? record.ids : saved;
-  const available = availableEquipmentForNotice(state);
-  const signature = available.join(',');
+  // Storage returns fresh snapshots as training advances. Only changes to shop eligibility need a catalogue pass.
+  const templateCount = Object.keys(state.collection).length;
+  const ownership = state.ownedEquipment.join(',');
+  const available = useMemo(() => enabled?availableEquipmentForNotice(state):[], [enabled,state.gymLevel,templateCount,ownership]);
+  const signature = useMemo(() => available.join(','), [available]);
   useEffect(() => {
     if(!enabled)return;
     const ids = shopOpen ? [...new Set([...seen, ...available])] : seen;
@@ -31,5 +34,5 @@ export function useGymShopNotice(state: GymState, shopOpen: boolean, enabled=tru
       try { localStorage.setItem(key, JSON.stringify(ids)); } catch { /* Acknowledged in this session even if storage is unavailable. */ }
     }
   }, [key, shopOpen, signature,enabled]);
-  return enabled&&available.some(id => !seen.includes(id));
+  return useMemo(() => enabled&&available.some(id => !seen.includes(id)), [enabled,available,seen]);
 }

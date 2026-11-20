@@ -26,7 +26,7 @@ export type OfflinePlayerReport = {
 export type OfflineTrainingReport = {
   reportId?: string;
   experienceMultiplier?: 1 | 2;
-  /** Actual additional XP credited per player, bounded by the level-99 ceiling. */
+  /** Actual additional XP credited per player, bounded by the level cap. */
   bonusExperience?: Record<string,number>;
   from: number; to: number; elapsedMs: number; creditedMs: number; capMs: number; capped: boolean;
   totalShots: number; totalExperience: number; players: OfflinePlayerReport[];

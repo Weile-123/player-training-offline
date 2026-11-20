@@ -76,5 +76,13 @@
   "deployedCodeHashTarget": "cloudfunctions/activity_api/gym/server/main.mjs",
   "deployedArchiveSha256": "88c2cfea7642d55ab4c3e91569ab941be5487ead43ca953ed53c69b0f1fec4d0",
   "localProgressMigration": "migrations/20261117000500_gym_local_rank_progress.sql",
+  "playerLevelDeployment": {
+    "playerLevelCap": 2000,
+    "migration": "migrations/20261117000600_gym_rank_level_cap.sql",
+    "migrationApplied": true,
+    "verifiedAt": "2026-11-20T06:55:04.135Z",
+    "archiveSha256": "85166b47ef126c95d104057735db07894d9ce3c0fc480d880c09c4fedf69415f",
+    "publicBoardsVerified": ["legacy player", "extended player", "fame"]
+  },
   "updatedAt": "2026-11-17T16:27:41.062Z"
 }

@@ -1,6 +1,7 @@
 import {afterEach, expect, it, vi} from 'vitest';
 import {cleanGymRankingNickname,createGymLeaderboardClient, gymRankReference, type GymRankRow} from './gymLeaderboard';
 import {newGym} from '../game/gym/engine';
+import {playerLevelCap} from '../game/gym/progression';
 import {nbaTemplates} from '../game/templates';
 
 afterEach(() => {vi.unstubAllGlobals(); vi.unstubAllEnvs();});
@@ -72,12 +73,14 @@ it('allows guests to read public fame rankings without a personal request', asyn
  await expect(client.sync(reference)).resolves.toBe(false);
  expect(client.getMessage()).toContain('登录虎扑');
 });
-it('preserves big integer player values and reads current-account personal ranking', async () => {
- const request = vi.fn(async (path: string) => path.includes('/me?') ? {me: {rank: 1, entry: playerRow}} : {entries: [playerRow]});
+it('preserves big integer player values and reads the extended public and personal ranks', async () => {
+ const extendedRow = {...playerRow, best: {...playerRow.best!, level: playerLevelCap}};
+ const request = vi.fn(async (path: string) => path.includes('/me?') ? {me: {rank: 1, entry: extendedRow}} : {entries: [extendedRow]});
  const client = createGymLeaderboardClient({enabled: () => true, user: async () => ({puid: 'one'}), request});
  const data = await client.list('player');
  expect(data.me?.entry.score).toBe('12345678901234567890');
- expect(request.mock.calls).toEqual([['/leaderboard?board=player&limit=50', 'GET'], ['/leaderboard/me?board=player', 'GET', undefined, true]]);
+ expect(data.me?.entry.best?.level).toBe(2000);
+ expect(request.mock.calls).toEqual([['/leaderboard?board=player&levels=extended&limit=50', 'GET'], ['/leaderboard/me?board=player&levels=extended', 'GET', undefined, true]]);
 });
 it('hides stale personal data but preserves public scores after an account switch; submission still rejects', async () => {
  const user = vi.fn().mockResolvedValueOnce({puid: 'one'}).mockResolvedValue({puid: 'two'});
@@ -114,7 +117,8 @@ it.each([{entries: Array(51).fill(fameRow)}, {entries: [{...fameRow, score: 'NaN
 it.each([
  {...playerRow, best: null},
  {...playerRow, best: {...playerRow.best!, value: '99'}},
- {...playerRow, best: {...playerRow.best!, level: 100}},
+ {...playerRow, best: {...playerRow.best!, level: playerLevelCap + 1}},
+ {...playerRow, best: {...playerRow.best!, level: 100.5}},
  {...playerRow, best: {...playerRow.best!, templateId: 'unknown-template'}},
  {...playerRow, best: {...playerRow.best!, stats: {...template.stats, three: 100}}},
 ])('rejects invalid player snapshots (%j)', async row => {
@@ -146,10 +150,11 @@ it('uses current project SDK cloud requests, checks HTTP and business errors, an
  const {gymLeaderboardRequest} = await import('./gymLeaderboard');
  const request = vi.fn().mockResolvedValue({statusCode: 200, code: 0, data: {entries: []}});
  await expect(gymLeaderboardRequest('/leaderboard?board=fame&limit=50', 'GET', undefined, false, {request})).resolves.toEqual({entries: []});
+ await expect(gymLeaderboardRequest('/leaderboard?board=player&levels=extended&limit=50&fresh=1', 'GET', undefined, false, {request})).resolves.toEqual({entries: []});
  expect(request).toHaveBeenCalledWith({url: 'https://current-project.example/api/leaderboard?board=fame&limit=50', method: 'GET', data: undefined, envId: 'current-project-env', auth: false});
  for (const response of [{statusCode: 403, code: 0, message: '无权限'}, {statusCode: 200, code: 500, message: '维护中'}]) {
   request.mockResolvedValue(response); await expect(gymLeaderboardRequest('/leaderboard', 'GET', undefined, false, {request})).rejects.toThrow(response.message);
  }
  await expect(gymLeaderboardRequest('/other-app/submit', 'POST', {}, true, {request})).rejects.toThrow('接口无效');
- expect(request).toHaveBeenCalledTimes(3);
+ expect(request).toHaveBeenCalledTimes(4);
 });

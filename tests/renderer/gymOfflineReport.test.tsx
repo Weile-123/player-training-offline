@@ -2,6 +2,7 @@ import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import type {OfflinePlayerReport, OfflineTrainingReport} from '../../src/game/gym/offline';
+import {playerLevelCap} from '../../src/game/gym/progression';
 import {templateById} from '../../src/game/templates';
 import {GymOfflineReport, offlineExperienceAnimationMs} from '../../src/components/GymOfflineReport';
 import {templateRules} from '../../src/game/contract/templates';
@@ -20,9 +21,9 @@ const report = (players = [player('1')]): OfflineTrainingReport => ({
   totalExperience: players.reduce((sum, entry) => sum + entry.xpGained, 0), players,
 });
 
-it('disables the ad when all reported players are already level99',async()=>{
+it('disables the ad when all reported players are at the level cap',async()=>{
  const onDoubleExperience=vi.fn(async()=>true);
- await mount(report([{...player('1'),levelAfter:99}]),vi.fn(),{onDoubleExperience});
+ await mount(report([{...player('1'),levelAfter:playerLevelCap}]),vi.fn(),{onDoubleExperience});
  const button=document.querySelector<HTMLButtonElement>('.gm-offline-double-experience')!;
  expect(button.disabled).toBe(true);expect(button.textContent).toContain('已满级');
  await act(async()=>button.click());expect(onDoubleExperience).not.toHaveBeenCalled();
@@ -31,7 +32,7 @@ it('disables the ad when all reported players are already level99',async()=>{
 
 it('animates and restores the actual capped bonus instead of inventing full double XP',async()=>{
  localStorage.setItem(presentationConfig.preferenceKey,JSON.stringify({version:1,sound:true,reducedMotion:true}));
- const value=report([{...player('1'),xpGained:20,levelAfter:98},{...player('2'),xpGained:120,levelAfter:99}]);
+ const value=report([{...player('1'),xpGained:20,levelAfter:playerLevelCap-1},{...player('2'),xpGained:120,levelAfter:playerLevelCap}]);
  value.bonusExperience={'1':10,'2':0};
  await mount(value,vi.fn(),{onDoubleExperience:vi.fn(async()=>true)});await claim();
  expect(document.querySelector('.gm-offline-xp-total b')?.textContent).toBe('+150');

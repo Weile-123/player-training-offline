@@ -1,7 +1,7 @@
 import {afterEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {newGym, requiredExperience, type GymPlayer, type GymState} from '../../src/game/gym/engine';
+import {newGym, playerLevelCap, requiredExperience, type GymPlayer, type GymState} from '../../src/game/gym/engine';
 import {GymClubPanel} from '../../src/components/GymPanels';
 
 let root: Root | null = null;
@@ -15,8 +15,8 @@ function state() {
   return game;
 }
 function almostFinished(player: GymPlayer) {
-  player.level = player.peakLevel = 98;
-  player.experience = requiredExperience(98) - 1;
+  player.level = player.peakLevel = playerLevelCap - 1;
+  player.experience = requiredExperience(player.level) - 1;
 }
 async function mount(game: GymState) {
   const action = vi.fn();

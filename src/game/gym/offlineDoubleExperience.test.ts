@@ -1,5 +1,5 @@
 import {describe,expect,it} from 'vitest';
-import {activePlayers,dispatchGym,experienceForLevel,newGym,requiredExperience,type GymAction,type GymPlayer,type GymState} from './engine';
+import {activePlayers,dispatchGym,experienceForLevel,newGym,playerLevelCap,requiredExperience,type GymAction,type GymPlayer,type GymState} from './engine';
 import {offlineLimitMs,settleOfflineGym} from './offline';
 import {decodeGym,encodeGym,validGym} from './save';
 
@@ -73,34 +73,34 @@ describe('one-time bonus XP for an immutable offline report',()=>{
   expect(ids.size).toBe(8);
  });
 
- it('refuses a bonus for an already level99 player without increasing XP or legacy overflow',()=>{
-  const state=automatic();state.player!.level=state.player!.peakLevel=98;
-  state.player!.experience=requiredExperience(98)-1;
+ it('refuses a bonus for a capped player without increasing XP or legacy overflow',()=>{
+  const state=automatic();state.player!.level=state.player!.peakLevel=playerLevelCap-1;
+  state.player!.experience=requiredExperience(state.player!.level)-1;
   const {state:paid,report}=settlement(state,5_000);
-  expect(paid.player).toMatchObject({level:99,experience:0,autoEnabled:false});
+  expect(paid.player).toMatchObject({level:playerLevelCap,experience:0,autoEnabled:false});
   expect(report!.totalExperience).toBe(1);
   paid.player!.overflowExperience=7;
   const before=structuredClone(paid),result=dispatchGym(paid,paid.revision,{type:'double-offline-experience',reportId:report!.reportId!},paid.updatedAt);
-  expect(result.error).toContain('99级');expect(result.state).toBe(paid);expect(paid).toEqual(before);
+  expect(result.error).toContain(`${playerLevelCap}级`);expect(result.state).toBe(paid);expect(paid).toEqual(before);
   expect(decodeGym(encodeGym(paid))).toEqual(paid);
  });
 
- it('credits only XP left before level99 and stores the actual capped bonus in its receipt',()=>{
-  const state=automatic();state.player!.level=state.player!.peakLevel=98;
-  state.player!.experience=requiredExperience(98)-30;state.player!.stamina=1;state.player!.greatShotsRemaining=1;
+ it('credits only XP left before the cap and stores the actual bonus in its receipt',()=>{
+  const state=automatic();state.player!.level=state.player!.peakLevel=playerLevelCap-1;
+  state.player!.experience=requiredExperience(state.player!.level)-30;state.player!.stamina=1;state.player!.greatShotsRemaining=1;
   const {state:paid,report}=settlement(state,5_000);
-  expect(report!.totalExperience).toBe(20);expect(paid.player!.level).toBe(98);
+  expect(report!.totalExperience).toBe(20);expect(paid.player!.level).toBe(playerLevelCap-1);
   const before=earned(paid.player!),result=claim(paid);
-  expect(result.player).toMatchObject({level:99,experience:0,autoEnabled:false});expect(result.player!.overflowExperience).toBeUndefined();
+  expect(result.player).toMatchObject({level:playerLevelCap,experience:0,autoEnabled:false});expect(result.player!.overflowExperience).toBeUndefined();
   expect(earned(result.player!)-before).toBe(10);expect(result.offlineReward!.report.bonusExperience).toEqual({[result.player!.id]:10});
   expect(trainingFacts(result)).toEqual(trainingFacts(paid));
   expect(decodeGym(encodeGym(result))).toEqual(result);
  });
 
  it('skips max-level report members while giving eligible teammates their own capped bonus',()=>{
-  const {state:paid,report}=settlement(automatic(2));paid.player!.level=paid.player!.peakLevel=99;paid.player!.experience=0;paid.player!.autoEnabled=false;
+  const {state:paid,report}=settlement(automatic(2));paid.player!.level=paid.player!.peakLevel=playerLevelCap;paid.player!.experience=0;paid.player!.autoEnabled=false;
   const teammate=paid.bench[0],before=earned(teammate),row=report!.players.find(player=>player.id===teammate.id)!;
-  const result=claim(paid);expect(result.player).toMatchObject({level:99,experience:0});expect(result.player!.overflowExperience).toBeUndefined();
+  const result=claim(paid);expect(result.player).toMatchObject({level:playerLevelCap,experience:0});expect(result.player!.overflowExperience).toBeUndefined();
   expect(earned(result.bench[0])-before).toBe(row.xpGained);expect(result.offlineReward!.report.bonusExperience).toEqual({[paid.player!.id]:0,[teammate.id]:row.xpGained});
  });
 

@@ -2,7 +2,7 @@ import {afterEach, beforeEach, expect, it} from 'vitest';
 import {useState, type ComponentType} from 'react';
 import {act} from 'preact/test-utils';
 import {createRoot, type Root} from 'react-dom/client';
-import {cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendationPayout, requiredExperience, type GymAction, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, dispatchGym, newGym, playerLevelCap, recommendationPayout, requiredExperience, type GymAction, type GymState} from '../../src/game/gym/engine';
 import {statKeys} from '../../src/game/types';
 import {GymInventoryPanel, GymShopPanel, type GymPanelProps} from '../../src/components/GymPanels';
 import {GymCooperationPanel} from '../../src/components/GymCooperationPanel';
@@ -16,7 +16,7 @@ let applyAction: (action: GymAction) => void;
 beforeEach(() => {resetGymFirstVisitTutorials(); localStorage.setItem(gymFirstVisitTutorialKey, JSON.stringify(['training', 'cooperation']));});
 afterEach(() => {if (root) act(() => root!.unmount()); root = undefined;});
 
-function fixture(level: 98 | 99, complete = false) {
+function fixture(level: number, complete = false) {
   let state = newGym(at, 7);
   state.gymLevel = 8; state.credits = 100; state.player = null;
   const admitted = dispatchGym(state, state.revision, {type: 'recruit', preference: 'forward'}, at);
@@ -60,8 +60,8 @@ function card(name: string) {
 }
 async function click(item: HTMLButtonElement) {await act(async () => item.click());}
 
-it('disables ordinary cooperation admission at 99 and explains that existing qualifications remain', async () => {
-  const state = fixture(99);
+it('disables ordinary cooperation admission at the cap and explains that existing qualifications remain', async () => {
+  const state = fixture(playerLevelCap);
   await mount(GymCooperationPanel, state);
   const before = structuredClone(latest);
   const buttons = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation button:not(.gm-cooperation-ad)')];
@@ -73,8 +73,8 @@ it('disables ordinary cooperation admission at 99 and explains that existing qua
   expect(latest).toEqual(before);
 });
 
-it('preserves a completed level-99 cooperation, its equipment eligibility and actual reward', async () => {
-  const state = fixture(99, true), expected = recommendationPayout(state);
+it('preserves a completed cooperation, its equipment eligibility and actual reward at the cap', async () => {
+  const state = fixture(playerLevelCap, true), expected = recommendationPayout(state);
   await mount(GymCooperationPanel, state);
   expect(document.body.textContent).toContain('已有合作与器材资格保留，可照常推荐结算');
   const replacements = [...document.querySelectorAll<HTMLButtonElement>('.gm-cooperation:not(.is-active) button:not(.gm-cooperation-ad)')];
@@ -86,15 +86,15 @@ it('preserves a completed level-99 cooperation, its equipment eligibility and ac
   expect(recommendationPayout(latest)).toEqual(expected);
 });
 
-it('disables an already-open replacement confirmation when one real shot advances 98 to 99', async () => {
-  const state = fixture(98, true);
-  state.player!.experience = requiredExperience(98) - 1;
+it('disables an already-open replacement confirmation when one real shot reaches the cap', async () => {
+  const state = fixture(playerLevelCap - 1, true);
+  state.player!.experience = requiredExperience(state.player!.level) - 1;
   await mount(GymCooperationPanel, state);
   await click(button('更换为此合作', card('基础培养合作')));
   expect(button('确认更换').disabled).toBe(false);
   const originalId = latest.player!.cooperation!.id;
   await act(async () => applyAction({type: 'train', id: latest.player!.id}));
-  expect(latest.player!.level).toBe(99);
+  expect(latest.player!.level).toBe(playerLevelCap);
   expect(button('确认更换').disabled).toBe(true);
   expect(document.querySelector('[role="alert"]')?.textContent).toContain('不能确认更换');
   const before = structuredClone(latest);
@@ -109,8 +109,8 @@ it('disables an already-open replacement confirmation when one real shot advance
   expect(bypass.state).toBe(latest);
 });
 
-it('keeps ordinary admission and confirmed replacement usable at 98', async () => {
-  await mount(GymCooperationPanel, fixture(98));
+it('keeps ordinary admission and confirmed replacement usable below the cap', async () => {
+  await mount(GymCooperationPanel, fixture(playerLevelCap - 1));
   await click(button('接取合作', card('基础培养合作')));
   const originalId = latest.player!.cooperation!.id;
   await click(button('更换为此合作', card('专项培养合作')));
@@ -121,8 +121,8 @@ it('keeps ordinary admission and confirmed replacement usable at 98', async () =
   expect(actions.map(action => action.type)).toEqual(['accept-cooperation', 'accept-cooperation']);
 });
 
-it('keeps the explicit abandonment confirmation and cancellation available at 99', async () => {
-  await mount(GymCooperationPanel, fixture(99, true));
+it('keeps the explicit abandonment confirmation and cancellation available at the cap', async () => {
+  await mount(GymCooperationPanel, fixture(playerLevelCap, true));
   const originalId = latest.player!.cooperation!.id;
   await click(button('放弃当前合作'));
   expect(button('确认放弃').disabled).toBe(false);
@@ -136,10 +136,10 @@ it('keeps the explicit abandonment confirmation and cancellation available at 99
 });
 
 it.each([
-  {label: 'inventory 99', Panel: GymInventoryPanel, level: 99, shop: false},
-  {label: 'shop 99', Panel: GymShopPanel, level: 99, shop: true},
-  {label: 'inventory 98', Panel: GymInventoryPanel, level: 98, shop: false},
-  {label: 'shop 98', Panel: GymShopPanel, level: 98, shop: true},
+  {label: 'inventory at the cap', Panel: GymInventoryPanel, level: playerLevelCap, shop: false},
+  {label: 'shop at the cap', Panel: GymShopPanel, level: playerLevelCap, shop: true},
+  {label: 'inventory below the cap', Panel: GymInventoryPanel, level: playerLevelCap - 1, shop: false},
+  {label: 'shop below the cap', Panel: GymShopPanel, level: playerLevelCap - 1, shop: true},
 ] as const)('keeps old drink inventory hidden and untouched in $label', async ({Panel, level}) => {
   const state = fixture(level);
   state.player!.stamina = 0; state.inventory.drink = 1;

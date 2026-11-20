@@ -1,5 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {dispatchGym, newGym} from './engine';
+import {playerLevelCap, requiredExperience} from './progression';
 import {decodeGym, encodeGym, gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './save';
 import {hash} from '../contract/random';
 
@@ -46,6 +47,27 @@ describe('gym save boundaries', () => {
     expect(validGym({...state, projects: {...state.projects, endurance: 8}})).toBe(false);
     expect(validGym({...state, equippedEquipment: ['relic_002']})).toBe(false);
     expect(validGym({...state, player: {...state.player!, stats: {...state.player!.stats, three: 100}}})).toBe(false);
+  });
+
+  it('restores an old max-level player and resumes training from their saved level', () => {
+    const old = newGym(1_000, 17);
+    Object.assign(old.player!, {level: 99, peakLevel: 99});
+    const restored = decodeGym(encodeGym(old))!;
+    expect(restored.player).toMatchObject({level: 99, experience: 0});
+    const result = dispatchGym(restored, restored.revision, {type: 'train', id: restored.player!.id}, 1_000);
+    expect(result.error).toBeUndefined();
+    expect(result.state.player!.experience).toBeGreaterThan(0);
+  });
+
+  it('roundtrips the new level cap and rejects progress beyond it', () => {
+    const state = newGym(1_000, 17);
+    Object.assign(state.player!, {level: playerLevelCap - 1, peakLevel: playerLevelCap - 1, experience: requiredExperience(playerLevelCap - 1) - 1});
+    expect(decodeGym(encodeGym(state))).toEqual(state);
+    const result = dispatchGym(state, state.revision, {type: 'train', id: state.player!.id}, 1_000);
+    expect(result.state.player).toMatchObject({level: 2_000, peakLevel: 2_000, experience: 0});
+    expect(decodeGym(encodeGym(result.state))).toEqual(result.state);
+    expect(validGym({...result.state, player: {...result.state.player!, experience: 1}})).toBe(false);
+    expect(validGym({...result.state, player: {...result.state.player!, level: 2_001, peakLevel: 2_001}})).toBe(false);
   });
 
   it('never exposes an uncommitted reward in the backup when the main write fails', () => {

@@ -2,6 +2,7 @@ import {gameAudio} from '../presentation/audio';
 import {soundEnabled} from '../presentation/sampleAudio';
 import './TemplatePortraitReveal.css';
 import {assetUrl} from '../presentation/assetUrls';
+import {clearImageFailure,imageRecentlyFailed,rememberImageFailure} from '../presentation/imageFailures';
 import { useEffect,useLayoutEffect,useRef,useState,type ReactNode } from 'react';
 import { statLabels } from '../game/config';
 import { rating } from '../game/engine';
@@ -18,26 +19,26 @@ export function templatePortrait(id:string|null|undefined) {
  return fallbackProfile(id)?.avatar ?? null;
 }
 
-export function StarPortrait(props:{src:string|null;fallbackSrc?:string|null;name:string;highPotential?:boolean}) {
+type PortraitProps={src:string|null;fallbackSrc?:string|null;name:string;highPotential?:boolean;loading?:'lazy'};
+export function StarPortrait(props:PortraitProps) {
  // A failed previous player must not poison the next player's image.
  return <PortraitContent key={`${props.src??''}|${props.fallbackSrc??''}`} {...props}/>;
 }
-function PortraitContent({src,fallbackSrc,name,highPotential=false}:{src:string|null;fallbackSrc?:string|null;name:string;highPotential?:boolean}) {
- const [failures,setFailures]=useState(0);
+function PortraitContent({src,fallbackSrc,name,highPotential=false,loading}:PortraitProps) {
+ const availableBackup=()=>fallbackSrc&&fallbackSrc!==src&&!imageRecentlyFailed(fallbackSrc)?fallbackSrc:null;
+ const [imageSource,setImageSource]=useState(()=>src&&!imageRecentlyFailed(src)?src:availableBackup());
  const [retry,setRetry]=useState(0);
  const retryTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
  useEffect(()=>()=>{if(retryTimer.current!==null)clearTimeout(retryTimer.current);},[]);
- const backup=fallbackSrc&&fallbackSrc!==src?fallbackSrc:null;
- const imageSource=failures===0?src:failures===1?backup:null;
  if(!src&&highPotential)return <img className="rookie-portrait high-potential-portrait" src={assetUrl(`art/players/high-potential-rookie.png`)} alt="高潜力新人头像"/>;
  if(!src)return <SchemeArt name="rookie" className="rookie-portrait" label="待发掘球员头像"/>;
  if(!imageSource)return <span className="template-silhouette" aria-label={src?'球星头像暂不可用':'尚未匹配球星模板'}>
   <svg viewBox="0 0 100 120" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><circle cx="50" cy="34" r="22"/><path d="M10 120V99c0-28 18-43 40-43s40 15 40 43v21Z"/></svg><span>{src?'头像暂不可用':'待发掘'}</span>
  </span>;
- return <img key={`${imageSource}|${retry}`} className="template-portrait-photo" src={imageSource} alt={`${name}模板头像`} referrerPolicy="no-referrer" onError={()=>{
+ return <img key={`${imageSource}|${retry}`} className="template-portrait-photo" src={imageSource} alt={`${name}模板头像`} loading={loading} referrerPolicy="no-referrer" onLoad={()=>clearImageFailure(imageSource)} onError={()=>{
   if(retryTimer.current!==null)return;
   if(retry===0){retryTimer.current=setTimeout(()=>{retryTimer.current=null;setRetry(1);},500);}
-  else {setRetry(0);setFailures(v=>v+1);}
+  else {rememberImageFailure(imageSource);setRetry(0);setImageSource(imageSource===src?availableBackup():null);}
  }}/>;
 }
 

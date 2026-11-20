@@ -1,9 +1,11 @@
 import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useGym} from '../gymStore';
+import {playerLevelCap} from '../game/gym/progression';
 import {gameAudio} from '../presentation/audio';
 import {useModalAccessibility} from '../presentation/useModalAccessibility';
 import {useShaperPerformanceReady} from '../presentation/useShaperPerformanceReady';
 import {ComicDialog} from './ComicDialog';
+import {GameIcon} from './GameIcon';
 import {ActionNotice} from './ActionNotice';
 import {GymHomeArt, GymHomeBackground, GymHomeFooter, GymHomeIcon} from './GymHomeArt';
 import {HomeSettings} from './HomeSettings';
@@ -18,12 +20,17 @@ import GymGame from './GymGame';
 import './GymGame.css';
 import './GymHome.css';
 
-type HomePanel = 'settings' | 'collection' | 'rank' | 'alumni' | null;
+type HomePanel = 'announcement' | 'settings' | 'collection' | 'rank' | 'alumni' | null;
+const updateNoticeKey = 'legend-gym.update-notice';
+const updateNoticeVersion = 'level-cap-2000-v2';
 
 export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:boolean}={}) {
  const store = useGym();
  const [playing, setPlaying] = useState(false);
- const [panel, setPanel] = useState<HomePanel>(null);
+ const [panel, setPanel] = useState<HomePanel>(() => {
+  try {return localStorage.getItem(updateNoticeKey) === updateNoticeVersion ? null : 'announcement';}
+  catch {return 'announcement';}
+ });
  const [collectionTab, setCollectionTab] = useState<0 | 1>(0);
  const [busy, setBusy] = useState(false);
  const [tutorialMode,setTutorialMode]=useState<'new'|'replay'|null>(null);
@@ -72,6 +79,12 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    &&!/失败|不可用|限制|无法读取|同步暂停/.test(current.saveMessage);
  };
  useShaperPerformanceReady(businessReady(),businessReady);
+
+ const closeAnnouncement = () => {
+  try {localStorage.setItem(updateNoticeKey, updateNoticeVersion);}
+  catch {/* A storage error must not prevent the notice from closing. */}
+  setPanel(null);
+ };
 
  const homeAction = async (action: GymAction) => {
   if (busy || store.hydrating || !store.hasSave) return;
@@ -140,8 +153,9 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
     </> : <button type="button" className="b-new" aria-label="开设训练馆" aria-busy={busy || store.hydrating} disabled={busy || store.hydrating} onClick={() => void start()}><i><GymHomeIcon name="new"/></i><strong>{busy?'正在开馆…':store.hydrating?'读取中…':'开设训练馆'}</strong></button>}
    </section>
    <nav className="b-menu" aria-label="更多功能">
+    <button type="button" className="b-announcement" aria-label="公告" aria-haspopup="dialog" onClick={() => setPanel('announcement')}><span><GameIcon name="announcement"/></span><strong>公告</strong></button>
     <button type="button" aria-label="球星图鉴" onClick={() => {setCollectionTab(0); setPanel('collection');}}><span><GymHomeIcon name="book"/></span><strong>图鉴</strong></button>
-    <button type="button" aria-label="排行榜" onClick={() => setPanel('rank')}><span><GymHomeIcon name="rank"/></span><strong>排行榜</strong></button>
+    <button type="button" className="b-rank" aria-label="排行榜" onClick={() => setPanel('rank')}><span><GymHomeIcon name="rank"/></span><strong>排行榜</strong></button>
     <button type="button" aria-label="生涯" onClick={() => setPanel('alumni')}><span><GymHomeIcon name="career"/></span><strong>生涯</strong></button>
     <button type="button" aria-label="设置" onClick={() => setPanel('settings')}><span><GymHomeIcon name="settings"/></span><strong>设置</strong></button>
    </nav>
@@ -152,7 +166,15 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   </div>
   </div>
   {panel === 'settings' && <HomeSettings cloudEnabled={false} onClose={() => setPanel(null)} onTutorial={()=>{setPanel(null);setTutorialMode('replay');}}/>}
-  {panel && panel !== 'settings' && <ComicDialog title={titles[panel]} onClose={() => setPanel(null)} variant="album" className={panel === 'collection' ? 'collection-album-dialog' : panel === 'rank' ? 'leaderboard-dialog' : 'career-statistics-dialog gym-career-dialog'}>
+  {panel === 'announcement' && <ComicDialog title="新版公告" onClose={closeAnnouncement} className="gym-update-notice"
+   footer={<div className="gym-update-notice-actions"><button type="button" className="primary" onClick={closeAnnouncement}>知道了</button></div>}>
+   <ul className="gym-update-notice-list">
+    <li><strong>球员等级上限提升</strong><p>球员上限从 Lv.99 提升至 <b>Lv.{playerLevelCap}</b>，已有球员可以继续培养。</p></li>
+    <li><strong>页面样式优化</strong><p>调整首页及部分游戏页面的布局与显示效果。</p></li>
+    <li><strong>动画更流畅</strong><p>优化训练和界面动画，减少卡顿。</p></li>
+   </ul>
+  </ComicDialog>}
+  {panel && panel !== 'settings' && panel !== 'announcement' && <ComicDialog title={titles[panel]} onClose={() => setPanel(null)} variant="album" className={panel === 'collection' ? 'collection-album-dialog' : panel === 'rank' ? 'leaderboard-dialog' : 'career-statistics-dialog gym-career-dialog'}>
    {panel === 'alumni' ? <GymCareerPanel state={store.state} loadAlumni={store.hasSave ? store.loadAlumni : undefined} onCollection={tab => {setCollectionTab(tab); setPanel('collection');}}/> : <div className="contract-panel gym-panels">
     {panel === 'collection' && <GymCollectionPanel state={store.state} initialTab={collectionTab} onAction={action => void homeAction(action)} busy={busy || store.hydrating || !store.hasSave}/>}
     {panel === 'rank' && <GymLeaderboard/>}

@@ -31,3 +31,20 @@ it('remounts the same image once after a transient failure and cancels pending r
  expect(document.querySelector('img')!.getAttribute('src')).toBe('./art/poster-portraits/tucker.png');
  render('./other.png');fail();act(()=>root.unmount());expect(vi.getTimerCount()).toBe(0);
 });
+it('reuses the failed-image fallback when the same portrait is reopened',()=>{
+ root=createRoot(document.getElementById('root')!);
+ vi.useFakeTimers();
+ let attempts=0;
+ for(let view=0;view<3;view++){
+  render('./art/poster-portraits/conley.png');
+  for(let attempt=0;attempt<2&&document.querySelector('img');attempt++){
+   attempts++;fail();act(()=>vi.advanceTimersByTime(500));
+  }
+  expect(document.querySelector('.template-silhouette')).toBeTruthy();
+  act(()=>root.render(null));
+ }
+ expect(attempts).toBe(2);
+ vi.setSystemTime(Date.now()+30_000);
+ render('./art/poster-portraits/conley.png');
+ expect(document.querySelector('img')?.getAttribute('src')).toBe('./art/poster-portraits/conley.png');
+});

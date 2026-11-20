@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {equipmentCatalog} from './catalog';
-import {dispatchGym, newGym, staminaMax, type GymAction, type GymState} from './engine';
+import {dispatchGym, newGym, playerLevelCap, staminaMax, type GymAction, type GymState} from './engine';
 import {forecastTraining} from './forecast';
 import {equipmentTrainingComparison, previewEquipmentState, previewProjectState, projectTrainingComparison} from './equipmentForecast';
 
@@ -60,8 +60,8 @@ describe('equipment training comparisons', () => {
   it('distinguishes level-25 completion, level cap and an empty court without projecting completed goals', () => {
     const state = newGym(1_000, 7);
     state.player!.level = state.player!.peakLevel = 25;
-    expect(equipmentTrainingComparison(state, 'relic_006').rows.map(row => row.level)).toEqual([99]);
-    state.player!.level = state.player!.peakLevel = 99;
+    expect(equipmentTrainingComparison(state, 'relic_006').rows.map(row => row.level)).toEqual([playerLevelCap]);
+    state.player!.level = state.player!.peakLevel = playerLevelCap;
     expect(equipmentTrainingComparison(state, 'relic_006')).toEqual({status: 'ended', rows: []});
     state.player = null;
     expect(equipmentTrainingComparison(state, 'relic_006')).toEqual({status: 'no-player', rows: []});

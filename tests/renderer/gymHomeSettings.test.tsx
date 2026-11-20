@@ -124,3 +124,17 @@ it('refreshes only account/cloud information without awaiting gameplay connectio
  const refresh=[...document.querySelectorAll<HTMLButtonElement>('button')].find(button=>button.textContent==='刷新账号')!;
  expect(refresh.disabled).toBe(false);
 });
+
+it('reuses the same avatar fallback when the settings panel is reopened',async()=>{
+ const avatar='https://i1.hoopchina.com.cn/user/player-fixture.jpg';
+ getUser.mockResolvedValue({code: 200, data: {islogin: 1, puid: 'avatar-coach', nickname: '球馆教练', avatar}});
+ let attempts=0;
+ for(let view=0;view<3;view++){
+  await mount();
+  const img=document.querySelector('.settings-avatar img');
+  if(img){attempts++;act(()=>img.dispatchEvent(new Event('error')));}
+  expect(document.querySelector('.settings-avatar .game-icon')).toBeTruthy();
+  act(()=>root!.unmount());root=null;
+ }
+ expect(attempts).toBe(1);
+});

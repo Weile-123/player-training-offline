@@ -1,6 +1,6 @@
 import {describe, expect, it} from 'vitest';
 import {statKeys} from '../types';
-import {cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendationPayout, type GymAction, type GymState} from './engine';
+import {cooperationOffers, cooperationStatus, dispatchGym, newGym, playerLevelCap, recommendationPayout, type GymAction, type GymState} from './engine';
 
 const at = 1_800_000_000_000;
 function command(state: GymState, action: GymAction) {
@@ -8,7 +8,7 @@ function command(state: GymState, action: GymAction) {
   expect(result.error).toBeUndefined();
   return result.state;
 }
-function fixture(level: 98 | 99, complete = false) {
+function fixture(level: number, complete = false) {
   let state = newGym(at, 7);
   state.gymLevel = 8; state.credits = 100; state.player = null;
   state = command(state, {type: 'recruit', preference: 'forward'});
@@ -27,8 +27,8 @@ function fixture(level: 98 | 99, complete = false) {
 }
 
 describe('level cap resource protection', () => {
-  it('rejects a new cooperation at 99 without changing the player, eligibility or RNG', () => {
-    const state = fixture(99), before = structuredClone(state);
+  it('rejects a new cooperation at the cap without changing the player, eligibility or RNG', () => {
+    const state = fixture(playerLevelCap), before = structuredClone(state);
     const offer = cooperationOffers(state)[0];
     const denied = dispatchGym(state, state.revision, {type: 'accept-cooperation', id: offer.id, playerId: state.player!.id}, at);
     expect(denied.error).toContain('无法新接或更换合作');
@@ -38,7 +38,7 @@ describe('level cap resource protection', () => {
   });
 
   it.each([false, true])('preserves completed cooperation and actual settlement when a capped replacement is refused (repeat=%s)', repeat => {
-    const state = fixture(99, true);
+    const state = fixture(playerLevelCap, true);
     if (repeat) state.postgameRecommendedTemplates = [state.player!.templateId!];
     const original = structuredClone(state), originalStatus = cooperationStatus(state), expected = recommendationPayout(state);
     expect(originalStatus.complete).toBe(true);
@@ -58,8 +58,8 @@ describe('level cap resource protection', () => {
     expect(settled.alumni.at(-1)!.equipmentTraining.cooperationCourses).toEqual([2, 2]);
   });
 
-  it('still accepts and replaces cooperation at 98 using the ordinary new baseline', () => {
-    let state = fixture(98);
+  it('still accepts and replaces cooperation one level before the cap using the ordinary new baseline', () => {
+    let state = fixture(playerLevelCap - 1);
     const basic = cooperationOffers(state)[0], specialist = cooperationOffers(state)[1];
     state = command(state, {type: 'accept-cooperation', id: basic.id, playerId: state.player!.id});
     expect(state.player!.cooperation).toMatchObject({id: basic.id, acceptedShots: 4_000, acceptedCourses: 400});
@@ -69,8 +69,8 @@ describe('level cap resource protection', () => {
     expect(state.player!.equipmentTraining.cooperationCourses).toEqual([0, 0]);
   });
 
-  it('keeps explicit abandonment available at 99', () => {
-    const state = fixture(99, true);
+  it('keeps explicit abandonment available at the cap', () => {
+    const state = fixture(playerLevelCap, true);
     const abandoned = command(state, {type: 'abandon-cooperation', playerId: state.player!.id});
     expect(abandoned.player!.cooperation).toBeNull();
     expect(abandoned.player!.equipmentTraining.cooperationCourses).toEqual([0, 0]);
@@ -78,8 +78,8 @@ describe('level cap resource protection', () => {
     expect(abandoned.fame).toBe(state.fame);
   });
 
-  it('does not consume a drink at 99, while allowing purchases for other or future players', () => {
-    const state = fixture(99);
+  it('does not consume a drink at the cap, while allowing purchases for other or future players', () => {
+    const state = fixture(playerLevelCap);
     state.player!.stamina = 0; state.inventory.drink = 1;
     const before = structuredClone(state);
     const denied = dispatchGym(state, state.revision, {type: 'use-drink', id: state.player!.id}, at);
@@ -93,8 +93,8 @@ describe('level cap resource protection', () => {
     expect(stocked.player!.stamina).toBe(0);
   });
 
-  it('still uses one drink to restore ten stamina at 98', () => {
-    const state = fixture(98);
+  it('still uses one drink to restore ten stamina one level before the cap', () => {
+    const state = fixture(playerLevelCap - 1);
     state.player!.stamina = 0; state.inventory.drink = 1;
     const restored = command(state, {type: 'use-drink', id: state.player!.id});
     expect(restored.inventory.drink).toBe(0);

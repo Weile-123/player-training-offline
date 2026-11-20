@@ -11,6 +11,7 @@ import {tutorialEnabled,saveTutorialEnabled} from '../presentation/tutorialPrefe
 import {useGym} from '../gymStore';
 import {gymCloudSync} from '../platform/gymCloudSync';
 import {gymCloudProgress,type GymCloudProgress} from '../platform/gymCloudArchive';
+import {clearImageFailure,imageRecentlyFailed,rememberImageFailure} from '../presentation/imageFailures';
 import {ActionNotice} from './ActionNotice';
 import './HomeSettings.css';
 
@@ -23,9 +24,15 @@ type HomeSettingsProps={onClose:()=>void;onTutorial?:()=>void;cloudEnabled?:bool
 export function HomeSettings({cloudEnabled=true,...props}:HomeSettingsProps){
  return cloudEnabled?<CloudHomeSettings {...props}/>:<LocalHomeSettings onClose={props.onClose} onTutorial={props.onTutorial}/>;
 }
+function SettingsAvatar({src}:{src:string}){
+ const [failed,setFailed]=useState(()=>imageRecentlyFailed(src));
+ return <div className="settings-avatar">{src&&!failed?
+  <img src={src} alt="虎扑头像" referrerPolicy="no-referrer" onLoad={()=>clearImageFailure(src)} onError={()=>{rememberImageFailure(src);setFailed(true);}}/>:
+  <GameIcon name="people"/>}</div>;
+}
 function LocalHomeSettings({onClose,onTutorial}:{onClose:()=>void;onTutorial?:()=>void}){
  const store=useGym(),sync=useSyncExternalStore(gymCloudSync.subscribe,gymCloudSync.getSnapshot,gymCloudSync.getSnapshot);
- const [notice,setNotice]=useState(''),[feedback,setFeedback]=useState(false),[failedAvatar,setFailedAvatar]=useState('');
+ const [notice,setNotice]=useState(''),[feedback,setFeedback]=useState(false);
  useEffect(()=>gymCloudSync.start(),[]);
  const avatar=safeAvatarUrl(sync.user?.avatar)||safeAvatarUrl(sync.user?.userHeadUrl),busy=!!sync.busy;
  const run=async(work:()=>Promise<unknown>)=>{setNotice('');try{await work();}catch(error){setNotice(errorText(error));}};
@@ -34,7 +41,7 @@ function LocalHomeSettings({onClose,onTutorial}:{onClose:()=>void;onTutorial?:()
  return <ComicDialog title="设置" className="home-settings-dialog" onClose={()=>{gymCloudSync.cancelSync();onClose();}} dismissible={sync.busy!=='restore'}>
   <div className="home-settings">
    <section className="settings-account" aria-label="虎扑账号">
-    <div className="settings-avatar">{avatar&&failedAvatar!==avatar?<img key={avatar} src={avatar} alt="虎扑头像" referrerPolicy="no-referrer" onError={()=>setFailedAvatar(avatar)}/>:<GameIcon name="people"/>}</div>
+    <SettingsAvatar key={avatar} src={avatar}/>
     <div><strong>{sync.busy==='account'?'正在获取虎扑账号…':sync.user?.nickname||(sync.user?'虎扑用户':'尚未登录虎扑')}</strong><p>{sync.user?'已登录':'请在虎扑登录后刷新账号'}</p></div>
     <button className="secondary" disabled={busy||!!sync.preview} aria-busy={sync.busy==='account'} onClick={refreshAccount}>刷新账号</button>
    </section>
@@ -64,7 +71,7 @@ function SettingsSoundSwitch({gym=false}:{gym?:boolean}){
 }
 function CloudHomeSettings({onClose,onTutorial}:HomeSettingsProps){
  const store=useContract(),sync=useSyncExternalStore(cloudSync.subscribe,cloudSync.getSnapshot,cloudSync.getSnapshot);
- const [enabled,setEnabled]=useState(tutorialEnabled),[notice,setNotice]=useState(''),[feedback,setFeedback]=useState(false),[failedAvatar,setFailedAvatar]=useState(''),[now,setNow]=useState(Date.now);
+ const [enabled,setEnabled]=useState(tutorialEnabled),[notice,setNotice]=useState(''),[feedback,setFeedback]=useState(false),[now,setNow]=useState(Date.now);
  const [noticeError,setNoticeError]=useState(false);
  useEffect(()=>{const stop=cloudSync.start(),timer=setInterval(()=>setNow(Date.now()),250);return()=>{clearInterval(timer);cloudSync.cancelSync();stop();};},[]);
  const run=async(action:()=>Promise<unknown>)=>{setNotice('');setNoticeError(false);try{await action();}catch(error){setNoticeError(true);setNotice(errorText(error));}};
@@ -75,7 +82,7 @@ function CloudHomeSettings({onClose,onTutorial}:HomeSettingsProps){
  return <ComicDialog title="设置" className="home-settings-dialog" onClose={()=>{cloudSync.cancelSync();onClose();}} dismissible={sync.busy!=='restore'}>
   <div className="home-settings">
    <section className="settings-account" aria-label="虎扑账号">
-    <div className="settings-avatar">{avatar&&failedAvatar!==avatar?<img key={avatar} src={avatar} alt="虎扑头像" referrerPolicy="no-referrer" onError={()=>setFailedAvatar(avatar)}/>:<GameIcon name="people"/>}</div>
+    <SettingsAvatar key={avatar} src={avatar}/>
     <div><strong>{sync.busy==='account'?'正在获取虎扑账号…':sync.user?.nickname||(sync.user?'虎扑用户':'尚未登录虎扑')}</strong><p>{sync.user?'已登录':'请在虎扑登录后刷新账号'}</p></div>
     <button className="secondary" disabled={busy||!!sync.preview} onClick={()=>void run(cloudSync.refresh)}>刷新账号</button>
    </section>

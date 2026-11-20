@@ -1,4 +1,5 @@
 import {playerValue, type GymAlumnus, type GymState} from '../src/game/gym/engine';
+import {playerLevelCap} from '../src/game/gym/progression';
 import {validGym} from '../src/game/gym/save';
 import {templateById} from '../src/game/templates';
 import {statKeys} from '../src/game/types';
@@ -24,7 +25,7 @@ export function verifiedGymRankingProgress({binding, evidenceId, state, alumni =
  for (const player of [state.player, ...state.bench]) if (player) add(player, playerValue(state, player));
  for (const player of alumni) add(player, player.finalValue);
  for (const player of candidates) {
-  if (!templateById(player.templateId) || !/^(0|[1-9]\d{0,159})$/.test(player.value) || !Number.isInteger(player.level) || player.level < 0 || player.level > 99 || !statKeys.every(key => Number.isInteger(player.stats[key]) && player.stats[key] >= 0 && player.stats[key] <= 99)) throw Error('Invalid previous verified player record');
+  if (!templateById(player.templateId) || !/^(0|[1-9]\d{0,159})$/.test(player.value) || !Number.isInteger(player.level) || player.level < 0 || player.level > playerLevelCap || !statKeys.every(key => Number.isInteger(player.stats[key]) && player.stats[key] >= 0 && player.stats[key] <= 99)) throw Error('Invalid previous verified player record');
  }
  const best = candidates.reduce<GymRankPlayer | null>((record, player) => !record || BigInt(player.value) > BigInt(record.value) ? player : record, null);
  return {puid: binding.actor, runId: binding.runId, revision: state.revision, evidenceId, fame: state.fame, best: best ? structuredClone(best) : null};

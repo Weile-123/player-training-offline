@@ -1,14 +1,15 @@
 import {initializeRecommendationRecords, recommendation, recommendedTemplateIds, type GymAlumnus, type GymState} from './engine';
-import {decodeGym, encodeGym, gymSaveKeys, readGym, validGymAlumnus, writeGym, type GymStorage} from './save';
+import {decodeGym, encodeGym, gymSaveKeys, readGym, validGymAlumnus, writeGym, writeGymEnvelope, type GymStorage} from './save';
 
 export const recentAlumniLimit = 100;
 export const gymHistoryDatabaseName = 'gym-management-history-v1';
+export const gymCloudRestoreBackupKey = 'gym-management-v1.cloud-restore.backup';
 const memoryPrefix = 'gym-management-v1.alumni.';
 const snapshotPrefix = 'gym-management-v1.migration.';
 
 export type AlumniPage = {players: GymAlumnus[]; total: number};
 type Current = ReturnType<typeof readGym>;
-export type GymCommit<T> = {value: T; state?: GymState};
+export type GymCommit<T> = {value: T; state?: GymState; recoverySnapshot?: {key: string; value: string}};
 export type GymCommitted<T> = {value: T; state: GymState | null; saved: boolean; backupOk: boolean};
 type ArchivedPlayer = {archiveId: string; sequence: number; player: GymAlumnus};
 type Compacted = {state: GymState; additions: ArchivedPlayer[]};
@@ -113,6 +114,9 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
     const next = after?.state ?? before?.state ?? null;
     const changed = !!outcome.state || !!before?.additions.length || prepared !== current.state;
     if (!changed || !next) return {value: outcome.value, state: next, saved: false, backupOk: true};
+    // The synchronous/injected repository keeps its previous storage contract.
+    // A refused recovery backup must leave the current save untouched.
+    if (outcome.recoverySnapshot) storage.setItem(outcome.recoverySnapshot.key, outcome.recoverySnapshot.value);
     const additions = [...(before?.additions ?? []), ...(after?.additions ?? [])];
     // Staging keys are immutable from the perspective of committed archive
     // counts. Failure leaves only unreachable staging data; the old main and
@@ -132,6 +136,7 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
 
   async function indexedTransaction<T>(work: (current: Current) => GymCommit<T>, repairMirror: boolean): Promise<GymCommitted<T>> {
     const db = await database();
+    let committedEnvelope: string | undefined;
     const committed = await new Promise<GymCommitted<T>>((resolve, reject) => {
       const tx = db.transaction(['hot', 'alumni', 'snapshots'], 'readwrite');
       const hot = tx.objectStore('hot');
@@ -152,6 +157,9 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
               // Encode before queuing any writes, then let IDB commit all queued
               // records together. Request, quota or transaction failures abort all.
               const hotEncoded = encodeGym(next);
+              // Restoring a cloud archive must not depend on localStorage
+              // capacity. Backup and replacement commit (or abort) together.
+              if (outcome.recoverySnapshot) tx.objectStore('snapshots').put(outcome.recoverySnapshot.value, outcome.recoverySnapshot.key);
               if (!stored) {
                 const snapshot = {main: storage.getItem(gymSaveKeys.main), backup: storage.getItem(gymSaveKeys.backup)};
                 if (snapshot.main || snapshot.backup) tx.objectStore('snapshots').put(snapshot,
@@ -164,6 +172,7 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
               for (const entry of [...(before?.additions ?? []), ...(after?.additions ?? [])]) archive.add(entry);
               hot.put(hotEncoded, 'current');
               hot.put(hotEncoded, 'backup');
+              committedEnvelope = hotEncoded;
             }
             result = {value: outcome.value, state: next, saved, backupOk: true};
           };
@@ -215,7 +224,7 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
       tx.onerror = () => { /* onabort is the sole failure notification. */ };
     });
     if ((committed.saved || repairMirror) && committed.state) {
-      const mirror = writeGym(storage, committed.state);
+      const mirror = committedEnvelope === undefined ? writeGym(storage, committed.state) : writeGymEnvelope(storage, committedEnvelope);
       committed.backupOk = mirror.ok && !!mirror.backupOk;
     }
     return committed;

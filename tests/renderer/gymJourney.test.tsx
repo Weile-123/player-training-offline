@@ -85,7 +85,7 @@ it('uses the upright B cover and exposes no new-gym control once a saved gym exi
   expect(document.querySelector('.gym-home-b .b-masthead h1')?.textContent).toBe('传奇球馆');
   expect(document.querySelector('.gym-home-background img')?.getAttribute('src')).toContain('background-b-portrait.webp');
   expect(document.querySelector('.b-save')?.textContent).toContain('150');
-  expect([...document.querySelectorAll('.gym-home-b button')].map(button => button.getAttribute('aria-label'))).toEqual(['继续经营', '球星图鉴', '排行榜', '生涯', '设置']);
+  expect([...document.querySelectorAll('.gym-home-b button')].map(button => button.getAttribute('aria-label'))).toEqual(['继续经营', '公告', '球星图鉴', '排行榜', '生涯', '设置']);
   expect(document.querySelector('.b-new')).toBeNull();
   // Background cropping must not define a control's layout box or z-order.
   const backdrop=document.querySelector('.gym-home-backdrop')!;

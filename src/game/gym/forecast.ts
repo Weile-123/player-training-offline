@@ -10,7 +10,11 @@ export type TrainingForecast = {
 // Cache by payout tuple; elapsed time below is a deterministic supply estimate,
 // not a guarantee of the random finishing time or any particular template.
 const expectations = new Map<string, Float64Array>();
+const exactExpectationLimit = 100_000;
 function stoppingShots(required: number, payouts: readonly number[]): number {
+  // At long horizons the final shot's overshoot is negligible. Divide by mean
+  // XP to avoid allocating one entry for every remaining experience point.
+  if (required > exactExpectationLimit) return required * 10 / (3 * payouts[0] + 6 * payouts[1] + payouts[2]);
   const key = payouts.join(':');
   let table = expectations.get(key);
   if (!table || table.length <= required) {
@@ -37,7 +41,27 @@ export function estimateShotTime(state: GymState, player: GymPlayer, shots: numb
   let course = player.training.shots;
   let nextShot = Math.max(0, player.nextShotAt - state.updatedAt);
   let at = 0;
-  for (let i = 0; i < shots; i++) {
+  let completed = 0;
+  const courseStarts = shots > 10_000 ? new Map<number, {completed: number; at: number}>() : null;
+  while (completed < shots) {
+    // After the first shot, cooldown is fixed. Repeating a course boundary's
+    // stamina and recovery remainder repeats its shot timing exactly.
+    if (courseStarts && completed > 0 && course === 0) {
+      const key = stamina * recovery + remainder;
+      const prior = courseStarts.get(key);
+      if (prior) {
+        const cycleSize = completed - prior.completed;
+        const repeats = Math.floor((shots - completed) / cycleSize);
+        if (repeats > 0) {
+          at += repeats * (at - prior.at);
+          completed += repeats * cycleSize;
+          nextShot = at + interval;
+          if (completed === shots) break;
+        }
+      } else {
+        courseStarts.set(key, {completed, at});
+      }
+    }
     const next = Math.max(at, nextShot, stamina < 1 ? at + recovery - remainder : at);
     const elapsed = next - at;
     if (stamina >= capacity || elapsed >= (capacity - stamina) * recovery - remainder) {
@@ -54,6 +78,7 @@ export function estimateShotTime(state: GymState, player: GymPlayer, shots: numb
     if (course === 10) {course = 0; stamina = Math.min(capacity, stamina + courseReturn);}
     if (stamina === capacity) remainder = 0;
     nextShot = at + interval;
+    completed++;
   }
   return at;
 }

@@ -1,6 +1,6 @@
 import {statKeys} from '../types';
 import {templateById} from '../templates';
-import {cooperationStatus, playerLevelCap, recommendation, recommendationPayout, postgameRepeatTemplateCredits, trainingCreditMilestones, type GymPlayer, type GymState} from './engine';
+import {cooperationStatus, playerLevelCap, recommendationPayout, postgameRepeatTemplateCredits, trainingCreditMilestones, type GymPlayer, type GymState} from './engine';
 
 const tierIds = [null, 'rotation', 'starter', 'star', 'superstar', 'legend'];
 const tierNames = ['待发掘', '替补', '首发', '全明星', '巨星', '传奇'];
@@ -13,8 +13,7 @@ export type TrainingGuidance = {
 /** Uses actual template/level milestones; never promises a template by time. */
 export function trainingGuidance(state: GymState, player: GymPlayer | null = state.player): TrainingGuidance | null {
   if (!player) return null;
-  const reward = recommendation(state, player);
-  const payout = recommendationPayout(state, player);
+  const reward = recommendationPayout(state, player);
   const tier = tierIds.indexOf(templateById(player.templateId)?.tier ?? null);
   const ended = player.level >= playerLevelCap;
   const milestone = ended ? undefined : trainingCreditMilestones.find(item => item.credits > reward.trainingCredits);
@@ -24,7 +23,7 @@ export function trainingGuidance(state: GymState, player: GymPlayer | null = sta
   const allStatsMax = maxedStats === statKeys.length;
   const cooperation = cooperationStatus(state, player);
   const remainingValue: string[] = [];
-  if (payout.repeatTemplate) remainingValue.push(`重复模板基础 ${postgameRepeatTemplateCredits} 券，培养、合作与器材加奖照常叠加`);
+  if (reward.repeatTemplate) remainingValue.push(`重复模板基础 ${postgameRepeatTemplateCredits} 券，培养、合作与器材加奖照常叠加`);
   if (ended) remainingValue.push(`训练已结束，按当前实际模板结算培养奖金 ${reward.trainingCredits} 券，无法继续训练提升`);
   else if (nextBonus) remainingValue.push(`下一培养奖金还可增加 ${nextBonus.additionalCredits} 券，需要 Lv.${nextBonus.level} 且匹配${nextBonus.tierName}及以上`);
   else remainingValue.push('已达到最高培养奖金，继续升级不会增加培养奖金');

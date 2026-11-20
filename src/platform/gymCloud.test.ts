@@ -1,18 +1,20 @@
 import {afterEach, expect, it, vi} from 'vitest';
+import {IDBFactory, IDBObjectStore} from 'fake-indexeddb';
 import {createGymStore} from '../gymStore';
 import {newGym, type GymState} from '../game/gym/engine';
+import {gymCloudRestoreBackupKey, type GymHistoryOptions} from '../game/gym/history';
 import {encodeGym, validGym, writeGym, type GymStorage} from '../game/gym/save';
 import {exportGymCloudArchive, parseGymCloudArchive, gymCloudProgress} from './gymCloudArchive';
 import {createGymCloudSync} from './gymCloudSync';
 import {readGymCloud, writeGymCloud} from './gymCloudTransport';
 import {hupuProject} from './hupuProject';
 
-afterEach(() => {vi.unstubAllGlobals(); vi.useRealTimers();});
-function context(state: GymState = newGym(1000, 17)) {
+afterEach(() => {vi.restoreAllMocks(); vi.unstubAllGlobals(); vi.useRealTimers();});
+function context(state: GymState = newGym(1000, 17), options?: GymHistoryOptions) {
  const values = new Map<string, string>(); let fail = false;
  const storage: GymStorage = {getItem: key => values.get(key) ?? null, setItem: (key, value) => {if (fail) throw Error('quota'); values.set(key, value);}};
  writeGym(storage, state);
- const store = createGymStore(storage, 17, () => 1000);
+ const store = createGymStore(storage, 17, () => 1000, options);
  return {store, values, fail: () => {fail = true;}};
 }
 const identify = (state: GymState) => {const {createdAt, seed, revision, updatedAt} = state; return {createdAt, seed, revision, updatedAt};};
@@ -74,12 +76,13 @@ it('only restores known persistent game fields, omitting unknown UI extensions a
 it('restores through the durable repository, keeps a portable backup and survives a new store instance', async () => {
  const {store, values} = context(); const before = await exportGymCloudArchive(store);
  const remote = newGym(900, 88); remote.credits = 37;
+ Object.assign(remote.player!, {level: 2_000, peakLevel: 2_000});
  await store.getState().restoreCloudArchive!(cloud(remote), identify(store.getState().state), before);
  expect(store.getState()).toMatchObject({hasSave: true, isSuspended: true, pendingOfflineReport: null});
  expect(store.getState().state).toMatchObject({seed: 88, credits: 37});
  expect(values.get('gym-management-v1.cloud-restore.backup')).toBe(before);
  const storage = {getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => {values.set(key, value);}};
- expect(createGymStore(storage).getState().state).toMatchObject({seed: 88, credits: 37});
+ expect(createGymStore(storage).getState().state).toMatchObject({seed: 88, credits: 37, player: {level: 2_000, peakLevel: 2_000}});
 });
 it('refuses a stale local restore and preserves original state when local writing fails', async () => {
  const {store, fail} = context(), expected = identify(store.getState().state), original = structuredClone(store.getState().state);
@@ -114,6 +117,26 @@ it('previews and confirms a selected remote snapshot, checking the current accou
  api.user.mockResolvedValueOnce({islogin: 1, puid: 'another', nickname: 'other'});
  await expect(sync.confirmSync()).rejects.toThrow('账号已切换'); expect(store.getState().state.seed).toBe(17);
  await sync.confirmSync(); expect(store.getState().state.seed).toBe(88); expect(sync.getSnapshot().preview).toBeNull();
+});
+it('keeps a cloud confirmation available after a local quota failure and restores the same preview on retry', async () => {
+ const {store} = context(newGym(1000, 17), {indexedDB: new IDBFactory()});
+ await store.getState().hydrate();
+ const raw = cloud(newGym(900, 88)), api = transport(raw), sync = createGymCloudSync(store, api);
+ await sync.refresh(); await sync.prepareSync();
+ const original = structuredClone(store.getState().state), put = IDBObjectStore.prototype.put;
+ const broken = vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: globalThis.IDBObjectStore, value, key) {
+  if (this.name === 'snapshots' && key === gymCloudRestoreBackupKey) throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+  return put.call(this, value, key);
+ });
+ const message = '本机存储空间不足，本次同步未生效，本地和云端进度均已保留。';
+ await expect(sync.confirmSync()).rejects.toThrow(message);
+ expect(sync.getSnapshot()).toMatchObject({phase: 'error', busy: null, preview: raw, message});
+ expect(store.getState().state).toEqual(original); expect(api.write).not.toHaveBeenCalled();
+ broken.mockRestore();
+ await sync.confirmSync();
+ expect(store.getState().state.seed).toBe(88);
+ expect(sync.getSnapshot()).toMatchObject({phase: 'ready', busy: null, preview: null});
+ expect(api.write).not.toHaveBeenCalled();
 });
 it('rejects late remote data when the local gym changed during the read or confirmation', async () => {
  const initial = newGym(1000, 17); initial.credits = 3;

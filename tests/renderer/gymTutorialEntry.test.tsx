@@ -47,6 +47,26 @@ function button(name:string){const control=[...document.querySelectorAll<HTMLBut
 async function press(name:string){await act(async()=>{button(name).click();await flushMicrotasks();});}
 function deferred<T>(){let resolve!:(value:T)=>void;return {promise:new Promise<T>(accept=>{resolve=accept;}),resolve:(value:T)=>resolve(value)};}
 
+it.each(['知道了', '关闭面板'])('shows the latest announcement until it is dismissed using %s', async action => {
+ localStorage.setItem('legend-gym.update-notice', 'level-cap-2000');
+ await mount();
+ const notice = document.querySelector('.gym-update-notice');
+ expect(notice?.querySelector('h2')?.textContent).toBe('新版公告');
+ expect(notice?.textContent).toContain('从 Lv.99 提升至 Lv.2000');
+ await act(async () => root!.unmount());
+ root = null;
+ await mount();
+ expect(document.querySelector('.gym-update-notice')).toBeTruthy();
+ await press(action);
+ expect(document.querySelector('.gym-update-notice')).toBeNull();
+ await act(async () => root!.unmount());
+ root = null;
+ await mount();
+ expect(document.querySelector('.gym-update-notice')).toBeNull();
+ await press('公告');
+ expect(document.querySelector('.gym-update-notice h2')?.textContent).toBe('新版公告');
+});
+
 it('offers a separate practice before creating the first real gym',async()=>{
  await mount();const before=structuredClone(store().getState().state);
  await press('开设训练馆');

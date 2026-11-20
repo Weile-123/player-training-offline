@@ -2,8 +2,7 @@ import manifest from '../data/runtime-assets.json';
 import {assetSource,configureAssets,hasAsset,localAsset,rememberAsset,rememberAssetUrl,type AssetConfig} from './assetUrls';
 import {applyAnimationConfig} from './animationConfig';
 import {preloadProductionAssets} from './productionAssets';
-import {selectStartupAssets,startupAssetBatches} from './startupAssets';
-import {gameAudio} from './audio';
+import {otherHomeBackground,selectStartupAssets} from './startupAssets';
 
 export type LoadingProgress={percent:number;completed:number;total:number;error:string};
 const entries=selectStartupAssets(manifest.entries);
@@ -20,19 +19,23 @@ async function validate(blob:Blob,path:string){
  const url=URL.createObjectURL(blob);
  let timer:ReturnType<typeof setTimeout>|undefined;
  try{
-  const img=new Image();img.src=url;
-  await Promise.race([img.decode(),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('图片解码超时')),45000);})]);
+  const img=new Image(),legacyLoad=typeof img.decode==='function'?null:new Promise<void>((resolve,reject)=>{
+   img.onload=()=>resolve();img.onerror=()=>reject(Error('图片加载失败'));
+  });
+  img.src=url;
+  await Promise.race([legacyLoad??img.decode(),new Promise<never>((_,reject)=>{timer=setTimeout(()=>reject(Error('图片解码超时')),45000);})]);
   return url;
  }catch(error){URL.revokeObjectURL(url);throw error;}finally{clearTimeout(timer);}
 }
 /** Count validated, usable assets. Persistent caching is optional in mobile WebViews. */
 export function preloadAssets(){
  if(task)return task;
- // Audio preparation is optional and parallel: missing audio never blocks entry.
- void gameAudio.preload();
+ // Prep audio alongside artwork so an immediate first shot can use the
+ // decoded cues. Audio stays outside the entry bundle and readiness gate.
+ void import('./audio').then(({gameAudio})=>gameAudio.preload()).catch(()=>{});
  report();
  task=(async()=>{
-  if(import.meta.env.PROD)return preloadProductionAssets(done,report);
+  if(import.meta.env.PROD)return preloadProductionAssets(done,report,entries);
   const config=await json(localAsset('config/assets.json')) as AssetConfig;
   configureAssets(config);
   const base=config.baseUrl?.trim()??'';
@@ -40,10 +43,9 @@ export function preloadAssets(){
   let cache:Cache|undefined;
   try{if('caches' in window)cache=await caches.open('player-training-assets-v1')}catch{/* WebViews may only allow the in-memory cache. */}
   const failures:string[]=[];
-  for(const batch of startupAssetBatches(entries)){
   let next=0;
   await Promise.all(Array.from({length:4},async()=>{
-   while(next<batch.length&&!failures.length){const asset=batch[next++];if(hasAsset(asset.path)){done.add(asset.path);report();continue;}
+   while(next<entries.length&&!failures.length){const asset=entries[next++];if(hasAsset(asset.path)){done.add(asset.path);report();continue;}
     const source=new URL(assetSource(asset.path,asset.local),location.href).href;
     const cacheUrl=new URL(source);cacheUrl.searchParams.set('v',asset.hash);const key=cacheUrl.href;
     try{
@@ -60,14 +62,21 @@ export function preloadAssets(){
      // decoding all local images again at the end causes a mobile decode spike.
      if(decodedUrl)rememberAssetUrl(asset.path,decodedUrl);else rememberAsset(asset.path,blob);
      done.add(asset.path);report();
-    }catch{failures.push(asset.path);}
+    }catch{
+     const alternate=otherHomeBackground(asset.path);
+     if(alternate){
+      try{
+       const url=await validate(await request(new URL(localAsset(alternate),location.href).href),alternate);
+       if(url){rememberAssetUrl(asset.path,url);done.add(asset.path);report();continue;}
+      }catch{/* The loading screen keeps retry available when both covers fail. */}
+     }
+     failures.push(asset.path);
+    }
    }
   }));
-  if(failures.length)break;
-  }
   if(failures.length)throw Error(`${failures.length} 项资源未能加载，请检查网络后重试；已加载资源会保留。`);
   const animation=await json(localAsset('config/animation.json'));if(!applyAnimationConfig(animation))throw Error('动画配置加载失败，请重试。');
-  await document.fonts.ready;
+  await document.fonts?.ready;
  })().then(()=>{assetsReady=true;}).catch(error=>{assetsReady=false;report(error instanceof Error?error.message:'加载失败，请重试。');task=null;throw error;});
  return task;
 }

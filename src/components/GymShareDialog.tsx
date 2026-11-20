@@ -1,5 +1,6 @@
 ﻿import {useEffect, useRef, useState} from 'react';
 import type {GymPlayer} from '../game/gym/engine';
+import {playerLevelCap} from '../game/gym/progression';
 import {cloneData} from '../utils/cloneData';
 import {generateGymSharePoster, gymShareCopy} from '../presentation/gymSharePoster';
 import {openGymPost, type GymPostingStage} from '../platform/gymPosting';
@@ -15,7 +16,7 @@ export function GymShareDialog({player, value = '0', reason, onClose, onGranted,
  const [busy, setBusy] = useState(false), [rendering, setRendering] = useState(true), [message, setMessage] = useState(''), [done, setDone] = useState(false);
  const [image, setImage] = useState<{url: string; blob: Blob} | null>(null), [stage, setStage] = useState<GymPostingStage | null>(null);
  const lock = useRef(false), alive = useRef(true), controller = useRef<AbortController>(), imageUrl = useRef('');
- const reward = reason === 'levels' ? '分享奖励：等级 +3（最高 99 级）' : '分享奖励：当前球员体力回满';
+ const reward = reason === 'levels' ? `分享奖励：等级 +3（最高 ${playerLevelCap} 级）` : '分享奖励：当前球员体力回满';
  useEffect(() => {alive.current = true; return () => {alive.current = false; controller.current?.abort(); if (imageUrl.current) URL.revokeObjectURL(imageUrl.current);};}, []);
  useEffect(() => {
   let cancelled = false;

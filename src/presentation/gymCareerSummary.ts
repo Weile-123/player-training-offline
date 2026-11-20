@@ -1,5 +1,6 @@
 import {templateById, type TemplateTier} from '../game/templates';
 import type {GymAlumnus, GymState} from '../game/gym/engine';
+import {playerLevelCap} from '../game/gym/progression';
 
 export const careerTiers: readonly {id: TemplateTier; label: string}[] = [
   {id: 'rotation', label: '替补'}, {id: 'starter', label: '首发'}, {id: 'star', label: '全明星'},
@@ -19,7 +20,7 @@ export function gymCareerSummary(state: GymState, alumni: readonly GymAlumnus[])
   }, null);
   return {
     active: active.length,
-    automatic: active.filter(player => player.autoEnabled && player.level < 99).length,
+    automatic: active.filter(player => player.autoEnabled && player.level < playerLevelCap).length,
     recommended: alumni.length,
     distribution,
     unmatched: alumni.length - matched.length,

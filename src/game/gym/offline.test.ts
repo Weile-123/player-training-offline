@@ -139,11 +139,11 @@ describe('bounded offline automatic gym training', () => {
       .toEqual(activePlayers(whole.state).sort((a, b) => a.id.localeCompare(b.id)));
   });
 
-  it('stops at level99, excludes overflow XP from the report and keeps other athletes training', () => {
+  it('stops at the level cap, excludes overflow XP from the report and keeps other athletes training', () => {
     const state = automaticGym(2);
-    state.player!.level = 98;
-    state.player!.peakLevel = 98;
-    state.player!.experience = requiredExperience(98) - 1;
+    state.player!.level = playerLevelCap - 1;
+    state.player!.peakLevel = playerLevelCap - 1;
+    state.player!.experience = requiredExperience(playerLevelCap - 1) - 1;
     const result = settleOfflineGym(state, start + 10_000);
     expect(result.state.player).toMatchObject({level: playerLevelCap, experience: 0, autoEnabled: false, shots: 1});
     expect(result.report!.players.find(player => player.id === state.player!.id)).toMatchObject({xpGained: 1, shots: 1});
@@ -162,7 +162,7 @@ describe('bounded offline automatic gym training', () => {
     expect(result.report).toMatchObject({creditedMs: 14_400_000, capped: true});
     expect(result.report!.totalShots).toBeGreaterThan(10_000);
     expect(result.state.revision).toBe(state.revision + 1);
-    expect(activePlayers(result.state).every(player => player.stamina >= 0 && player.level <= 99)).toBe(true);
+    expect(activePlayers(result.state).every(player => player.stamina >= 0 && player.level <= playerLevelCap)).toBe(true);
     expect(validGym(result.state)).toBe(true);
   }, 60_000);
 });

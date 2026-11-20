@@ -4,7 +4,7 @@ import {templateRules} from '../contract/templates';
 import {equipmentCatalog, previousEquipmentCatalog, legacyEquipmentCatalog, equipmentCanonicalIds, equipmentCatalogVersion, projects, maximumRecommendationCredits} from './catalog';
 import {buildCooperationOffers} from './cooperation';
 import {legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymAlumnus, type GymPlayer, type GymState} from './engine';
-import {requiredExperience} from './progression';
+import {playerLevelCap, requiredExperience} from './progression';
 import {allGymConsumables, maximumStoredChalkShots} from './consumables';
 
 export type GymStorage = Pick<Storage, 'getItem' | 'setItem'>;
@@ -18,6 +18,7 @@ const previousEquipmentIds = new Set(previousEquipmentCatalog.map(equipment => e
 const legacyEquipmentIds = new Set(legacyEquipmentCatalog.map(equipment => equipment.id));
 const legacyEquipmentById = new Map(legacyEquipmentCatalog.map(equipment => [equipment.id, equipment]));
 const tiers = new Set(templateRules.map(template => template.tier));
+const legacyPlayerLevelCap = 99;
 const record = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object' && !Array.isArray(value);
 const integer = (value: unknown, min = 0, max = Number.MAX_SAFE_INTEGER): value is number => typeof value === 'number' && Number.isSafeInteger(value) && value >= min && value <= max;
 const finite = (value: unknown, min: number, max: number): value is number => typeof value === 'number' && Number.isFinite(value) && value >= min && value <= max;
@@ -58,8 +59,9 @@ function equipmentTraining(value: unknown, athlete: Record<string, unknown>, all
 }
 
 function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boolean, balanceVersion: 1 | 2 | 3, equipmentMetadataRequired: boolean, allowMissingPartial: boolean): value is GymPlayer {
+  const levelCap = balanceVersion === 3 ? playerLevelCap : legacyPlayerLevelCap;
   if (!record(value) || !text(value.id) || !text(value.name) || !integer(value.enteredAt, 0, updatedAt)
-    || !integer(value.height, 178, 218) || !integer(value.level, 0, 99) || !integer(value.peakLevel, value.level, 99)
+    || !integer(value.height, 178, 218) || !integer(value.level, 0, levelCap) || !integer(value.peakLevel, value.level, levelCap)
     || !integer(value.matchSeed, 0, 0xffffffff) || !integer(value.shots) || !integer(value.stamina, 0, 90)
     || !integer(value.recoveryMs, 0, 19_999) || !stats(value.stats, 0, 99) || !stats(value.entryStats, 24, 54)
     || !stats(value.bias, 0, 1, false) || !stats(value.lastStyle, -3, 3, false)) return false;
@@ -68,7 +70,7 @@ function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boo
   if (!statKeys.every(key => currentStats[key] >= entryStats[key])) return false;
   const level = value.level as number;
   const requirement = balanceVersion === 1 ? 20 + 6 * level + level * level : requiredExperience(level);
-  if ((!legacy || has(value, 'experience')) && !integer(value.experience, 0, level === 99 ? 0 : requirement - 1)) return false;
+  if ((!legacy || has(value, 'experience')) && !integer(value.experience, 0, level === levelCap ? 0 : requirement - 1)) return false;
   if ((!legacy || has(value, 'nextShotAt')) && !integer(value.nextShotAt)) return false;
   if ((!legacy || has(value, 'autoEnabled')) && (typeof value.autoEnabled !== 'boolean' || (gymLevel < 2 && value.autoEnabled))) return false;
   if (has(value, 'greatShotReady') && typeof value.greatShotReady !== 'boolean') return false;
@@ -148,7 +150,7 @@ function validGymShape(value: unknown, legacy = false): value is GymState {
       ||typeof r.capped!=='boolean'||!Array.isArray(r.players)||r.players.length>8||new Set(r.players.map(p=>record(p)?p.id:null)).size!==r.players.length)return false;
     let xp=0,shots=0;
     for(const p of r.players){if(!record(p)||!text(p.id)||!text(p.name)||![p.shots,p.xpGained,p.courses,p.staminaBefore,p.staminaAfter].every(v=>integer(v))
-      ||!integer(p.levelBefore,0,99)||!integer(p.levelAfter,p.levelBefore,99)
+      ||!integer(p.levelBefore,0,playerLevelCap)||!integer(p.levelAfter,p.levelBefore,playerLevelCap)
       ||!(p.templateBefore===null||typeof p.templateBefore==='string'&&templateIds.has(p.templateBefore))
       ||!(p.templateAfter===null||typeof p.templateAfter==='string'&&templateIds.has(p.templateAfter)))return false;
       xp+=p.xpGained as number;shots+=p.shots as number;
@@ -316,6 +318,7 @@ function migrateEquipment(state: GymState): boolean {
 }
 
 function restoreGym(value: unknown): GymState | null {
+  if (validGym(value)) return value;
   const sourceBalanceVersion = record(value) ? value.balanceVersion : undefined;
   if (!validGymShape(value, true)) return null;
   const oldFormat = !has(value, 'bench');
@@ -336,7 +339,7 @@ function restoreGym(value: unknown): GymState | null {
     }
     if (oldBalance) {
       const oldRequirement = 20 + 6 * athlete.level + athlete.level * athlete.level;
-      athlete.experience = athlete.level === 99 ? 0 : Math.floor(athlete.experience * requiredExperience(athlete.level) / oldRequirement);
+      athlete.experience = athlete.level === legacyPlayerLevelCap ? 0 : Math.floor(athlete.experience * requiredExperience(athlete.level) / oldRequirement);
     }
   }
   if (oldStamina) for (const athlete of [...(value.player ? [value.player] : []), ...value.bench]) {
@@ -379,9 +382,13 @@ export function readGym(storage: GymStorage): {state: GymState | null; source: '
 }
 
 export function writeGym(storage: GymStorage, state: GymState): {ok: boolean; backupOk?: boolean; error?: string} {
-  let encoded: string;
+  try { return writeGymEnvelope(storage, encodeGym(state)); }
+  catch (error) { return {ok: false, error: error instanceof Error ? error.message : 'save-failed'}; }
+}
+
+/** Mirror the exact bytes returned by encodeGym after the IndexedDB commit. */
+export function writeGymEnvelope(storage: GymStorage, encoded: string): {ok: boolean; backupOk?: boolean; error?: string} {
   try {
-    encoded = encodeGym(state);
     storage.setItem(gymSaveKeys.main, encoded);
   } catch (error) { return {ok: false, error: error instanceof Error ? error.message : 'save-failed'}; }
   // The main write is the commit. A new backup must never become visible before it.

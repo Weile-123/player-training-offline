@@ -1,4 +1,6 @@
 import {beforeEach,afterEach,it,expect,vi} from 'vitest';
+// Audio warms independently. Keep its module initialization outside the image/network fixture.
+vi.mock('./audio',()=>({gameAudio:{preload:async()=>true}}));
 const entries=[{path:'art/home/background-b-portrait.webp',bytes:20,hash:'a',local:true},{path:'art/shot/ball.png',bytes:30,hash:'b',local:false},{path:'art/shot/player-data.json',bytes:50,hash:'c',local:false}];
 let saved:Map<string,Response>,fetcher:ReturnType<typeof vi.fn>,cache:{match:ReturnType<typeof vi.fn>;put:ReturnType<typeof vi.fn>;delete:ReturnType<typeof vi.fn>};
 beforeEach(()=>{
@@ -10,7 +12,11 @@ beforeEach(()=>{
  fetcher=vi.fn(async(url:string)=>new Response(url.endsWith('config/assets.json')?JSON.stringify({baseUrl:'https://cdn.test/game/'}):url.endsWith('config/animation.json')?JSON.stringify({shotAnimationDurationSeconds:1,gameMaxWidthPx:640,hoopScale:1,shootButtonScale:1}):url.includes('player-data.json')?JSON.stringify({outcomes:{great:{frames:[{}]}}}):'picture'));
  vi.stubGlobal('fetch',fetcher);
 });
-afterEach(()=>{vi.useRealTimers();vi.unstubAllGlobals();vi.restoreAllMocks();vi.doUnmock('../data/runtime-assets.json')});
+afterEach(async()=>{
+ vi.useRealTimers();
+ await vi.dynamicImportSettled();
+ vi.unstubAllGlobals();vi.restoreAllMocks();vi.doUnmock('../data/runtime-assets.json');
+});
 it('资源校验可用后累计进度，资源全部完成仍等待首页初始化确认100%',async()=>{
  const api=await import('./preloadAssets'),seen:number[]=[];api.subscribeLoading(p=>seen.push(p.percent));
  await api.preloadAssets();expect(cache.put).toHaveBeenCalledTimes(3);expect(Math.max(...seen)).toBe(99);

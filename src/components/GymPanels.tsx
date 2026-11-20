@@ -15,7 +15,7 @@ import { usePlayerProfile } from '../platform/usePlayerProfile';
 import { money } from '../presentation/money';
 import { equipmentSummary } from '../presentation/equipmentSummary';
 import { gymPlayerName } from '../presentation/gymPlayerName';
-import { offlineDuration } from '../presentation/offlineDuration';
+import { offlineDuration, trainingDuration } from '../presentation/offlineDuration';
 import { useGymFirstVisitTutorial } from '../presentation/gymFeatureTutorialPreference';
 import { ComicDialog } from './ComicDialog';
 import { EquipmentMystery } from './EquipmentMystery';
@@ -81,15 +81,15 @@ export function TrainingAdvice({ state, player = state.player, compact = false }
   if (compact) return <section className="gm-training-advice gm-paper gm-stack is-compact" aria-label={`${gymPlayerName(player)}培养建议`}>
     <strong>{payout.repeatTemplate ? `重复模板 · 推荐合计 ${payout.credits} 券` : `培养奖金 +${guidance.currentBonus} 券${atCap ? ' · 训练已结束' : next ? ` · 下档 Lv.${next.level}＋${next.tierName}` : ' · 已达最高档'}`}</strong>
     <p className="gm-muted">{guidance.allStatsMax ? '六维已满，可核对奖金与合作后推荐。' : end?.finished ? '等级已满，可推荐签约。' : next && next.levelGap === 0 && next.tierGap > 0 ? `等级达标，仍需匹配${next.tierName}。` : guidance.suggestion}</p>
-    {end && !end.finished && <p className="gm-muted">当前配置预计约 {offlineDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}；可在节点提前推荐。</p>}
+    {end && !end.finished && <p className="gm-muted">当前配置预计约 {trainingDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}；可在节点提前推荐。</p>}
   </section>;
   return <section className={`gm-training-advice gm-paper gm-stack${compact ? ' is-compact' : ''}`} aria-label={`${gymPlayerName(player)}培养建议`}>
     <div className="gm-section-heading"><h4>培养节点</h4><strong>{payout.repeatTemplate ? `重复模板 · 推荐合计 ${payout.credits} 券` : `当前培养奖金 +${guidance.currentBonus} 券`}</strong></div>
     <p>{guidance.suggestion}</p>
     <RecommendationCreditRule state={state} />
     {next ? <p className="gm-muted">下一档：Lv.{next.level}＋{next.tierName}及以上，额外奖金再增加 {next.additionalCredits} 券；{next.levelGap > 0 ? `还差 ${next.levelGap} 级` : '等级已达标'}{next.tierGap > 0 ? `，模板仍需达到${next.tierName}` : '，模板档次已达标'}。</p> : <p className="gm-inline-status">{atCap ? `训练等级已满，按当前实际模板结算培养奖金 ${guidance.currentBonus} 券，无法继续训练提升。` : '已达到最高培养奖金，继续升级不再增加培养奖金。'}</p>}
-    {nextForecast && <p className="gm-muted">按当前配置连续{player.autoEnabled ? '自动' : '手动'}训练，约 {offlineDuration(nextForecast.estimatedMs)} 到 Lv.{next!.level}；模板仍需实际匹配，时间不是模板保证。</p>}
-    {guidance.allStatsMax ? <p className="gm-recommend-warning">六维已满，继续训练不会增加属性。可核对奖金与合作后推荐签约，无需每名球员都练到99级。</p> : end?.finished ? <p className="gm-inline-status">已达到训练等级上限，可推荐签约。</p> : end && <p className="gm-muted">按当前配置连续训练，预计约 {offlineDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}（属性可能提前达到上限，可提前推荐）。{player.autoEnabled && !end.withinOfflineLimit ? '当前离线上限不足以覆盖这段训练。' : ''}</p>}
+    {nextForecast && <p className="gm-muted">按当前配置连续{player.autoEnabled ? '自动' : '手动'}训练，约 {trainingDuration(nextForecast.estimatedMs)} 到 Lv.{next!.level}；模板仍需实际匹配，时间不是模板保证。</p>}
+    {guidance.allStatsMax ? <p className="gm-recommend-warning">六维已满，继续训练不会增加属性。达到 {playerLevelCap} 级前也可推荐签约。</p> : end?.finished ? <p className="gm-inline-status">已达到训练等级上限，可推荐签约。</p> : end && <p className="gm-muted">按当前配置连续训练，预计约 {trainingDuration(end.estimatedMs)} 到 Lv.{end.targetLevel}（属性可能提前达到上限，可提前推荐）。{player.autoEnabled && !end.withinOfflineLimit ? '当前离线上限不足以覆盖这段训练。' : ''}</p>}
     {!compact && <><h4>继续培养的剩余价值</h4><ul className="gm-remaining-value">{guidance.remainingValue.map(value => <li key={value}>{value}</li>)}</ul><p className="gm-muted">预计时间按当前体力、器材、课程与经验概率计算，不包含停留或换装，实际结果会波动；不会自动推荐球员。</p></>}
   </section>;
 }
@@ -216,9 +216,9 @@ function OfflineProjectPreview({ state }: { state: GymState }) {
   const allStatsMax = useMemo(() => trainingGuidance(state)?.allStatsMax, [state]);
   const upgrade = useMemo(() => offlineUpgradeGuidance(state), [state]);
   return <section className="gm-stack gm-project-forecast" aria-label="离线升级收益预估">
-    {state.player && <p className="gm-muted">{allStatsMax ? '当前球员六维已满，可核对培养奖金与合作后推荐。' : forecast?.finished ? '当前球员已到训练等级上限，可以推荐。' : forecast ? `当前球员约 ${offlineDuration(forecast.estimatedMs)} 到 Lv.${forecast.targetLevel}，可在模板、奖金节点提前推荐。` : ''}</p>}
+    {state.player && <p className="gm-muted">{allStatsMax ? '当前球员六维已满，可核对培养奖金与合作后推荐。' : forecast?.finished ? '当前球员已到训练等级上限，可以推荐。' : forecast ? `当前球员约 ${trainingDuration(forecast.estimatedMs)} 到 Lv.${forecast.targetLevel}，可在模板、奖金节点提前推荐。` : ''}</p>}
     {upgrade ? <><p className="gm-muted">升级花费 {upgrade.price} 券，离线训练上限 {offlineDuration(upgrade.currentLimitMs)} → {offlineDuration(upgrade.nextLimitMs)}。</p>
-      {upgrade.automaticPlayers === 0 ? <p className="gm-muted">当前没有开启自动的球员，离线只恢复体力；开启自动后才会训练。</p> : upgrade.predictedFinishedWithinCurrent === upgrade.automaticPlayers ? <p className="gm-recommend-warning">当前开启自动的 {upgrade.automaticPlayers} 名球员预计都可在现有离线上限内达到 Lv.99，延长时长不一定增加本批训练收益。</p> : upgrade.predictedFinishedWithinCurrent > 0 ? <p className="gm-recommend-warning">当前开启自动的 {upgrade.automaticPlayers} 名球员中，{upgrade.predictedFinishedWithinCurrent} 名预计可在现有上限内达到 Lv.99；延长时长主要帮助其余球员继续训练。</p> : <p className="gm-muted">当前开启自动的 {upgrade.automaticPlayers} 名球员预计尚不能在现有上限内全部练满。</p>}
+      {upgrade.automaticPlayers === 0 ? <p className="gm-muted">当前没有开启自动的球员，离线只恢复体力；开启自动后才会训练。</p> : upgrade.predictedFinishedWithinCurrent === upgrade.automaticPlayers ? <p className="gm-recommend-warning">当前开启自动的 {upgrade.automaticPlayers} 名球员预计都可在现有离线上限内达到 Lv.{playerLevelCap}，延长时长不一定增加本批训练收益。</p> : upgrade.predictedFinishedWithinCurrent > 0 ? <p className="gm-recommend-warning">当前开启自动的 {upgrade.automaticPlayers} 名球员中，{upgrade.predictedFinishedWithinCurrent} 名预计可在现有上限内达到 Lv.{playerLevelCap}；延长时长主要帮助其余球员继续训练。</p> : <p className="gm-muted">当前开启自动的 {upgrade.automaticPlayers} 名球员预计尚不能在现有上限内全部练满。</p>}
       <p className="gm-muted">项目永久生效，也适用于后续新人。{upgrade.hasExtensionEquipment ? '可按需要换下离线加时器材，腾出槽位。' : ''}{upgrade.automaticPlayers > 0 ? '满级时间按当前配置预估，实际经验结果会波动；不会自动推荐或补招。' : ''}</p></> : <p className="gm-muted">{state.gymLevel < 2 ? '球馆2级免费开放离线训练。' : '离线课表已升满；超过上限的时间仅恢复体力。'}</p>}
   </section>;
 }
@@ -321,7 +321,7 @@ function TrainingTimeComparison({ state, comparison, title, label }: { state: Gy
     {comparison.status === 'no-player' ? <p className="gm-muted">招募球员后，可按实际等级、体力与训练配置比较培养耗时。</p>
       : comparison.status === 'ended' ? <p className="gm-muted">当前球员已满级，训练已结束；此项投入仍适用于其他或未来球员。</p>
         : comparison.status === 'choose-replacement' ? <p className="gm-muted">馆内已满，请在替换确认中选择替换对象，再比较实际培养耗时。</p>
-          : <>{comparison.rows.map(row => <p key={row.level} data-forecast-level={row.level}>到 Lv.{row.level}：约 {offlineDuration(row.beforeMs)} → {offlineDuration(row.afterMs)}{row.beforeMs === row.afterMs ? '（预计耗时不变）' : ''}</p>)}
+          : <>{comparison.rows.map(row => <p key={row.level} data-forecast-level={row.level}>到 Lv.{row.level}：约 {trainingDuration(row.beforeMs)} → {trainingDuration(row.afterMs)}{row.beforeMs === row.afterMs ? '（预计耗时不变）' : ''}</p>)}
             <p className="gm-muted">按当前球员{state.player?.autoEnabled ? '自动' : '手动'}连续训练估算，沿用现有体力、课程与冷却，不包含停留或后续换装。实际结果会波动，不保证模板；专项属性成长不折算为等级提速，离线延时仅增加可结算时长。</p>
           </>}
   </section>;
@@ -652,8 +652,7 @@ function TemplateDetail({ template, state, onClose }: { template: TemplateRule; 
 }
 
 function GymAlbumEntry({ template, collected, onSelect }: { template: TemplateRule; collected: boolean; onSelect: () => void }) {
-  const profile = usePlayerProfile(collected ? template.id : null);
-  return <button type="button" data-tier={template.tier} className={`album-card ${collected ? 'discovered' : 'collection-locked'}`} disabled={!collected} onClick={onSelect} aria-label={collected ? `查看${template.name}档案` : '未知球星'}><span className="collection-photo tier-portrait-frame" data-tier={template.tier}>{collected ? <StarPortrait src={profile?.avatar ?? templatePortrait(template.id)} fallbackSrc={templatePortrait(template.id)} name={profile?.name ?? template.name} /> : <svg className="album-unknown" viewBox="0 0 120 130" aria-hidden="true"><path d="m7 130 3-22q1-10 19-16l16-9V72q-8-8-9-22-6-2-5-10l3-3q-3-27 12-29 22-15 35 6 9 9 5 23l3 4q1 8-6 10-1 13-9 21v11l17 9q19 5 20 16l3 22Z" /><text x="60" y="81" textAnchor="middle">?</text></svg>}</span><b><span>{collected ? template.name : '未知球星'}</span></b></button>;
+  return <button type="button" data-tier={template.tier} className={`album-card ${collected ? 'discovered' : 'collection-locked'}`} disabled={!collected} onClick={onSelect} aria-label={collected ? `查看${template.name}档案` : '未知球星'}><span className="collection-photo tier-portrait-frame" data-tier={template.tier}>{collected ? <StarPortrait src={templatePortrait(template.id)} name={template.name} loading="lazy" /> : <svg className="album-unknown" viewBox="0 0 120 130" aria-hidden="true"><path d="m7 130 3-22q1-10 19-16l16-9V72q-8-8-9-22-6-2-5-10l3-3q-3-27 12-29 22-15 35 6 9 9 5 23l3 4q1 8-6 10-1 13-9 21v11l17 9q19 5 20 16l3 22Z" /><text x="60" y="81" textAnchor="middle">?</text></svg>}</span><b><span>{collected ? template.name : '未知球星'}</span></b></button>;
 }
 
 export function GymCollectionPanel({ state, initialTab = 0 }: GymPanelProps & {initialTab?: 0 | 1}) {

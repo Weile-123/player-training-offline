@@ -2,7 +2,7 @@ import {afterEach, beforeEach, describe, expect, it, vi} from 'vitest';
 import {IDBFactory, IDBKeyRange, IDBObjectStore} from 'fake-indexeddb';
 import {createGymStore} from '../../gymStore';
 import {activePlayers, alumniProgress, newGym, recommendation, recommendationPayout, type GymState} from './engine';
-import {createGymHistory, recentAlumniLimit} from './history';
+import {createGymHistory, gymCloudRestoreBackupKey, recentAlumniLimit} from './history';
 import {encodeGym, gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './save';
 import {templateRules} from '../contract/templates';
 import {exportGymCloudArchive} from '../../platform/gymCloudArchive';
@@ -71,6 +71,59 @@ beforeEach(() => { vi.stubGlobal('IDBKeyRange', IDBKeyRange); });
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('bounded recent alumni with durable history', () => {
+  it('restores a cloud archive and saves a portable recovery copy in IDB even when every localStorage write exceeds quota', async () => {
+    const original = fixture(113), remote = fixture(117);
+    remote.seed = 88; remote.credits = 37;
+    const context = memory(original), indexedDB = new IDBFactory();
+    const options = {indexedDB, databaseName: 'history-test'};
+    const store = createGymStore(context.storage, 17, () => 1_000, options);
+    await store.getState().hydrate();
+    const backup = await exportGymCloudArchive(store, 2_000);
+    const raw = JSON.stringify({format: 'legend-gym-cloud-v1', applicationId: hupuProject.applicationId, uploadedAt: 2_000, gym: encodeGym(remote)});
+    const mirrors = new Map(context.data), {createdAt, seed, revision, updatedAt} = store.getState().state;
+    context.fail(() => true);
+    await store.getState().restoreCloudArchive!(raw, {createdAt, seed, revision, updatedAt}, backup);
+    expect(store.getState().state).toMatchObject({seed: 88, credits: 37});
+    expect(await store.getState().loadAlumni(100, 17)).toEqual({players: remote.alumni.slice(0, 17).reverse(), total: 117});
+    expect(context.data).toEqual(mirrors);
+    expect(await records(indexedDB, 'snapshots')).toContain(backup);
+    const reloaded = createGymStore(context.storage, 17, () => 1_000, options);
+    await reloaded.getState().hydrate();
+    expect(reloaded.getState().state).toMatchObject({seed: 88, credits: 37});
+    expect(await reloaded.getState().loadAlumni(100, 17)).toEqual({players: remote.alumni.slice(0, 17).reverse(), total: 117});
+    expect(await records(indexedDB, 'snapshots')).toContain(backup);
+  });
+
+  it('aborts cloud restoration when its portable recovery snapshot exceeds quota and preserves all original copies', async () => {
+    const original = fixture(113), remote = fixture(117);
+    remote.seed = 88; remote.credits = 37;
+    const context = memory(original), indexedDB = new IDBFactory();
+    const options = {indexedDB, databaseName: 'history-test'};
+    const store = createGymStore(context.storage, 17, () => 1_000, options);
+    await store.getState().hydrate();
+    const backup = await exportGymCloudArchive(store, 2_000), before = store.getState().state;
+    const raw = JSON.stringify({format: 'legend-gym-cloud-v1', applicationId: hupuProject.applicationId, uploadedAt: 2_000, gym: encodeGym(remote)});
+    const originalCold = await records(indexedDB, 'alumni'), originalHot = await records(indexedDB, 'hot');
+    const originalSnapshots = await records(indexedDB, 'snapshots'), mirrors = new Map(context.data);
+    const put = IDBObjectStore.prototype.put;
+    vi.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: globalThis.IDBObjectStore, value, key) {
+      if (this.name === 'snapshots' && key === gymCloudRestoreBackupKey) throw new DOMException('The quota has been exceeded.', 'QuotaExceededError');
+      return put.call(this, value, key);
+    });
+    const {createdAt, seed, revision, updatedAt} = before;
+    await expect(store.getState().restoreCloudArchive!(raw, {createdAt, seed, revision, updatedAt}, backup)).rejects.toThrow('本机存储空间不足，本次同步未生效，本地和云端进度均已保留。');
+    expect(store.getState().state).toBe(before);
+    expect(context.data).toEqual(mirrors);
+    expect(await records(indexedDB, 'alumni')).toEqual(originalCold);
+    expect(await records(indexedDB, 'hot')).toEqual(originalHot);
+    expect(await records(indexedDB, 'snapshots')).toEqual(originalSnapshots);
+    expect(await store.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+    const reloaded = createGymStore(context.storage, 17, () => 1_000, options);
+    await reloaded.getState().hydrate();
+    expect(reloaded.getState().state).toMatchObject({seed: 17, credits: 100});
+    expect(await reloaded.getState().loadAlumni(100, 13)).toEqual({players: original.alumni.slice(0, 13).reverse(), total: 113});
+  });
+
   it('restores a portable cloud snapshot for the same gym repeatedly without colliding with prior cold records', async () => {
     const original = fixture(113), context = memory(original), indexedDB = new IDBFactory();
     const options = {indexedDB, databaseName: 'history-test'};

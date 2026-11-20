@@ -74,9 +74,10 @@ function ShortcutIcon({cooperation = false}: {cooperation?: boolean}) {
 
 export function GymTrainingToolbar({playerId, level, experience, required, atCap, cooperationReady, empty = false, reducedMotion = false, onTraining, onCooperation}: Props) {
   const percent = empty ? 0 : atCap ? 100 : Math.min(100, Math.max(0, experience / Math.max(1, required) * 100));
+  const longReadout = !empty && !atCap && (level >= 1000 || required >= 100_000);
   return <section className="gym-training-toolbar" aria-label="训练快捷操作" style={{'--training-ticket-paper': `url("${assetUrl('art/game/paper.png')}")`} as CSSProperties}>
     <div className="gym-experience" aria-label="训练经验">
-      <div className="gym-experience-upper"><strong>{empty ? '空训练位' : `Lv.${level}`}</strong><span>{empty ? '等待招募' : '训练经验'}</span><span className="gym-experience-readout"><b>{empty ? '—' : atCap ? '已满级' : <>{experience}<small> / {required}</small></>}</b></span></div>
+      <div className="gym-experience-upper" data-long-readout={longReadout || undefined}><strong>{empty ? '空训练位' : `Lv.${level}`}</strong><span>{empty ? '等待招募' : '训练经验'}</span><span className="gym-experience-readout"><b>{empty ? '—' : atCap ? '已满级' : <>{experience}<small> / {required}</small></>}</b></span></div>
       <div className="gym-experience-track" role="progressbar" aria-label="当前球员训练经验" aria-valuemin={0} aria-valuemax={empty || atCap ? 1 : required} aria-valuenow={empty ? 0 : atCap ? 1 : experience} aria-valuetext={empty ? '空训练位，等待招募' : atCap ? '已满级' : `${experience}/${required} 经验`}><ExperienceFill key={empty ? 'empty' : playerId ?? 'active'} level={level} percent={percent} atCap={atCap} reducedMotion={reducedMotion}/></div>
     </div>
     <div className="gym-training-tickets">

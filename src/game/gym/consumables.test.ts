@@ -1,6 +1,6 @@
 import {expect, it} from 'vitest';
 import {chalkTrainingShots, gymConsumables, type GymConsumableId} from './consumables';
-import {cooperationOffers, dispatchGym, experienceForLevel, newGym, requiredExperience, shotCooldownMs, trainPlayer, type GymAction, type GymState} from './engine';
+import {cooperationOffers, dispatchGym, experienceForLevel, newGym, playerLevelCap, requiredExperience, shotCooldownMs, trainPlayer, type GymAction, type GymState} from './engine';
 import {settleOfflineGym} from './offline';
 import {forecastTraining} from './forecast';
 import {decodeGym, encodeGym, validGym} from './save';
@@ -120,7 +120,7 @@ it('restores the whole eligible team without XP, courses, cooldown changes or wa
   state = command(command(state, {type: 'recruit'}), {type: 'recruit'});
   state.inventory.supplement = 1;
   state.player!.stamina = 2; state.bench[0].stamina = 16; state.bench[0].recoveryMs = 123;
-  state.bench[1].level = state.bench[1].peakLevel = 99; state.bench[1].stamina = 0;
+  state.bench[1].level = state.bench[1].peakLevel = playerLevelCap; state.bench[1].stamina = 0;
   const result = command(state, {type: 'use-consumable', id: 'supplement', playerId: state.player!.id});
   expect(result.player!.stamina).toBe(12);
   expect(result.bench[0].stamina).toBe(20); expect(result.bench[0].recoveryMs).toBe(0);
@@ -137,7 +137,7 @@ it('restores the whole eligible team without XP, courses, cooldown changes or wa
 
 it('can replenish bench athletes when the selected athlete is already capped, without wasting a second supply', () => {
   let state = command(fixture(), {type: 'recruit'});
-  state.player!.level = state.player!.peakLevel = 99;
+  state.player!.level = state.player!.peakLevel = playerLevelCap;
   state.bench[0].stamina = 10; state.inventory.supplement = 2;
   state = command(state, {type: 'use-consumable', id: 'supplement', playerId: state.player!.id});
   expect(state.bench[0].stamina).toBe(20); expect(state.inventory.supplement).toBe(1);
@@ -145,19 +145,19 @@ it('can replenish bench athletes when the selected athlete is already capped, wi
   expect(result.error).toContain('体力已满'); expect(result.state).toBe(state);
 });
 
-it('caps a retained legacy timer at 99 and disables automatic at the cap', () => {
+it('stops a retained legacy timer at the cap and disables automatic training', () => {
   for (const id of ['timer'] as const) {
-    const state = fixture(); state.inventory[id] = 1; state.player!.level = 98; state.player!.peakLevel = 98;
-    state.player!.experience = requiredExperience(98) - 1;
+    const state = fixture(); state.inventory[id] = 1; state.player!.level = state.player!.peakLevel = playerLevelCap - 1;
+    state.player!.experience = requiredExperience(state.player!.level) - 1;
     const result = command(state, {type: 'use-consumable', id, playerId: state.player!.id});
-    expect(result.player!.level).toBe(99); expect(result.player!.experience).toBe(0);
+    expect(result.player!.level).toBe(playerLevelCap); expect(result.player!.experience).toBe(0);
     expect(result.player!.autoEnabled).toBe(false);
     expect(result.player!.shots).toBe(1);
   }
 });
 
-it.each(gymConsumables)('refuses $name at 99 or with empty stock without changing state', item => {
-  const state = fixture(); state.inventory[item.id] = 1; state.player!.level = 99; state.player!.peakLevel = 99;
+it.each(gymConsumables)('refuses $name at the level cap or with empty stock without changing state', item => {
+  const state = fixture(); state.inventory[item.id] = 1; state.player!.level = state.player!.peakLevel = playerLevelCap;
   const action: GymAction = {type: 'use-consumable', id: item.id, playerId: state.player!.id};
   expect(dispatchGym(state, state.revision, action, at).state).toBe(state);
   state.player!.level = 0; state.player!.peakLevel = 0; state.inventory[item.id] = 0;

@@ -1,4 +1,5 @@
 import type {GymState} from '../game/gym/engine';
+import {playerLevelCap} from '../game/gym/progression';
 import {templateById} from '../game/templates';
 import {statKeys, type Stats} from '../game/types';
 import {getHupuUser} from './hupuAccount';
@@ -26,7 +27,7 @@ function validRow(value: GymRankRow, board: GymBoard) {
  const best = value.best;
  if (board === 'fame') return best === null;
  return !!best && typeof best.playerId === 'string' && !!templateById(best.templateId) && score(best.value)
-  && best.value === value.score && Number.isInteger(best.level) && best.level >= 0 && best.level <= 99
+  && best.value === value.score && Number.isInteger(best.level) && best.level >= 0 && best.level <= playerLevelCap
   && !!best.stats && statKeys.every(key => Number.isInteger(best.stats[key]) && best.stats[key] >= 0 && best.stats[key] <= 99);
 }
 type Dependencies = {
@@ -79,7 +80,9 @@ export function createGymLeaderboardClient(deps: Dependencies) {
   async list(board: GymBoard): Promise<GymRanking> {
    assertEnabled();
    if (!['player', 'fame'].includes(board)) throw Error('排行榜分类无效');
-   const publicResult = await deps.request(`/leaderboard?board=${board}&limit=50${freshBoards.has(board)?'&fresh=1':''}`, 'GET') as {entries?: GymRankRow[]};
+   // Old clients reject an entire response when one player is above level 99.
+   const levels = board === 'player' ? '&levels=extended' : '';
+   const publicResult = await deps.request(`/leaderboard?board=${board}${levels}&limit=50${freshBoards.has(board)?'&fresh=1':''}`, 'GET') as {entries?: GymRankRow[]};
    if (!Array.isArray(publicResult?.entries) || publicResult.entries.length > 50 || !publicResult.entries.every(row => validRow(row, board))) throw Error('排行榜返回格式异常');
    freshBoards.delete(board);
    try {
@@ -92,7 +95,7 @@ export function createGymLeaderboardClient(deps: Dependencies) {
       if(acknowledgement?.accepted!==true)throw Error('profile not acknowledged');
      }catch{profileError='昵称暂未同步，请稍后刷新；公开榜单仍可查看。';}
     }
-    const personal = user?.puid ? await deps.request(`/leaderboard/me?board=${board}`, 'GET', undefined, true) as {me?: GymRanking['me']} : {me: null};
+    const personal = user?.puid ? await deps.request(`/leaderboard/me?board=${board}${levels}`, 'GET', undefined, true) as {me?: GymRanking['me']} : {me: null};
     if (!personal || personal.me === undefined || personal.me && (!Number.isSafeInteger(personal.me.rank) || personal.me.rank < 1 || !validRow(personal.me.entry, board))) throw Error('个人排名返回格式异常');
     if (user?.puid && (await deps.user())?.puid !== user.puid) throw Error('虎扑账号已切换，请刷新个人排名');
     // The public response may predate the authenticated display-name update.
@@ -112,7 +115,7 @@ export async function gymLeaderboardRequest(path: string, method: 'GET' | 'POST'
  await ensureColorboxSdk(); assertHupuProject();
  const cloud = api ?? window.ColorboxAI?.cloud;
  if (!gymLeaderboardConfigured() || !cloud) throw Error('排行榜服务尚未连接，本地球馆进度已保留');
- if (!/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player|fame)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
+ if (!/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player(?:&levels=extended)?|fame)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
  const response = await sdkDeadline(cloud.request({url: gymLeaderboardConfig.apiBase + path, method, data, envId: gymLeaderboardConfig.envId, auth}), '排行请求超时，请稍后手动刷新');
  assertHupuProject();
  if (response.statusCode < 200 || response.statusCode >= 300 || ![0, 200].includes(response.code)) throw Error(response.message || '排行榜读取失败，请稍后重试');

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, expect, it } from 'vitest';
 import { createRoot, type Root } from 'react-dom/client';
 import { useState, type ComponentType } from 'react';
 import { act } from 'preact/test-utils';
-import { cooperationOffers, cooperationStatus, dispatchGym, newGym, recommendation, type GymAction, type GymState } from '../../src/game/gym/engine';
+import { cooperationOffers, cooperationStatus, dispatchGym, newGym, playerLevelCap, recommendation, type GymAction, type GymState } from '../../src/game/gym/engine';
 import { equipmentCatalog } from '../../src/game/gym/catalog';
 import { templateRules } from '../../src/game/contract/templates';
 import { ComicDialog } from '../../src/components/ComicDialog';
@@ -143,7 +143,7 @@ it('keeps earned cultivation coupons in the compact repeated-template reward eve
   expect(payout.querySelector('small')?.textContent).toBe('重复模板');
 
   const capped = structuredClone(state);
-  capped.player!.level = capped.player!.peakLevel = 99;
+  capped.player!.level = capped.player!.peakLevel = playerLevelCap;
   await mount(GymTrainingPanel, capped);
   expect(document.querySelector('.gm-plan-summary')?.textContent).toContain('已满级，训练已结束');
   expect(document.querySelector('.gm-plan-summary')?.textContent).not.toContain('完课恢复');
