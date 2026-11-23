@@ -56,7 +56,7 @@ export function GymLeaderboard() {
   </section>
   <button type="button" className="secondary" disabled={loading} onClick={() => setRefresh(value => value + 1)}>刷新排行榜</button>
   <ActionNotice message={data?.personalError||message} role={data?.personalError||syncFailed||/失败|不可用|未确认|未连接|切换|暂无已验证/.test(message)?'alert':'status'} className="leaderboard-action-notice"/>
-  <p className="leaderboard-note">每人保留各榜最高成绩 · 同分按成绩记录时间排序。</p>
+  <p className="leaderboard-note">{board==='challenge'?'按球馆挑战最高通关关数排名':'每人保留各榜最高成绩'} · 同分按成绩记录时间排序。</p>
   {debugging && <p className="leaderboard-note">当前处于独立测试球馆，测试成绩不提交。</p>}
   <p className="leaderboard-note">{localOnly?'本机培养成果经服务器校验后更新排名；同步不会覆盖球馆进度。':'每次同步当前球馆培养成果，历史最高成绩保留。'}</p>
  </div>;

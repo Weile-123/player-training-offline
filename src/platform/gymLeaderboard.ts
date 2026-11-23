@@ -39,6 +39,10 @@ type Dependencies = {
  localProgress?: () => Promise<{runId: string; revision: number; archive: string} | null>;
 };
 
+class GymRankingRequestError extends Error {
+ constructor(message: string, readonly statusCode: number) {super(message);}
+}
+
 /** Presentation only: never use this nickname to establish account identity. */
 export const cleanGymRankingNickname=(value:unknown)=>typeof value==='string'?Array.from(value
  .replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200e\u200f\u202a-\u202e\u2066-\u2069\ufeff]/g,'')
@@ -46,19 +50,22 @@ export const cleanGymRankingNickname=(value:unknown)=>typeof value==='string'?Ar
 
 /** A progress reference and optional display nickname; never client scores or identity. */
 export function createGymLeaderboardClient(deps: Dependencies) {
- let message = '', pendingResult: Promise<boolean> | null = null;
+ let message = '', pending: {reference: GymRankReference; result: Promise<boolean>} | null = null;
  const freshBoards = new Set<GymBoard>();
  const listeners = new Set<() => void>();
  const update = (next: string) => {message = next; listeners.forEach(listener => listener());};
  const assertEnabled = () => {if (!deps.enabled()) throw Error('排行榜服务尚未连接，本地球馆进度已保留');};
- return {
-  subscribe: (listener: () => void) => {listeners.add(listener); return () => {listeners.delete(listener);};},
-  getMessage: () => message,
-  sync(reference: GymRankReference): Promise<boolean> {
-   if (pendingResult) return pendingResult;
+ function sync(reference: GymRankReference): Promise<boolean> {
+   if (!/^\d{1,16}-\d{1,10}$/.test(reference.runId) || !Number.isSafeInteger(reference.revision) || reference.revision < 0) return Promise.reject(Error('球馆进度标识无效'));
+   if (pending) {
+    if (pending.reference.runId===reference.runId && pending.reference.revision>=reference.revision) return pending.result;
+    // Wait for the previous upload, then read the latest archived progress.
+    // Joining an older request would leave an already cleared stage unsubmitted.
+    const next = () => sync(reference);
+    return pending.result.then(next,next);
+   }
    const task = (async () => {
    assertEnabled();
-   if (!/^\d{1,16}-\d{1,10}$/.test(reference.runId) || !Number.isSafeInteger(reference.revision) || reference.revision < 0) throw Error('球馆进度标识无效');
    try {
     const user = await deps.user();
     if (!user?.puid) {update('登录虎扑后可查看个人排名并同步成绩'); return false;}
@@ -74,17 +81,33 @@ export function createGymLeaderboardClient(deps: Dependencies) {
     update('球馆排行成绩已同步'); return true;
    } catch (error) {update(error instanceof Error ? error.message : '排行同步失败，本地进度已保留'); throw error;}
    })();
-   pendingResult = task;
-   const clear = () => {if (pendingResult === task) pendingResult = null;};
+   pending = {reference,result:task};
+   const clear = () => {if (pending?.result === task) pending = null;};
    void task.then(clear, clear);
    return task;
-  },
+ }
+ return {
+  subscribe: (listener: () => void) => {listeners.add(listener); return () => {listeners.delete(listener);};},
+  getMessage: () => message,
+  sync,
   async list(board: GymBoard): Promise<GymRanking> {
    assertEnabled();
    if (!gymBoards.includes(board)) throw Error('排行榜分类无效');
    // Old clients reject an entire response when one player is above level 99.
    const levels = board === 'player' ? '&levels=extended' : '';
-   const publicResult = await deps.request(`/leaderboard?board=${board}${levels}&limit=50${freshBoards.has(board)?'&fresh=1':''}`, 'GET') as {entries?: GymRankRow[]};
+   let publicResult: {entries?: GymRankRow[]};
+   try {
+    publicResult = await deps.request(`/leaderboard?board=${board}${levels}&limit=50${freshBoards.has(board)?'&fresh=1':''}`, 'GET') as {entries?: GymRankRow[]};
+   } catch (error) {
+    if (board==='challenge' && error instanceof GymRankingRequestError && error.statusCode===400) {
+     // Older gateways reject the new board parameter. Only show the rollout
+     // message when the same project's advertised boards confirm it is absent.
+     const health = await deps.request('/health','GET').catch(()=>null) as {applicationId?: unknown; boards?: unknown}|null;
+     if (health?.applicationId===hupuProject.applicationId && Array.isArray(health.boards) &&
+         health.boards.includes('player') && health.boards.includes('fame') && !health.boards.includes('challenge')) throw Error('挑战榜暂未开放，请稍后刷新');
+    }
+    throw error;
+   }
    if (!Array.isArray(publicResult?.entries) || publicResult.entries.length > 50 || !publicResult.entries.every(row => validRow(row, board))) throw Error('排行榜返回格式异常');
    freshBoards.delete(board);
    try {
@@ -117,10 +140,11 @@ export async function gymLeaderboardRequest(path: string, method: 'GET' | 'POST'
  await ensureColorboxSdk(); assertHupuProject();
  const cloud = api ?? window.ColorboxAI?.cloud;
  if (!gymLeaderboardConfigured() || !cloud) throw Error('排行榜服务尚未连接，本地球馆进度已保留');
- if (!/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player(?:&levels=extended)?|fame|challenge)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
+ const health = path==='/health' && method==='GET' && !auth && data===undefined;
+ if (!health && !/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player(?:&levels=extended)?|fame|challenge)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
  const response = await sdkDeadline(cloud.request({url: gymLeaderboardConfig.apiBase + path, method, data, envId: gymLeaderboardConfig.envId, auth}), '排行请求超时，请稍后手动刷新');
  assertHupuProject();
- if (response.statusCode < 200 || response.statusCode >= 300 || ![0, 200].includes(response.code)) throw Error(response.message || '排行榜读取失败，请稍后重试');
+ if (response.statusCode < 200 || response.statusCode >= 300 || ![0, 200].includes(response.code)) throw new GymRankingRequestError(response.message || '排行榜读取失败，请稍后重试',response.statusCode);
  return response.data;
 }
 export async function currentLocalGymRankingProgress() {

@@ -650,6 +650,8 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
     case 'assign-challenge-matchup':
     case 'choose-challenge-reward':
     case 'swap-challenge-lineup':
+    case 'equip-challenge-gear':
+    case 'unequip-challenge-gear':
     case 'revive-challenge':
     case 'retire-challenge-run':
     case 'take-challenge-reward': {

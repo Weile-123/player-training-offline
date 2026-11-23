@@ -52,14 +52,6 @@
 .gym-home-b .b-continue::before,.gym-home-b .b-new::before {position:absolute;inset:5px;content:'';border:1px solid #f8d69e;pointer-events:none;}
 .gym-home-b .b-continue>span {font:400 36px/1.15 var(--display);white-space:nowrap;text-shadow:1px 2px #82251d;}
 .gym-home-b .b-continue>i {display:block;flex:none;width:26px;height:26px;}
-.gym-home-b .b-challenge {
- display:flex;align-items:center;gap:9px;position:relative;flex:none;width:100%;min-height:46px;
- padding:6px 10px;border:3px solid #081923;background:#e8ba63;color:#21251e;box-shadow:4px 4px #0009;
-}
-.gym-home-b .b-challenge::before {content:'';position:absolute;inset:3px;border:1px solid #8d6332;pointer-events:none;}
-.gym-home-b .b-challenge>span {width:21px;height:21px;flex:none;}
-.gym-home-b .b-challenge strong {font:400 clamp(17px,4.8vw,21px)/1.15 var(--display);white-space:nowrap;}
-.gym-home-b .b-challenge small {margin-left:auto;padding:2px 5px;background:#273d40;color:#f6e6c6;font:700 10px/1.2 var(--body);white-space:nowrap;}
 .gym-home-b .b-new strong {font:400 30px/1.2 var(--display);white-space:nowrap;}
 .gym-home-b .b-new>i {display:block;flex:none;width:22px;height:22px;}
 .gym-home-b .b-menu {--home-menu-row:88px;position:relative;display:grid;grid-template-columns:var(--home-menu-width);grid-template-rows:44px;grid-auto-rows:var(--home-menu-row);gap:var(--home-wide-menu-gap);width:var(--home-menu-width);margin:0;padding:0;}
@@ -187,9 +179,43 @@
 .gym-home-b .gym-home-design .b-menu>button.b-announcement>span {width:18px;height:18px;}
 .gym-home-b .gym-home-design .b-menu>button.b-announcement>strong {font-size:15px;line-height:20px;}
 
-.gym-update-notice-list {display:grid;gap:10px;list-style:none;margin:0;padding:0;}
-.gym-update-notice-list li {border:1px solid #ad945e;background:#f9edcf;padding:9px 11px;}
-.gym-update-notice-list strong {font-size:15px;}
-.gym-update-notice-list p {margin:2px 0 0;font-size:13px;}
+.gym-update-notice-releases {display:grid;gap:22px;}
+.gym-update-notice-releases .gym-update-notice-date {
+ display:flex;align-items:center;gap:10px;margin:0 0 10px;
+ color:#f7e3b5;font:800 13px/1.2 var(--font-body);font-variant-numeric:tabular-nums;letter-spacing:.04em;
+}
+.gym-update-notice-date time {
+ display:inline-flex;align-items:center;gap:7px;padding:6px 11px;background:#17323e;
+ border:1px solid #122531;box-shadow:inset 0 0 0 1px #c7a668;white-space:nowrap;
+}
+.gym-update-notice-date svg {width:15px;height:15px;color:#e3bd76;}
+.gym-update-notice-date::after {content:'';flex:1;height:4px;border-block:1px solid #b79a68;}
+.gym-update-notice-list {
+ display:grid;list-style:none;margin:0;padding:0;border:1px solid #b69a69;
+ background:#fff2d4;box-shadow:2px 2px 0 #bea67d;
+}
+.gym-update-notice-list li {
+ display:grid;grid-template-columns:clamp(30px,8.6vw,38px) minmax(0,1fr);align-items:start;
+ gap:10px;padding:10px clamp(8px,3vw,13px);
+}
+.gym-update-notice-list li+li {border-top:1px solid #d4bd8f;}
+.gym-update-notice-icon {
+ display:grid;place-items:center;aspect-ratio:1;color:#17323e;background:#eadaaf;
+ border:1px solid #b09360;box-shadow:inset 0 0 0 2px #fbefce;
+}
+.gym-update-notice-list li:first-child .gym-update-notice-icon {
+ color:#ffeac3;background:#ab3023;border-color:#833322;box-shadow:inset 0 0 0 2px #d96c51;
+}
+.gym-update-notice-icon svg {width:60%;height:60%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linejoin:round;stroke-linecap:round;}
+.gym-update-notice-list strong {display:block;color:#132b36;font-size:clamp(14px,3.6vw,17px);font-weight:900;line-height:1.25;}
+.game-screen.comic-dialog-layer .gym-update-notice .gym-update-notice-list p {
+ margin:4px 0 0;font-size:clamp(12px,3.25vw,14px);line-height:1.55;
+}
 .gym-update-notice-list b {color:#a4261b;white-space:nowrap;}
-.gym-update-notice-actions {display:grid;padding:0 16px 16px;}
+.gym-update-notice-actions {display:grid;flex:none;padding:0 16px 14px;}
+.game-screen.comic-dialog-layer .gym-update-notice .gym-update-notice-actions .primary {
+ min-height:46px;outline:1px solid #f4bc83;outline-offset:-6px;font-size:15px;letter-spacing:.06em;
+}
+.game-screen.comic-dialog-layer .gym-update-notice .gym-update-notice-actions .primary:focus-visible {
+ outline:2px solid #172f3a;outline-offset:2px;
+}

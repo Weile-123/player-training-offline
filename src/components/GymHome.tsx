@@ -1,6 +1,5 @@
 import {useEffect, useLayoutEffect, useRef, useState} from 'react';
 import {useGym} from '../gymStore';
-import {playerLevelCap} from '../game/gym/progression';
 import {gameAudio} from '../presentation/audio';
 import {useModalAccessibility} from '../presentation/useModalAccessibility';
 import {useShaperPerformanceReady} from '../presentation/useShaperPerformanceReady';
@@ -20,18 +19,29 @@ import GymGame from './GymGame';
 import './GymGame.css';
 import './GymHome.css';
 
-type HomePanel = 'announcement' | 'settings' | 'collection' | 'rank' | 'alumni' | null;
+type HomePanel = 'update' | 'announcement' | 'settings' | 'collection' | 'rank' | 'alumni' | null;
 const updateNoticeKey = 'legend-gym.update-notice';
-const updateNoticeVersion = 'level-cap-2000-v2';
+const updateNotices = [
+ {date:'2026-11-23', changes:[
+  {title:'球馆挑战', icon:<GameIcon name="train"/>, detail:'球馆达到 Lv.3 后，可从训练场进入挑战。每关选派三名球员，按对位闯关。推荐签约可提高对应球员的挑战初始等级。'},
+  {title:'挑战阵容与器材', icon:<GameIcon name="bag"/>, detail:'阵容最多可招募六人。器材可卸下存入仓库，再分配给本轮其他球员。'},
+  {title:'球馆经营', icon:<GameIcon name="home"/>, detail:<>球馆 Lv.3 解锁挑战项目升级，新一轮挑战生效。经营项目上限提高，恢复护理和招生培养最高 <b>Lv.12</b>，离线课表最高 <b>Lv.8</b>。</>},
+  {title:'挑战榜', icon:<GymHomeIcon name="rank"/>, detail:'按历史最高通关关数排名，可查看公开榜单和个人名次。'},
+ ]},
+ {date:'2026-11-20', changes:[
+  {title:'球员等级上限提升', icon:<GameIcon name="people"/>, detail:<>球员上限从 Lv.99 提升至 <b>Lv.2000</b>，已有球员可以继续培养。</>},
+  {title:'页面样式优化', icon:<GameIcon name="book"/>, detail:'调整首页及部分游戏页面的布局与显示效果。'},
+  {title:'动画更流畅', icon:<GameIcon name="train"/>, detail:'优化训练和界面动画，减少卡顿。'},
+ ]},
+] as const;
+const latestUpdate = updateNotices[0];
 
 export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:boolean}={}) {
  const store = useGym();
- const [playing, setPlaying] = useState<'court' | 'challenge' | null>(null);
- const challengeButton = useRef<HTMLButtonElement>(null);
- const returningFromChallenge = useRef(false);
+ const [playing, setPlaying] = useState(false);
  const [panel, setPanel] = useState<HomePanel>(() => {
-  try {return localStorage.getItem(updateNoticeKey) === updateNoticeVersion ? null : 'announcement';}
-  catch {return 'announcement';}
+  try {return localStorage.getItem(updateNoticeKey) === latestUpdate.date ? null : 'update';}
+  catch {return 'update';}
  });
  const [collectionTab, setCollectionTab] = useState<0 | 1>(0);
  const [busy, setBusy] = useState(false);
@@ -68,12 +78,6 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   return()=>{active=false;cancelAnimationFrame(request);observer?.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);};
  },[playing,store.hasSave,tutorialMode]);
  useModalAccessibility(!playing&&!tutorialMode);
- useEffect(() => {
-  if (!playing && returningFromChallenge.current) {
-   returningFromChallenge.current = false;
-   challengeButton.current?.focus();
-  }
- }, [playing]);
  useEffect(() => gameAudio.install(document), []);
  useEffect(() => {
   let active=true;
@@ -89,7 +93,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
  useShaperPerformanceReady(businessReady(),businessReady);
 
  const closeAnnouncement = () => {
-  try {localStorage.setItem(updateNoticeKey, updateNoticeVersion);}
+  try {localStorage.setItem(updateNoticeKey, latestUpdate.date);}
   catch {/* A storage error must not prevent the notice from closing. */}
   setPanel(null);
  };
@@ -104,14 +108,14 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   const current = useGym.getState();
   if (busy || current.hydrating) return;
   // A late click from the pre-hydration screen can only continue an existing gym.
-  if (current.hasSave) {setPlaying('court'); return;}
+  if (current.hasSave) {setPlaying(true); return;}
   if(shouldOfferGymTutorial()){setTutorialError('');setPanel(null);setTutorialMode('new');return;}
   setBusy(true);
   try {
    const result = await useGym.getState().start();
    if (!result.error) {
     setPanel(null);
-    setPlaying('court');
+    setPlaying(true);
    }
   } finally { setBusy(false); }
  };
@@ -125,7 +129,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    setBusy(true);
    const current=useGym.getState();
    const result=current.hasSave?null:await current.start();
-   if(!result?.error){completeGymTutorial();setTutorialMode(null);setPanel(null);setPlaying('court');}
+   if(!result?.error){completeGymTutorial();setTutorialMode(null);setPanel(null);setPlaying(true);}
   }catch(error){setTutorialError(error instanceof Error?error.message:'开馆暂未成功，请重试');}
   finally{tutorialTransition.current=false;setBusy(false);}
  };
@@ -138,12 +142,11 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
 
  if(tutorialMode)return <GymTutorial onComplete={()=>void finishTutorial()} onSkip={()=>void finishTutorial()} error={tutorialError||store.actionError}/>;
 
- if (playing) return <GymGame initialChallenge={playing==='challenge'} onHome={() => {
+ if (playing) return <GymGame onHome={() => {
   const current = useGym.getState();
-  returningFromChallenge.current = playing==='challenge';
-  if (current.debugSessionActive) {void current.debugRestoreGym?.().then(() => setPlaying(null)); return;}
+  if (current.debugSessionActive) {void current.debugRestoreGym?.().then(() => setPlaying(false)); return;}
   void current.flush();
-  setPlaying(null);
+  setPlaying(false);
  }}/>;
 
  const titles = {settings: '游戏设置', collection: '收藏图鉴', rank: '排行榜', alumni: '球馆档案'};
@@ -158,10 +161,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    <section className="b-command" aria-label="球馆经营">
     {store.hasSave ? <>
      <div className="b-save"><span>当前球馆</span><strong>Lv.<b>{store.state.gymLevel}</b></strong><i/><span>赞助券 <b>{store.state.credits.toLocaleString('zh-CN')}</b></span></div>
-     <button type="button" className="b-continue" aria-label="继续经营" disabled={store.hydrating || busy} onClick={() => setPlaying('court')}><span>继续经营</span><i><GymHomeIcon name="arrow"/></i></button>
-     <button type="button" className="b-challenge" aria-label="球馆挑战" ref={challengeButton} disabled={store.hydrating || busy} onClick={() => setPlaying('challenge')}>
-      <span aria-hidden="true"><GymHomeIcon name="rank"/></span><strong>球馆挑战</strong><small>新玩法</small>
-     </button>
+     <button type="button" className="b-continue" aria-label="继续经营" disabled={store.hydrating || busy} onClick={() => setPlaying(true)}><span>继续经营</span><i><GymHomeIcon name="arrow"/></i></button>
     </> : <button type="button" className="b-new" aria-label="开设训练馆" aria-busy={busy || store.hydrating} disabled={busy || store.hydrating} onClick={() => void start()}><i><GymHomeIcon name="new"/></i><strong>{busy?'正在开馆…':store.hydrating?'读取中…':'开设训练馆'}</strong></button>}
    </section>
    <nav className="b-menu" aria-label="更多功能">
@@ -178,15 +178,21 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   </div>
   </div>
   {panel === 'settings' && <HomeSettings cloudEnabled={false} onClose={() => setPanel(null)} onTutorial={()=>{setPanel(null);setTutorialMode('replay');}}/>}
-  {panel === 'announcement' && <ComicDialog title="新版公告" onClose={closeAnnouncement} className="gym-update-notice"
+  {(panel === 'update' || panel === 'announcement') && <ComicDialog title={panel === 'update' ? '新版公告' : '更新公告'} onClose={closeAnnouncement} className="gym-update-notice"
    footer={<div className="gym-update-notice-actions"><button type="button" className="primary" onClick={closeAnnouncement}>知道了</button></div>}>
-   <ul className="gym-update-notice-list">
-    <li><strong>球员等级上限提升</strong><p>球员上限从 Lv.99 提升至 <b>Lv.{playerLevelCap}</b>，已有球员可以继续培养。</p></li>
-    <li><strong>页面样式优化</strong><p>调整首页及部分游戏页面的布局与显示效果。</p></li>
-    <li><strong>动画更流畅</strong><p>优化训练和界面动画，减少卡顿。</p></li>
-   </ul>
+   <div className="gym-update-notice-releases">
+    {(panel === 'update' ? [latestUpdate] : updateNotices).map(({date, changes}) => <section key={date}>
+     <h3 className="gym-update-notice-date"><time dateTime={date}><GameIcon name="calendar"/>{date}</time></h3>
+     <ul className="gym-update-notice-list">
+      {changes.map(({title, icon, detail}) => <li key={title}>
+       <span className="gym-update-notice-icon" aria-hidden="true">{icon}</span>
+       <div><strong>{title}</strong><p>{detail}</p></div>
+      </li>)}
+     </ul>
+    </section>)}
+   </div>
   </ComicDialog>}
-  {panel && panel !== 'settings' && panel !== 'announcement' && <ComicDialog title={titles[panel]} onClose={() => setPanel(null)} variant="album" className={panel === 'collection' ? 'collection-album-dialog' : panel === 'rank' ? 'leaderboard-dialog' : 'career-statistics-dialog gym-career-dialog'}>
+  {panel && panel !== 'settings' && panel !== 'update' && panel !== 'announcement' && <ComicDialog title={titles[panel]} onClose={() => setPanel(null)} variant="album" className={panel === 'collection' ? 'collection-album-dialog' : panel === 'rank' ? 'leaderboard-dialog' : 'career-statistics-dialog gym-career-dialog'}>
    {panel === 'alumni' ? <GymCareerPanel state={store.state} loadAlumni={store.hasSave ? store.loadAlumni : undefined} onCollection={tab => {setCollectionTab(tab); setPanel('collection');}}/> : <div className="contract-panel gym-panels">
     {panel === 'collection' && <GymCollectionPanel state={store.state} initialTab={collectionTab} onAction={action => void homeAction(action)} busy={busy || store.hydrating || !store.hasSave}/>}
     {panel === 'rank' && <GymLeaderboard/>}

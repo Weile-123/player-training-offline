@@ -91,6 +91,7 @@ it('shares one confirmed submission across all three boards and shows cleared st
  expect(document.querySelector('[role=tab][aria-selected=true]')?.textContent).toBe('挑战榜');
  expect(document.querySelector('.endless-ranking')?.textContent).toContain('67 关');
  expect(document.querySelector('.personal-score')?.textContent).toBe('67 关');
+ expect(document.body.textContent).toContain('按球馆挑战最高通关关数排名');
  expect(api.list).toHaveBeenLastCalledWith('challenge');
  await click('球员榜');expect(api.sync).toHaveBeenCalledTimes(1);
  await click('刷新排行榜');expect(api.sync).toHaveBeenCalledTimes(2);

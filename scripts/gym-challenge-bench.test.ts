@@ -32,6 +32,26 @@ function reload(state:GymState) {
   return decoded!;
 }
 
+it('retires a legacy challenge while preserving its best result across the next draft',()=>{
+  const initial=newGym(1000,18201);
+  initial.gymLevel=3;
+  initial.challengeProjects={conditioning:5,coaching:3};
+  let state=legacyV5ChallengeGym(initial);
+  const attempt=1,seed=challengeSeed(state.seed,attempt);
+  const {rulesVersion,settings}=state.challenge!.run;
+  const pool=challengePlayerPool(state,rulesVersion);
+  const players=recommendedChallengeDraft(challengeDraft(seed,pool,pool.length,rulesVersion,settings),challengeFixture(seed,1,rulesVersion));
+  state=act(state,{type:'draft-challenge',attempt,players});
+  state=winAndPick(state,'level');
+  const record=state.challenge!.record,fame=state.fame;
+  state=reload(act(state,{type:'retire-challenge-run',attempt,stage:1}));
+  expect(state.challenge!.run).toMatchObject({phase:'reward',retired:true});
+  state=reload(act(state,{type:'start-challenge',attempt}));
+  expect(state.challenge!.run).toMatchObject({attempt:2,phase:'draft'});
+  expect(state.challenge!.record).toEqual(record);
+  expect(state.fame).toBe(fame);
+});
+
 it('recruits three reserves, exchanges their own levels and gear, and replays the lineup after a declined reward',()=>{
   let state=newGym(1000,18201);
   state.gymLevel=3;

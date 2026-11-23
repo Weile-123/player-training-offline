@@ -27,6 +27,20 @@ test('public reads use no account ID and reject arbitrary query identities',asyn
  await assert.rejects(handler({method:'GET',path:'/leaderboard',query:{board:'player',puid:'other'}}),{statusCode:400});
 });
 
+test('challenge board supports public reads and scopes private reads to the gateway identity',async()=>{
+ const calls=[];
+ const handler=createHandler({rpc:async(...args)=>{calls.push(args);return {entries:[]};}});
+ const query={board:'challenge',limit:'50'};
+ await handler({method:'GET',path:'/leaderboard',query});
+ await handler({method:'GET',path:'/leaderboard/me',query,context});
+ await assert.rejects(handler({method:'GET',path:'/leaderboard/me',query}),{statusCode:401});
+ await assert.rejects(handler({method:'GET',path:'/leaderboard',query:{...query,levels:'extended'}}),{statusCode:400});
+ assert.deepEqual(calls,[
+  ['read_gym_rank',{p_board:'challenge',p_limit:50,p_puid:null}],
+  ['read_gym_rank',{p_board:'challenge',p_limit:50,p_puid:'verified-coach'}],
+ ]);
+});
+
 test('uses separate caches and consistently routes level-aware public and personal reads',async()=>{
  const calls=[];
  const handler=createHandler({rpc:async(name,params)=>{calls.push([name,params]);return {entries:[name]};}});

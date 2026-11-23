@@ -37,6 +37,7 @@ export type GymStore = {
   /** Local developer-only disposable gym; never persisted to the real repository. */
   debugSessionActive?: boolean;
   debugSetGymLevel?: (level: number, options?: GymDebugOptions) => Promise<GymResult>;
+  debugForkGym?: () => Promise<void>;
   debugRestoreGym?: () => Promise<GymResult>;
   state: GymState;
   hasSave: boolean;
@@ -270,22 +271,26 @@ function recommendDebugTemplates(gym: GymState): GymState {
   return {...state, player: rookie};
 }
 
-/** Valid test fixtures own a separate memory repository, including their history. */
-export function createGymDebugStore(level: number, now: () => number = Date.now, {recommendAllTemplates = false}: GymDebugOptions = {}) {
-  if (!Number.isInteger(level) || level < 1 || level > 8) throw Error('请选择1至8级球馆');
+/** Test gyms own a separate memory repository, including their history. */
+export function createGymMemoryStore(state: GymState, now: () => number = Date.now) {
   const values = new Map<string, string>();
   const storage: GymStorage = {getItem: key => values.get(key) ?? null, setItem: (key, value) => {values.set(key, value);}};
-  const state = newGym(now(), 20_261_117 + level);
+  if (!writeGym(storage, state).ok) throw Error('测试球馆初始化失败');
+  return createGymStore(storage, state.seed, now);
+}
+
+export function createGymDebugStore(level: number, now: () => number = Date.now, {recommendAllTemplates = false}: GymDebugOptions = {}) {
+  if (!Number.isInteger(level) || level < 1 || level > 8) throw Error('请选择1至8级球馆');
+  const state = newGym(now(), randomSeed());
   state.gymLevel = level;
   state.credits = 999;
   state.player!.enteredGymLevel = level;
   state.offlineRulesVersion = 2;
-  const fixture = recommendAllTemplates ? recommendDebugTemplates(state) : state;
-  if (!writeGym(storage, fixture).ok) throw Error('测试球馆初始化失败');
-  return createGymStore(storage, state.seed, now);
+  return createGymMemoryStore(recommendAllTemplates ? recommendDebugTemplates(state) : state, now);
 }
 
 export const useGym = createGymLocalFirstStore(createGymStore(gymStorage), gymStorage, createGymAuthorityTransport(), {
   debugAvailable: gymDebugAvailable,
   debugFactory: (level, options) => createGymDebugStore(level, Date.now, options),
+  debugSnapshotFactory: state => createGymMemoryStore(state),
 });

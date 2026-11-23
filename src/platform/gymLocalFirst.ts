@@ -22,7 +22,8 @@ const sameCloud=(a:GymAuthoritySnapshot,b:GymAuthoritySnapshot)=>a.epoch===b.epo
  * action queue and no returned server game snapshot is published over a save.
  */
 export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport:GymAuthorityTransport,
- options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number;debugAvailable?:()=>boolean;debugFactory?:(level:number,options?:GymDebugOptions)=>Hook}={}):Hook{
+ options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number;debugAvailable?:()=>boolean;debugFactory?:(level:number,options?:GymDebugOptions)=>Hook;
+  debugSnapshotFactory?:(state:GymState)=>Hook}={}):Hook{
  const now=options.now??Date.now,requestId=options.requestId??(()=>crypto.randomUUID());
  const clockInterval=Math.max(60_000,options.minClockIntervalMs??60_000);
  let generation=0,hydration:Promise<void>|null=null,background:Promise<void>|null=null,hydrated=false;
@@ -61,11 +62,20 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
    await next.getState().hydrate();
    if(version!==generation)throw Error('球馆状态已变化，本次测试切换已取消');
    if(!validGym(next.getState().state)||next.getState().state.gymLevel!==level)throw Error('测试球馆初始化失败');
-   stopDebug?.();debug=next;
-   const publish=()=>store.setState({...copy(next.getState()),debugSessionActive:true,
-    authorityCapabilities:{platformRewards:false,legacyAdoption:false},authorityMessage:'独立测试球馆'});
-   stopDebug=next.subscribe(publish);publish();
+   publishDebug(next);
    return{state:next.getState().state,events:[]};
+  },
+  debugForkGym:async()=>{
+   if(!debugAllowed()||!options.debugSnapshotFactory)throw Error('仅本地开发环境可复制测试球馆');
+   if(debug)return;
+   const expected=stamp(local.getState()),version=++generation;
+   if(!expected.hasSave)throw Error('请先开设球馆');
+   const snapshot=await snapshotLocalGym();
+   const next=options.debugSnapshotFactory(snapshot);
+   await next.getState().hydrate();
+   if(version!==generation||!same(stamp(local.getState()),expected))throw Error('球馆状态已变化，请重试');
+   if(next.getState().actionError||!validGym(next.getState().state))throw Error('测试球馆初始化失败');
+   publishDebug(next);
   },
   debugRestoreGym:async()=>{
    if(!debugAllowed())throw Error('仅本地开发环境可恢复测试球馆');
@@ -104,20 +114,30 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
   // committed by the same local engine transaction as every other game action.
   preparePlatformReward:async()=>undefined,
  }));
+ function publishDebug(next:Hook){
+  stopDebug?.();debug=next;
+  const publish=()=>store.setState({...copy(next.getState()),debugSessionActive:true,
+   authorityCapabilities:{platformRewards:false,legacyAdoption:false},authorityMessage:'独立测试球馆'});
+  stopDebug=next.subscribe(publish);publish();
+ }
  local.subscribe(value=>{if(!debug)store.setState(copy(value));});
  const status=(message:string)=>{if(!debug)store.setState({authorityMode:'local',authorityMessage:message});};
- async function backupLocal(expected:Expected,version:number){
-  if(!expected.hasSave)return;
+ async function snapshotLocalGym(){
   const before=structuredClone(local.getState().state),all:typeof before.alumni=[];
   const total=before.alumni.length+(before.alumniArchive?.count??0);
   while(all.length<total){
    const limit=Math.min(100,total-all.length),page=await local.getState().loadAlumni(all.length,limit);
-   if(page.total!==total||page.players.length!==limit||page.players.some(player=>!validGymAlumnus(player,before)))throw Error('local history backup incomplete');
+   if(page.total!==total||page.players.length!==limit||page.players.some(player=>!validGymAlumnus(player,before)))throw Error('校友档案暂时无法读取');
    all.push(...page.players);
   }
-  if(generation!==version||!same(stamp(local.getState()),expected))throw Error('local changed before backup');
   before.alumni=all.reverse();delete before.alumniArchive;
-  if(!validGym(before))throw Error('local recovery backup invalid');
+  if(!validGym(before))throw Error('本地存档校验失败');
+  return before;
+ }
+ async function backupLocal(expected:Expected,version:number){
+  if(!expected.hasSave)return;
+  const before=await snapshotLocalGym();
+  if(generation!==version||!same(stamp(local.getState()),expected))throw Error('local changed before backup');
   criticalWrite(`${gymLocalFirstPrefix}.before-recovery.${expected.createdAt}-${expected.seed}-${expected.revision}`,{version:1,state:before});
  }
  async function importState(state:GymState,expected:Expected,version:number,owner:string,replace=false){

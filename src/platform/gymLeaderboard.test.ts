@@ -3,9 +3,11 @@ import {cleanGymRankingNickname,createGymLeaderboardClient, gymRankReference, ty
 import {newGym} from '../game/gym/engine';
 import {playerLevelCap} from '../game/gym/progression';
 import {nbaTemplates} from '../game/templates';
+import {hupuProject} from './hupuProject';
 
 afterEach(() => {vi.unstubAllGlobals(); vi.unstubAllEnvs();});
 const fameRow: GymRankRow = {id: 'rank-1', coach: '训练师', score: '2500', best: null};
+const challengeRow: GymRankRow = {id: 'rank-3', coach: '挑战教练', score: '67', best: null};
 const template = nbaTemplates[0];
 const playerRow: GymRankRow = {id: 'rank-2', coach: '训练师', score: '12345678901234567890', best: {playerId: 'gym-p1', templateId: template.id, value: '12345678901234567890', level: 25, stats: {...template.stats}}};
 const reference = {runId: '1800000000000-23', revision: 50};
@@ -72,6 +74,16 @@ it('allows guests to read public fame rankings without a personal request', asyn
  expect(request).toHaveBeenCalledExactlyOnceWith('/leaderboard?board=fame&limit=50', 'GET');
  await expect(client.sync(reference)).resolves.toBe(false);
  expect(client.getMessage()).toContain('登录虎扑');
+});
+it('reads confirmed challenge stages through the public and authenticated ranking endpoints',async()=>{
+ const request=vi.fn(async(path:string)=>path.includes('/me?')?{me:{rank:1,entry:challengeRow}}:{entries:[challengeRow]});
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'one'}),request});
+ expect(await client.list('challenge')).toEqual({entries:[challengeRow],me:{rank:1,entry:challengeRow}});
+ expect(request.mock.calls).toEqual([['/leaderboard?board=challenge&limit=50','GET'],['/leaderboard/me?board=challenge','GET',undefined,true]]);
+});
+it.each([{...challengeRow,score:'0'},{...challengeRow,best:playerRow.best}])('rejects invalid challenge rows (%j)',async row=>{
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>null,request:async()=>({entries:[row]})});
+ await expect(client.list('challenge')).rejects.toThrow('格式异常');
 });
 it('preserves big integer player values and reads the extended public and personal ranks', async () => {
  const extendedRow = {...playerRow, best: {...playerRow.best!, level: playerLevelCap}};
@@ -140,6 +152,19 @@ it('joins simultaneous submissions so a rank-page refresh waits for a pending ho
  const failure = expect(first).rejects.toThrow('offline'); reject(Error('offline')); await failure;
  await expect(client.sync(reference)).resolves.toBe(true); expect(request).toHaveBeenCalledTimes(2);
 });
+it('serializes a newer progress revision behind an older upload so a new best is not skipped',async()=>{
+ let confirm!: (value:unknown)=>void;
+ const request=vi.fn().mockImplementationOnce(()=>new Promise(resolve=>{confirm=resolve;})).mockResolvedValue({accepted:true});
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'one'}),request});
+ const first=client.sync(reference),newer={...reference,revision:reference.revision+1};
+ for(let index=0;index<5;index++)await Promise.resolve();
+ const followUp=client.sync(newer);
+ expect(request).toHaveBeenCalledTimes(1);
+ confirm({accepted:true});
+ await expect(first).resolves.toBe(true);
+ await expect(followUp).resolves.toBe(true);
+ expect(request).toHaveBeenNthCalledWith(2,'/leaderboard/submit','POST',{event:'gym-progress',...newer},true);
+});
 it.each([{runId: 'evil?score=100', revision: 1}, {runId: reference.runId, revision: -1}, {runId: reference.runId, revision: 1.5}])('validates references before requesting an account (%j)', async invalid => {
  const user = vi.fn(), request = vi.fn(), client = createGymLeaderboardClient({enabled: () => true, user, request});
  await expect(client.sync(invalid)).rejects.toThrow('标识无效'); expect(user).not.toHaveBeenCalled(); expect(request).not.toHaveBeenCalled();
@@ -157,4 +182,23 @@ it('uses current project SDK cloud requests, checks HTTP and business errors, an
  }
  await expect(gymLeaderboardRequest('/other-app/submit', 'POST', {}, true, {request})).rejects.toThrow('接口无效');
  expect(request).toHaveBeenCalledTimes(4);
+});
+it.each([
+ {statusCode:400,boards:['player','fame'],message:'挑战榜暂未开放，请稍后刷新',health:true},
+ {statusCode:400,boards:['player','fame','challenge'],message:'排行查询参数无效',health:true},
+ {statusCode:503,boards:['player','fame'],message:'排行查询参数无效',health:false},
+])('preserves old and failed backend behavior for the challenge tab (%j)',async({statusCode,boards,message,health})=>{
+ vi.resetModules();vi.stubEnv('VITE_GYM_LEADERBOARD_API_BASE','https://current-project.example/api');vi.stubEnv('VITE_GYM_LEADERBOARD_ENV_ID','current-project-env');
+ vi.stubGlobal('window',{ColorboxAI:{}});
+ const {createGymLeaderboardClient,gymLeaderboardRequest}=await import('./gymLeaderboard');
+ const cloud={request:vi.fn(async({url}:{url:string})=>url.endsWith('/health')
+  ?{statusCode:200,code:0,data:{applicationId:hupuProject.applicationId,boards}}
+  :url.includes('board=fame')?{statusCode:200,code:0,data:{entries:[fameRow]}}
+  :{statusCode,code:statusCode,message:'排行查询参数无效'})};
+ const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>null,request:(path,method,data,auth)=>gymLeaderboardRequest(path,method,data,auth,cloud)});
+ await expect(client.list('challenge')).rejects.toThrow(message);
+ expect(cloud.request.mock.calls.map(([options])=>options.url)).toEqual([
+  'https://current-project.example/api/leaderboard?board=challenge&limit=50',...(health?['https://current-project.example/api/health']:[]),
+ ]);
+ await expect(client.list('fame')).resolves.toEqual({entries:[fameRow],me:null});
 });

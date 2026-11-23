@@ -4,6 +4,7 @@ import {challengeCanStart,challengeReferralCounts,dispatchGym,newGym,finishEquip
 import {settleOfflineGym,offlineLimitMs,type OfflineTrainingReport} from '../src/game/gym/offline';
 import {validGym,validGymAlumnus} from '../src/game/gym/save';
 import {challengeRewardCategories} from '../src/game/gym/challenge';
+import {challengeEquipment} from '../src/game/gym/challengeCatalog';
 import {validChallengeProjectLevels} from '../src/game/gym/challengeProjects';
 import {parseGymCloudArchive} from '../src/platform/gymCloudArchive';
 import {extractGymClockInterval,extractGymRecoveryClockInterval} from './gymTimeflowClock.mjs';
@@ -21,6 +22,7 @@ const allowedActions:Record<string,readonly string[]>={
  'choose-challenge-reward':['attempt','stage','category'],'take-challenge-reward':['attempt','stage','offer','targetId','replaceSlot','toBench','levelTargetIds'],
  'revive-challenge':['attempt','stage'],'retire-challenge-run':['attempt','stage'],
  'swap-challenge-lineup':['attempt','stage','starterId','reserveId'],
+ 'equip-challenge-gear':['attempt','stage','playerId','itemIndex','item'],'unequip-challenge-gear':['attempt','stage','playerId','itemIndex','item'],
  'assign-challenge-matchup':['attempt','stage','lane','playerId'],'upgrade-challenge-project':['projectId'],
  train:['id'],recommend:['id'],'use-drink':['id'],recruit:['preference','mode','direction','expectedNextPlayer','selectRecruited'],
  'buy-equipment':['id','replaceId','destination'],equip:['id','replaceId'],unequip:['id'],'sell-equipment':['id'],'upgrade-project':['id'],
@@ -54,6 +56,11 @@ function checkAction(value:unknown):asserts value is GymAction {
     !action.players.every(player=>typeof player==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(player))))reject();
  if(type==='choose-challenge-reward')choice('category',challengeRewardCategories,true);
  if(type==='swap-challenge-lineup'){id('starterId',true);id('reserveId',true);}
+ if(type==='equip-challenge-gear'||type==='unequip-challenge-gear'){
+  const item=action.item;
+  if(!integer(action.itemIndex)||!object(item)||Object.keys(item).length!==2||typeof item.id!=='string'||
+     !challengeEquipment.has(item.id)||!integer(item.band))reject();
+ }
  if(type==='assign-challenge-matchup'&&(!integer(action.lane)||action.lane>2))reject();
  if(type==='upgrade-challenge-project'&&(typeof action.projectId!=='string'||!validChallengeProjectLevels({[action.projectId]:0})))reject();
  if(type==='take-challenge-reward'){

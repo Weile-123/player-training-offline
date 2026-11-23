@@ -1,10 +1,10 @@
 import {statKeys} from '../types';
 import {
-  applyChallengeOffer, applyScheduledChallengeMove, challengeBenchCap, challengeDraft, challengeEntrant, challengeFamePerStage, challengeFixture,
+  applyChallengeGearTransfer, applyChallengeOffer, applyScheduledChallengeMove, challengeBenchCap, challengeDraft, challengeEntrant, challengeFamePerStage, challengeFixture,
   challengeLineupLimit, challengeMatchupLimit, challengeOffers, challengeReserveTarget, challengeRewardCategories, challengeRewardChoices,
   challengeRoster, challengeRosterCap, challengeScheduledMatchupLimit, challengeScheduledReward, challengeScheduledRewards, challengeSeed, challengeStage, challengeSupportsBench, challengeUnlockTemplates, challengeUsesCollection,
   challengeUsesManualMatchups, challengeUsesScheduledRewards, decodeChallengeMatchups, decodeScheduledMatchup, encodeChallengeMatchups, restoreChallengeLineup, scoreChallenge,
-  type ChallengePlayer, type ChallengeReplay, type ChallengeRewardCategory, type ChallengeRulesVersion, type ChallengeSettings, type ChallengeSquad, type GymChallenge,
+  type ChallengeGear, type ChallengePlayer, type ChallengeReplay, type ChallengeRewardCategory, type ChallengeRulesVersion, type ChallengeSettings, type ChallengeSquad, type GymChallenge,
 } from './challenge';
 import {challengeCards,challengeEquipment,challengeTemplateIds} from './challengeCatalog';
 import {challengeProjectLevel,validChallengeProjectLevels} from './challengeProjects';
@@ -17,7 +17,7 @@ const fields = (value:unknown, required:readonly string[], optional:readonly str
   !!value && typeof value==='object' && !Array.isArray(value) && required.every(key=>has(value,key)) &&
   Object.keys(value).every(key=>required.includes(key)||optional.includes(key));
 const replayKeys=['attempt','startPoolSize','starters','moves'];
-const scheduledReplayKeys=['checkpoint','draftRefreshed','revival','gearMilestones'];
+const scheduledReplayKeys=['checkpoint','draftRefreshed','revival','gearMilestones','warehouseEnabled','gearTransfers'];
 const optionalReplayKeys=['rulesVersion','settings','matchups',...scheduledReplayKeys];
 const rulesVersionOf = (value:unknown):ChallengeRulesVersion|undefined => value===2||value===3||value===4||value===5||value===6?value:undefined;
 function validCollectionPool(value:unknown, collection:GymState['collection']):value is string[] {
@@ -44,6 +44,22 @@ function validScheduledMove(value:unknown,expected:ChallengeRewardCategory) {
     slot===-1&&(offer===-1?target===-1:whole(offer,0,2)&&whole(target,-1,challengeRosterCap-1));
 }
 
+function validGearTransfers(value: unknown, firstStage:number, lastStage:number, revivedStage:unknown) {
+  if (!Array.isArray(value)||!value.length) return false;
+  let previousStage=firstStage, previousRevival=0;
+  for (const transfer of value) {
+    if (!Array.isArray(transfer)||transfer.length!==5) return false;
+    const [stage,afterRevival,target,itemIndex,equip]=transfer;
+    if (!whole(stage,previousStage,lastStage)||!whole(afterRevival,0,1)||
+        afterRevival===1&&stage!==revivedStage||stage===previousStage&&afterRevival<previousRevival||
+        !whole(target,0,challengeRosterCap-1)||!whole(equip,0,1)||
+        !whole(itemIndex,0,equip?Math.floor((stage-1)/5)-1:2)) return false;
+    previousStage=stage;
+    previousRevival=afterRevival;
+  }
+  return true;
+}
+
 function validTrace(value:Record<string,unknown>, pool:readonly string[], state:GymState, draft:boolean, finalMatch:boolean,pendingMilestone=false) {
   const rulesVersion=rulesVersionOf(value.rulesVersion);
   if (!whole(value.attempt,1) || !whole(value.startPoolSize,challengeUnlockTemplates,pool.length) ||
@@ -54,6 +70,7 @@ function validTrace(value:Record<string,unknown>, pool:readonly string[], state:
   const scheduled=challengeUsesScheduledRewards(rulesVersion);
   let checkpoint=0;
   if (scheduled) {
+    if (has(value,'warehouseEnabled')&&value.warehouseEnabled!==true) return false;
     if (has(value,'checkpoint')) {
       if (!whole(value.checkpoint,10)||value.checkpoint%10!==0) return false;
       checkpoint=value.checkpoint;
@@ -66,12 +83,15 @@ function validTrace(value:Record<string,unknown>, pool:readonly string[], state:
           !Object.entries(gear).every(([key,move])=>/^[1-9]\d*$/.test(key)&&whole(Number(key),10,gearCount*10)&&
             Number(key)%10===0&&validScheduledMove(move,'gear'))) return false;
     } else if (has(value,'gearMilestones')) return false;
+    let revivedStage:unknown;
     if (has(value,'revival')) {
       const revival=value.revival;
       if (draft||!fields(revival,['stage','matchup'],['move'])||!whole(revival.stage,checkpoint+1,value.moves.length+1)||
           !whole(revival.matchup,0,challengeScheduledMatchupLimit-1)||
           (has(revival,'move')?!validScheduledMove(revival.move,'swap'):finalMatch||revival.stage!==value.moves.length+1)) return false;
+      if (has(revival,'move')) revivedStage=revival.stage;
     }
+    if (has(value,'gearTransfers')&&(draft||!validGearTransfers(value.gearTransfers,Math.max(6,checkpoint+1),value.moves.length+1,revivedStage))) return false;
   } else if (scheduledReplayKeys.some(key=>has(value,key))) return false;
   if (manual) {
     if (!validSettings(value.settings,state)||value.startPoolSize!==challengeTemplateIds.length||
@@ -105,7 +125,7 @@ function validTrace(value:Record<string,unknown>, pool:readonly string[], state:
 export function validChallenge(value:unknown, state:GymState):value is GymChallenge {
   if (!fields(value,['version','run','record'],['collectionPool','checkpointProofs'])||value.version!==1) return false;
   const r=value.run;
-  if (!fields(r,[...replayKeys,'phase','offerPoolSize','team','boosts'],[...optionalReplayKeys,'rewardCategory','bench','assignments','retired']) ||
+  if (!fields(r,[...replayKeys,'phase','offerPoolSize','team','boosts'],[...optionalReplayKeys,'rewardCategory','bench','warehouse','assignments','retired']) ||
       typeof r.phase!=='string' || !['draft','ready','reward','lost'].includes(r.phase)) return false;
   const rulesVersion=rulesVersionOf(r.rulesVersion), signedPool=state.postgameRecommendedTemplates??[];
   const record=value.record;
@@ -141,7 +161,7 @@ export function validChallenge(value:unknown, state:GymState):value is GymChalle
       !challengeRewardCategories.some(category=>category===r.rewardCategory))) return false;
   const stage=r.moves.length+1;
   const checkpoint=scheduled?Number(r.checkpoint??0):0;
-  if (has(r,'retired')&&(!scheduled||r.phase!=='lost'||r.retired!==true)) return false;
+  if (has(r,'retired')&&r.retired!==true) return false;
   if (pendingRevival&&r.phase!=='reward') return false;
   if (scheduled&&r.phase==='reward') {
     const expected=pendingRevival?'swap':pendingMilestone?'level':challengeScheduledRewards(stage)[0];
@@ -150,7 +170,13 @@ export function validChallenge(value:unknown, state:GymState):value is GymChalle
   if (scheduled&&stage<=checkpoint&&(r.phase==='ready'||r.phase==='lost')) return false;
   const usedSize=r.moves[r.moves.length-1]?.[0]??r.startPoolSize;
   if (r.phase==='reward'?!whole(r.offerPoolSize,usedSize,pool.length):r.offerPoolSize!==0) return false;
-  let upgrades=0;
+  const warehouse=r.warehouse;
+  const validGear=(item:unknown)=>fields(item,['id','band'])&&typeof item.id==='string'&&challengeEquipment.has(item.id)&&
+    whole(item.band,0,Math.floor((stage-2)/10));
+  if (r.warehouseEnabled===true||has(r,'gearTransfers')) {
+    if (!Array.isArray(warehouse)||warehouse.length>Math.floor((stage-1)/5)||!warehouse.every(validGear)) return false;
+  } else if (has(r,'warehouse')) return false;
+  let upgrades=Array.isArray(warehouse)?warehouse.length:0;
   const ids=new Set<string>();
   const team=r.team;
   const settings=manual?r.settings as ChallengeSettings:undefined;
@@ -162,8 +188,7 @@ export function validChallenge(value:unknown, state:GymState):value is GymChalle
     if (!whole(p.level,baseLevel,baseLevel+stage-1)) return false;
     ids.add(p.id);
     upgrades+=p.level-baseLevel+p.gear.length;
-    if (!p.gear.every(item=>fields(item,['id','band'])&&typeof item.id==='string'&&challengeEquipment.has(item.id)&&
-        whole(item.band,0,Math.floor((stage-2)/10)))) return false;
+    if (!p.gear.every(validGear)) return false;
   }
   if (manual) {
     const assignments=r.assignments, matchups=r.matchups as number[];
@@ -208,6 +233,7 @@ function replay(trace:ChallengeReplay, gymSeed:number, pool:readonly string[]):C
     team:trace.starters.map(id=>challengeEntrant(id,trace.settings)),
     boosts:{three:0,mid:0,drive:0,inside:0,handle:0,defense:0},
     ...(challengeSupportsBench(trace.rulesVersion)?{bench:[]}:{}),
+    ...(trace.warehouseEnabled?{warehouse:[]}:{}),
     ...(trace.settings?{settings:trace.settings}:{}),rulesVersion:trace.rulesVersion,
   };
   if (challengeUsesScheduledRewards(trace.rulesVersion)) return replayScheduled(trace,seed,squad);
@@ -239,7 +265,14 @@ function replay(trace:ChallengeReplay, gymSeed:number, pool:readonly string[]):C
 function replayScheduled(trace:ChallengeReplay,seed:number,original:ChallengeSquad):ChallengeSquad|null {
   let squad=original;
   const nextStage=challengeStage(trace);
+  const transfers=trace.gearTransfers??[];
+  let transferIndex=0;
   for(let stage=1;stage<=nextStage;stage++) {
+    while (transfers[transferIndex]?.[0]===stage&&transfers[transferIndex][1]===0) {
+      const moved=applyChallengeGearTransfer(squad,transfers[transferIndex++]);
+      if (!moved) return null;
+      squad=moved;
+    }
     if (trace.revival?.stage===stage) {
       const loss=scoreRecordedMatch(trace,squad,seed,stage,trace.revival.matchup);
       if (!loss||loss.won) return null;
@@ -248,6 +281,11 @@ function replayScheduled(trace:ChallengeReplay,seed:number,original:ChallengeSqu
         if (!restored) return null;
         squad=restored;
       }
+    }
+    while (transfers[transferIndex]?.[0]===stage&&transfers[transferIndex][1]===1) {
+      const moved=applyChallengeGearTransfer(squad,transfers[transferIndex++]);
+      if (!moved) return null;
+      squad=moved;
     }
     if (stage<nextStage&&stage>(trace.checkpoint??0)&&!scoreRecordedMatch(trace,squad,seed,stage)?.won) return null;
     const gear=trace.gearMilestones?.[stage];
@@ -258,7 +296,7 @@ function replayScheduled(trace:ChallengeReplay,seed:number,original:ChallengeSqu
     if (!after) return null;
     squad=after;
   }
-  return squad;
+  return transferIndex===transfers.length?squad:null;
 }
 
 export function verifyChallengeHistory(state:GymState):boolean {
@@ -284,22 +322,31 @@ export function verifyChallengeHistory(state:GymState):boolean {
       !record.starters.every((id,i)=>id===run.starters[i])||
       !record.moves.every((move,i)=>move.every((n,j)=>n===run.moves[i]?.[j]))||
       record.matchups?.some((index,i)=>index!==run.matchups?.[i])||
-      record.checkpoint!==run.checkpoint||record.draftRefreshed!==run.draftRefreshed||
+      record.checkpoint!==run.checkpoint||record.draftRefreshed!==run.draftRefreshed||!sameGearHistory(record,run)||
       Object.entries(record.gearMilestones??{}).some(([stage,move])=>move.some((n,i)=>n!==run.gearMilestones?.[Number(stage)]?.[i]))||
       !sameRevival(record,run)||!sameSettings(record.settings,run.settings))) return false;
   if (run.phase==='draft') return true;
   const rebuilt=replay(run,gymSeed,poolFor(run));
+  const sameGear=(actual:ChallengeGear[],expected:ChallengeGear[])=>actual.length===expected.length&&
+    actual.every((item,i)=>item.id===expected[i].id&&item.band===expected[i].band);
   const samePlayers=(actual:ChallengePlayer[],expected:ChallengePlayer[])=>actual.length===expected.length&&
     actual.every((player,i)=>{
       const saved=expected[i];
-      return player.id===saved.id&&player.level===saved.level&&player.gear.length===saved.gear.length&&
-        player.gear.every((item,j)=>item.id===saved.gear[j].id&&item.band===saved.gear[j].band);
+      return player.id===saved.id&&player.level===saved.level&&sameGear(player.gear,saved.gear);
     });
   if (!rebuilt||!statKeys.every(key=>rebuilt.boosts[key]===run.boosts[key])||
-      !samePlayers(rebuilt.team,run.team)||!samePlayers(rebuilt.bench??[],run.bench??[])) return false;
+      !samePlayers(rebuilt.team,run.team)||!samePlayers(rebuilt.bench??[],run.bench??[])||
+      !sameGear(rebuilt.warehouse??[],run.warehouse??[])) return false;
   const stage=challengeStage(run);
   if (run.phase==='ready'||run.phase==='reward'&&(stage<=(run.checkpoint??0)||run.revival?.stage===stage&&!run.revival.move)) return true;
   return scoreRecordedMatch(run,rebuilt,challengeSeed(gymSeed,run.attempt),stage)?.won===(run.phase==='reward');
+}
+
+function sameGearHistory(record:ChallengeReplay,run:ChallengeReplay) {
+  const stage=challengeStage(record), saved=record.gearTransfers??[];
+  const played=(run.gearTransfers??[]).filter(transfer=>transfer[0]<=stage);
+  return record.warehouseEnabled===run.warehouseEnabled&&saved.length===played.length&&
+    saved.every((transfer,i)=>transfer.every((value,j)=>value===played[i][j]));
 }
 
 function sameRevival(record:ChallengeReplay,run:ChallengeReplay) {

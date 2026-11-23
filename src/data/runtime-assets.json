@@ -1,5 +1,5 @@
 {
-  "version": "b592ecc0464a1fcf",
+  "version": "2776de427a8dcaa2",
   "entries": [
     {
       "path": "art/career/album.png",
@@ -39,8 +39,8 @@
     },
     {
       "path": "art/collection/court-lines.svg",
-      "bytes": 345,
-      "hash": "b172b1cce0c5aaee",
+      "bytes": 339,
+      "hash": "1c9fb54828cf0f68",
       "local": true
     },
     {
@@ -147,8 +147,8 @@
     },
     {
       "path": "art/home/continue-frame.svg",
-      "bytes": 1005,
-      "hash": "a68a9df93d707fd7",
+      "bytes": 997,
+      "hash": "100ae5aa84faf84c",
       "local": true
     },
     {
@@ -1527,8 +1527,8 @@
     },
     {
       "path": "art/shot/player-data.json",
-      "bytes": 292738,
-      "hash": "480c9be0a9b6a6e6",
+      "bytes": 292737,
+      "hash": "aa98ad2156cb79f9",
       "local": true
     },
     {

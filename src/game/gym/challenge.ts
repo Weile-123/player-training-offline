@@ -17,13 +17,14 @@ export type ChallengeGear = {id: string; band: number};
 export type ChallengePlayer = {id: string; level: number; gear: ChallengeGear[]};
 export type ChallengeOffer = {kind:'level'} | {kind:'swap'; id:string} | {kind:'gear'; item:ChallengeGear} | {kind:'team'; key:StatKey};
 export type ChallengeSettings = {projects: ChallengeProjectLevels; referrals: Readonly<Record<string,number>>};
-export type ChallengeSquad = {team: ChallengePlayer[]; boosts: Stats; bench?: ChallengePlayer[]; settings?:ChallengeSettings; rulesVersion?:ChallengeRulesVersion};
+export type ChallengeSquad = {team: ChallengePlayer[]; boosts: Stats; bench?: ChallengePlayer[]; warehouse?:ChallengeGear[]; settings?:ChallengeSettings; rulesVersion?:ChallengeRulesVersion};
 // The recommendation or collection list is append-only. Its length at the draw fixes the
 // offered cards even if more templates are recommended before selecting one.
 export type ChallengeMove =
   | [poolSize:number, offer:number, target:number, replace:number]
   | [poolSize:number, category:number, offer:number, target:number, replace:number]
   | [poolSize:number, category:number, offer:number, target:number, replace:number, lineup:number];
+export type ChallengeGearTransfer = [stage:number, afterRevival:0|1, player:number, itemIndex:number, equip:0|1];
 export type ChallengeReplay = {
   rulesVersion?:ChallengeRulesVersion; attempt:number; startPoolSize:number; starters:string[]; moves:ChallengeMove[];
   settings?:ChallengeSettings; matchups?:number[];
@@ -31,6 +32,8 @@ export type ChallengeReplay = {
   draftRefreshed?:true;
   revival?:{stage:number; matchup:number; move?:ChallengeMove};
   gearMilestones?:Record<number,ChallengeMove>;
+  warehouseEnabled?:true;
+  gearTransfers?:ChallengeGearTransfer[];
 };
 export type ChallengeRun = ChallengeReplay & ChallengeSquad & {
   phase:'draft'|'ready'|'reward'|'lost'; offerPoolSize:number; rewardCategory?:ChallengeRewardCategory;
@@ -38,6 +41,7 @@ export type ChallengeRun = ChallengeReplay & ChallengeSquad & {
   retired?:true;
 };
 export type GymChallenge = {version:1; run:ChallengeRun; record:ChallengeReplay|null; collectionPool?:string[]; checkpointProofs?:ChallengeReplay[]};
+type ChallengeGearAction = {attempt:number; stage:number; playerId:string; itemIndex:number; item:ChallengeGear};
 export type ChallengeAction =
   | {type:'start-challenge'; attempt:number; checkpoint?:number}
   | {type:'refresh-challenge-draft'; attempt:number}
@@ -48,7 +52,8 @@ export type ChallengeAction =
   | {type:'play-challenge'; attempt:number; stage:number}
   | {type:'choose-challenge-reward'; attempt:number; stage:number; category:ChallengeRewardCategory}
   | {type:'take-challenge-reward'; attempt:number; stage:number; offer:number; targetId?:string; replaceSlot?:number; toBench?:true; levelTargetIds?:[string,string]}
-  | {type:'swap-challenge-lineup'; attempt:number; stage:number; starterId:string; reserveId:string};
+  | {type:'swap-challenge-lineup'; attempt:number; stage:number; starterId:string; reserveId:string}
+  | (ChallengeGearAction&({type:'equip-challenge-gear'}|{type:'unequip-challenge-gear'}));
 
 const gyms = ['滨江球馆','南桥球馆','红砖球馆','北岸球馆','灯塔球馆','西港球馆','长街球馆','青枫球馆','山城球馆','海风球馆','石桥球馆','老街球馆'];
 const orders = [[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]] as const;
@@ -378,6 +383,19 @@ export function challengeAutomaticMove(seed:number,stage:number):ChallengeMove {
   return [challengeTemplateIds.length,0,Math.floor(random(draws(seed,stage,10))*statKeys.length),-1,-1,-1];
 }
 
+export function applyChallengeGearTransfer(squad:ChallengeSquad,transfer:ChallengeGearTransfer):ChallengeSquad|null {
+  const [, ,target,itemIndex,equip]=transfer;
+  const player=squad.team[target], warehouse=squad.warehouse??[];
+  if (!player) return null;
+  const source=equip?warehouse:player.gear;
+  const item=source[itemIndex];
+  if (!item||equip&&player.gear.length>=3) return null;
+  const remaining=source.filter((_,index)=>index!==itemIndex);
+  const gear=equip?[...player.gear,item]:remaining;
+  return {...squad,team:squad.team.map((member,index)=>index===target?{...player,gear}:member),
+    warehouse:equip?remaining:[...warehouse,item]};
+}
+
 /** The last index stores the second level recipient in scheduled runs. */
 export function applyScheduledChallengeMove(squad:ChallengeSquad,seed:number,stage:number,move:ChallengeMove,revival=false):ChallengeSquad|null {
   if (move.length!==6||move[0]!==challengeTemplateIds.length) return null;
@@ -402,11 +420,15 @@ export function applyScheduledChallengeMove(squad:ChallengeSquad,seed:number,sta
     if (slot!==-1) return null;
     const recruited=challengeEntrant(card.id,squad.settings);
     if (squad.team.length<challengeRosterCap) return target===-1?{...squad,team:[...squad.team,recruited]}:null;
-    if (!squad.team[target]) return null;
-    return {...squad,team:squad.team.map((player,index)=>index===target?recruited:player)};
+    const outgoing=squad.team[target];
+    if (!outgoing) return null;
+    return {...squad,team:squad.team.map((player,index)=>index===target?recruited:player),
+      ...(squad.warehouse&&outgoing.gear.length?{warehouse:[...squad.warehouse,...outgoing.gear]}:{})};
   }
   const geared=applyChallengeOffer(squad,card,target,slot);
-  return geared?{...squad,team:geared.team}:null;
+  if (!geared) return null;
+  const displaced=squad.team[target]?.gear[slot];
+  return {...squad,team:geared.team,...(squad.warehouse&&displaced?{warehouse:[...squad.warehouse,displaced]}:{})};
 }
 
 const scheduledReady = ({rewardCategory,...run}:ChallengeRun):ChallengeRun =>
@@ -429,9 +451,10 @@ function scheduledCheckpoint(run:ChallengeRun,seed:number):ChallengeRun {
 }
 
 function scheduledRecord(run:ChallengeRun):ChallengeReplay {
-  const {rulesVersion,attempt,startPoolSize,starters,moves,matchups,settings,checkpoint,draftRefreshed,revival,gearMilestones}=run;
+  const {rulesVersion,attempt,startPoolSize,starters,moves,matchups,settings,checkpoint,draftRefreshed,revival,gearMilestones,warehouseEnabled,gearTransfers}=run;
   return {rulesVersion,attempt,startPoolSize,starters,moves,matchups,settings,
-    ...(checkpoint?{checkpoint}:{}),...(draftRefreshed?{draftRefreshed}:{}),...(revival?{revival}:{}),...(gearMilestones?{gearMilestones}:{})};
+    ...(checkpoint?{checkpoint}:{}),...(draftRefreshed?{draftRefreshed}:{}),...(revival?{revival}:{}),...(gearMilestones?{gearMilestones}:{}),
+    ...(warehouseEnabled?{warehouseEnabled}:{}),...(gearTransfers?{gearTransfers}:{})};
 }
 
 function finishScheduledMatch(current:GymChallenge,run:ChallengeRun,seed:number,stage:number,matchup:number):ChallengeChange {
@@ -457,6 +480,12 @@ function finishScheduledMatch(current:GymChallenge,run:ChallengeRun,seed:number,
 type ChallengeChange = {challenge:GymChallenge; fame:number} | {error:string};
 export function advanceChallenge(current:GymChallenge|undefined, action:ChallengeAction, gymSeed:number, gymLevel:number, pool:readonly string[],settings=emptySettings):ChallengeChange {
   const fail={error:'挑战进度已变化，请按当前阵容再试。'};
+  const run=current?.run;
+  if (action.type==='retire-challenge-run') {
+    if (!current||!run||run.retired||action.attempt!==run.attempt||action.stage!==challengeStage(run)) return fail;
+    // Retiring keeps the run's actual phase and replay data, including a win with an unclaimed reward.
+    return {challenge:{...current,run:{...run,retired:true}},fame:0};
+  }
   const rulesVersion=action.type==='start-challenge'?challengeRulesVersion:current?.run.rulesVersion;
   const manual=challengeUsesManualMatchups(rulesVersion);
   const scheduled=challengeUsesScheduledRewards(rulesVersion);
@@ -467,22 +496,21 @@ export function advanceChallenge(current:GymChallenge|undefined, action:Challeng
   };
   if (action.attempt!==(current?.run.attempt??0)) return fail;
   const collectionCheckpoint=challengeUsesCollection(rulesVersion)?{collectionPool:[...pool]}:{};
-  const run=current?.run;
   if (action.type==='start-challenge') {
-    if (run&&run.phase!=='lost') return fail;
+    if (run&&!run.retired&&run.phase!=='lost') return fail;
     const checkpoint=action.checkpoint;
     if (checkpoint!==undefined&&(!Number.isSafeInteger(checkpoint)||checkpoint<10||checkpoint!==challengeCheckpoint(current))) return fail;
     const next:ChallengeRun={
       rulesVersion:challengeRulesVersion,attempt:action.attempt+1,startPoolSize:pool.length,starters:[],moves:[],team:[],
       boosts:emptyBoosts(),phase:'draft',offerPoolSize:0,settings:{projects:{...settings.projects},referrals:{...settings.referrals}},
-      matchups:[],assignments:emptyAssignments(),...(checkpoint?{checkpoint}:{}),
+      matchups:[],assignments:emptyAssignments(),warehouseEnabled:true,warehouse:[],...(checkpoint?{checkpoint}:{}),
     };
     const record=current?.record??null;
     const legacyPool=current?.collectionPool&&(challengeUsesCollection(record?.rulesVersion)||current.checkpointProofs?.some(proof=>challengeUsesCollection(proof.rulesVersion)))
       ? {collectionPool:current.collectionPool}:{};
     return {challenge:{version:1,run:next,record,...legacyPool,...(current?.checkpointProofs?{checkpointProofs:current.checkpointProofs}:{})},fame:0};
   }
-  if (!current||!run) return fail;
+  if (!current||!run||run.retired) return fail;
   const seed=challengeSeed(gymSeed,run.attempt), stage=challengeStage(run);
   const update=(next:ChallengeRun):ChallengeChange=>({challenge:{...current,...collectionCheckpoint,run:next},fame:0});
   if (action.type==='refresh-challenge-draft') {
@@ -495,11 +523,21 @@ export function advanceChallenge(current:GymChallenge|undefined, action:Challeng
     return update(scheduled?scheduledCheckpoint(next,seed):next);
   }
   if (stage!==action.stage) return fail;
-  if (action.type==='retire-challenge-run') {
-    return scheduled&&run.phase==='lost'&&!run.retired?update({...run,retired:true}):fail;
+  if (action.type==='equip-challenge-gear'||action.type==='unequip-challenge-gear') {
+    if (!scheduled||run.phase!=='ready'||!Number.isSafeInteger(action.itemIndex)||action.itemIndex<0) return fail;
+    const target=run.team.findIndex(player=>player.id===action.playerId);
+    const equip=action.type==='equip-challenge-gear'?1:0;
+    const gear=equip?run.warehouse:run.team[target]?.gear;
+    const item=gear?.[action.itemIndex];
+    if (target<0||!item||item.id!==action.item?.id||item.band!==action.item?.band) return fail;
+    const afterRevival=run.revival?.stage===stage&&run.revival.move?1:0;
+    const transfer:ChallengeGearTransfer=[stage,afterRevival,target,action.itemIndex,equip];
+    const squad=applyChallengeGearTransfer(run,transfer);
+    if (!squad) return {error:'该球员的装备已满，请先卸下一件。'};
+    return update({...run,team:squad.team,warehouse:squad.warehouse,gearTransfers:[...(run.gearTransfers??[]),transfer]});
   }
   if (action.type==='revive-challenge') {
-    if (!scheduled||run.phase!=='lost'||run.revival||run.retired) return fail;
+    if (!scheduled||run.phase!=='lost'||run.revival) return fail;
     return update({...run,phase:'reward',rewardCategory:'swap',offerPoolSize:challengeTemplateIds.length,
       matchups:run.matchups!.slice(0,-1),assignments:emptyAssignments(),revival:{stage,matchup:run.matchups!.at(-1)!}});
   }
@@ -569,7 +607,7 @@ export function advanceChallenge(current:GymChallenge|undefined, action:Challeng
     if (run.rewardCategory==='gear'&&challengeScheduledReward(stage)==='level') {
       return update({...run,gearMilestones:{...run.gearMilestones,[stage]:move},rewardCategory:'level'});
     }
-    const ready=scheduledReady({...run,team:squad.team,boosts:squad.boosts});
+    const ready=scheduledReady({...run,...squad});
     if (revival) return update({...ready,revival:{...run.revival!,move}});
     return update(scheduledCheckpoint({...ready,moves:[...run.moves,move]},seed));
   }

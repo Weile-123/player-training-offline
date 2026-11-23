@@ -71,16 +71,25 @@
   "authorityUpgradeMigration": "migrations/20261117000300_gym_authority_rankings.sql",
   "functionDeploymentEvidence": "../outputs/prelaunch-20261118/deployed-source-verification.json",
   "businessFlowEvidence": "../outputs/prelaunch-20261118/live-http-smoke.json",
-  "deployedCodeSha256": "c7cf62d8f3993333c59a1d13005125f3fca059f8b88c8b07aee36419ae4dee15",
+  "deployedCodeSha256": "e6266406720f4e50d66a09aa18f6f367935e410f492103dab972a97061e40d08",
   "nicknameMigration": "migrations/20261117000400_gym_rank_nicknames.sql",
   "deployedCodeHashTarget": "cloudfunctions/activity_api/gym/server/main.mjs",
-  "deployedArchiveSha256": "88c2cfea7642d55ab4c3e91569ab941be5487ead43ca953ed53c69b0f1fec4d0",
+  "deployedArchiveSha256": "24a961fa8fce40172be9ba9be95889212512fa2446a422cc71f42a040f981fd6",
   "localProgressMigration": "migrations/20261117000500_gym_local_rank_progress.sql",
   "challengeBoardDeployment": {
     "board": "challenge",
     "scoreSource": "highest cleared challenge stage from the validated local archive or canonical server state",
     "migration": "migrations/20261117000700_gym_challenge_rank.sql",
-    "migrationApplied": false
+    "migrationApplied": true,
+    "verifiedAt": "2026-11-23T06:35:03.545Z",
+    "archiveSha256": "24a961fa8fce40172be9ba9be95889212512fa2446a422cc71f42a040f981fd6",
+    "publicBoardsVerified": ["legacy player", "extended player", "fame", "challenge"],
+    "anonymousPersonalStatus": 401,
+    "checkpointConflictRecovery": {
+      "migration": "migrations/20261117000800_gym_challenge_rank_recovery.sql",
+      "migrationApplied": true,
+      "verifiedAt": "2026-11-23T07:04:44.579Z"
+    }
   },
   "playerLevelDeployment": {
     "playerLevelCap": 2000,
@@ -90,5 +99,5 @@
     "archiveSha256": "85166b47ef126c95d104057735db07894d9ce3c0fc480d880c09c4fedf69415f",
     "publicBoardsVerified": ["legacy player", "extended player", "fame"]
   },
-  "updatedAt": "2026-11-17T16:27:41.062Z"
+  "updatedAt": "2026-11-23T07:04:44.579Z"
 }

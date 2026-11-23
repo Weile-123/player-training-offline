@@ -1,0 +1,18 @@
+.gc-equipment-actions {
+  display:flex;
+  gap:6px;
+}
+.gc-sheet > .gc-equipment-actions .gc-stamp {flex:1;}
+.gc-equipment-row .gc-equipment-actions .gc-stamp {font-size:12px;padding-inline:5px;}
+.gc-warehouse-targets {display:grid;gap:5px;}
+.gc-warehouse-target {
+  display:grid;
+  grid-template-columns:40px minmax(0,1fr) auto;
+  align-items:center;
+  gap:6px;
+  padding:5px;
+  border:1px solid #b89a63;
+  background:#fff1d1;
+}
+.gc-warehouse-target .gc-warehouse-photo {width:40px;height:44px;}
+.gc-warehouse-target small {display:block;color:#5c4a2d;}

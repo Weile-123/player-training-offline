@@ -323,10 +323,13 @@ function ScheduledRewardSelection({run,seed,pool,busy,act,onClose,error,reduced}
       <button type="button" className="gc-stamp" disabled={busy||target<0||replaceGear&&slot<0} onClick={takeReward}>{isGear?replaceGear?'确认替换装备':'确认装备':'确认换人'}</button>
     </>;
     return <RewardSheet {...sheet} title={isGear?'分配装备':'替换阵容球员'} footer={footer}>
-      {card.kind==='gear'?<GearPlacement card={card} team={run.team} target={target} pickTarget={pickTarget} slot={slot} pickSlot={setSlot} busy={busy}/>:
+      {card.kind==='gear'?<>
+          <GearPlacement card={card} team={run.team} target={target} pickTarget={pickTarget} slot={slot} pickSlot={setSlot} busy={busy}/>
+          {replaceGear&&run.warehouse&&<p className="gcr-note">替下的装备将移入器材仓库。</p>}
+        </>:
         <>
           <div className="gcr-arrange-card"><OfferCard offer={card} run={run}/></div>
-          <p className="gcr-note">阵容已满。换下的球员和他的装备将一起离队。</p>
+          <p className="gcr-note">{run.warehouse?'阵容已满。换下球员的装备将移入器材仓库。':'阵容已满。换下的球员和他的装备将一起离队。'}</p>
           <PlayerTarget team={run.team} selected={target} pick={pickTarget} busy={busy} mode="swap" replaceLabel="选择换下的球员"/>
         </>}
     </RewardSheet>;

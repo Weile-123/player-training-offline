@@ -1,7 +1,9 @@
 import {afterEach, beforeEach, expect, it, vi} from 'vitest';
 import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
-import {cooperationOffers, cooperationStatus, experienceForLevel, gymUpgrade, newGym, playerLevelCap, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
+import {cooperationOffers, cooperationStatus, dispatchGym, experienceForLevel, gymUpgrade, newGym, playerLevelCap, staminaMax, type GymAction, type GymAlumnus, type GymState} from '../../src/game/gym/engine';
+import {challengeDraft, challengeFixture, challengeRewardChoices, challengeSeed, scoreChallenge} from '../../src/game/gym/challenge';
+import {challengeCards} from '../../src/game/gym/challengeCatalog';
 import {settleOfflineGym} from '../../src/game/gym/offline';
 import {offlineExperienceAnimationMs} from '../../src/components/GymOfflineReport';
 import {templateRules} from '../../src/game/contract/templates';
@@ -9,6 +11,7 @@ import {positionLabels, templateById} from '../../src/game/templates';
 import type {GymStore} from '../../src/gymStore';
 import type {UseBoundStore, StoreApi} from 'zustand';
 import {gymFirstVisitTutorialKey, resetGymFirstVisitTutorials} from '../../src/presentation/gymFeatureTutorialPreference';
+import {getGymDebug, toggleGymDebug} from '../../src/platform/gymDebug';
 
 const harness = vi.hoisted(() => ({store: null as UseBoundStore<StoreApi<GymStore>> | null, actions: [] as GymAction[], proofs: [] as (Parameters<GymStore['act']>[1])[], order: [] as string[]}));
 vi.mock('../../src/gymStore', async () => {
@@ -94,10 +97,11 @@ beforeEach(() => {
   };
   vi.stubGlobal('URL', class extends URL {static createObjectURL = vi.fn(() => 'blob:gym-share-preview'); static revokeObjectURL = vi.fn();});
   harness.actions = []; harness.proofs = []; harness.order = [];
-  harness.store!.setState({state: newGym(at, 24), actionError: '', isSuspended: false, pendingOfflineReport: null, authorityMode:undefined,authorityMessage:'',authorityCapabilities:undefined,preparePlatformReward:undefined});
+  harness.store!.setState({state: newGym(at, 24), actionError: '', isSuspended: false, pendingOfflineReport: null, authorityMode:undefined,authorityMessage:'',authorityCapabilities:undefined,preparePlatformReward:undefined,debugSessionActive:false,debugForkGym:undefined});
 });
 afterEach(async () => {
   if (root) act(() => root!.unmount()); root = null;
+  for (const key of ['skipAds','skipPosting'] as const) if(getGymDebug()[key])toggleGymDebug(key);
   await act(async () => {await vi.advanceTimersByTimeAsync(120_001);});
   delete window.ColorboxAI; delete window.__COLORBOX_AI_CONFIG__;
   vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals();
@@ -425,4 +429,97 @@ it('keeps remote share preparation failures visible without opening an editor or
  enableRemote(vi.fn(async()=>{throw Error('分享奖励准备失败');}));await mount(initial);await press('分享·等级+3');await press('发帖分享');
  expect(postEditor).not.toHaveBeenCalled();expect(harness.actions).toEqual([]);expect(harness.proofs).toEqual([]);
  expect(state().player).toEqual(before);expect(document.querySelector('.action-notice.poster-share-notice[role=alert]')?.textContent).toBe('分享奖励准备失败');
+});
+
+function applyChallenge(state:GymState,action:GymAction){
+ const result=dispatchGym(state,state.revision,action,at);
+ expect(result.error).toBeUndefined();
+ return result.state;
+}
+
+function challengeDraftFixture(seed:number){
+ const initial=newGym(at,seed);
+ initial.gymLevel=3;
+ return applyChallenge(initial,{type:'start-challenge',attempt:0});
+}
+
+function challengeLostFixture(){
+ for(let seed=1;seed<=100;seed++){
+  const draft=challengeDraftFixture(seed),run=draft.challenge!.run,runSeed=challengeSeed(seed,1);
+  const starters=challengeDraft(runSeed,[],run.startPoolSize,run.rulesVersion,run.settings).slice(0,3);
+  const ready=applyChallenge(draft,{type:'draft-challenge',attempt:1,players:starters});
+  if(scoreChallenge(ready.challenge!.run,challengeFixture(runSeed,1,run.rulesVersion),starters).won)continue;
+  const assigned=starters.reduce((roster,playerId,lane)=>applyChallenge(roster,{type:'assign-challenge-matchup',attempt:1,stage:1,playerId,lane}),ready);
+  return applyChallenge(assigned,{type:'play-challenge',attempt:1,stage:1});
+ }
+ throw Error('No reproducible challenge loss');
+}
+
+const challengeAdLabel='刷新·必定出巨星';
+const challengeReviveLabel='分享·复活并获得强力援助';
+
+it('refreshes the challenge draft only after a rewarded video, guards repeat clicks, and guarantees a superstar',async()=>{
+ const pending=deferred<{code:number;data:{rewarded:boolean}}>();
+ rewardVideo.mockReturnValueOnce(pending.promise);
+ await mount(challengeDraftFixture(41));await press('球馆挑战');
+ await press(challengeAdLabel);
+ expect(button('正在加载广告…')?.disabled).toBe(true);
+ await press('正在加载广告…');
+ expect(rewardVideo).toHaveBeenCalledTimes(1);
+ expect(state().challenge!.run.draftRefreshed).toBeUndefined();
+ await act(async()=>{pending.resolve({code:200,data:{rewarded:false}});await flushMicrotasks();});
+ expect(button(challengeAdLabel)?.disabled).toBe(false);
+ expect(harness.actions).toEqual([]);
+
+ await press(challengeAdLabel);
+ expect(harness.actions).toEqual([{type:'refresh-challenge-draft',attempt:1}]);
+ expect(state().challenge!.run.draftRefreshed).toBe(true);
+ expect(button(challengeAdLabel)).toBeUndefined();
+ expect(refreshTask).toHaveBeenCalledTimes(1);
+ const run=state().challenge!.run;
+ const players=challengeDraft(challengeSeed(state().seed,1),[],run.startPoolSize,run.rulesVersion,run.settings,run.draftRefreshed);
+ expect(players).toHaveLength(5);
+ expect(challengeCards.get(players[0])?.tier).toBe('superstar');
+});
+
+it('keeps the challenge lost if opening the editor fails, then revives it once after the editor acknowledges',async()=>{
+ const prepare=vi.fn(async()=>proof); enableRemote(prepare);
+ postEditor.mockResolvedValueOnce({code:500,message:'编辑器暂不可用'});
+ await mount(challengeLostFixture());await press('球馆挑战');
+ await press(challengeReviveLabel);await press('发帖分享');
+ expect(state().challenge!.run.phase).toBe('lost');
+ expect(harness.actions).toEqual([]);
+ expect(document.querySelector('.poster-share-notice[role=alert]')?.textContent).toBe('编辑器暂不可用');
+ await press('发帖分享');
+ expect(postEditor).toHaveBeenLastCalledWith(expect.objectContaining({topicId:'871',tagId:'162117',topicName:'AI工坊',tagName:'传奇球馆'}));
+ expect(prepare).toHaveBeenLastCalledWith({type:'revive-challenge',attempt:1,stage:1});
+ expect(harness.actions).toEqual([{type:'revive-challenge',attempt:1,stage:1}]);
+ expect(harness.proofs).toEqual([proof]);
+ expect(document.querySelector('.gym-share-dialog')).toBeNull();
+ const run=state().challenge!.run;
+ expect(run).toMatchObject({phase:'reward',rewardCategory:'swap',revival:{stage:1}});
+ const [first]=challengeRewardChoices(challengeSeed(state().seed,1),1,run.team,[],run.offerPoolSize!,'swap',run.rulesVersion,run.settings,true);
+ expect(first.kind==='swap'&&challengeCards.get(first.id)?.tier).toBe('superstar');
+});
+
+it.each(['skipAds','skipPosting'] as const)('uses %s inside a live challenge only after switching to a disposable gym',async flag=>{
+ const ads=flag==='skipAds';
+ const initial=ads?challengeDraftFixture(41):challengeLostFixture();
+ const fork=vi.fn(async()=>{harness.store!.setState({debugSessionActive:true,authorityCapabilities:{platformRewards:false,legacyAdoption:false}});});
+ const prepare=vi.fn(async()=>proof);enableRemote(prepare);
+ harness.store!.setState({debugForkGym:fork});
+ toggleGymDebug(flag);
+ expect(getGymDebug()[flag]).toBe(true);
+ await mount(initial);await press('球馆挑战');
+ await press(ads?challengeAdLabel:challengeReviveLabel);
+ expect(fork).toHaveBeenCalledTimes(1);
+ expect(harness.store!.getState().debugSessionActive).toBe(true);
+ if(ads)await act(async()=>{await vi.advanceTimersByTimeAsync(1_000);await flushMicrotasks();});
+ else await press('发帖分享');
+ expect(harness.actions).toEqual([ads?{type:'refresh-challenge-draft',attempt:1}:{type:'revive-challenge',attempt:1,stage:1}]);
+ expect(harness.proofs).toEqual([undefined]);
+ expect(prepare).not.toHaveBeenCalled();
+ expect(rewardVideo).not.toHaveBeenCalled();
+ expect(postEditor).not.toHaveBeenCalled();
+ expect(window.ColorboxAI!.oss!.uploadFile).not.toHaveBeenCalled();
 });

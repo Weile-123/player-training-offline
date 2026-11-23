@@ -33,6 +33,7 @@ export function GymDebugDialog({onClose,onLevelChange}: {onClose:()=>void;onLeve
       )}
       <section className="gm-paper gm-stack">
         <h3>球馆挑战</h3>
+        <p className="gm-muted">启用跳过后，使用挑战内的广告或发帖按钮会在独立测试球馆继续当前挑战。测试成绩不会上榜。</p>
         <p className="gm-muted">进入 3 级测试球馆，将每种模板推荐一次，用于测试挑战初始等级加成。</p>
         <button type="button" className="gm-button gm-primary" disabled={busy} onClick={()=>void change(challengeUnlockLevel,true)}>推荐全部模板并进入挑战</button>
         <button type="button" className="gm-button" disabled={busy} onClick={()=>void change(challengeUnlockLevel)}>一键升到 3 级</button>

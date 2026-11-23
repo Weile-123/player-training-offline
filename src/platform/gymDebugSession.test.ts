@@ -1,7 +1,8 @@
 import {describe, expect, it, vi} from 'vitest';
-import {createGymDebugStore, createGymStore, type GymDebugOptions} from '../gymStore';
+import {createGymDebugStore, createGymMemoryStore, createGymStore, type GymDebugOptions} from '../gymStore';
 import {newGym, recommendedTemplateIds, type GymState} from '../game/gym/engine';
-import {challengeRulesVersion} from '../game/gym/challenge';
+import {challengeDraft, challengeRulesVersion, challengeSeed} from '../game/gym/challenge';
+import {challengeTemplateIds} from '../game/gym/challengeCatalog';
 import {templateRules} from '../game/contract/templates';
 import {validGym, writeGym, type GymStorage} from '../game/gym/save';
 import {createGymLocalFirstStore} from './gymLocalFirst';
@@ -17,6 +18,7 @@ function fixture(allowed = true, source = newGym(initialTime, 99), debugFactory?
  const transport = {enabled: () => false, account: vi.fn(async () => null), request: vi.fn(async () => {throw Error('No network expected');})};
  const store = createGymLocalFirstStore(local, storage, transport, {
   now, debugAvailable: () => allowed, debugFactory: debugFactory ?? ((level, options) => createGymDebugStore(level, now, options)),
+  debugSnapshotFactory: state => createGymMemoryStore(state, now),
  });
  return {values, local, store, transport, advance: () => {time += 1_000;}};
 }
@@ -33,10 +35,40 @@ describe('disposable local debug gyms', () => {
   }
  });
 
+ it('draws fresh challenge candidates when rebuilding the same test gym level', async () => {
+  const f = fixture();
+  const seeds = [20_261_123, 20_261_120];
+  let draws = 0;
+  const random = vi.spyOn(globalThis.crypto, 'getRandomValues').mockImplementation(values => {
+   if (!(values instanceof Uint32Array) || draws >= seeds.length) throw Error('Unexpected seed request');
+   values[0] = seeds[draws++];
+   return values;
+  });
+  async function openDraft() {
+   await f.store.getState().debugSetGymLevel!(6);
+   const started = await f.store.getState().act({type:'start-challenge',attempt:0});
+   expect(started.error).toBeUndefined();
+   const refreshed = await f.store.getState().act({type:'refresh-challenge-draft',attempt:1});
+   expect(refreshed.error).toBeUndefined();
+   const {seed,challenge} = refreshed.state;
+   const run = challenge!.run;
+   return {seed,candidates:challengeDraft(challengeSeed(seed,run.attempt),challengeTemplateIds,run.startPoolSize,run.rulesVersion,run.settings,run.draftRefreshed)};
+  }
+  try {
+   const first = await openDraft();
+   const second = await openDraft();
+   expect([first.seed,second.seed]).toEqual(seeds);
+   expect(random).toHaveBeenCalledTimes(2);
+   expect(first.candidates[0]).not.toBe(second.candidates[0]);
+   expect(first.candidates.slice(1)).not.toEqual(second.candidates.slice(1));
+  } finally {random.mockRestore();}
+ });
+
  it('refuses unavailable or malformed debug requests without modifying the real save', async () => {
   const unavailable = fixture(false);
   const before = [...unavailable.values];
   await expect(unavailable.store.getState().debugSetGymLevel!(2)).rejects.toThrow('本地开发');
+  await expect(unavailable.store.getState().debugForkGym!()).rejects.toThrow('本地开发');
   expect([...unavailable.values]).toEqual(before);
   const f = fixture();
   for (const level of [0, 9, 1.5]) await expect(f.store.getState().debugSetGymLevel!(level)).rejects.toThrow('1至8');
@@ -123,6 +155,31 @@ describe('disposable local debug gyms', () => {
   await f.store.getState().debugRestoreGym!();
   expect(f.store.getState().state).toBe(changed);
   expect(f.store.getState().state.credits).toBe(17);
+ });
+
+ it('copies the active draft and full history for simulated rewards without changing real progress', async () => {
+  const source = newGym(initialTime, 99);
+  source.gymLevel = 3;
+  source.alumni = Array.from({length: 135}, (_, i) => ({...structuredClone(source.player!), id: `old-${i}`,
+   recommendedAt: initialTime, rewardCredits: 0, rewardFame: 0, finalValue: '320'}));
+  source.nextPlayer = 137;
+  const f = fixture(true, source);
+  await f.store.getState().hydrate();
+  await f.store.getState().act({type:'start-challenge',attempt:0});
+  const original = f.local.getState().state, before = [...f.values];
+  const oldPage = await f.store.getState().loadAlumni(90, 50);
+  await f.store.getState().debugForkGym!();
+  expect(f.store.getState().debugSessionActive).toBe(true);
+  expect(f.store.getState().state.challenge).toEqual(original.challenge);
+  expect(await f.store.getState().loadAlumni(90, 50)).toEqual(oldPage);
+  const refreshed = await f.store.getState().act({type:'refresh-challenge-draft',attempt:1});
+  expect(refreshed.error).toBeUndefined();
+  expect(refreshed.state.challenge?.run.draftRefreshed).toBe(true);
+  expect(f.local.getState().state.challenge?.run.draftRefreshed).toBeUndefined();
+  await f.store.getState().debugRestoreGym!();
+  expect(f.store.getState().state).toBe(original);
+  expect([...f.values]).toEqual(before);
+  expect(f.transport.request).not.toHaveBeenCalled();
  });
 
  it.each(['restore', 'flush'] as const)('cancels an unfinished test-gym transition after %s', async action => {

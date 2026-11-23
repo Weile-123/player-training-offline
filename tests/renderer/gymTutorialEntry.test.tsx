@@ -48,23 +48,39 @@ async function press(name:string){await act(async()=>{button(name).click();await
 function deferred<T>(){let resolve!:(value:T)=>void;return {promise:new Promise<T>(accept=>{resolve=accept;}),resolve:(value:T)=>resolve(value)};}
 
 it.each(['知道了', '关闭面板'])('shows the latest announcement until it is dismissed using %s', async action => {
- localStorage.setItem('legend-gym.update-notice', 'level-cap-2000');
+ localStorage.setItem('legend-gym.update-notice', 'level-cap-2000-v2');
  await mount();
  const notice = document.querySelector('.gym-update-notice');
  expect(notice?.querySelector('h2')?.textContent).toBe('新版公告');
- expect(notice?.textContent).toContain('从 Lv.99 提升至 Lv.2000');
+ expect([...notice!.querySelectorAll('time')].map(date=>date.dateTime)).toEqual(['2026-11-23']);
+ expect(notice?.textContent).toContain('球馆达到 Lv.3');
+ const business = [...notice!.querySelectorAll('li')].find(item => item.querySelector('strong')?.textContent === '球馆经营');
+ expect(business?.textContent).toContain('球馆 Lv.3 解锁挑战项目升级');
+ expect(business?.textContent).toContain('恢复护理和招生培养最高 Lv.12，离线课表最高 Lv.8');
+ expect(notice?.textContent).toContain('挑战榜');
+ expect(notice?.textContent).not.toContain('球员等级上限提升');
  await act(async () => root!.unmount());
  root = null;
  await mount();
  expect(document.querySelector('.gym-update-notice')).toBeTruthy();
  await press(action);
  expect(document.querySelector('.gym-update-notice')).toBeNull();
+ expect(localStorage.getItem('legend-gym.update-notice')).toBe('2026-11-23');
  await act(async () => root!.unmount());
  root = null;
  await mount();
  expect(document.querySelector('.gym-update-notice')).toBeNull();
  await press('公告');
- expect(document.querySelector('.gym-update-notice h2')?.textContent).toBe('新版公告');
+ const history = document.querySelector('.gym-update-notice');
+ expect(history?.querySelector('h2')?.textContent).toBe('更新公告');
+ const releases = history!.querySelectorAll('.gym-update-notice-releases section');
+ expect([...releases].map(release=>release.querySelector('time')?.dateTime)).toEqual(['2026-11-23','2026-11-20']);
+ expect(releases[0].textContent).toContain('挑战榜');
+ expect([...releases[1].querySelectorAll('li')].map(item=>item.textContent)).toEqual([
+  '球员等级上限提升球员上限从 Lv.99 提升至 Lv.2000，已有球员可以继续培养。',
+  '页面样式优化调整首页及部分游戏页面的布局与显示效果。',
+  '动画更流畅优化训练和界面动画，减少卡顿。',
+ ]);
 });
 
 it('offers a separate practice before creating the first real gym',async()=>{

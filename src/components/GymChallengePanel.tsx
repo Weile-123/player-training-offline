@@ -3,15 +3,17 @@ import {statLabels} from '../game/config';
 import {statKeys, type Stats} from '../game/types';
 import {challengeCanStart, challengePlayerPool, type GymState} from '../game/gym/engine';
 import {
-  challengeBest,challengeCheckpoint,challengeDraft,challengeEntrant,challengeFamePerStage,challengeFixture,challengeMatchesAssigned,
-  challengeNextMilestone,challengePower,challengeScheduledRewards,challengeSeed,challengeStage,challengeUnlockLevel,challengeUsesManualMatchups,
-  challengeUsesScheduledRewards,recommendedChallengeDraft,scoreChallenge,
+  challengeAutomaticMove,challengeBest,challengeCheckpoint,challengeDraft,challengeEntrant,challengeFamePerStage,challengeFixture,
+  challengeMatchesAssigned,challengeNextMilestone,challengePower,challengeScheduledReward,challengeScheduledRewards,challengeSeed,
+  challengeStage,challengeUnlockLevel,challengeUsesManualMatchups,challengeUsesScheduledRewards,decodeScheduledMatchup,
+  encodeChallengeMatchups,recommendedChallengeDraft,scoreChallenge,
   type ChallengeAction,type ChallengeFixture,type ChallengeRun,
 } from '../game/gym/challenge';
 import {challengeCards} from '../game/gym/challengeCatalog';
 import {assetUrl} from '../presentation/assetUrls';
 import {ActionNotice} from './ActionNotice';
 import {ChallengeBattle,ChallengeMatchups,ChallengeOpponents,ChallengePortrait} from './GymChallengeBattle';
+import {GymChallengeRules} from './GymChallengePage';
 import {GymChallengeRewards} from './GymChallengeRewards';
 import {ChallengeRosterDialog,ChallengeStarters,type ChallengeRosterView} from './GymChallengeRoster';
 import {ComicDialog} from './ComicDialog';
@@ -102,17 +104,19 @@ function Lobby({state,busy,act,error}:Controls & {state:GymState;error:string}) 
       <img src={assetUrl('art/shot/court-clean.png')} alt="" />
       <div><small>传奇球馆</small><h2>球馆挑战</h2><p>挑选首发，连战闯关</p></div>
     </div>
-    {unlocked?<>
-      <p className="gc-note">从五名候选球员中选出三名首发。成功推荐签约可提高对应球员的初始等级。</p>
-      {checkpoint>0&&<p className="gc-note">历史最高 {challengeBest(state.challenge)} 关。快速闯关会补领前 {checkpoint} 关的奖励，再从第 {checkpoint+1} 关开打。</p>}
-    </>:<>
+    {!unlocked&&<>
       <div className="gc-section-head"><h2>开启条件</h2></div><UnlockProgress state={state}/>
     </>}
+    <section className="gc-lobby-rules" aria-labelledby="gc-lobby-rules-title">
+      <h2 id="gc-lobby-rules-title">玩法规则</h2>
+      <GymChallengeRules manualMatchups scheduledRewards/>
+    </section>
+    {unlocked&&checkpoint>0&&<p className="gc-note">历史最高 {challengeBest(state.challenge)} 关。快速闯关会补领前 {checkpoint} 关的奖励，再从第 {checkpoint+1} 关开打。</p>}
     <ActionNotice message={error} role="alert"/>
   </ChallengeLayout>;
 }
 
-type PanelProps=Controls & PlatformControls & {state:GymState;error:string;reduced:boolean};
+type PanelProps=Controls & PlatformControls & {state:GymState;error:string;reduced:boolean;testRun?:boolean;showRules:()=>void};
 
 export function GymChallengePanel(props:PanelProps) {
   const {state,busy,act,error,rewardAvailable,adLoading}=props;
@@ -151,12 +155,45 @@ function DefeatDialog({run,stage,reduced,busy,error,rewardAvailable,onRevive,onL
   </ComicDialog>;
 }
 
-function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvailable,reviveDialogOpen,onRevive,onReturnToGym}:PanelProps & {run:ChallengeRun;seed:number;pool:string[]}) {
+type MatchPlayback = {fixture:ChallengeFixture;score:ReturnType<typeof scoreChallenge>;status:'playing'|'awaiting-next';token?:string};
+const pendingWinKey='legend-gym.challenge-pending-win.v1';
+
+function winToken(state:GymState,run:ChallengeRun,stage:number,matchup:number) {
+  return `${state.createdAt}:${state.seed}:${run.attempt}:${stage}:${matchup}`;
+}
+
+function storePendingWin(testRun:boolean,token:string,pending:boolean) {
+  try {
+    const storage=testRun?sessionStorage:localStorage;
+    if (pending) storage.setItem(pendingWinKey,token);
+    else if (storage.getItem(pendingWinKey)===token) storage.removeItem(pendingWinKey);
+  } catch {/* The result can still be acknowledged in the current view. */}
+}
+
+function restorePendingWin(state:GymState,run:ChallengeRun,seed:number,testRun:boolean):MatchPlayback|null {
+  const stage=challengeStage(run)-1;
+  const matchup=run.matchups?.[stage-1];
+  if (!challengeUsesScheduledRewards(run.rulesVersion)||run.phase!=='ready'||stage<1||
+      challengeScheduledReward(stage)!=='team'||matchup===undefined||matchup<0) return null;
+  const token=winToken(state,run,stage,matchup);
+  try {
+    if ((testRun?sessionStorage:localStorage).getItem(pendingWinKey)!==token) return null;
+  } catch {return null;}
+  const assignments=decodeScheduledMatchup(run,matchup);
+  if (!assignments) return null;
+  const stat=statKeys[challengeAutomaticMove(seed,stage)[2]];
+  // Recover the actual battle strengths before this stage's automatic boost.
+  const squad={...run,boosts:{...run.boosts,[stat]:run.boosts[stat]-1}};
+  const fixture=challengeFixture(seed,stage,run.rulesVersion),score=scoreChallenge(squad,fixture,assignments);
+  return score.won?{fixture,score,status:'awaiting-next',token}:null;
+}
+
+function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvailable,reviveDialogOpen,onRevive,onReturnToGym,testRun=false,showRules}:PanelProps & {run:ChallengeRun;seed:number;pool:string[]}) {
   const stage=challengeStage(run),best=challengeBest(state.challenge);
   const rulesVersion=run.rulesVersion;
   const fixture=useMemo(()=>challengeFixture(seed,stage,rulesVersion),[seed,stage,rulesVersion]);
   const [animateStage,setAnimateStage]=useState<number|null>(null);
-  const [playback,setPlayback]=useState<{fixture:ChallengeFixture;score:ReturnType<typeof scoreChallenge>}|null>(null);
+  const [playback,setPlayback]=useState<MatchPlayback|null>(()=>restorePendingWin(state,run,seed,testRun));
   const [selectedLane,setSelectedLane]=useState<number|null>(null);
   const selectedSlot=useRef<HTMLButtonElement|null>(null);
   const [view,setView]=useState<ChallengeRosterView|{kind:'reward'}|null>(null);
@@ -170,32 +207,45 @@ function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvaila
   const automaticReward=settlingCheckpoint||aid;
   const automaticRewardKey=`${stage}:${aid?'aid':'checkpoint'}:${run.rewardCategory??''}`;
   const score=useMemo(()=>isReady||automaticReward?null:scoreChallenge(run,fixture,run.assignments),[isReady,automaticReward,run,fixture]);
-  const playing=!!playback||!isReady&&animateStage===stage;
+  const visiblePlayback=playback&&(playback.fixture.stage===stage||playback.token&&isReady&&playback.fixture.stage===stage-1)?playback:null;
+  const playing=visiblePlayback?.status==='playing'||!isReady&&animateStage===stage;
+  const awaitingNext=visiblePlayback?.status==='awaiting-next';
   const loss=scheduled&&run.phase==='lost'&&!playing;
   const rewardOpen=won&&!playing&&(view?.kind==='reward'||!view&&automaticReward&&closedAutomaticReward!==automaticRewardKey);
-  const finish=useCallback(()=>{setAnimateStage(null);setPlayback(null);},[]);
+  const finish=useCallback(()=>{
+    setAnimateStage(null);
+    setPlayback(result=>result?.token?{...result,status:'awaiting-next'}:null);
+  },[]);
+  const nextStage=()=>{
+    if (visiblePlayback?.token) storePendingWin(testRun,visiblePlayback.token,false);
+    setPlayback(null);
+  };
   const openRoster=(next:ChallengeRosterView)=>{selectedSlot.current=null;setSelectedLane(null);setView(next);};
   const close=()=>setView(null);
 
   useEffect(()=>{
-    if (selectedLane!==null||busy||!isReady) return;
+    if (selectedLane!==null||busy||!isReady||awaitingNext) return;
     selectedSlot.current?.focus({preventScroll:true});
     selectedSlot.current=null;
-  },[selectedLane,busy,isReady]);
+  },[selectedLane,busy,isReady,awaitingNext]);
 
   async function chooseStarter(playerId:string) {
-    if (busy||!isReady||selectedLane===null) return;
+    if (busy||!isReady||visiblePlayback||selectedLane===null) return;
     const ok=await act({type:'assign-challenge-matchup',attempt:run.attempt,stage,lane:selectedLane,playerId});
     if (ok) setSelectedLane(null);
   }
 
   async function play() {
-    if (busy||!isReady||incomplete) return;
+    if (busy||!isReady||visiblePlayback||incomplete) return;
     setSelectedLane(null);
     const command={type:'play-challenge',attempt:run.attempt,stage} as const;
     if (scheduled) {
       const result=scoreChallenge(run,fixture,run.assignments);
-      if (await act(command)) setPlayback({fixture,score:result});
+      if (await act(command)) {
+        const token=result.won&&challengeScheduledReward(stage)==='team'?winToken(state,run,stage,encodeChallengeMatchups(run)):undefined;
+        if (token) storePendingWin(testRun,token,true);
+        setPlayback({fixture,score:result,status:'playing',token});
+      }
     } else {
       setAnimateStage(stage);
       if (!await act(command)) finish();
@@ -206,12 +256,13 @@ function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvaila
     onReturnToGym();
   }
   const action=playing?{label:'对战中…',disabled:true,activate:undefined}:
+    awaitingNext?{label:'下一关',disabled:busy,activate:nextStage}:
     isReady?{label:'开始挑战',disabled:busy||incomplete,activate:()=>void play()}:
     won?{label:aid?'领取强力援助':'选择奖励',disabled:busy,activate:()=>setView({kind:'reward'})}:
     {label:'重新组队',disabled:busy||!challengeCanStart(state),activate:()=>void act({type:'start-challenge',attempt:run.attempt})};
 
-  const firstWin=state.challenge?.record?.attempt===run.attempt&&best===stage;
-  const picking=manual&&isReady&&selectedLane!==null
+  const firstWin=state.challenge?.record?.attempt===run.attempt&&best===(awaitingNext?stage-1:stage);
+  const picking=manual&&isReady&&!visiblePlayback&&selectedLane!==null
     ?{lane:selectedLane,stat:fixture.lanes[selectedLane].key,choose:(id:string)=>void chooseStarter(id)}:undefined;
   const cleared=won&&!aid?stage:stage-1;
   const next=scheduled?challengeNextMilestone(cleared):undefined;
@@ -219,10 +270,10 @@ function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvaila
     next?`再过 ${next.stage-cleared} 关可${next.categories.length===2?'获取装备并升级两名球员':milestoneLabels[next.category]}`:
     isReady&&incomplete?'为三项对位各安排一名首发':won?`第 ${stage} 关已通过`:!isReady?`本局通过 ${stage-1} 关`:undefined;
   const checkpoint=challengeCheckpoint(state.challenge);
-  const battle=playback??(score?{fixture,score}:null);
+  const battle=visiblePlayback??(score?{fixture,score}:null);
   return <>
-    <ChallengeLayout view={`${stage}-${run.phase}`} note={note}
-      roster={<ChallengeStarters run={run} disabled={busy||playing||loss} open={openRoster} selection={picking}/>}
+    <ChallengeLayout view={battle?`battle-${battle.fixture.stage}`:`${stage}-${run.phase}`} note={note}
+      roster={<ChallengeStarters run={run} disabled={busy||playing||awaitingNext||loss} open={openRoster} selection={picking} showRules={showRules}/>}
       action={!loss&&<>
         {!scheduled&&run.phase==='lost'&&checkpoint>0&&<button type="button" className="gc-stamp gc-stamp-yellow gc-checkpoint" disabled={busy}
           onClick={()=>void act({type:'start-challenge',attempt:run.attempt,checkpoint})}>快速通过 {checkpoint} 关</button>}
@@ -234,6 +285,7 @@ function ChallengeMatch({state,run,seed,pool,busy,act,error,reduced,rewardAvaila
           <p>{aid?`选一名援助球员，随后重试第 ${stage} 关。`:`领取第 ${stage} 关奖励，完成后从第 ${(run.checkpoint??0)+1} 关开打。`}</p>
         </div>:isReady&&(manual?<ChallengeMatchups fixture={fixture} run={run} selected={selectedLane} disabled={busy}
         pick={(lane,button)=>{selectedSlot.current=button;setSelectedLane(current=>current===lane?null:lane);}}/>:<ChallengeOpponents fixture={fixture}/>)}
+      {awaitingNext&&<p className="gc-settlement">{firstWin?`首次通过 · 球馆声望 +${challengeFamePerStage}`:'本关已通过'}</p>}
       {!isReady&&!playing&&!automaticReward&&(won
         ?<p className="gc-settlement">{firstWin?`首次通过 · 球馆声望 +${challengeFamePerStage}`:'本关已通过，可领取奖励'}</p>
         :<div className="gc-loss"><span>本局通过 <b>{stage-1}</b> 关</span><span>历史最高 <b>{best}</b> 关</span></div>)}

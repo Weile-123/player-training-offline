@@ -17,7 +17,7 @@
 
 .gym-challenge-banner-content {
  display:grid;
- grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+ grid-template-columns:minmax(max-content,1fr) auto minmax(max-content,1fr);
  align-items:center;
  gap:8px;
  max-width:740px;
@@ -35,7 +35,7 @@
  text-shadow:1px 2px #7d2418;
 }
 
-.gym-challenge-back,.gym-challenge-help {
+.gym-challenge-back,.gym-challenge-abandon {
  justify-self:start;
  display:flex;
  align-items:center;
@@ -48,7 +48,7 @@
  font:600 clamp(11px,3.2vw,14px)/1.2 var(--font-body);
  white-space:nowrap;
 }
-.gym-challenge-help {justify-self:end;justify-content:center;width:36px;font-size:20px;}
+.gym-challenge-abandon {grid-column:3;justify-self:end;justify-content:center;background:#682a27;}
 
 .gym-challenge-back svg {
  flex:none;
@@ -59,3 +59,8 @@
  transform:rotate(180deg);
 }
 
+@media(max-width:360px) {
+ .gym-challenge-banner {padding-inline:7px;}
+ .gym-challenge-banner-content {gap:6px;}
+ .gym-challenge-banner h1 {padding-inline:8px;}
+}
