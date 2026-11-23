@@ -1,13 +1,13 @@
 ﻿import {existsSync,readFileSync,writeFileSync,mkdirSync,copyFileSync} from 'node:fs';
 import {join,dirname} from 'node:path';import {createHash} from 'node:crypto';
-import {includeRuntimeAsset,currentHomeImages} from './runtime-asset-selection.mjs';
+import {includeRuntimeAsset,currentHomeImages,currentEquipmentImages} from './runtime-asset-selection.mjs';
 import './prepare-contract-runtime.mjs';
 const config=JSON.parse(readFileSync('public/config/assets.json','utf8'));
 const previous=JSON.parse(readFileSync('src/data/runtime-assets.json','utf8'));
 const verified=existsSync('src/data/cdn-assets.json')?JSON.parse(readFileSync('src/data/cdn-assets.json','utf8')):{};
 const portraits=JSON.parse(readFileSync('src/data/poster-portraits.json','utf8'));
 const alwaysLocal=new Set([...currentHomeImages,...Object.values(portraits),'art/collection/court-lines.svg','art/home/continue-frame.svg','art/shot/player-data.json']);
-const paths=new Set([...previous.entries.map(a=>a.path),...Object.keys(config.urls??{}),...alwaysLocal].filter(includeRuntimeAsset));
+const paths=new Set([...previous.entries.map(a=>a.path),...Object.keys(config.urls??{}),...alwaysLocal,...currentEquipmentImages].filter(includeRuntimeAsset));
 const entries=[...paths].sort().map(path=>{
  const url=alwaysLocal.has(path)?undefined:config.urls?.[path];
  if(url){const a=verified[path];if(!a||a.url!==url)throw Error(`Run npm run assets:verify for ${path}`);return {path,bytes:a.bytes,hash:a.hash,local:false,url};}

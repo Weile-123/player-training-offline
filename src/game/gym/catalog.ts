@@ -18,15 +18,30 @@ export const selectedRecruitmentPrice = 8;
 export const selectedRecruitmentUnlockLevel = 4;
 export const trainingPlanUnlockLevel = 1;
 export const cooperationUnlockLevel = 1;
+export const offlineProjectMinutes = [30, 45, 60, 90, 120, 180, 195, 210, 225] as const;
 
 export const projects: readonly Project[] = [
   { id: 'endurance', name: '耐力训练', unlockLevel: 1, maxLevel: 8, basePrice: 1, prices: [1, 2, 3, 5, 7, 10, 14, 20], description: '每级增加 5 点体力上限，不补充当前体力。', available: true },
-  { id: 'recovery', name: '恢复护理', unlockLevel: 1, maxLevel: 8, basePrice: 1, description: '每级将恢复 1 点体力所需时间缩短 1 秒。', available: true },
-  { id: 'recruitment', name: '招生培养', unlockLevel: 2, maxLevel: 6, basePrice: 2, prices: [2, 4, 7, 10, 14, 20], description: '每级使下一名新人出生六维各增加 1 点。', available: true },
+  { id: 'recovery', name: '恢复护理', unlockLevel: 1, maxLevel: 12, basePrice: 1, prices: [1, 2, 4, 6, 11, 19, 35, 62, 65, 69, 74, 80], description: '每级将恢复 1 点体力所需时间缩短 1 秒。与器材叠加后最低 6 秒。', available: true },
+  { id: 'recruitment', name: '招生培养', unlockLevel: 2, maxLevel: 12, basePrice: 2, prices: [2, 4, 7, 10, 14, 20, 24, 29, 35, 42, 50, 59], description: '每级使下一名新人出生六维各增加 1 点。', available: true },
   { id: 'equipment', name: '器械管理', unlockLevel: 2, maxLevel: 4, basePrice: 2, description: '每级增加 1 个器材启用槽。', available: true },
   { id: 'automation', name: '自动训练', unlockLevel: 2, maxLevel: 5, basePrice: 3, description: '球馆 2 级免费解锁在线与离线自动训练。项目每级使每球经验额外 +1，并缩短出手间隔 0.2 秒，最低 1 秒；体力不足仍需恢复。', available: true },
-  { id: 'offline', name: '离线课表', unlockLevel: 2, maxLevel: 5, basePrice: 2, description: '球馆 2 级免费获得 30 分钟离线训练；项目依次提升至 45、60、90、120、180 分钟。超时只恢复体力，仅训练开启自动的球员。', available: true },
+  { id: 'offline', name: '离线课表', unlockLevel: 2, maxLevel: offlineProjectMinutes.length - 1, basePrice: 2, prices: [2, 4, 7, 12, 21, 26, 32, 40], description: '球馆 2 级免费获得 30 分钟离线训练。项目升满后可训练 225 分钟，与器材叠加后最多 240 分钟。超时只恢复体力，仅训练开启自动的球员。', available: true },
 ];
+
+const extendedProjectCaps: Partial<Record<ProjectId, readonly number[]>> = {
+  recovery: [1, 2, 3, 4, 5, 7, 9, 12],
+  recruitment: [0, 1, 2, 3, 4, 6, 8, 12],
+  offline: [0, 1, 2, 3, 4, 5, 6, 8],
+};
+
+export function projectLevelCap(id: string, gymLevel: number): number {
+  const project = projects.find(item => item.id === id);
+  if (!project || gymLevel < project.unlockLevel) return 0;
+  const caps = extendedProjectCaps[project.id];
+  if (caps) return caps[Math.min(gymLevel, caps.length) - 1];
+  return Math.min(project.maxLevel, gymLevel - project.unlockLevel + 1);
+}
 
 /** Cumulative training coupons; both actual level and actual template tier are required. */
 export const trainingCreditMilestones = [

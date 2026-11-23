@@ -388,12 +388,14 @@ describe('fixed P0 equipment and project economy', () => {
     }
   });
 
-  it('uses explicit endurance prices and rounded recovery prices with unlock-relative caps while keeping future projects unpurchasable', () => {
+  it('preserves early project caps and reaches every new maximum at the top gym level', () => {
     expect([1, 2, 3, 4, 5, 6, 7, 8].map(level => projectCost('endurance', level))).toEqual([1, 2, 3, 5, 7, 10, 14, 20]);
     expect([1, 2, 3, 4, 5, 6, 7, 8].map(level => projectCost('recovery', level))).toEqual([1, 2, 4, 6, 11, 19, 35, 62]);
     expect(projectCap('recruitment', 1)).toBe(0);
     expect(projectCap('recruitment', 2)).toBe(1);
-    expect(projectCap('recruitment', 8)).toBe(6);
+    expect(projectCap('recruitment', 8)).toBe(12);
+    expect(projectCap('recovery', 8)).toBe(12);
+    expect(projectCap('offline', 8)).toBe(8);
     const gym = {...newGym(start), credits: 1000, gymLevel: 8};
     for (const project of projects.filter(project => !project.available)) {
       expect(projectOffer(gym, project.id).price).toBeNull();

@@ -3,10 +3,12 @@ import {readFileSync} from 'node:fs';
 import {createServer,request as httpRequest} from 'node:http';
 import {createHash} from 'node:crypto';
 import {expect,it,vi} from 'vitest';
-import {newGym,playerValue,type GymState} from '../src/game/gym/engine';
+import {challengePlayerPool,dispatchGym,newGym,playerValue,type GymAction,type GymState} from '../src/game/gym/engine';
+import {challengeDraft,challengeFixture,challengeSeed,recommendedChallengeDraft,scoreChallenge} from '../src/game/gym/challenge';
 import {playerLevelCap} from '../src/game/gym/progression';
 import {encodeGym,validGym} from '../src/game/gym/save';
 import {validateLocalGymRankingArchive} from '../server/gymLocalRankProgress';
+import {verifiedGymRankingProgress} from '../server/gymRankProgress';
 import {createGymLeaderboardClient} from '../src/platform/gymLeaderboard';
 import {verifiedOfficialSdkBytes} from './prepare-gym-authority.mjs';
 const {createHandler}=createRequire(import.meta.url)('../activity/cloudfunctions/activity_api/rankings.cjs');
@@ -23,20 +25,41 @@ function fixture(){
  state.fame=420;state.nextPlayer=3;
  expect(validGym(state)).toBe(true);return state;
 }
-it('submits the current local game as a business archive; the server derives both scores and never reads the stale authority game',async()=>{
+it('submits the current local game as a business archive; the server derives all scores without reading the stale authority game',async()=>{
  const state=fixture(),raw=archive(state),rpc=vi.fn().mockResolvedValue({accepted:true,source:'local-validated',duplicate:false});
  const handler=createHandler({rpc,now:()=>now,validateLocalProgress:validateLocalGymRankingArchive});
  const client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'not-sent',nickname:'SDK昵称'}),
   localProgress:async()=>({...reference(state),archive:raw}),
   request:async(path,method,body)=>handler({path,method,body,context})});
  await expect(client.sync(reference(state))).resolves.toBe(true);
- expect(rpc).toHaveBeenCalledExactlyOnceWith('submit_local_gym_rank',expect.objectContaining({p_puid:'authenticated-coach',p_name:'虎扑昵称',p_fame:420,p_best:expect.objectContaining({templateId:'bryant',value:playerValue(state)})}));
+ expect(rpc).toHaveBeenCalledExactlyOnceWith('submit_local_gym_rank_v2',expect.objectContaining({p_puid:'authenticated-coach',p_name:'虎扑昵称',p_fame:420,p_challenge:0,p_best:expect.objectContaining({templateId:'bryant',value:playerValue(state)})}));
  const data=rpc.mock.calls[0][1];expect(data.p_revision).toBe(state.revision);expect(data.p_evidence).toMatch(/^[a-f0-9]{64}$/);
 });
 it('includes cold alumni after the portable archive export and retains a more valuable historical final value',()=>{
  const state=fixture();state.alumni[0].level=state.alumni[0].peakLevel=40;state.alumni[0].finalValue=(320n*41n**3n*110n/100n).toString();
  const result=validateLocalGymRankingArchive(archive(state),reference(state),now);
  expect(result.best).toMatchObject({playerId:'gym-old',value:state.alumni[0].finalValue});expect(result.source).toBe('local-validated');
+});
+it('publishes the replayed highest cleared challenge, independently from fame and the next stage',async()=>{
+ let state=newGym(now,18201);state.gymLevel=3;
+ const play=(action:GymAction)=>{
+  const result=dispatchGym(state,state.revision,action,now);
+  expect(result.error).toBeUndefined();state=result.state;
+ };
+ play({type:'start-challenge',attempt:0});
+ const {attempt,rulesVersion,settings,startPoolSize}=state.challenge!.run;
+ const seed=challengeSeed(state.seed,attempt),fixture=challengeFixture(seed,1,rulesVersion);
+ const pool=challengePlayerPool(state,rulesVersion);
+ const choices=challengeDraft(seed,pool,startPoolSize,rulesVersion,settings);
+ play({type:'draft-challenge',attempt,players:recommendedChallengeDraft(choices,fixture)});
+ const {lanes}=scoreChallenge(state.challenge!.run,fixture);
+ lanes.forEach(({player},lane)=>play({type:'assign-challenge-matchup',attempt,stage:1,lane,playerId:player.id}));
+ play({type:'play-challenge',attempt,stage:1});
+ const rpc=vi.fn().mockResolvedValue({accepted:true,source:'local-validated'});
+ const handler=createHandler({rpc,now:()=>now,validateLocalProgress:validateLocalGymRankingArchive});
+ await handler({method:'POST',path:'/leaderboard/submit',context,body:{event:'gym-local-progress',...reference(state),archive:archive(state)}});
+ expect(rpc).toHaveBeenCalledExactlyOnceWith('submit_local_gym_rank_v2',expect.objectContaining({p_challenge:1,p_fame:6}));
+ expect(verifiedGymRankingProgress({state,evidenceId:'receipt-1',binding:{applicationId:app,actor:'authenticated-coach',runId:reference(state).runId}})).toMatchObject({challenge:1,fame:6});
 });
 it('does not apply today’s gear to historical value, but verifies that saved value against the engine formula',()=>{
  const state=fixture();state.alumni[0].level=state.alumni[0].peakLevel=40;state.alumni[0].finalValue=(320n*41n**3n*110n/100n).toString();
@@ -51,7 +74,7 @@ it('validates the actual final value of a level-2000 alumnus with a historical e
  alumnus.finalValue=(480n*BigInt(playerLevelCap+1)**3n).toString();
  expect(validateLocalGymRankingArchive(archive(state),reference(state),now).best).toMatchObject({level:2000,value:'3845762880480'});
 });
-it.each([{puid:'victim'},{score:'99999999'},{best:{}},{fame:99999}])('rejects direct score or identity injection (%j)',async extra=>{
+it.each([{puid:'victim'},{score:'99999999'},{best:{}},{fame:99999},{challenge:99999}])('rejects direct score or identity injection (%j)',async extra=>{
  const state=fixture(),rpc=vi.fn(),handler=createHandler({rpc,now:()=>now,validateLocalProgress:validateLocalGymRankingArchive});
  await expect(handler({method:'POST',path:'/leaderboard/submit',context,body:{event:'gym-local-progress',...reference(state),archive:archive(state),...extra}})).rejects.toMatchObject({statusCode:400});expect(rpc).not.toHaveBeenCalled();
 });
@@ -110,7 +133,7 @@ it('passes official webfn transport through both ranking reads without permittin
  await new Promise<void>(done=>server.listen(0,'127.0.0.1',done));
  try{
   const port=(server.address() as {port:number}).port;
-  for(const path of ['/leaderboard','/leaderboard/me'])for(const board of ['player','fame']){
+  for(const path of ['/leaderboard','/leaderboard/me'])for(const board of ['player','fame','challenge']){
    const response=await fetch(`http://127.0.0.1:${port}/api${path}?board=${board}&webfn=true`,{headers:{'x-cloudbase-context':context}});
    expect(response.status).toBe(200);
    expect((await response.json()).code).toBe(0);
@@ -127,8 +150,8 @@ it('passes official webfn transport through both ranking reads without permittin
 it('bypasses another function instance’s short public cache on the first post-submit read of each board',async()=>{
  const player=fixture().player!,row={id:'public-one',coach:'教练',score:playerValue(fixture()),best:{playerId:player.id,templateId:player.templateId!,level:player.level,stats:player.stats,value:playerValue(fixture())}};
  const calls:string[]=[],client=createGymLeaderboardClient({enabled:()=>true,user:async()=>({puid:'one'}),request:async(path)=>{calls.push(path);return path.endsWith('/submit')?{accepted:true}:path.includes('/me?')?{me:null}:{entries:path.includes('board=player')?[row]:[]};}});
- await client.sync({runId:'1800000000000-23',revision:1});await client.list('player');await client.list('fame');await client.list('player');
- expect(calls.filter(path=>path.includes('limit=50'))).toEqual(['/leaderboard?board=player&levels=extended&limit=50&fresh=1','/leaderboard?board=fame&limit=50&fresh=1','/leaderboard?board=player&levels=extended&limit=50']);
+ await client.sync({runId:'1800000000000-23',revision:1});await client.list('player');await client.list('fame');await client.list('challenge');await client.list('player');
+ expect(calls.filter(path=>path.includes('limit=50'))).toEqual(['/leaderboard?board=player&levels=extended&limit=50&fresh=1','/leaderboard?board=fame&limit=50&fresh=1','/leaderboard?board=challenge&limit=50&fresh=1','/leaderboard?board=player&levels=extended&limit=50']);
  let score='121';const handler=createHandler({rpc:async()=>({entries:[{score}]}),now:()=>now});
  const query={method:'GET',path:'/leaderboard',query:{board:'fame',limit:'50'}};
  await handler(query);score='420';expect((await handler(query)).entries[0].score).toBe('121');

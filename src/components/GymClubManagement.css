@@ -24,6 +24,9 @@
 .gm-project-row.is-locked .gm-project-badge { background: #586a67; color: #e5d7b4; }
 .gm-club .gm-project-row.is-locked h4 { color: #61706a; }
 .gm-project-row.is-locked .gm-project-change > b { color: #62706a; }
+.gm-challenge-project-page .gm-project-badge { background: #27483e; }
+.gym-panel .gm-challenge-project-effect { margin: 0; color: #203a42; font-size: clamp(10px, 2.9cqw, 13px); font-weight: 800; line-height: 1.35; }
+.gm-challenge-project-effect > span { display: block; color: #725934; font-weight: 500; }
 
 .gm-club .gm-expansion-a { display: block; gap: 0; padding: 0; border: 2px solid #183341; background: #f6e5bd; box-shadow: 3px 4px 0 #a48a59; container-type: inline-size; }
 .gm-expansion-a > header { display: flex; align-items: center; justify-content: space-between; padding: 17px 20px 13px; border-bottom: 1px solid #b99a5d; gap: 10px; }

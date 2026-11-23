@@ -1,11 +1,13 @@
 import {describe, expect, it, vi} from 'vitest';
-import {createGymDebugStore, createGymStore} from '../gymStore';
-import {newGym, type GymState} from '../game/gym/engine';
+import {createGymDebugStore, createGymStore, type GymDebugOptions} from '../gymStore';
+import {newGym, recommendedTemplateIds, type GymState} from '../game/gym/engine';
+import {challengeRulesVersion} from '../game/gym/challenge';
+import {templateRules} from '../game/contract/templates';
 import {validGym, writeGym, type GymStorage} from '../game/gym/save';
 import {createGymLocalFirstStore} from './gymLocalFirst';
 
 const initialTime = 1_800_000_000_000;
-function fixture(allowed = true, source = newGym(initialTime, 99), debugFactory?: (level: number) => ReturnType<typeof createGymDebugStore>) {
+function fixture(allowed = true, source = newGym(initialTime, 99), debugFactory?: (level: number, options?: GymDebugOptions) => ReturnType<typeof createGymDebugStore>) {
  const values = new Map<string, string>();
  const storage: GymStorage = {getItem: key => values.get(key) ?? null, setItem: (key, value) => {values.set(key, value);}};
  writeGym(storage, source);
@@ -13,7 +15,9 @@ function fixture(allowed = true, source = newGym(initialTime, 99), debugFactory?
  const now = () => time;
  const local = createGymStore(storage, 99, now);
  const transport = {enabled: () => false, account: vi.fn(async () => null), request: vi.fn(async () => {throw Error('No network expected');})};
- const store = createGymLocalFirstStore(local, storage, transport, {now, debugAvailable: () => allowed, debugFactory: debugFactory ?? (level => createGymDebugStore(level, now))});
+ const store = createGymLocalFirstStore(local, storage, transport, {
+  now, debugAvailable: () => allowed, debugFactory: debugFactory ?? ((level, options) => createGymDebugStore(level, now, options)),
+ });
  return {values, local, store, transport, advance: () => {time += 1_000;}};
 }
 
@@ -37,6 +41,39 @@ describe('disposable local debug gyms', () => {
   const f = fixture();
   for (const level of [0, 9, 1.5]) await expect(f.store.getState().debugSetGymLevel!(level)).rejects.toThrow('1至8');
   expect(f.store.getState().debugSessionActive).toBe(false);
+ });
+
+ it('unlocks challenge from a complete recommendation history without writing to the real gym', async () => {
+  const f = fixture();
+  await f.store.getState().hydrate();
+  const original = f.local.getState().state, before = [...f.values];
+  await f.store.getState().debugSetGymLevel!(3);
+  const emptyArchiveStart = await f.store.getState().act({type:'start-challenge',attempt:0});
+  expect(emptyArchiveStart.error).toBeUndefined();
+  expect(emptyArchiveStart.state.challenge?.run.settings?.referrals).toEqual({});
+
+  const {state} = await f.store.getState().debugSetGymLevel!(3,{recommendAllTemplates:true});
+  const templateIds = templateRules.map(template=>template.id).sort();
+  expect(validGym(state)).toBe(true);
+  expect(state.gymLevel).toBe(3);
+  expect(state.player?.templateId).toBeNull();
+  expect([...recommendedTemplateIds(state)].sort()).toEqual(templateIds);
+  expect(Object.keys(state.collection).sort()).toEqual(templateIds);
+  const recent = await f.store.getState().loadAlumni(0,100), archived = await f.store.getState().loadAlumni(100,100);
+  const players = [...recent.players,...archived.players];
+  expect(recent.total).toBe(templateIds.length);
+  expect(players.map(player=>player.templateId).sort()).toEqual(templateIds);
+  expect(new Set(players.map(player=>player.id)).size).toBe(templateIds.length);
+  expect(players.reduce((sum,player)=>sum+player.rewardFame,0)).toBe(state.fame);
+
+  const started = await f.store.getState().act({type:'start-challenge',attempt:0});
+  expect(started.error).toBeUndefined();
+  expect(started.state.challenge?.run).toMatchObject({phase:'draft',rulesVersion:challengeRulesVersion,startPoolSize:templateIds.length,team:[]});
+  expect(started.state.challenge?.run.settings?.referrals).toEqual(Object.fromEntries(templateIds.map(id=>[id,1])));
+  await f.store.getState().debugRestoreGym!();
+  expect(f.store.getState().state).toEqual(original);
+  expect([...f.values]).toEqual(before);
+  expect(f.transport.request).not.toHaveBeenCalled();
  });
 
  it('keeps real players and cold alumni intact while every gameplay operation uses memory', async () => {

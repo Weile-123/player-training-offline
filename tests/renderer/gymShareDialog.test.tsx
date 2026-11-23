@@ -98,3 +98,21 @@ it('ignores preparation that resolves after the share dialog was dismissed', asy
  await act(async()=>{finish();for(let index=0;index<10;index++)await Promise.resolve();});
  expect(mock.post).not.toHaveBeenCalled();expect(onGranted).not.toHaveBeenCalled();
 });
+
+it('shows the revival poster above the defeat dialog and refuses simulated posting for real progress',async()=>{
+ const onGranted=vi.fn(async()=>true);
+ const onClose=vi.fn(),roster=[{id:'caruso',level:2},{id:'jordan',level:1},{id:'curry',level:3}];
+ mock.post.mockResolvedValueOnce({editorOpened:true,simulated:true});
+ root=createRoot(document.getElementById('root')!);
+ await act(async()=>{
+  root!.render(<GymShareDialog reason="revive" stage={12} roster={roster} allowSimulated={false} onClose={onClose} onGranted={onGranted}/>);
+  for(let index=0;index<10;index++)await Promise.resolve();
+ });
+ await act(async()=>{for(let index=0;index<10;index++)await Promise.resolve();});
+ expect(document.querySelector('.gym-share-dialog')?.getAttribute('data-dialog-depth')).toBe('2');
+ expect(document.body.textContent).toContain('必定出现一名巨星');
+ expect(mock.generate).toHaveBeenCalledWith({reason:'revive',stage:12,roster});
+ await click('发帖分享');
+ expect(onGranted).not.toHaveBeenCalled();expect(onClose).not.toHaveBeenCalled();
+ expect(document.body.textContent).toContain('测试分享不能领取正式球馆奖励');
+});

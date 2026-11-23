@@ -7,7 +7,8 @@ import {ensureColorboxSdk, sdkDeadline, type HupuSdk} from './hupuSdk';
 import {assertHupuProject, hupuProject} from './hupuProject';
 import leaderboardDeployment from '../../activity/leaderboard.manifest.json';
 
-export type GymBoard = 'player' | 'fame';
+const gymBoards = ['player', 'fame', 'challenge'] as const;
+export type GymBoard = typeof gymBoards[number];
 export type GymRankPlayer = {playerId: string; templateId: string; value: string; level: number; stats: Stats};
 export type GymRankRow = {id: string; coach: string; score: string; best: GymRankPlayer | null};
 export type GymRanking = {entries: GymRankRow[]; me: {rank: number; entry: GymRankRow} | null; personalError?: string};
@@ -25,6 +26,7 @@ const score = (value: unknown): value is string => typeof value === 'string' && 
 function validRow(value: GymRankRow, board: GymBoard) {
  if (!value || typeof value.id !== 'string' || value.id.length > 200 || typeof value.coach !== 'string' || Array.from(value.coach).length > 60 || !score(value.score)) return false;
  const best = value.best;
+ if (board === 'challenge') return best === null && Number.isSafeInteger(Number(value.score)) && Number(value.score)>0;
  if (board === 'fame') return best === null;
  return !!best && typeof best.playerId === 'string' && !!templateById(best.templateId) && score(best.value)
   && best.value === value.score && Number.isInteger(best.level) && best.level >= 0 && best.level <= playerLevelCap
@@ -68,8 +70,8 @@ export function createGymLeaderboardClient(deps: Dependencies) {
      : {event: 'gym-progress', runId: reference.runId, revision: reference.revision,...(nickname?{nickname}:{})}, true) as {accepted?: boolean; source?: string};
     if ((await deps.user())?.puid !== user.puid) throw Error('虎扑账号已切换，请刷新排行榜');
     if (receipt?.accepted !== true || local && receipt.source !== 'local-validated') throw Error('排行同步尚未确认，本地进度已保留');
-    freshBoards.add('player');freshBoards.add('fame');
-    update('最佳球员与声望成绩已同步'); return true;
+    for (const board of gymBoards) freshBoards.add(board);
+    update('球馆排行成绩已同步'); return true;
    } catch (error) {update(error instanceof Error ? error.message : '排行同步失败，本地进度已保留'); throw error;}
    })();
    pendingResult = task;
@@ -79,7 +81,7 @@ export function createGymLeaderboardClient(deps: Dependencies) {
   },
   async list(board: GymBoard): Promise<GymRanking> {
    assertEnabled();
-   if (!['player', 'fame'].includes(board)) throw Error('排行榜分类无效');
+   if (!gymBoards.includes(board)) throw Error('排行榜分类无效');
    // Old clients reject an entire response when one player is above level 99.
    const levels = board === 'player' ? '&levels=extended' : '';
    const publicResult = await deps.request(`/leaderboard?board=${board}${levels}&limit=50${freshBoards.has(board)?'&fresh=1':''}`, 'GET') as {entries?: GymRankRow[]};
@@ -115,7 +117,7 @@ export async function gymLeaderboardRequest(path: string, method: 'GET' | 'POST'
  await ensureColorboxSdk(); assertHupuProject();
  const cloud = api ?? window.ColorboxAI?.cloud;
  if (!gymLeaderboardConfigured() || !cloud) throw Error('排行榜服务尚未连接，本地球馆进度已保留');
- if (!/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player(?:&levels=extended)?|fame)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
+ if (!/^\/leaderboard(?:\/submit|\/me)?(?:\?board=(?:player(?:&levels=extended)?|fame|challenge)(?:&limit=50(?:&fresh=1)?)?)?$/.test(path)) throw Error('排行榜接口无效');
  const response = await sdkDeadline(cloud.request({url: gymLeaderboardConfig.apiBase + path, method, data, envId: gymLeaderboardConfig.envId, auth}), '排行请求超时，请稍后手动刷新');
  assertHupuProject();
  if (response.statusCode < 200 || response.statusCode >= 300 || ![0, 200].includes(response.code)) throw Error(response.message || '排行榜读取失败，请稍后重试');

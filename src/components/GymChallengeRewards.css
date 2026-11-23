@@ -1,0 +1,190 @@
+.gc-reward-dialog .gcr-body {
+  display:grid;
+  gap:10px;
+  color:#102f3b;
+  font:500 14px/1.4 var(--font-body);
+}
+.gc-reward-dialog .gcr-body :is(p,fieldset) {margin:0;}
+.gc-reward-dialog .gcr-body .gcr-note {color:#655234;font-size:12px;line-height:1.5;}
+.gc-reward-dialog .gcr-body .gcr-error {
+  padding:7px 9px;
+  border-inline-start:3px solid #ac3228;
+  background:#f4ddc0;
+  color:#892b23;
+  font-size:12px;
+  font-weight:700;
+}
+.gc-reward-dialog .gcr-categories {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.gc-reward-dialog [data-reward="team"] {--gcr-ink:#1a4d40;--gcr-light:#fbebba;--gcr-wash:#dce7cc;--gcr-edge:#71916a;}
+.gc-reward-dialog [data-reward="swap"] {--gcr-ink:#1d4860;--gcr-light:#f9ebc8;--gcr-wash:#dbe5e3;--gcr-edge:#7396a3;}
+.gc-reward-dialog [data-reward="gear"] {--gcr-ink:#694723;--gcr-light:#fff0c1;--gcr-wash:#efd7a3;--gcr-edge:#af8449;}
+.gc-reward-dialog [data-reward="level"] {--gcr-ink:#89392e;--gcr-light:#ffe7bd;--gcr-wash:#f0d8c2;--gcr-edge:#b68064;}
+.gc-reward-dialog .gcr-category {
+  position:relative;
+  isolation:isolate;
+  display:grid;
+  grid-template-rows:45px auto;
+  gap:8px;
+  min-width:0;
+  min-height:118px;
+  align-content:space-between;
+  justify-items:start;
+  padding:10px 8px 9px;
+  border:1px solid var(--gcr-ink);
+  background:linear-gradient(145deg,#fff3d4 18%,var(--gcr-wash));
+  color:var(--gcr-ink);
+  box-shadow:inset 0 0 0 2px #fff2d3,2px 2px 0 var(--gcr-edge);
+  font:inherit;
+  text-align:left;
+}
+.gc-reward-dialog .gcr-category::before {
+  content:'';
+  position:absolute;
+  inset:0 0 auto auto;
+  z-index:-1;
+  width:62%;
+  height:57%;
+  opacity:.3;
+  background:radial-gradient(var(--gcr-edge) .8px,transparent 1.1px) 0 0/4px 4px;
+  clip-path:polygon(29% 0,100% 0,100% 100%,0 64%);
+}
+.gc-reward-dialog .gcr-category:hover:not(:disabled) {
+  outline:2px solid var(--gcr-edge);
+  outline-offset:-2px;
+}
+.gc-reward-dialog .gcr-category-art {
+  display:grid;
+  place-items:center;
+  width:51px;
+  height:43px;
+  border:1px solid var(--gcr-edge);
+  background:repeating-linear-gradient(135deg,#fff1ce0d 0 2px,transparent 2px 6px),var(--gcr-ink);
+  color:var(--gcr-light);
+  box-shadow:inset 0 0 0 2px var(--gcr-ink),inset 0 0 0 3px var(--gcr-edge),2px 2px 0 var(--gcr-edge);
+}
+.gc-reward-dialog .gcr-category:nth-child(2) .gcr-category-art {border-radius:9px 2px 9px 2px;}
+.gc-reward-dialog .gcr-category:nth-child(3) .gcr-category-art {border-radius:5px;}
+.gc-reward-dialog .gcr-category:nth-child(4) .gcr-category-art {border-radius:2px 15px 2px 2px;}
+.gc-reward-dialog .gcr-category-art .game-icon {width:30px;height:29px;}
+.gc-reward-dialog .gcr-level-art {position:relative;display:flex;align-items:flex-end;gap:3px;width:29px;height:20px;}
+.gc-reward-dialog .gcr-level-art i {display:block;width:4px;height:25%;background:currentColor;}
+.gc-reward-dialog .gcr-level-art i:nth-child(2) {height:47%;}
+.gc-reward-dialog .gcr-level-art i:nth-child(3) {height:68%;}
+.gc-reward-dialog .gcr-level-art b {position:absolute;right:0;top:-6px;font:800 21px/1 Arial,sans-serif;}
+.gc-reward-dialog .gcr-category-caption {display:grid;gap:2px;min-width:0;}
+.gc-reward-dialog .gcr-category-caption strong {font-size:clamp(14px,4.2vw,17px);line-height:1.18;font-weight:900;}
+.gc-reward-dialog .gcr-category-caption small {font-size:11px;color:#57462c;line-height:1.3;}
+.gc-reward-dialog .gcr-category-next {
+  position:absolute;
+  top:5px;
+  right:8px;
+  color:var(--gcr-ink);
+  font:800 22px/1 Arial,sans-serif;
+}
+.gc-reward-dialog .gcr-candidates,.gc-reward-dialog .gcr-targets,.gc-reward-dialog .gcr-attributes,.gc-reward-dialog .gcr-destinations {
+  display:grid;
+  min-width:0;
+  gap:6px;
+  border:0;
+  padding:0;
+}
+.gc-reward-dialog :is(.gcr-targets,.gcr-attributes) {grid-template-columns:repeat(3,minmax(0,1fr));}
+.gc-reward-dialog .gcr-destinations {grid-template-columns:repeat(2,minmax(0,1fr));}
+.gc-reward-dialog .gcr-level-targets {grid-template-columns:minmax(0,1fr);}
+.gc-reward-dialog :is(.gcr-candidates,.gcr-targets) legend {
+  padding:0;
+  margin:0 0 5px;
+  font-size:13px;
+  font-weight:850;
+}
+.gc-reward-dialog :is(.gcr-option,.gcr-target,.gcr-attributes>button,.gcr-destinations>button,.gcr-arrange-card) {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-width:0;
+  min-height:46px;
+  padding:6px;
+  border:1px solid #ab8e57;
+  background:linear-gradient(140deg,#fff1d1,#f0e0b7);
+  color:inherit;
+  font:inherit;
+  text-align:left;
+}
+.gc-reward-dialog .gcr-body button[aria-pressed="true"] {
+  border-color:#387359;
+  background:#e3ecd6;
+  box-shadow:inset 3px 0 #387359;
+}
+.gc-reward-dialog .gcr-body button:disabled {cursor:default;}
+.gc-reward-dialog .gcr-destinations>button:disabled {color:#6f6654;background:#e9dfc4;}
+.gc-reward-dialog .gcr-body button:focus-visible,.gc-reward-dialog .gcr-footer button:focus-visible {outline:2px solid #ad4e31;outline-offset:1px;}
+.gc-reward-dialog .gcr-option-copy,.gc-reward-dialog .gcr-target>span:not(.gcr-portrait) {min-width:0;flex:1;}
+.gc-reward-dialog .gcr-player-heading {display:flex;align-items:center;gap:3px 5px;flex-wrap:wrap;min-width:0;}
+.gc-reward-dialog .gcr-player-heading .tier-badge {font-size:10px;}
+.gc-reward-dialog .gcr-option-copy small,.gc-reward-dialog .gcr-target small,.gc-reward-dialog .gcr-destinations small {display:block;font-size:11px;color:#655234;}
+.gc-reward-dialog .gcr-option-copy strong {font-weight:850;overflow-wrap:anywhere;}
+.gc-reward-dialog .gcr-skill-list {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:4px;
+  margin-top:3px;
+  font-variant-numeric:tabular-nums;
+}
+.gc-reward-dialog .gcr-skill-list small {white-space:nowrap;}
+.gc-reward-dialog .gcr-check {flex:none;margin-left:auto;color:#30664e;font:800 16px/1 Arial,sans-serif;}
+.gc-reward-dialog .gcr-portrait,.gc-reward-dialog .gcr-gear-art {
+  flex:none;
+  display:block;
+  width:42px;
+  height:45px;
+}
+.gc-reward-dialog .gcr-gear-art {
+  height:42px;
+  overflow:hidden;
+  background:#e9d5a7;
+  border:1px solid #b0965d;
+}
+.gc-reward-dialog .gcr-gear-art .product-image {display:block;width:100%;height:100%;object-fit:contain;}
+.gc-reward-dialog .gcr-option-copy .gcr-gain,.gc-reward-dialog .gcr-gain {
+  color:#216147;
+  font-weight:850;
+  font-variant-numeric:tabular-nums;
+}
+.gc-reward-dialog .gcr-legacy-icon .gcr-category-art {width:42px;height:40px;}
+.gc-reward-dialog .gcr-attributes>button,.gc-reward-dialog .gcr-targets:not(.gcr-level-targets) .gcr-target {
+  flex-direction:column;
+  gap:3px;
+  justify-content:center;
+  text-align:center;
+}
+.gc-reward-dialog .gcr-targets:not(.gcr-level-targets) .gcr-portrait {width:34px;height:36px;}
+.gc-reward-dialog .gcr-attributes small,.gc-reward-dialog .gcr-targets:not(.gcr-level-targets) .gcr-target strong {font-size:11px;}
+.gc-reward-dialog .gcr-targets:not(.gcr-level-targets) .gcr-target strong {display:block;}
+.gc-reward-dialog .gcr-level-targets .gcr-target {gap:8px;}
+.gc-reward-dialog .gcr-destinations>button {flex-direction:column;align-items:flex-start;justify-content:center;gap:3px;}
+.gc-reward-dialog .gcr-effect {background:#efdeb5;border:1px solid #bba06e;padding:6px 8px;}
+.gc-reward-dialog .gcr-effect-heading {display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:1px 5px;margin-bottom:3px;}
+.gc-reward-dialog .gcr-effect-heading small {color:#645134;font-size:11px;}
+.gc-reward-dialog .gcr-effect-row {display:flex;align-items:center;gap:6px;padding:3px 0;border-top:1px solid #cdb788;font-size:12px;}
+.gc-reward-dialog .gcr-effect-row .gcr-portrait {width:24px;height:24px;}
+.gc-reward-dialog .gcr-effect-row b {margin-left:auto;color:#216649;font-variant-numeric:tabular-nums;}
+.gc-reward-dialog .gcr-existing-gear .gcr-gear-art {width:31px;height:31px;}
+.gc-reward-dialog .gcr-existing-gear .gcr-option {min-height:40px;padding-block:4px;}
+.gc-reward-dialog .gcr-footer {
+  display:flex;
+  gap:7px;
+  flex:none;
+  padding:8px 12px 10px;
+  border-top:1px solid #bda470;
+  background:#f1dfb7;
+}
+.gc-reward-dialog .gcr-footer .gc-stamp {flex:1;min-height:41px;padding-inline:6px;}
+@media(max-width:360px) {
+  .gc-reward-dialog .gcr-category {padding-inline:6px;}
+  .gc-reward-dialog .gcr-categories,.gc-reward-dialog :is(.gcr-targets,.gcr-attributes) {gap:5px;}
+  .gc-reward-dialog .gcr-targets:not(.gcr-level-targets) .gcr-target {padding-inline:4px;}
+}

@@ -1,5 +1,5 @@
 import {create,type StoreApi,type UseBoundStore} from 'zustand';
-import type {GymStore} from '../gymStore';
+import type {GymDebugOptions,GymStore} from '../gymStore';
 import type {GymAction,GymState} from '../game/gym/engine';
 import {validGym,validGymAlumnus,type GymStorage} from '../game/gym/save';
 import {hupuProject} from './hupuProject';
@@ -22,7 +22,7 @@ const sameCloud=(a:GymAuthoritySnapshot,b:GymAuthoritySnapshot)=>a.epoch===b.epo
  * action queue and no returned server game snapshot is published over a save.
  */
 export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport:GymAuthorityTransport,
- options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number;debugAvailable?:()=>boolean;debugFactory?:(level:number)=>Hook}={}):Hook{
+ options:{now?:()=>number;requestId?:()=>string;minClockIntervalMs?:number;debugAvailable?:()=>boolean;debugFactory?:(level:number,options?:GymDebugOptions)=>Hook}={}):Hook{
  const now=options.now??Date.now,requestId=options.requestId??(()=>crypto.randomUUID());
  const clockInterval=Math.max(60_000,options.minClockIntervalMs??60_000);
  let generation=0,hydration:Promise<void>|null=null,background:Promise<void>|null=null,hydrated=false;
@@ -53,11 +53,11 @@ export function createGymLocalFirstStore(local:Hook,storage:GymStorage,transport
   hydrate:()=>debug?debug.getState().hydrate():hydrate(),retryAuthority:()=>refresh(),
   loadAlumni:(offset,limit)=>(debug??local).getState().loadAlumni(offset,limit),
   debugSessionActive:false,
-  debugSetGymLevel:async level=>{
+  debugSetGymLevel:async (level,debugOptions)=>{
    if(!debugAllowed()||!options.debugFactory)throw Error('仅本地开发环境可切换测试球馆');
    if(!Number.isInteger(level)||level<1||level>8)throw Error('请选择1至8级球馆');
    const version=++generation;
-   const next=options.debugFactory(level);
+   const next=options.debugFactory(level,debugOptions);
    await next.getState().hydrate();
    if(version!==generation)throw Error('球馆状态已变化，本次测试切换已取消');
    if(!validGym(next.getState().state)||next.getState().state.gymLevel!==level)throw Error('测试球馆初始化失败');

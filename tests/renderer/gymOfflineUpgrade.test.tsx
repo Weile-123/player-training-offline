@@ -79,7 +79,7 @@ it('explains why no automatic roster yields no current offline training without 
 
 it('does not present an upgrade forecast when the project is already maxed', async () => {
   const game = state();
-  game.projects.offline = 5;
+  game.projects.offline = 8;
   await mount(game);
   expect(advice()).toBeNull();
   expect(offlineCard().querySelector('.gm-primary')!.disabled).toBe(true);

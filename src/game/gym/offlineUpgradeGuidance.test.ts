@@ -75,6 +75,8 @@ describe('offline project upgrade guidance', () => {
     expect(offlineUpgradeGuidance(game)).toBeNull();
     game.gymLevel = 8;
     game.projects.offline = 5;
+    expect(offlineUpgradeGuidance(game)).toMatchObject({price: 26, nextLimitMs: 195 * minute});
+    game.projects.offline = 8;
     expect(offlineUpgradeGuidance(game)).toBeNull();
   });
 });

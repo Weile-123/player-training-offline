@@ -4,7 +4,7 @@ const {createHandler,identity,cleanName}=require('../rankings.cjs');
 const context=Buffer.from(JSON.stringify({customUserId:'verified-coach',nickname:'本地教练',applicationId:'app_847cdb589a'})).toString('base64');
 test('health exposes only the current public project identity',async()=>{
  const handler=createHandler({rpc:()=>{throw Error('unexpected database call');}});
- assert.deepEqual(await handler({method:'GET',path:'/health'}),{applicationId:'app_847cdb589a',version:'gym-rankings-v1',boards:['player','fame']});
+ assert.deepEqual(await handler({method:'GET',path:'/health'}),{applicationId:'app_847cdb589a',version:'gym-rankings-v1',boards:['player','fame','challenge']});
 });
 test('authenticated progress submission resolves server facts without accepting client scores',async()=>{
  let received;

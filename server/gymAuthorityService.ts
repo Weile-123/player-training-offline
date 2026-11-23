@@ -1,8 +1,10 @@
 import {createHash,randomBytes,randomUUID} from 'node:crypto';
 import activity from '../hupu-skills/activity.json';
-import {dispatchGym,newGym,finishEquipmentMigration,type GymAction,type GymEvent,type GymState} from '../src/game/gym/engine';
+import {challengeCanStart,challengeReferralCounts,dispatchGym,newGym,finishEquipmentMigration,initializeRecommendationRecords,type GymAction,type GymEvent,type GymState} from '../src/game/gym/engine';
 import {settleOfflineGym,offlineLimitMs,type OfflineTrainingReport} from '../src/game/gym/offline';
 import {validGym,validGymAlumnus} from '../src/game/gym/save';
+import {challengeRewardCategories} from '../src/game/gym/challenge';
+import {validChallengeProjectLevels} from '../src/game/gym/challengeProjects';
 import {parseGymCloudArchive} from '../src/platform/gymCloudArchive';
 import {extractGymClockInterval,extractGymRecoveryClockInterval} from './gymTimeflowClock.mjs';
 import {authorityFailure,type AuthorityCommand,type AuthorityDocument,type AuthorityTransaction,type GymAuthorityRepository} from './gymAuthorityRepository';
@@ -15,6 +17,11 @@ type ClockResult={status:'ready';settlementId:string;report:unknown}|{status:'pe
 export type GymAuthoritySnapshot={applicationId:string;epoch:string;hasSave:boolean;mode:'timeflow';serverTime:number;revision:number;state?:GymState;events:GymEvent[];offlineReport?:OfflineTrainingReport;error?:string;replayed?:boolean;pending?:{pollAfterMs:number;stage:'settlement'|'ack'|'baseline';retryable:boolean};capabilities:{platformRewards:boolean;legacyAdoption:boolean}};
 export type AuthorityPayload={epoch:string;requestId:string;expectedRevision?:number;action?:GymAction;archive?:string;rewardProof?:unknown};
 const allowedActions:Record<string,readonly string[]>={
+ 'start-challenge':['attempt','checkpoint'],'refresh-challenge-draft':['attempt'],'draft-challenge':['attempt','players'],'play-challenge':['attempt','stage'],
+ 'choose-challenge-reward':['attempt','stage','category'],'take-challenge-reward':['attempt','stage','offer','targetId','replaceSlot','toBench','levelTargetIds'],
+ 'revive-challenge':['attempt','stage'],'retire-challenge-run':['attempt','stage'],
+ 'swap-challenge-lineup':['attempt','stage','starterId','reserveId'],
+ 'assign-challenge-matchup':['attempt','stage','lane','playerId'],'upgrade-challenge-project':['projectId'],
  train:['id'],recommend:['id'],'use-drink':['id'],recruit:['preference','mode','direction','expectedNextPlayer','selectRecruited'],
  'buy-equipment':['id','replaceId','destination'],equip:['id','replaceId'],unequip:['id'],'sell-equipment':['id'],'upgrade-project':['id'],
  'set-training-plan':['id','playerId','scope'],'accept-cooperation':['id','playerId','scope'],'abandon-cooperation':['playerId','scope'],
@@ -23,8 +30,8 @@ const allowedActions:Record<string,readonly string[]>={
  'complete-cooperation-ad':['id','playerId','expectedCooperationId','expectedCooperationRevision','scope'],
  'select-player':['id'],'set-auto':['id','enabled'],'buy-drink':[],'buy-consumable':['id'],'use-consumable':['id','playerId'],'upgrade-gym':['targetLevel'],
 };
-const protectedActions=new Set(['share-player-levels','restore-stamina-reward','complete-cooperation-ad','double-offline-experience']);
-const rewardMethod=(action:GymAction):'ad'|'post'=>action.type==='share-player-levels'||action.type==='restore-stamina-reward'&&action.method==='share'?'post':'ad';
+const protectedActions=new Set(['share-player-levels','restore-stamina-reward','complete-cooperation-ad','double-offline-experience','refresh-challenge-draft','revive-challenge']);
+const rewardMethod=(action:GymAction):'ad'|'post'=>action.type==='share-player-levels'||action.type==='revive-challenge'||action.type==='restore-stamina-reward'&&action.method==='share'?'post':'ad';
 const object=(value:unknown):value is Record<string,unknown>=>!!value&&typeof value==='object'&&!Array.isArray(value);
 const integer=(value:unknown):value is number=>typeof value==='number'&&Number.isSafeInteger(value)&&value>=0;
 function parseArchive(value:string){try{return parseGymCloudArchive(value);}catch{throw authorityFailure('ARCHIVE_INVALID',400,false,'本地档案无效，原进度已保留');}}
@@ -40,6 +47,26 @@ function checkAction(value:unknown):asserts value is GymAction {
  const choice=(field:string,choices:readonly unknown[],required=false)=>{if(action[field]===undefined&&!required)return;if(!choices.includes(action[field]))reject();};
  if(fields.includes('id'))id('id',true);if(fields.includes('playerId'))id('playerId',true);
  if(fields.includes('replaceId'))id('replaceId');
+ if(fields.includes('attempt')&&(!integer(action.attempt)||type!=='start-challenge'&&action.attempt<1))reject();
+ if(fields.includes('stage')&&(!integer(action.stage)||action.stage<1))reject();
+ if(type==='start-challenge'&&action.checkpoint!==undefined&&(!integer(action.checkpoint)||action.checkpoint<10||action.checkpoint%10!==0))reject();
+ if(type==='draft-challenge'&&(!Array.isArray(action.players)||action.players.length!==3||new Set(action.players).size!==3||
+    !action.players.every(player=>typeof player==='string'&&/^[A-Za-z0-9_-]{1,100}$/.test(player))))reject();
+ if(type==='choose-challenge-reward')choice('category',challengeRewardCategories,true);
+ if(type==='swap-challenge-lineup'){id('starterId',true);id('reserveId',true);}
+ if(type==='assign-challenge-matchup'&&(!integer(action.lane)||action.lane>2))reject();
+ if(type==='upgrade-challenge-project'&&(typeof action.projectId!=='string'||!validChallengeProjectLevels({[action.projectId]:0})))reject();
+ if(type==='take-challenge-reward'){
+  if(action.offer===-1){
+   if(action.targetId!==undefined||action.replaceSlot!==undefined)reject();
+  }else if(!integer(action.offer)||action.offer>2)reject();
+  if(action.replaceSlot!==undefined&&(!integer(action.replaceSlot)||action.replaceSlot>2))reject();
+  if(action.toBench!==undefined&&(action.toBench!==true||action.offer===-1||action.targetId!==undefined||action.replaceSlot!==undefined))reject();
+  if(action.levelTargetIds!==undefined&&(!Array.isArray(action.levelTargetIds)||action.levelTargetIds.length!==2||
+   new Set(action.levelTargetIds).size!==2||action.levelTargetIds.some(target=>typeof target!=='string'||!/^[A-Za-z0-9_-]{1,100}$/.test(target))||
+   action.offer!==0||action.targetId!==undefined||action.replaceSlot!==undefined||action.toBench!==undefined))reject();
+  id('targetId');
+ }
  if(fields.includes('reportId'))id('reportId',true);
  if(fields.includes('scope'))choice('scope',['roster']);
  if(fields.includes('destination'))choice('destination',['warehouse']);
@@ -57,6 +84,21 @@ function checkAction(value:unknown):asserts value is GymAction {
   if(action.expectedCooperationRevision!==null&&!integer(action.expectedCooperationRevision))reject();
  }
  if(type==='upgrade-gym'&&action.targetLevel!==undefined&&(!integer(action.targetLevel)||action.targetLevel<2||action.targetLevel>8))reject();
+}
+
+async function loadColdAlumni(tx: AuthorityTransaction, state: GymState) {
+ const archived=state.alumniArchive?.count??0,persisted=tx.document?.state;
+ const incomplete=()=>authorityFailure('HISTORY_INCOMPLETE',503,false,'球馆历史档案不完整，已保留原进度，请重试');
+ if(!persisted||persisted.createdAt!==state.createdAt||persisted.seed!==state.seed
+  ||(persisted.alumniArchive?.count??0)!==archived)throw incomplete();
+ const hotCount=persisted.alumni.length,total=hotCount+archived,cold:GymState['alumni']=[];
+ const ids=new Set(state.alumni.map(player=>player.id));
+ while(cold.length<archived){
+  const limit=Math.min(100,archived-cold.length),page=await tx.alumni(hotCount+cold.length,limit);
+  if(!page||page.total!==total||!Array.isArray(page.players)||page.players.length!==limit)throw incomplete();
+  for(const player of page.players){if(!validGymAlumnus(player,state)||ids.has(player.id))throw incomplete();ids.add(player.id);cold.push(player);}
+ }
+ return cold;
 }
 function checkPayload(value:unknown,kind:AuthorityCommand['kind']):asserts value is AuthorityPayload {
  const fields=['epoch','requestId',...(kind==='action'?['expectedRevision','action','rewardProof']:kind==='adopt'?['archive']:['expectedRevision'])];
@@ -160,6 +202,7 @@ export function createGymAuthorityService(options:{repository:GymAuthorityReposi
    doc.settlements[response.settlementId].status='acked';command.status='prepared';command.payload.baselineAttempt=attempt+1;delete command.report;delete command.settlementId;await commit();return snapshot(doc,undefined,{pollAfterMs:250,stage:'baseline',retryable:true});
   }
   let result:AuthorityCommand['result']={events:[]};
+  let coldAlumni:GymState['alumni']|undefined;
   if(!doc.state){
    if(command.kind!=='start'&&command.kind!=='adopt')throw authorityFailure('GYM_REQUIRED',409,false,'请先开设训练馆');
    const anchor=interval!.to;
@@ -183,7 +226,15 @@ export function createGymAuthorityService(options:{repository:GymAuthorityReposi
     let verified=true;
     if(protectedActions.has(action.type))verified=verifyReward?await verifyReward(actor,action,command.payload.rewardProof,{epoch:doc.epoch,requestId:id}):nativeConfirmation(doc,action,command.payload.rewardProof,id);
     if(!verified)result.error='平台奖励尚未完成服务器校验，未发放奖励';
-    else{const dispatched=dispatchGym(doc.state,doc.state.revision,action,doc.state.updatedAt);doc.state=dispatched.state;result.events.push(...dispatched.events);if(dispatched.error)result.error=dispatched.error;}
+    else{
+     if(action.type==='start-challenge'&&challengeCanStart(doc.state)&&!doc.state.challengeReferralCounts&&doc.state.alumniArchive?.count){
+      coldAlumni=await loadColdAlumni(tx,doc.state);
+      const archived=challengeReferralCounts(coldAlumni);
+      doc.state={...initializeRecommendationRecords(doc.state,Object.keys(archived)),challengeReferralCounts:challengeReferralCounts(doc.state.alumni,archived)};
+     }
+     const dispatched=dispatchGym(doc.state,doc.state.revision,action,doc.state.updatedAt);doc.state=dispatched.state;
+     result.events.push(...dispatched.events);if(dispatched.error)result.error=dispatched.error;
+    }
    }
    doc.suspended=command.kind==='suspend';
   }
@@ -193,17 +244,7 @@ export function createGymAuthorityService(options:{repository:GymAuthorityReposi
    // the actual persisted cold history; the current action may already have
    // appended a recommendation to the in-memory hot history, so do not reload
    // or replace that current hot suffix with its pre-action database version.
-   const archived=doc.state.alumniArchive!.count,persisted=tx.document?.state;
-   const incomplete=()=>authorityFailure('HISTORY_INCOMPLETE',503,false,'球馆历史档案不完整，已保留原进度并暂停排行结算');
-   if(!persisted||persisted.createdAt!==doc.state.createdAt||persisted.seed!==doc.state.seed
-    ||(persisted.alumniArchive?.count??0)!==archived)throw incomplete();
-   const hotCount=persisted.alumni.length,total=hotCount+archived,cold:typeof doc.state.alumni=[];
-   const ids=new Set(doc.state.alumni.map(player=>player.id));
-   while(cold.length<archived){
-    const limit=Math.min(100,archived-cold.length),page=await tx.alumni(hotCount+cold.length,limit);
-    if(!page||page.total!==total||!Array.isArray(page.players)||page.players.length!==limit)throw incomplete();
-    for(const player of page.players){if(!validGymAlumnus(player,doc.state)||ids.has(player.id))throw incomplete();ids.add(player.id);cold.push(player);}
-   }
+   const archived=doc.state.alumniArchive!.count,cold=coldAlumni??await loadColdAlumni(tx,doc.state);
    doc.ranking={...verifiedGymRankingProgress({binding:{applicationId,actor:doc.actorId,runId:`${doc.state.createdAt}-${doc.state.seed}`},
     evidenceId:response.settlementId,state:doc.state,alumni:[...cold,...doc.state.alumni]}),historyCount:archived+doc.state.alumni.length};
   }else doc.ranking=buildAuthorityGymRankingProgress(doc,response.settlementId);

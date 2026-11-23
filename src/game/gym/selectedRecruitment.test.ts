@@ -11,7 +11,7 @@ import {hupuProject} from '../../platform/hupuProject';
 const now = 1_000;
 function fixture(seed = 1, project = 0): GymState {
   const state = newGym(now, seed);
-  state.gymLevel = Math.max(selectedRecruitmentUnlockLevel, project + 1);
+  state.gymLevel = Math.min(8, Math.max(selectedRecruitmentUnlockLevel, project + 1));
   state.credits = 72;
   state.projects.recruitment = project;
   return state;
@@ -25,7 +25,7 @@ function lastPlayer(state: GymState) { return activePlayers(state).at(-1)!; }
 
 describe('optional selected recruitment', () => {
   it.each(selectedRecruitmentDirections)('$id boosts only its two base attributes using independent real recruit-stream draws', direction => {
-    for (const project of [0, 5]) for (let seed = 1; seed <= 64; seed++) {
+    for (const project of [0, 5, 12]) for (let seed = 1; seed <= 64; seed++) {
       const initial = fixture(seed, project);
       const free = command(initial, {type: 'recruit', preference: 'forward'});
       const selected = command(initial, {type: 'recruit', preference: 'forward', mode: 'selected', direction: direction.id, expectedNextPlayer: initial.nextPlayer});
@@ -46,6 +46,7 @@ describe('optional selected recruitment', () => {
       expect(paid.height).toBe(ordinary.height);
       expect(paid.matchSeed).toBe(ordinary.matchSeed);
       expect(paid.entryStats).toEqual(paid.stats);
+      expect(validGym(selected)).toBe(true);
       expect(paid.level).toBe(0);
       expect(paid.templateId).toBeNull();
       expect(paid.shots).toBe(0);

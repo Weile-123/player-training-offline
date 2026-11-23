@@ -3,7 +3,9 @@ import {createRoot, type Root} from 'react-dom/client';
 import {act} from 'preact/test-utils';
 import type {UseBoundStore, StoreApi} from 'zustand';
 import type {GymStore} from '../../src/gymStore';
-import {dispatchGym, newGym, staminaMax, type GymState} from '../../src/game/gym/engine';
+import {challengePlayerPool, dispatchGym, newGym, staminaMax, type GymAction, type GymState} from '../../src/game/gym/engine';
+import {challengeDraft, challengeFixture, challengeSeed, challengeStage, recommendedChallengeDraft, scoreChallenge} from '../../src/game/gym/challenge';
+import {challengeCards} from '../../src/game/gym/challengeCatalog';
 import {equipmentCatalog} from '../../src/game/gym/catalog';
 import {readGym, writeGym} from '../../src/game/gym/save';
 import {templateRules} from '../../src/game/contract/templates';
@@ -85,7 +87,7 @@ it('uses the upright B cover and exposes no new-gym control once a saved gym exi
   expect(document.querySelector('.gym-home-b .b-masthead h1')?.textContent).toBe('传奇球馆');
   expect(document.querySelector('.gym-home-background img')?.getAttribute('src')).toContain('background-b-portrait.webp');
   expect(document.querySelector('.b-save')?.textContent).toContain('150');
-  expect([...document.querySelectorAll('.gym-home-b button')].map(button => button.getAttribute('aria-label'))).toEqual(['继续经营', '公告', '球星图鉴', '排行榜', '生涯', '设置']);
+  expect([...document.querySelectorAll('.gym-home-b button')].map(button => button.getAttribute('aria-label'))).toEqual(['继续经营', '球馆挑战', '公告', '球星图鉴', '排行榜', '生涯', '设置']);
   expect(document.querySelector('.b-new')).toBeNull();
   // Background cropping must not define a control's layout box or z-order.
   const backdrop=document.querySelector('.gym-home-backdrop')!;
@@ -153,6 +155,259 @@ function card(selector: string, heading: string) {
   expect(result, heading).toBeTruthy();
   return result!;
 }
+
+it('uses the standalone challenge screen from both entrances and keeps the run when returning to the court', async () => {
+  const initial = newGym(at, 41);
+  initial.gymLevel = 3;
+  await mount(initial);
+  await press('球馆挑战');
+  const page = () => document.querySelector<HTMLElement>('main.gym-challenge-page')!;
+  expect(page().querySelector('h1')?.textContent).toBe('球馆挑战');
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+  expect(document.querySelector('main.gym-game')?.hasAttribute('hidden')).toBe(true);
+  await press('组建挑战队', page());
+  const opened = state().challenge;
+  expect(opened?.run.phase).toBe('draft');
+  expect(page().querySelectorAll('.gc-draft-player')).toHaveLength(5);
+  await press('返回首页', page());
+  expect(document.querySelector('main.gym-home')).toBeTruthy();
+  await press('继续经营');
+  await press('球馆挑战');
+  expect(state().challenge).toEqual(opened);
+  await press('返回训练场', page());
+  expect(page()).toBeNull();
+  expect(document.querySelector('main.gym-game')?.hasAttribute('hidden')).toBe(false);
+});
+
+it('continues a saved V5 matchup reveal and lets a rewarded reserve trade places with a starter', async () => {
+  const initial = newGym(at, 41);
+  initial.gymLevel = 3;
+  const opened=dispatchGym(initial,initial.revision,{type:'start-challenge',attempt:0},at).state;
+  const draft=opened.challenge!.run,seed=challengeSeed(initial.seed,draft.attempt);
+  draft.rulesVersion=5;
+  draft.bench=[];
+  const fixture=challengeFixture(seed,1,draft.rulesVersion);
+  const offered=challengeDraft(seed,challengePlayerPool(opened,draft.rulesVersion),draft.startPoolSize,draft.rulesVersion,draft.settings);
+  const starters=recommendedChallengeDraft(offered,fixture);
+  const ready=dispatchGym(opened,opened.revision,{type:'draft-challenge',attempt:1,players:starters},at).state;
+  const optimal=scoreChallenge(ready.challenge!.run,fixture).lanes.map(lane=>lane.player.id);
+  const assignments=[optimal[1],optimal[2],optimal[0]];
+  const score=scoreChallenge(ready.challenge!.run,fixture,assignments);
+  expect(score.won).toBe(true);
+  const animationStart=10_000;
+  vi.spyOn(performance,'now').mockReturnValue(animationStart);
+  await mount(ready);
+  await press('球馆挑战');
+  const page=document.querySelector<HTMLElement>('main.gym-challenge-page')!;
+  const profiles=page.querySelectorAll('.gc-team .gc-player-card[data-tier]');
+  expect(profiles).toHaveLength(3);
+  expect(page.querySelectorAll('.gc-paired-rival .tier-portrait-frame')).toHaveLength(3);
+  expect(page.querySelector('.gc-paired-rival .tier-badge')).toBeNull();
+  expect(page.querySelectorAll('.gc-paired-slot .gc-paired-empty')).toHaveLength(3);
+  expect(page.querySelector('.gc-battle-total')).toBeNull();
+  expect(page.textContent).not.toMatch(/预计比分|下关我方/);
+  const name=challengeCards.get(starters[0])!.name;
+  await press(`查看球员 ${name}`,page);
+  let dialog=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  expect(dialog.querySelector('.tier-portrait-frame')).toBeTruthy();
+  expect(dialog.textContent).toContain(name);
+  await press('查看装备',dialog);
+  dialog=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  expect(dialog.textContent).toContain('球员装备');
+  await press('关闭面板',dialog);
+
+  expect(buttonWithin(page,'开始挑战').disabled).toBe(true);
+  for (const [index,id] of assignments.entries()) {
+    const slot=page.querySelectorAll<HTMLButtonElement>('.gc-paired-slot')[index];
+    await press(slot.getAttribute('aria-label')!,page);
+    expect(page.querySelector('.gc-team-zone')?.getAttribute('data-picking')).toBe('true');
+    expect(page.querySelectorAll('.gc-player-actions button')).toHaveLength(3);
+    const playerName=challengeCards.get(id)!.name;
+    await press(`选择 ${playerName}`,page);
+    expect(slot.querySelector('strong')?.textContent).toBe(playerName);
+    expect(slot.querySelector('.gc-paired-ability b')?.textContent).toBe(String(score.lanes[index].power));
+    expect(page.querySelector('.gc-team-zone')?.getAttribute('data-picking')).toBe('false');
+  }
+  expect(state().challenge!.run.assignments).toEqual(assignments);
+  expect(buttonWithin(page,'开始挑战').disabled).toBe(false);
+  await press('开始挑战',page);
+  expect(state().challenge!.run.phase).toBe('reward');
+  const total=()=>[...page.querySelectorAll('.gc-battle-side>b')].map(item=>Number(item.textContent));
+  expect(total()).toEqual([0,0]);
+  expect(page.querySelectorAll('.gc-matchup .tier-portrait-frame')).toHaveLength(6);
+  expect([...page.querySelectorAll('.gc-matchup-player:first-child strong')].map(node=>node.textContent)).toEqual(assignments.map(id=>challengeCards.get(id)!.name));
+  expect(page.querySelectorAll('.gc-matchup-dash')).toHaveLength(3);
+  expect(buttonWithin(page,'对战中').disabled).toBe(true);
+  async function frame(elapsed:number) {
+    const pending=[...frames.values()];
+    frames.clear();
+    await act(async()=>pending.forEach(callback=>callback(animationStart+elapsed)));
+  }
+  await frame(700);
+  expect(total()).toEqual([score.lanes[0].points,score.lanes[0].rival.points]);
+  expect(page.querySelectorAll('.gc-matchup-dash')).toHaveLength(2);
+  await frame(2000);
+  expect(total()).toEqual([score.home,score.away]);
+  expect(page.querySelector('.gc-matchup-score .gc-battle-winner')).toBeTruthy();
+  await press('选择奖励',page);
+  dialog=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  expect(dialog.querySelectorAll('.gcr-category')).toHaveLength(4);
+  await press('选择新球员',dialog);
+  dialog=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  const recruit=dialog.querySelector<HTMLButtonElement>('.gcr-option')!;
+  expect(dialog.querySelectorAll('.gcr-option .tier-portrait-frame')).toHaveLength(3);
+  act(()=>recruit.click());
+  await press('安排所选球员',dialog);
+  await press('确认加入备战席',dialog);
+  expect(state().challenge!.run.bench).toHaveLength(1);
+  const fresh=state().challenge!.run.bench![0];
+  await press('备战席',page);
+  dialog=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  await press(`${challengeCards.get(fresh.id)!.name}调入首发`,dialog);
+  await press(`换下${name}`,dialog);
+  await press('确认交换',dialog);
+  expect(state().challenge!.run.team[0]).toEqual(fresh);
+  expect(state().challenge!.run.bench?.[0].id).toBe(starters[0]);
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+});
+
+function challengeStep(state:GymState,action:GymAction) {
+  const result=dispatchGym(state,state.revision,action,at);
+  expect(result.error).toBeUndefined();
+  return result.state;
+}
+
+function currentChallengeFixture(state:GymState) {
+  const run=state.challenge!.run;
+  return challengeFixture(challengeSeed(state.seed,run.attempt),challengeStage(run),run.rulesVersion);
+}
+
+function startNewChallenge(seed:number,strong=false) {
+  const initial=newGym(at,seed);
+  initial.gymLevel=3;
+  if (strong) initial.challengeProjects={conditioning:5,coaching:3,training:4};
+  const opened=challengeStep(initial,{type:'start-challenge',attempt:0});
+  const draft=opened.challenge!.run;
+  const offered=challengeDraft(challengeSeed(seed,draft.attempt),challengePlayerPool(opened,draft.rulesVersion),draft.startPoolSize,draft.rulesVersion,draft.settings);
+  return challengeStep(opened,{type:'draft-challenge',attempt:1,players:recommendedChallengeDraft(offered,currentChallengeFixture(opened))});
+}
+
+function assignChallenge(state:GymState,ids:readonly string[]) {
+  const run=state.challenge!.run;
+  return ids.reduce((assigned,playerId,lane)=>challengeStep(assigned,{type:'assign-challenge-matchup',attempt:run.attempt,stage:challengeStage(run),lane,playerId}),state);
+}
+
+it('reveals an automatic win before advancing, and adds the scheduled recruit directly to the lineup', async () => {
+  const ready=startNewChallenge(41);
+  const run=ready.challenge!.run;
+  const assigned=assignChallenge(ready,scoreChallenge(run,currentChallengeFixture(ready)).lanes.map(lane=>lane.player.id));
+  const animationStart=10_000;
+  vi.spyOn(performance,'now').mockReturnValue(animationStart);
+  await mount(assigned);
+  await press('球馆挑战');
+  const page=document.querySelector<HTMLElement>('main.gym-challenge-page')!;
+  expect(page.textContent).toContain('点击下方位置选择球员');
+  expect(page.textContent).toContain('再过 3 关可招募新球员');
+  await press('开始挑战',page);
+  expect(challengeStage(state().challenge!.run)).toBe(2);
+  expect(page.querySelector('.gc-battle-heading')?.textContent).toBe('第 1 关对战');
+  expect(buttonWithin(page,'对战中').disabled).toBe(true);
+  const nextFrame=[...frames.values()];
+  frames.clear();
+  await act(async()=>nextFrame.forEach(callback=>callback(animationStart+2000)));
+  expect(page.querySelector('.gc-opponents-heading small')?.textContent).toBe('第 2 关');
+  expect(page.textContent).toContain('再过 2 关可招募新球员');
+  expect(document.querySelector('[role="dialog"]')).toBeNull();
+
+  for (const stage of [2,3]) {
+    const current=state();
+    const matchup=scoreChallenge(current.challenge!.run,currentChallengeFixture(current));
+    expect(matchup.won).toBe(true);
+    for (const [index,lane] of matchup.lanes.entries()) {
+      await press(page.querySelectorAll('.gc-paired-slot')[index].getAttribute('aria-label')!,page);
+      await press(`选择 ${challengeCards.get(lane.player.id)!.name}`,page);
+    }
+    await press('开始挑战',page);
+    const pending=[...frames.values()]; frames.clear();
+    await act(async()=>pending.forEach(callback=>callback(animationStart+2000)));
+    expect(state().challenge!.run.phase).toBe(stage===2?'ready':'reward');
+  }
+  await press('选择奖励',page);
+  const reward=document.querySelector<HTMLElement>('[role="dialog"]')!;
+  expect(reward.querySelectorAll('.gcr-option')).toHaveLength(3);
+  await act(async()=>reward.querySelector<HTMLButtonElement>('.gcr-option')!.click());
+  await press('加入阵容',reward);
+  expect(state().challenge!.run.team).toHaveLength(4);
+  expect(page.querySelectorAll('.gc-team-scroll .gc-player-card')).toHaveLength(4);
+  expect(page.querySelector('.gc-bench-link')).toBeNull();
+  const newcomer=state().challenge!.run.team[3];
+  await press(page.querySelector('.gc-paired-slot')!.getAttribute('aria-label')!,page);
+  await press(`选择 ${challengeCards.get(newcomer.id)!.name}`,page);
+  expect(state().challenge!.run.assignments?.[0]).toBe(newcomer.id);
+});
+
+it('locks the defeat dialog until returning to training and then offers a fresh draft', async () => {
+  let lost:GymState|undefined;
+  for(let seed=1;seed<=100&&!lost;seed++) {
+    const ready=startNewChallenge(seed),run=ready.challenge!.run;
+    const order=run.team.map(player=>player.id);
+    if (!scoreChallenge(run,currentChallengeFixture(ready),order).won) {
+      lost=challengeStep(assignChallenge(ready,order),{type:'play-challenge',attempt:1,stage:1});
+    }
+  }
+  expect(lost?.challenge!.run.phase).toBe('lost');
+  await mount(lost);
+  await press('球馆挑战');
+  const dialog=document.querySelector<HTMLElement>('.gc-defeat-dialog')!;
+  expect(dialog.textContent).toContain('止步第 1 关');
+  expect(dialog.querySelectorAll('.gc-defeat-roster li')).toHaveLength(3);
+  expect(dialog.querySelector('.sheet-close')).toBeNull();
+  await act(async()=>buttonWithin(dialog,'返回球馆').dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true})));
+  expect(document.querySelector('.gc-defeat-dialog')).toBe(dialog);
+  await press('返回球馆',dialog);
+  expect(state().challenge!.run.retired).toBe(true);
+  expect(document.querySelector('main.gym-game')?.hasAttribute('hidden')).toBe(false);
+  await press('球馆挑战');
+  await press('组建挑战队');
+  expect(state().challenge!.run).toMatchObject({attempt:2,phase:'draft'});
+});
+
+it('keeps the tenth-gate dialog open between gear assignment and choosing two distinct upgrades', async () => {
+  let prepared=startNewChallenge(41,true);
+  for (let stage=1;stage<=10;stage++) {
+    const run=prepared.challenge!.run;
+    const score=scoreChallenge(run,currentChallengeFixture(prepared));
+    expect(score.won).toBe(true);
+    prepared=challengeStep(assignChallenge(prepared,score.lanes.map(lane=>lane.player.id)),{type:'play-challenge',attempt:1,stage});
+    const pending=prepared.challenge!.run;
+    if (stage===10) break;
+    if (pending.rewardCategory==='swap') prepared=challengeStep(prepared,{type:'take-challenge-reward',attempt:1,stage,offer:0});
+    if (pending.rewardCategory==='gear') prepared=challengeStep(prepared,{type:'take-challenge-reward',attempt:1,stage,offer:0,targetId:pending.team[0].id});
+  }
+  expect(prepared.challenge?.run.rewardCategory).toBe('gear');
+  await mount(prepared);
+  await press('球馆挑战');
+  await press('选择奖励');
+  const reward=()=>document.querySelector<HTMLElement>('.gc-reward-dialog')!;
+  await act(async()=>reward().querySelector<HTMLButtonElement>('.gcr-option')!.click());
+  await press('分配所选装备',reward());
+  await act(async()=>reward().querySelector<HTMLButtonElement>('.gcr-target')!.click());
+  await press('确认装备',reward());
+  expect(reward().querySelector('h2')?.textContent).toBe('提高等级');
+  expect(state().challenge!.run.rewardCategory).toBe('level');
+  const before=state().challenge!.run.team;
+  const targets=reward().querySelectorAll<HTMLButtonElement>('.gcr-target');
+  await act(async()=>targets[0].click());
+  expect(buttonWithin(reward(),'确认升级').disabled).toBe(true);
+  await act(async()=>targets[1].click());
+  expect(buttonWithin(reward(),'确认升级').disabled).toBe(false);
+  await press('确认升级',reward());
+  expect(document.querySelector('.gc-reward-dialog')).toBeNull();
+  const after=state().challenge!.run.team;
+  expect(challengeStage(state().challenge!.run)).toBe(11);
+  expect(after.slice(0,2).map(player=>player.level)).toEqual(before.slice(0,2).map(player=>player.level+1));
+  expect(after[0].gear).toHaveLength(before[0].gear.length+1);
+});
 
 it('starts at home, completes a course, chooses a plan and cooperation, recommends, recruits, saves and continues the same gym', async () => {
   await mount();

@@ -1,15 +1,15 @@
 import {cloneData} from '../../utils/cloneData';
+import {offlineProjectMinutes} from './catalog';
 import {
   activePlayers, advanceGym, automaticIntervalMs, equipmentEffects, experienceForLevel, finishEquipmentMigration, playerLevelCap, recoverySeconds, trainPlayer,
   type GymEvent, type GymState,
 } from './engine';
 
-const offlineWindowsMs = [30, 45, 60, 90, 120, 180].map(minutes => minutes * 60_000);
 const legacyOfflineWindowsMs = [30, 60, 120, 240, 480, 720].map(minutes => minutes * 60_000);
 
-/** The free level-two window and its five coupon-funded upgrades. */
+/** The free level-two window, project upgrades, and bonus time from equipment. */
 export function offlineLimitMs(state: GymState): number {
-  return state.gymLevel < 2 ? 0 : Math.min(240, (offlineWindowsMs[state.projects.offline] ?? offlineWindowsMs[0]) / 60_000
+  return state.gymLevel < 2 ? 0 : Math.min(240, (offlineProjectMinutes[state.projects.offline] ?? offlineProjectMinutes[0])
     + equipmentEffects(state).offlineMinutes) * 60_000;
 }
 

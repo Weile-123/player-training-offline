@@ -6,13 +6,17 @@ import {createServer} from 'node:http';
 import {createGymAuthorityService,type AuthorityClock,type GymClockBinding} from '../server/gymAuthorityService';
 import {createFileGymAuthorityRepository,createCloudBaseGymAuthorityRepository,type AuthorityDocument,type GymAuthorityRepository} from '../server/gymAuthorityRepository';
 import {createGymAuthorityHttpHandler} from '../server/gymAuthorityHttp';
-import {newGym,type GymState} from '../src/game/gym/engine';
+import {challengePlayerPool,dispatchGym,newGym,type GymAction,type GymState} from '../src/game/gym/engine';
 import {encodeGym,validGym} from '../src/game/gym/save';
 import {settleOfflineGym} from '../src/game/gym/offline';
 import {createGymClock} from '../server/gymTimeflowClock.mjs';
 import {templateRules} from '../src/game/contract/templates';
+import {challengeDraft,challengeFixture,challengeRewardChoices,challengeRulesVersion,challengeSeed,challengeStage,recommendedChallengeDraft} from '../src/game/gym/challenge';
+import {challengeCards,challengeTemplateIds} from '../src/game/gym/challengeCatalog';
+import {challengeMatchupActions,legacyV5ChallengeGym,qualifiedChallengeGym} from './fixtures/challengeGym';
 
 const applicationId='app_847cdb589a',actor={id:'verified-player-a'},base=resolve('.tmp/gym-authority-tests');
+const authorityKey=createHash('sha256').update(JSON.stringify({actor:actor.id,applicationId,environmentId:'test'})).digest('hex');
 let directory:string;
 beforeEach(async()=>{await mkdir(base,{recursive:true});directory=await mkdtemp(resolve(base,'case-'));});
 afterEach(async()=>{if(!resolve(directory).startsWith(base+sep))throw Error('Unsafe test directory');await rm(directory,{recursive:true,force:true});});
@@ -35,8 +39,7 @@ const archive=(state:GymState)=>JSON.stringify({format:'legend-gym-cloud-v1',app
 async function open(test:ReturnType<typeof fixture>){const session=await test.service.session(actor);return test.service.start(actor,{epoch:session.epoch,requestId:'start-1'});}
 async function seedPreRankingHistory(test:ReturnType<typeof fixture>){
  await open(test);
- const key=createHash('sha256').update(JSON.stringify({actor:actor.id,applicationId,environmentId:'test'})).digest('hex');
- return test.repository.withActor(key,async tx=>{
+ return test.repository.withActor(authorityKey,async tx=>{
   const doc=structuredClone(tx.document!),state=doc.state!,template=templateRules.find(item=>item.tier==='rotation')!;
   state.player!.templateId=template.id;state.player!.highestTier=template.tier;state.player!.height=template.height[0];
   state.alumni=Array.from({length:235},(_,index)=>({...structuredClone(state.player!),id:'historical-'+index,recommendedAt:state.updatedAt,
@@ -51,6 +54,142 @@ function failCommit(repository:GymAuthorityRepository,predicate:(doc:AuthorityDo
 }
 
 describe('authoritative Gym business service',()=>{
+ it('keeps existing V5 challenge draws, scoring, and bench rewards available through the authoritative commands',async()=>{
+  const test=fixture(),session=await test.service.session(actor),eligible=qualifiedChallengeGym();
+  eligible.challengeProjects={scouting:1};
+  let snapshot=await test.service.adopt(actor,{epoch:session.epoch,requestId:'challenge-adopt',archive:archive(legacyV5ChallengeGym(eligible))});
+  const command=(requestId:string,action:GymAction)=>({
+    epoch:snapshot.epoch,requestId,expectedRevision:snapshot.revision,action});
+  const state=snapshot.state!,seed=challengeSeed(state.seed,1),run=state.challenge!.run,pool=challengePlayerPool(state,run.rulesVersion);
+  expect(run.rulesVersion).toBe(5);
+  expect(run.settings?.projects).toEqual({scouting:1});
+  const players=recommendedChallengeDraft(challengeDraft(seed,pool,pool.length,run.rulesVersion,run.settings),challengeFixture(seed,1,run.rulesVersion));
+  snapshot=await test.service.action(actor,command('challenge-draft',{type:'draft-challenge',attempt:1,players}));
+  await expect(test.service.action(actor,command('challenge-invalid-lane',{type:'assign-challenge-matchup',attempt:1,stage:1,lane:3,playerId:players[0]}))).rejects.toMatchObject({code:'ACTION_INVALID'});
+  const arrange=async()=>{
+   for(const assignment of challengeMatchupActions(snapshot.state!)){
+    snapshot=await test.service.action(actor,command(`challenge-lane-${assignment.stage}-${assignment.lane}`,assignment));
+   }
+  };
+  await arrange();
+  const play=command('challenge-play',{type:'play-challenge',attempt:1,stage:1});
+  snapshot=await test.service.action(actor,play);
+  expect(snapshot.state!.challenge!.run.phase).toBe('reward');
+  expect(snapshot.state!.fame).toBe(eligible.fame+6);
+  expect((await test.service.action(actor,play)).state!.fame).toBe(snapshot.state!.fame);
+  const extra=command('challenge-score',{type:'play-challenge',attempt:1,stage:1});
+  await expect(test.service.action(actor,{...extra,action:{...extra.action,score:999} as typeof extra.action})).rejects.toMatchObject({code:'ACTION_INVALID'});
+  snapshot=await test.service.action(actor,command('challenge-category',{type:'choose-challenge-reward',attempt:1,stage:1,category:'level'}));
+  expect(snapshot.state!.challenge!.run.rewardCategory).toBe('level');
+  const target=snapshot.state!.challenge!.run.team[0];
+  snapshot=await test.service.action(actor,command('challenge-take',{type:'take-challenge-reward',attempt:1,stage:1,offer:0,targetId:target.id}));
+  expect(snapshot.state!.challenge!.run.phase).toBe('ready');
+  expect(snapshot.state!.challenge!.run.team[0].level).toBe(target.level+1);
+  expect(snapshot.state!.challenge!.run.moves).toHaveLength(1);
+  await arrange();
+  snapshot=await test.service.action(actor,command('challenge-second-game',{type:'play-challenge',attempt:1,stage:2}));
+  snapshot=await test.service.action(actor,command('challenge-recruit-category',{type:'choose-challenge-reward',attempt:1,stage:2,category:'swap'}));
+  await expect(test.service.action(actor,command('challenge-invalid-reserve',{
+   type:'take-challenge-reward',attempt:1,stage:2,offer:0,toBench:true,targetId:target.id,
+  }))).rejects.toMatchObject({code:'ACTION_INVALID'});
+  snapshot=await test.service.action(actor,command('challenge-bench',{type:'take-challenge-reward',attempt:1,stage:2,offer:0,toBench:true}));
+  const recruited=snapshot.state!.challenge!.run.bench![0];
+  snapshot=await test.service.action(actor,command('challenge-lineup',{
+   type:'swap-challenge-lineup',attempt:1,stage:3,starterId:target.id,reserveId:recruited.id,
+  }));
+  expect(snapshot.state!.challenge!.run.team[0]).toEqual(recruited);
+  expect(snapshot.state!.challenge!.run.bench![0]).toMatchObject({id:target.id,level:target.level+1});
+ });
+ it('commits a confirmed draft refresh once, then auto-applies a silent first-stage reward',async()=>{
+  const test=fixture(),eligible={...newGym(1_700_000_000_000,18201),gymLevel:3,credits:120};
+  const service=createGymAuthorityService({repository:test.repository,clockFactory:test.clock.factory,environmentId:'test',allowNativeRewards:true});
+  const session=await service.session(actor),epoch=session.epoch;
+  let snapshot=await service.adopt(actor,{epoch,requestId:'scheduled-adopt',archive:archive(eligible)});
+  async function send(requestId:string,action:GymAction,rewardProof?:unknown){
+   snapshot=await service.action(actor,{epoch,requestId,expectedRevision:snapshot.revision,action,rewardProof});
+   return snapshot;
+  }
+  await send('scheduled-project',{type:'upgrade-challenge-project',projectId:'scouting'});
+  expect(snapshot.state!.challengeProjects).toEqual({scouting:1});
+  expect(snapshot.state!.credits).toBe(108);
+  await send('scheduled-start',{type:'start-challenge',attempt:0});
+  const refresh={type:'refresh-challenge-draft',attempt:1} as const;
+  const ticket=await service.prepareReward(actor,{epoch,action:refresh});expect(ticket.method).toBe('ad');
+  expect((await send('missing-refresh-proof',refresh)).error).toBeTruthy();
+  expect(snapshot.state!.challenge!.run.draftRefreshed).toBeUndefined();
+  const proof={challengeId:ticket.challengeId,confirmation:'native-sdk-confirmation'};
+  expect((await send('confirm-refresh',refresh,proof)).error).toBeUndefined();
+  expect(snapshot.state!.challenge!.run.draftRefreshed).toBe(true);
+  expect((await send('duplicate-refresh',refresh,proof)).error).toBeTruthy();
+  await expect(service.prepareReward(actor,{epoch,action:refresh})).rejects.toMatchObject({code:'REWARD_INELIGIBLE'});
+  const state=snapshot.state!,run=state.challenge!.run,seed=challengeSeed(state.seed,1),pool=challengeTemplateIds;
+  expect(run.rulesVersion).toBe(challengeRulesVersion);
+  const candidates=challengeDraft(seed,pool,pool.length,run.rulesVersion,run.settings,true);
+  expect(candidates.filter(id=>challengeCards.get(id)?.tier==='superstar')).toHaveLength(1);
+  const players=recommendedChallengeDraft(candidates,challengeFixture(seed,1,run.rulesVersion));
+  await send('scheduled-draft',{type:'draft-challenge',attempt:1,players});
+  for(const action of challengeMatchupActions(snapshot.state!)) await send(`scheduled-lane-${action.lane}`,action);
+  expect((await send('scheduled-win',{type:'play-challenge',attempt:1,stage:1})).error).toBeUndefined();
+  expect(snapshot.state!.fame).toBe(6);
+  expect(snapshot.state!.challenge!.run.phase).toBe('ready');
+  expect(snapshot.state!.challenge!.run.rewardCategory).toBeUndefined();
+  expect(challengeStage(snapshot.state!.challenge!.run)).toBe(2);
+ });
+ it('binds revival to a confirmed post and returns the same stage with a guaranteed superstar offer',async()=>{
+  const test=fixture();
+  let local={...newGym(1_700_000_000_000,18201),gymLevel:3};
+  const play=(action:GymAction)=>{
+   const result=dispatchGym(local,local.revision,action,local.updatedAt);
+   if(result.error)throw Error(result.error);
+   local=result.state;
+  };
+  play({type:'start-challenge',attempt:0});
+  const seed=challengeSeed(local.seed,1),pool=challengeTemplateIds;
+  play({type:'draft-challenge',attempt:1,players:challengeDraft(seed,pool,pool.length,challengeRulesVersion).slice(0,3)});
+  for(let stage=1;stage<30;stage++) {
+   const run=local.challenge!.run;
+   for(const [lane,player] of run.team.slice(0,3).entries())play({type:'assign-challenge-matchup',attempt:1,stage,lane,playerId:player.id});
+   play({type:'play-challenge',attempt:1,stage});
+   const settled=local.challenge!.run;
+   if(settled.phase==='lost')break;
+   if(settled.rewardCategory==='swap')play({type:'take-challenge-reward',attempt:1,stage,offer:-1});
+   if(settled.rewardCategory==='gear')play({type:'take-challenge-reward',attempt:1,stage,offer:0,targetId:settled.team[0].id,...(settled.team[0].gear.length===3?{replaceSlot:0}:{})});
+   if(local.challenge!.run.rewardCategory==='level')play({type:'take-challenge-reward',attempt:1,stage,offer:0,levelTargetIds:[settled.team[0].id,settled.team[1].id]});
+  }
+  const lost=local.challenge!.run,stage=challengeStage(lost);
+  expect(lost.phase).toBe('lost');
+  const service=createGymAuthorityService({repository:test.repository,clockFactory:test.clock.factory,environmentId:'test',allowNativeRewards:true});
+  const {epoch}=await service.session(actor);
+  const snapshot=await service.adopt(actor,{epoch,requestId:'revive-adopt',archive:archive(local)});
+  const action={type:'revive-challenge',attempt:1,stage} as const;
+  const ticket=await service.prepareReward(actor,{epoch,action});
+  expect(ticket.method).toBe('post');
+  const request={epoch,requestId:'revive-proof',expectedRevision:snapshot.revision,action};
+  const unconfirmed=await service.action(actor,{...request,requestId:'revive-no-proof'});
+  expect(unconfirmed.state!.challenge!.run.phase).toBe('lost');
+  const confirmed=await service.action(actor,{...request,expectedRevision:unconfirmed.revision,rewardProof:{challengeId:ticket.challengeId,confirmation:'native-sdk-confirmation'}});
+  const run=confirmed.state!.challenge!.run;
+  expect(confirmed.error).toBeUndefined();expect(run.rewardCategory).toBe('swap');expect(challengeStage(run)).toBe(stage);
+  expect(challengeRewardChoices(seed,stage,run.team,pool,pool.length,'swap',challengeRulesVersion,run.settings,true)
+   .filter(offer=>offer.kind==='swap'&&challengeCards.get(offer.id)?.tier==='superstar')).toHaveLength(1);
+  expect(confirmed.state!.fame).toBe(local.fame);
+  await expect(service.prepareReward(actor,{epoch,action})).rejects.toMatchObject({code:'REWARD_INELIGIBLE'});
+ });
+ it('loads exact repeat counts from a legacy cold archive before opening a challenge',async()=>{
+  const test=fixture(),prior=await seedPreRankingHistory(test);
+  await test.repository.withActor(authorityKey,async tx=>{
+   const doc=structuredClone(tx.document!);
+   doc.state!.gymLevel=3;
+   delete doc.state!.challengeReferralCounts;
+   await tx.commit(doc);
+  });
+  const state=prior.state!;
+  const started=await test.service.action(actor,{epoch:prior.epoch,requestId:'legacy-challenge',expectedRevision:state.revision,action:{type:'start-challenge',attempt:0}});
+  const counts={[state.player!.templateId!]:235};
+  expect(started.state!.challengeReferralCounts).toEqual(counts);
+  expect(started.state!.challenge!.run.settings?.referrals).toEqual(counts);
+  expect((await document()).document.ranking!.historyCount).toBe(235);
+ });
  it.each(['train','recommend'] as const)('bootstraps an older server gym ranking once from real paged cold history before %s commits',async type=>{
   const test=fixture(),prior=await seedPreRankingHistory(test),reads:{offset:number;limit:number}[]=[];
   const repository:GymAuthorityRepository={kind:test.repository.kind,withActor:(key,work)=>test.repository.withActor(key,tx=>work(new Proxy(tx,{get(target,property){

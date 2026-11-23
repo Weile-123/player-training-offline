@@ -3,10 +3,11 @@ import {existsSync} from 'node:fs';
 import {equipmentCatalog} from '../src/game/gym/catalog';
 import {includeRuntimeAsset,currentEquipmentImages,currentHomeImages} from './runtime-asset-selection.mjs';
 import manifest from '../src/data/runtime-assets.json';
+import {challengeEquipment} from '../src/game/gym/challengeCatalog';
 
 describe('published Gym artwork closure',()=>{
  it('ships every current catalog artwork by artId, independently of persistent equipment IDs',()=>{
-  const actual=[...new Set(equipmentCatalog.map(item=>`art/products/${item.artId}.png`))].sort();
+  const actual=[...new Set([...equipmentCatalog.map(item=>item.artId),...challengeEquipment.keys()])].map(id=>`art/products/${id}.png`).sort();
   expect(currentEquipmentImages).toEqual(actual);
   for(const path of actual){expect(includeRuntimeAsset(path)).toBe(true);expect(existsSync('public/'+path)).toBe(true);expect(manifest.entries.some(entry=>entry.path===path)).toBe(true);}
   const remapped=equipmentCatalog.find(item=>item.id==='relic_001')!;
@@ -17,7 +18,7 @@ describe('published Gym artwork closure',()=>{
   for(const path of paths){expect(includeRuntimeAsset(path)).toBe(true);expect(manifest.entries.some(entry=>entry.path===path)).toBe(true);}
  });
  it('omits obsolete product and former cover entries from the actual browser manifest',()=>{
-  for(const path of ['art/products/relic_001.png','art/products/basic.png','art/home/title-comic.png','art/home/background-simple-sky.png']){
+  for(const path of ['art/products/basic.png','art/home/title-comic.png','art/home/background-simple-sky.png']){
    expect(existsSync('public/'+path)).toBe(true);expect(includeRuntimeAsset(path)).toBe(false);expect(manifest.entries.some(entry=>entry.path===path)).toBe(false);
   }
  });

@@ -4,6 +4,8 @@ import {statKeys} from '../game/types';
 import {loadAllGymAlumni} from '../presentation/gymAlumniGroups';
 import type {GymStore} from '../gymStore';
 import {hupuProject} from './hupuProject';
+import {verifyChallengeHistory} from '../game/gym/challengeSave';
+import {cloneData} from '../utils/cloneData';
 
 export type GymCloudArchive = {format: 'legend-gym-cloud-v1'; applicationId: string; uploadedAt: number; gym: string};
 export type GymCloudProgress = {level: number; fame: number; shots: number; updatedAt: number; uploadedAt: number};
@@ -30,6 +32,9 @@ function portableGym(source: GymState): GymState {
  value.collectedEquipment=Object.fromEntries(Object.entries(source.collectedEquipment).map(([id,item])=>[id,{firstAt:item.firstAt}]));
  if(source.legacyEquipmentCollection)value.legacyEquipmentCollection=Object.fromEntries(Object.entries(source.legacyEquipmentCollection).map(([id,item])=>[id,{firstAt:item.firstAt}]));
  if(source.postgameRecommendedTemplates)value.postgameRecommendedTemplates=[...source.postgameRecommendedTemplates];
+ if(source.challengeProjects)value.challengeProjects={...source.challengeProjects};
+ if(source.challengeReferralCounts)value.challengeReferralCounts={...source.challengeReferralCounts};
+ if(source.challenge)value.challenge=cloneData(source.challenge);
  value.rng={recruits:{state:source.rng.recruits.state},economy:{state:source.rng.economy.state},attributes:{state:source.rng.attributes.state}};
  if(source.pendingLegacyEquipmentEffects)value.pendingLegacyEquipmentEffects={...pick(source.pendingLegacyEquipmentEffects,['stamina','recovery','valuePercent','courseRecovery','cooperationBonus','experience','automationExperience','offlineMinutes']),focus:pick(source.pendingLegacyEquipmentEffects.focus,statKeys)} as GymState['pendingLegacyEquipmentEffects'];
  return value;
@@ -41,7 +46,7 @@ export function parseGymCloudArchive(raw: string) {
   if (archive?.format !== 'legend-gym-cloud-v1' || archive.applicationId !== hupuProject.applicationId || !Number.isSafeInteger(archive.uploadedAt) || archive.uploadedAt < 0 || typeof archive.gym !== 'string') throw Error();
   const state = decodeGym(archive.gym);
   // Cloud snapshots carry every alumni record, never a pointer to another device's IndexedDB.
-  if (!state || state.alumniArchive?.count) throw Error();
+  if (!state || state.alumniArchive?.count || !verifyChallengeHistory(state)) throw Error();
   const portable=portableGym(state);if(!validGym(portable))throw Error();
   return {archive, state:portable};
  } catch {throw Error(failure);}

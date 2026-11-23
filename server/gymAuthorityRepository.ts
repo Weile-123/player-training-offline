@@ -1,7 +1,7 @@
 import {createHash, randomUUID} from 'node:crypto';
 import {mkdir,open,readFile,readdir,rename,unlink} from 'node:fs/promises';
 import {resolve} from 'node:path';
-import {recommendation, type GymAlumnus, type GymState} from '../src/game/gym/engine';
+import {challengeReferralCounts, recommendation, type GymAlumnus, type GymState} from '../src/game/gym/engine';
 import type {GymEvent} from '../src/game/gym/engine';
 import type {OfflineTrainingReport} from '../src/game/gym/offline';
 import type {AlumniPage} from '../src/game/gym/history';
@@ -47,6 +47,7 @@ function compact(document: AuthorityDocument): {document:AuthorityDocument; addi
  const archive=state.alumniArchive;
  const firstSequence=archive?.count??0;
  if(!overflow)return{document:next,additions:[],firstSequence};
+ if(!archive&&!state.challengeReferralCounts)state.challengeReferralCounts=challengeReferralCounts(state.alumni);
  const metadata={...(archive??{id:next.epoch,count:0,effectiveCount:0,legendCount:0,bestTier:0})};
  const additions=state.alumni.slice(0,overflow);
  for(const player of additions){const earned=recommendation(player);if(earned.growth>0&&earned.tier>=1){metadata.effectiveCount++;if(earned.tier===5)metadata.legendCount++;metadata.bestTier=Math.max(metadata.bestTier,earned.tier);}}

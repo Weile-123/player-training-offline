@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState, useSyncExternalStore, type CSSProperties} from 'react';
 import {useGym as defaultGym} from '../gymStore';
 import {automaticIntervalMs, cooperationStatus, gymUpgrade, offlineBonusExperience, playerLevelCap, playerValue, recommendationPayout, postgameRepeatTemplateCredits, requiredExperience, shotCooldownMs, shotExperience, staminaRewardMethod, trainingStatus, type GymAction, type GymPlayer, type GymResult, type GymState} from '../game/gym/engine';
+import {challengeStage, challengeUsesManualMatchups, challengeUsesScheduledRewards, type ChallengeAction} from '../game/gym/challenge';
 import {templateById} from '../game/templates';
 import {type Player} from '../game/types';
 import {gameAudio} from '../presentation/audio';
@@ -22,16 +23,20 @@ import {ShotStatusPop} from './ShotStatusPop';
 import {ShootButton} from './ShootButton';
 import {GymScoreboard, GymStamina} from './GymStatus';
 import {GymAlumniPanel, GymClubPanel, GymCollectionPanel, GymCooperationPanel, GymInventoryPanel, GymOfflineReport, GymRecommendPanel, GymRosterPanel, GymShopPanel, GymTrainingPanel} from './GymPanels';
+import {GymChallengePanel} from './GymChallengePanel';
+import {GymChallengePage} from './GymChallengePage';
+import {GymHomeIcon} from './GymHomeArt';
 import {trainingGuidance} from '../game/gym/guidance';
 import {GymRecruitmentControls} from './GymRecruitmentControls';
 import {GymPlayerDetails} from './GymPlayerDetails';
 import {GymTrainingToolbar} from './GymTrainingToolbar';
 import {useGymShopNotice} from '../presentation/gymShopNotice';
 import {gymPlayerName} from '../presentation/gymPlayerName';
+import type {GymSharePoster} from '../presentation/gymSharePoster';
 import {AutoTrainingBorder} from './AutoTrainingBorder';
 import {GymShareDialog} from './GymShareDialog';
 import {GymDebugDialog} from './GymDebugDialog';
-import {getGymDebug, gymDebugAvailable} from '../platform/gymDebug';
+import {getGymDebug, gymDebugAvailable, useGymDebug} from '../platform/gymDebug';
 import {completeRewardedVideo} from '../platform/rewardedVideo';
 import {assertHupuProject} from '../platform/hupuProject';
 import './GymRewards.css';
@@ -39,11 +44,13 @@ import './TrainingLayout.css';
 import '../equipment-status.css';
 import './GymGame.css';
 
-export type GymGamePanel = 'club' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'recruit' | 'collection' | 'player' | 'training' | 'cooperation' | null;
+export type GymGamePanel = 'club' | 'challenge' | 'shop' | 'inventory' | 'recommend' | 'alumni' | 'roster' | 'recruit' | 'collection' | 'player' | 'training' | 'cooperation' | null;
 type Panel = GymGamePanel;
 const panelTitles = {club: '球馆经营', shop: '器材商店', inventory: '器材背包', recommend: '推荐签约', alumni: '球馆档案', roster: '球员名册', recruit: '新人招生', collection: '收藏图鉴', player: '球员资料', training: '训练计划', cooperation: '赞助合作'};
 const outcomeLabels = {hold: '维持', success: '成功', great: '大成功'};
 const rewardsUnavailable = '分享和广告奖励暂不可用，请稍后再试。';
+type ChallengeRevive = Extract<ChallengeAction,{type:'revive-challenge'}>;
+type ShareIntent = {key:string; source:GymSharePoster; action:GymAction; createdAt:number; seed:number; debug:boolean};
 function platformRewardsAvailable(current=defaultGym.getState()) {
  if (current.debugSessionActive) return false;
  return !current.authorityMode||current.authorityMode==='local'||current.authorityMode==='timeflow'&&current.authorityCapabilities?.platformRewards===true;
@@ -61,11 +68,15 @@ function formatValue(value: string) {
  return money(amount).slice(1);
 }
 
-export default function GymGame({onHome,storeHook,tutorial=false,onTutorialAction,onTutorialPanel}: {onHome: () => void;storeHook?:typeof defaultGym;tutorial?:boolean;onTutorialAction?:(action:GymAction,result:GymResult)=>void;onTutorialPanel?:(panel:Panel)=>void}) {
+export default function GymGame({onHome,storeHook,tutorial=false,initialChallenge=false,onTutorialAction,onTutorialPanel}: {onHome: () => void;storeHook?:typeof defaultGym;tutorial?:boolean;initialChallenge?:boolean;onTutorialAction?:(action:GymAction,result:GymResult)=>void;onTutorialPanel?:(panel:Panel)=>void}) {
  const useGym=storeHook??defaultGym;
  const store = useGym();
  const state = store.state;
+ const challengeRun = state.challenge?.run;
  const rewardsEnabled = !tutorial&&platformRewardsAvailable(store);
+ const debugOptions = useGymDebug();
+ const mockChallengeReward = challengeRun?.phase==='draft'?debugOptions.skipAds:debugOptions.skipPosting;
+ const challengeRewardAvailable = !tutorial&&(store.debugSessionActive?mockChallengeReward:rewardsEnabled);
  // Empty positions are a court view, never a player=null save with occupied
  // bench entries. Every real athlete stays in the authoritative game state.
  const trainees = (state.player ? [state.player, ...state.bench] : state.bench).slice().sort((first, second) => first.enteredAt - second.enteredAt || first.id.localeCompare(second.id));
@@ -73,7 +84,11 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
  const viewingEmptySlot = emptyCourtSlot !== null && emptyCourtSlot >= trainees.length && emptyCourtSlot < state.gymLevel;
  const player = viewingEmptySlot ? null : state.player;
  const courtState = player ? state : {...state, player: null};
- const [panel, setPanel] = useState<Panel>(tutorial || player ? null : 'recruit');
+ const [panel, setPanel] = useState<Panel>(initialChallenge ? 'challenge' : tutorial || player ? null : 'recruit');
+ const challengeFromHome = useRef(initialChallenge);
+ const challengeOpen = panel === 'challenge';
+ const courtChallengeButton = useRef<HTMLButtonElement>(null);
+ const returningFromChallenge = useRef(false);
  const [featureTutorialActive, setFeatureTutorialActive] = useState(false);
  const shopHasNewEquipment = useGymShopNotice(state, panel === 'shop',!tutorial);
  const tutorialCallbacks=useRef({onTutorialAction,onTutorialPanel});
@@ -85,7 +100,7 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
  const [notice, setNotice] = useState('');
  const [operationError, setOperationError] = useState('');
  const [platformWarning, setPlatformWarning] = useState('');
- const [share, setShare] = useState<{player: GymPlayer; reason: 'levels' | 'stamina'; expectedCount: number; createdAt: number; seed: number} | null>(null);
+ const [share, setShare] = useState<ShareIntent | null>(null);
  const [debugOpen, setDebugOpen] = useState(false);
  const [adAction, setAdAction] = useState<GymAction | null>(null);
  const upgradePrompted = useRef(new Set<number>());
@@ -101,7 +116,7 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
  })();
  useModalAccessibility();
  useEffect(() => {if(!tutorial)return watchAnimationConfig();}, [tutorial]);
- useEffect(() => {if(!rewardsEnabled)setShare(null);}, [rewardsEnabled]);
+ useEffect(() => {if(!rewardsEnabled&&!challengeRewardAvailable)setShare(null);}, [rewardsEnabled,challengeRewardAvailable]);
  useEffect(() => {
   if(tutorial)return;
   let disposed = false;
@@ -148,6 +163,12 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
   };
  }, [tutorial,useGym]);
  useEffect(() => {if (viewport.current) viewport.current.inert = panel !== null || !!store.pendingOfflineReport || !!share || debugOpen;}, [panel, store.pendingOfflineReport, share, debugOpen]);
+ useEffect(() => {
+  if (!challengeOpen && returningFromChallenge.current) {
+   returningFromChallenge.current = false;
+   courtChallengeButton.current?.focus();
+  }
+ }, [challengeOpen]);
  const upgradeReady = gymUpgrade(state).canUpgrade;
  useEffect(() => {
   if (tutorial || featureTutorialActive || !upgradeReady || upgradePrompted.current.has(state.gymLevel) || busy || panel || share || debugOpen || store.pendingOfflineReport) return;
@@ -194,6 +215,12 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
  };
 
  const perform = async (action: GymAction, withAd = false, preparedProof?:{challengeId:string;confirmation:'native-sdk-confirmation'}): Promise<boolean> => {
+  const challengeAd = action.type==='refresh-challenge-draft';
+  const challengePost = action.type==='revive-challenge';
+  const rewardStore = useGym.getState();
+  const challengeTest = rewardStore.debugSessionActive===true && (challengeAd&&getGymDebug().skipAds||challengePost&&getGymDebug().skipPosting);
+  withAd ||= challengeAd;
+  if ((challengeAd||challengePost)&&(tutorial||(!challengeTest&&!platformRewardsAvailable(rewardStore)))) {setPlatformWarning(rewardsUnavailable);return false;}
   if (['share-player-levels','restore-stamina-reward','complete-cooperation-ad','double-offline-experience'].includes(action.type)&&(tutorial||!platformRewardsAvailable(useGym.getState()))) {setPlatformWarning(rewardsUnavailable);return false;}
   if (busyRef.current) return false;
   if (action.type === 'recruit' && !player) action = {...action, selectRecruited: true};
@@ -209,15 +236,16 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
    const origin = useGym.getState().state;
    let rewardProof=preparedProof;
    if (withAd) {
+    if (challengeAd && getGymDebug().skipAds && !challengeTest) throw Error('请先关闭免广告测试，或切换到独立测试球馆');
     setAdAction(action);
     rewardProof=await useGym.getState().preparePlatformReward?.(action);
     // The platform's rewarded acknowledgement, not the bridge-start acknowledgement, grants access.
     const confirmation=await completeRewardedVideo(() => {}, {mock: getGymDebug().skipAds, onTaskStateError: setPlatformWarning});
     if(rewardProof&&confirmation?.confirmation!=='native-sdk-confirmation')throw Error('测试广告不能领取线上奖励');
-    if(!platformRewardsAvailable(useGym.getState())){setOperationError(rewardsUnavailable);return false;}
+    if(!challengeTest&&!platformRewardsAvailable(useGym.getState())){setOperationError(rewardsUnavailable);return false;}
     assertHupuProject();
     const current = useGym.getState().state;
-    if (current.createdAt !== origin.createdAt || current.seed !== origin.seed) {setOperationError('本局游戏已变化，未发放旧奖励'); return false;}
+    if (current.createdAt !== origin.createdAt || current.seed !== origin.seed || useGym.getState().debugSessionActive !== rewardStore.debugSessionActive) {setOperationError('本局游戏已变化，未发放旧奖励'); return false;}
    }
    const previous = useGym.getState().state;
    const result = await useGym.getState().act(action,rewardProof);
@@ -259,7 +287,27 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
  };
  const onAction = (action: GymAction) => {void perform(action);};
  const onAdAction = (action: GymAction) => {void perform(action, true);};
- const openShare = (reason: 'levels' | 'stamina') => {if(tutorial||!platformRewardsAvailable(useGym.getState())){setPlatformWarning(rewardsUnavailable);return;}if (player && !busy) setShare({player, reason, expectedCount: state.staminaRewardCount ?? 0, createdAt: state.createdAt, seed: state.seed});};
+ const openShare = (reason: 'levels' | 'stamina') => {
+  if(tutorial||!platformRewardsAvailable(useGym.getState())){setPlatformWarning(rewardsUnavailable);return;}
+  if (!player||busy) return;
+  const action:GymAction=reason==='levels'?{type:'share-player-levels',playerId:player.id}:
+   {type:'restore-stamina-reward',playerId:player.id,method:'share',expectedCount:state.staminaRewardCount??0};
+  setShare({key:`${player.id}:${reason}`,source:{player,reason,value:playerValue(state,player)},action,createdAt:state.createdAt,seed:state.seed,debug:false});
+ };
+ const openReviveShare = (action:ChallengeRevive) => {
+  const current=useGym.getState(), live=current.state, run=live.challenge?.run;
+  if (tutorial||(!platformRewardsAvailable(current)&&!(current.debugSessionActive&&getGymDebug().skipPosting))) {setPlatformWarning(rewardsUnavailable);return;}
+  if (busyRef.current||!run||run.phase!=='lost'||run.retired||run.revival||run.attempt!==action.attempt||challengeStage(run)!==action.stage) return;
+  setShare({key:`revive:${run.attempt}:${action.stage}`,source:{reason:'revive',stage:action.stage,roster:run.team},action,
+   createdAt:live.createdAt,seed:live.seed,debug:current.debugSessionActive===true});
+ };
+ const currentShare = (intent:ShareIntent) => {
+  const current=useGym.getState();
+  if (current.state.createdAt!==intent.createdAt||current.state.seed!==intent.seed||Boolean(current.debugSessionActive)!==intent.debug) return false;
+  if (intent.action.type!=='revive-challenge') return true;
+  const run=current.state.challenge?.run;
+  return run?.phase==='lost'&&!run.retired&&!run.revival&&run.attempt===intent.action.attempt&&challengeStage(run)===intent.action.stage;
+ };
  const restoreStamina = () => {
   if(tutorial||!platformRewardsAvailable(useGym.getState())){setPlatformWarning(rewardsUnavailable);return;}
   if (!player || busy) return;
@@ -282,7 +330,32 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
   setFeedback(null); setShots([]); setNotice(''); setOperationError(''); setPlatformWarning('');
  };
 
- return <main className={`game-screen contract-game training-layout gym-game${reduced ? ' reduce-motion' : ''}${tutorial?' gym-tutorial-practice':''}`} aria-label="篮球训练馆" style={{'--game-max-width': `${visual.gameMaxWidthPx}px`, '--shoot-button-scale': visual.shootButtonScale} as CSSProperties}>
+ const openChallenge = () => {
+  challengeFromHome.current = false;
+  setFeedback(null); setShots([]); setPanel('challenge');
+ };
+ const returnToTraining = () => {
+  challengeFromHome.current = false;
+  returningFromChallenge.current = true;
+  setPanel(null);
+ };
+ const leaveChallenge = () => {
+  if (challengeFromHome.current) {onHome(); return;}
+  returnToTraining();
+ };
+ const challengeKey = `${state.createdAt}:${state.seed}:${state.challenge?.run.attempt??0}`;
+
+ return <>
+ {challengeOpen && <GymChallengePage home={challengeFromHome.current} blocked={!!store.pendingOfflineReport}
+   busy={busy} reduced={reduced} manualMatchups={!challengeRun||challengeUsesManualMatchups(challengeRun.rulesVersion)}
+   scheduledRewards={!challengeRun||challengeUsesScheduledRewards(challengeRun.rulesVersion)||!!challengeRun.retired}
+   lossLocked={challengeUsesScheduledRewards(challengeRun?.rulesVersion)&&challengeRun?.phase==='lost'&&!challengeRun.retired} onBack={leaveChallenge}>
+   <GymChallengePanel key={challengeKey} state={state} act={perform} busy={busy} reduced={reduced}
+     onReturnToGym={returnToTraining} onRevive={openReviveShare} rewardAvailable={challengeRewardAvailable} adLoading={adAction?.type==='refresh-challenge-draft'}
+     reviveDialogOpen={share?.action.type==='revive-challenge'}
+     error={store.pendingOfflineReport?'':store.actionError||operationError||platformWarning}/>
+ </GymChallengePage>}
+ <main className={`game-screen contract-game training-layout gym-game${reduced ? ' reduce-motion' : ''}${tutorial?' gym-tutorial-practice':''}`} hidden={challengeOpen} aria-label="篮球训练馆" style={{'--game-max-width': `${visual.gameMaxWidthPx}px`, '--shoot-button-scale': visual.shootButtonScale} as CSSProperties}>
   <div className="game-viewport" ref={viewport}>
    <header className="game-topbar">
     <div className="cash-display"><GameIcon name="assets"/><span><small>赞助券</small><b>{state.credits}</b></span></div>
@@ -305,7 +378,12 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
     <GymStamina state={courtState}/>
     {!tutorial&&gymDebugAvailable() && <button type="button" className="gym-local-test" onClick={() => setDebugOpen(true)}>{store.debugSessionActive ? `测试球馆 Lv.${state.gymLevel}` : '本地测试'}</button>}
     <div className="stage-navigation">
-     <div className="contract-stage-tools"><button className="stage-collection-button" onClick={() => setPanel('collection')} aria-label="打开图鉴"><span>图鉴</span></button></div>
+     <div className="contract-stage-tools">
+      {!tutorial && <button type="button" className="stage-challenge-button" ref={courtChallengeButton} onClick={openChallenge}>
+       <GymHomeIcon name="rank"/><span>球馆挑战</span>
+      </button>}
+      <button className="stage-collection-button" onClick={() => setPanel('collection')} aria-label="打开图鉴"><span>图鉴</span></button>
+     </div>
     </div>
     {player && <button className="court-equipment-status" aria-label="查看当前训练课程" onClick={() => setPanel('training')}>
      <span className="equipment-status-heading">{training.plan.name} <i>›</i></span>
@@ -329,10 +407,10 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
     </div>
    </div></footer>
   </div>
-  {panel && <ComicDialog title={panelTitles[panel]} dismissible={!featureTutorialActive} onClose={() => {if (!featureTutorialActive) setPanel(null);}} variant={panel === 'collection' ? 'album' : panel === 'roster' ? 'roster' : 'standard'} className={panel === 'collection' ? 'collection-album-dialog' : panel === 'roster' ? 'scheme-roster-dialog' : panel === 'shop' ? 'gym-management-dialog gym-shop-dialog' : panel === 'inventory' ? 'gym-management-dialog gym-inventory-dialog' : 'gym-management-dialog'}><div className="contract-panel">
+  {panel && panel !== 'challenge' && <ComicDialog title={panelTitles[panel]} dismissible={!featureTutorialActive} onClose={() => {if (!featureTutorialActive) setPanel(null);}} variant={panel === 'collection' ? 'album' : panel === 'roster' ? 'roster' : 'standard'} className={panel === 'collection' ? 'collection-album-dialog' : panel === 'roster' ? 'scheme-roster-dialog' : panel === 'shop' ? 'gym-management-dialog gym-shop-dialog' : panel === 'inventory' ? 'gym-management-dialog gym-inventory-dialog' : 'gym-management-dialog'}><div className="contract-panel">
    <ActionNotice message={!store.pendingOfflineReport?store.actionError||operationError||platformWarning:''} role="alert" className="contract-notice"/>
    <div aria-busy={busy} className={busy && !adAction ? 'gym-action-pending' : ''}>
-    {panel === 'club' && <GymClubPanel state={state} onAction={onAction}/>}
+    {panel === 'club' && <GymClubPanel state={state} onAction={onAction} busy={busy} onChallenge={tutorial?undefined:openChallenge}/>}
     {panel === 'training' && <GymTrainingPanel key={player?.id} state={state} onAction={onAction} tutorialEnabled={!tutorial} onTutorialActiveChange={setFeatureTutorialActive}/>}
     {panel === 'cooperation' && <GymCooperationPanel key={player?.id} state={state} onAction={onAction} onAdAction={rewardsEnabled?onAdAction:undefined} busy={busy} adAction={adAction} tutorialEnabled={!tutorial} onTutorialActiveChange={setFeatureTutorialActive}/>}
     {panel === 'shop' && <GymShopPanel state={state} onAction={onAction} busy={busy}/>}
@@ -345,24 +423,23 @@ export default function GymGame({onHome,storeHook,tutorial=false,onTutorialActio
     {panel === 'player' && player && <GymPlayerDetails player={player} onTraining={() => setPanel('training')}/>}
    </div>
   </div></ComicDialog>}
+ </main>
   {store.pendingOfflineReport && <GymOfflineReport report={store.pendingOfflineReport} onClose={store.dismissOfflineReport}
     bonusExperience={offlineBonusExperience(store.state,store.pendingOfflineReport)}
     doubleExperienceClaimed={store.state.offlineReward?.report.reportId===store.pendingOfflineReport.reportId&&store.state.offlineReward?.claimed===true}
     doubleExperiencePending={busy&&adAction?.type==='double-offline-experience'}
     doubleExperienceError={operationError||store.actionError}
     onDoubleExperience={rewardsEnabled&&store.pendingOfflineReport.reportId?()=>perform({type:'double-offline-experience',reportId:store.pendingOfflineReport!.reportId!},true):undefined}/>}
-  {share && <GymShareDialog key={`${share.player.id}:${share.reason}`} player={share.player} value={playerValue(state, share.player)} reason={share.reason} onClose={() => {shareRewardProof.current=undefined;setShare(null);}} onBeforeOpen={async()=>{
+  {share && <GymShareDialog key={share.key} {...share.source} allowSimulated={share.source.reason!=='revive'||share.debug} onClose={() => {shareRewardProof.current=undefined;setShare(null);}} onBeforeOpen={async()=>{
     shareRewardProof.current=undefined;
-    const current=useGym.getState().state;
-    if(current.createdAt!==share.createdAt||current.seed!==share.seed)throw Error('本局游戏已变化，请返回球场重新分享');
-    shareRewardProof.current=await useGym.getState().preparePlatformReward?.(share.reason==='levels'?{type:'share-player-levels',playerId:share.player.id}:{type:'restore-stamina-reward',playerId:share.player.id,method:'share',expectedCount:share.expectedCount});
+    if(!currentShare(share))throw Error('本局游戏已变化，请返回球场重新分享');
+    shareRewardProof.current=await useGym.getState().preparePlatformReward?.(share.action);
   }} onGranted={async () => {
-   const current = useGym.getState().state;
-   if (current.createdAt !== share.createdAt || current.seed !== share.seed) return false;
-   return perform(share.reason === 'levels' ? {type: 'share-player-levels', playerId: share.player.id} : {type: 'restore-stamina-reward', playerId: share.player.id, method: 'share', expectedCount: share.expectedCount},false,shareRewardProof.current);
+   if (!currentShare(share)) return false;
+   return perform(share.action,false,shareRewardProof.current);
   }}/>}
-  {debugOpen && <GymDebugDialog onClose={() => setDebugOpen(false)} onLevelChange={() => {
-   setFeatureTutorialActive(false); setEmptyCourtSlot(null); setPanel(null); setDebugOpen(false);
+  {debugOpen && <GymDebugDialog onClose={() => setDebugOpen(false)} onLevelChange={openChallenge => {
+   setFeatureTutorialActive(false); setEmptyCourtSlot(null); setPanel(openChallenge ? 'challenge' : null); setDebugOpen(false);
   }}/>}
- </main>;
+ </>;
 }

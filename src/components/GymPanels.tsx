@@ -2,6 +2,7 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState, type CSSPrope
 import { statLabels } from '../game/config';
 import { templateRules, type TemplateRule } from '../game/contract/templates';
 import { equipmentCatalog, equipmentFamilyLabels, gymLevels, projects, postgameRepeatTemplateCredits, selectedRecruitmentUnlockLevel, type GymEquipment, type ProjectId } from '../game/gym/catalog';
+import { challengeProjectUnlockLevel } from '../game/gym/challengeProjects';
 import { activePlayers, automaticIntervalMs, cooperationStatus, courseRecoveryCap, effectiveTrainingBias, equipmentCapacity, equipmentEffects, equipmentOffer, equipmentSaleValue, equippedFamilyEquipment, gymUpgrade, playerLevelCap, playerValue, projectOffer, recoverySeconds, requiredExperience, staminaMax, trainingCreditMilestones, trainingPlans, trainingStatus, type GymAction, type GymAlumnus, type GymPlayer, type GymState, type TrainingPlanId } from '../game/gym/engine';
 import { offlineLimitMs } from '../game/gym/offline';
 import { trainingGuidance } from '../game/gym/guidance';
@@ -30,6 +31,8 @@ import { GymFeatureTutorial } from './GymFeatureTutorial';
 import { groupGymAlumni, loadAllGymAlumni, type GymAlumniGroup } from '../presentation/gymAlumniGroups';
 import { EquipmentReplacementChanges } from './EquipmentReplacementChanges';
 import { TierBadge } from './TierBadge';
+import { GymChallengeEntry } from './GymChallengePanel';
+import { GymChallengeProjects } from './GymChallengeProjects';
 import { AutoTrainingBorder } from './AutoTrainingBorder';
 import { AlbumIcon, MatchingRequirements } from './CollectionAlbum';
 import { alumniProgress, recommendationPayout } from '../game/gym/engine';
@@ -171,8 +174,10 @@ function nextGymUnlocks(state: GymState, nextLevel: number) {
   return { newEquipment, opened, raised };
 }
 
-export function GymClubPanel({ state, onAction, busy }: GymPanelProps) {
+export function GymClubPanel({ state, onAction, busy, onChallenge }: GymPanelProps & {onChallenge?:()=>void}) {
   const [tab, setTab] = useState(0);
+  const challengeProjectsLocked = state.gymLevel < challengeProjectUnlockLevel;
+  const activeTab = challengeProjectsLocked && tab === 2 ? 0 : tab;
   const [detailProject, setDetailProject] = useState<ProjectId | null>(null);
   const [showRules, setShowRules] = useState(false);
   const current = gymLevels.find(level => level.level === state.gymLevel)!;
@@ -186,12 +191,14 @@ export function GymClubPanel({ state, onAction, busy }: GymPanelProps) {
       <button type="button" className="gm-training-help" aria-label="查看球馆说明" title="球馆说明" onClick={() => setShowRules(true)}>?</button>
     </div>
     <div className="gm-club-resources" aria-label="球馆经营资源"><span>累计声望 <b>{format(state.fame)}</b></span><span>校友 <b>{format(alumniProgress(state).total)}</b></span><span><i className="gm-coupon" aria-hidden="true">券</i> <b>{format(state.credits)}</b></span></div>
-    <SlidingTabs labels={['球馆升级', '经营项目']} label="球馆经营分类" index={tab} onChange={setTab}>
-      {tab === 0 ? upgrade.level ? <section className="gm-club-expansion gm-expansion-a" aria-label="下一球馆升级条件">
+    {onChallenge && <GymChallengeEntry state={state} open={onChallenge} busy={!!busy}/>}
+    <SlidingTabs labels={['球馆升级', '经营项目', '挑战项目']} label="球馆经营分类" index={activeTab} onChange={setTab}
+      disabledReasons={challengeProjectsLocked ? {2: `球馆 ${challengeProjectUnlockLevel} 级解锁`} : undefined}>
+      {activeTab === 0 ? upgrade.level ? <section className="gm-club-expansion gm-expansion-a" aria-label="下一球馆升级条件">
         <header><div><span className="gm-expansion-ribbon">扩建至 Lv.{upgrade.level.level}</span><h3>{upgrade.level.name}</h3></div><span className="gm-expansion-arrow">{state.gymLevel}<i>›</i>{upgrade.level.level}</span></header>
         <div className="gm-expansion-conditions">{upgrade.requirements.map(requirement => <div className={requirement.met ? 'is-met' : ''} key={requirement.label}><span>{requirement.label}{requirement.met && <i aria-label="已达成">✓</i>}</span><b>{requirement.label.includes('推荐档次') ? recommendationTierNames[requirement.current] : format(requirement.current)} <small>/ {requirement.label.includes('推荐档次') ? recommendationTierNames[requirement.required] : format(requirement.required)}</small></b><div role="progressbar" aria-label={requirement.label} aria-valuemin={0} aria-valuemax={requirement.required} aria-valuenow={Math.min(requirement.current, requirement.required)}><i style={{ width: `${Math.min(100, requirement.current / requirement.required * 100)}%` }} /></div></div>)}</div>
-        <footer><div className="gm-expansion-unlocks"><small>下一级新增</small><span><b>+1</b> {upgrade.level.level === 2 ? <strong><u>训练位</u></strong> : '训练位'}{upgrade.level.level === 2 && <> <i>·</i> <strong><u>自动训练</u></strong> <i>·</i> <strong><u>30分钟离线训练</u></strong></>}{upgrade.level.level > 2 && !!unlocks?.newEquipment && <> <i>·</i> {unlocks.newEquipment}件器材上架</>}</span>{upgrade.level.level === selectedRecruitmentUnlockLevel && <span><strong>解锁精选招生</strong></span>}{!!unlocks?.opened.length && <span className="gm-expansion-secondary">{upgrade.level.level === 2 ? '开放招生、器械管理、自动与离线项目' : `开放${unlocks.opened.join('、')}项目`}</span>}{upgrade.level.level > 2 && !!unlocks?.raised.length && <span className="gm-expansion-secondary">{unlocks.raised.join('、')}项目上限提高</span>}</div><button type="button" className="gm-button gm-primary gm-expansion-upgrade" title={upgrade.reason || `扩建花费 ${upgrade.price} 券`} disabled={busy || !upgrade.canUpgrade} onClick={() => onAction({ type: 'upgrade-gym', targetLevel: upgrade.level!.level })}>{upgrade.price === 0 ? '免费' : `升级 · ${format(upgrade.price)} 券`}</button></footer>
-      </section> : <p className="gm-inline-status">已达到当前最高馆级，继续培养与收藏。</p> : <div className="gm-stack gm-club-project-page">
+        <footer><div className="gm-expansion-unlocks"><small>下一级新增</small><span><b>+1</b> {upgrade.level.level === 2 ? <strong><u>训练位</u></strong> : '训练位'}{upgrade.level.level === 2 && <> <i>·</i> <strong><u>自动训练</u></strong> <i>·</i> <strong><u>30分钟离线训练</u></strong></>}{upgrade.level.level > 2 && !!unlocks?.newEquipment && <> <i>·</i> {unlocks.newEquipment}件器材上架</>}</span>{upgrade.level.level === challengeProjectUnlockLevel && <span><strong>解锁球馆挑战与挑战项目</strong></span>}{upgrade.level.level === selectedRecruitmentUnlockLevel && <span><strong>解锁精选招生</strong></span>}{!!unlocks?.opened.length && <span className="gm-expansion-secondary">{upgrade.level.level === 2 ? '开放招生、器械管理、自动与离线项目' : `开放${unlocks.opened.join('、')}项目`}</span>}{upgrade.level.level > 2 && !!unlocks?.raised.length && <span className="gm-expansion-secondary">{unlocks.raised.join('、')}项目上限提高</span>}</div><button type="button" className="gm-button gm-primary gm-expansion-upgrade" title={upgrade.reason || `扩建花费 ${upgrade.price} 券`} disabled={busy || !upgrade.canUpgrade} onClick={() => onAction({ type: 'upgrade-gym', targetLevel: upgrade.level!.level })}>{upgrade.price === 0 ? '免费' : `升级 · ${format(upgrade.price)} 券`}</button></footer>
+      </section> : <p className="gm-inline-status">已达到当前最高馆级，继续培养与收藏。</p> : activeTab === 1 ? <div className="gm-stack gm-club-project-page">
         <div className="gm-section-heading"><h3>经营项目</h3><small>全馆永久生效</small></div>
         <div className="gm-projects gm-project-list">{projects.map(project => {
           const offer = projectOffer(state, project.id);
@@ -204,10 +211,10 @@ export function GymClubPanel({ state, onAction, busy }: GymPanelProps) {
             <button type="button" className="gm-project-detail" aria-label={`查看${project.name}详情`} onClick={() => setDetailProject(project.id)}>?</button>
             <button type="button" className="gm-button gm-primary gm-project-upgrade" title={reason || `馆级上限 Lv.${offer.maxLevel}`} disabled={!canBuy} onClick={() => onAction({ type: 'upgrade-project', id: project.id })}>{nextPrice === null ? '已升满' : <>{offer.price !== null && state.credits >= offer.price ? '升级' : ''}<b>{nextPrice}券</b>{(offer.price === null || state.credits < offer.price) && <small>{state.gymLevel < project.unlockLevel ? `馆${project.unlockLevel}开放` : offer.level >= offer.maxLevel ? '需先扩馆' : '赞助券不足'}</small>}</>}</button>
           </article>;
-        })}</div></div>}
+        })}</div></div> : <GymChallengeProjects state={state} onAction={onAction} busy={busy}/>}
     </SlidingTabs>
     {selectedProject && selectedOffer && <ComicDialog title={`${selectedProject.name}详情`} onClose={() => setDetailProject(null)}><div className="gym-panel gm-stack"><h3>{selectedProject.name} · Lv.{selectedOffer.level}/{selectedProject.maxLevel}</h3><p>{selectedProject.description}</p><p>当前 · {projectEffect(state, selectedProject.id, selectedOffer.level)}</p>{selectedOffer.level < selectedProject.maxLevel && <p>下级 · {projectEffect({ ...state, gymLevel: Math.max(2, state.gymLevel) }, selectedProject.id, selectedOffer.level + 1)}</p>}<p className="gm-muted">馆级上限 Lv.{selectedOffer.maxLevel}。{selectedOffer.reason ?? (selectedOffer.price !== null && state.credits < selectedOffer.price ? `还差 ${selectedOffer.price - state.credits} 券` : '')}</p>{['endurance', 'recovery', 'automation'].includes(selectedProject.id) && selectedOffer.price !== null && <ProjectTrainingPreview state={state} id={selectedProject.id} />} {selectedProject.id === 'offline' && selectedOffer.price !== null && <OfflineProjectPreview state={state} />}<button type="button" className="gm-button" onClick={() => setDetailProject(null)}>返回经营项目</button></div></ComicDialog>}
-    {showRules && <ComicDialog title="球馆说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules"><section className="gm-stack"><h3>扩建球馆</h3><p>满足声望、培养成果与赞助券条件后扩建，每级新增1个空训练位，并提高项目上限、开放器材。升级保留累计声望；已有馆级不补收历史费用。</p><p>训练计划与赞助合作从开馆即可使用。球馆2级开放<strong><u>多训练位、自动训练和30分钟离线训练</u></strong>，{selectedRecruitmentUnlockLevel}级开放精选招生。空位由你招募新人。</p></section><section className="gm-stack"><h3>经营项目</h3>{projects.map(project => <p key={project.id}><strong>{project.name}</strong> · {project.description}</p>)}</section><section className="gm-stack"><h3>获取赞助券</h3><RecommendationCreditRule state={state} /><p>未匹配模板的球员离馆不入校友档案；已发掘模板的推荐成果保存在校友簿。</p></section><button type="button" className="gm-button" onClick={() => setShowRules(false)}>返回球馆</button></div></ComicDialog>}
+    {showRules && <ComicDialog title="球馆说明" onClose={() => setShowRules(false)}><div className="gym-panel gm-training-rules"><section className="gm-stack"><h3>扩建球馆</h3><p>满足声望、培养成果与赞助券条件后扩建，每级新增1个空训练位，并提高项目上限、开放器材。升级保留累计声望；已有馆级不补收历史费用。</p><p>训练计划与赞助合作从开馆即可使用。球馆2级开放<strong><u>多训练位、自动训练和30分钟离线训练</u></strong>，{challengeProjectUnlockLevel}级开放球馆挑战与挑战项目，{selectedRecruitmentUnlockLevel}级开放精选招生。空位由你招募新人。</p></section><section className="gm-stack"><h3>经营项目</h3>{projects.map(project => <p key={project.id}><strong>{project.name}</strong> · {project.description}</p>)}</section><section className="gm-stack"><h3>获取赞助券</h3><RecommendationCreditRule state={state} /><p>未匹配模板的球员离馆不入校友档案；已发掘模板的推荐成果保存在校友簿。</p></section><button type="button" className="gm-button" onClick={() => setShowRules(false)}>返回球馆</button></div></ComicDialog>}
   </div>;
 }
 

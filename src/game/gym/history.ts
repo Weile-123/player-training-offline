@@ -1,4 +1,4 @@
-import {initializeRecommendationRecords, recommendation, recommendedTemplateIds, type GymAlumnus, type GymState} from './engine';
+import {challengeReferralCounts, countChallengeReferral, initializeRecommendationRecords, recommendation, type GymAlumnus, type GymState} from './engine';
 import {decodeGym, encodeGym, gymSaveKeys, readGym, validGymAlumnus, writeGym, writeGymEnvelope, type GymStorage} from './save';
 
 export const recentAlumniLimit = 100;
@@ -39,7 +39,13 @@ function compact(state: GymState): Compacted {
     return {archiveId: archive.id, sequence: archive.count + index, player};
   });
   archive.count += overflow;
-  return {state: {...state, alumniArchive: archive, alumni: state.alumni.slice(overflow)}, additions};
+  const referrals = state.challengeReferralCounts ?? (!state.alumniArchive ? challengeReferralCounts(state.alumni) : undefined);
+  return {state: {...state, alumniArchive: archive, alumni: state.alumni.slice(overflow), ...(referrals ? {challengeReferralCounts: referrals} : {})}, additions};
+}
+
+function restoreAlumniIndexes(state: GymState, archived: Record<string, number>): GymState {
+  const indexed = initializeRecommendationRecords(state, Object.keys(archived));
+  return indexed.challengeReferralCounts ? indexed : {...indexed, challengeReferralCounts: challengeReferralCounts(indexed.alumni, archived)};
 }
 
 function pageRange(offset: number, limit: number) {
@@ -90,17 +96,17 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
     const current = readGym(storage);
     if (current.error === 'storage-unavailable') throw new Error(current.error);
     let prepared = current.state;
-    if (prepared && prepared.recommendationRulesVersion !== 11) {
-      const archivedIds = new Set<string>();
+    if (prepared && (prepared.recommendationRulesVersion !== 11 || (!prepared.challengeReferralCounts && prepared.alumniArchive?.count))) {
+      const archived: Record<string, number> = {};
       const archive = prepared.alumniArchive;
       if (archive) for (let sequence = 0; sequence < archive.count; sequence++) {
         const raw = storage.getItem(`${memoryPrefix}${archive.id}.${sequence}`);
         if (!raw) throw new Error('alumni-unavailable');
         const player: unknown = JSON.parse(raw);
         if (!validGymAlumnus(player, prepared)) throw new Error('invalid-alumni-record');
-        if (player.templateId) archivedIds.add(player.templateId);
+        countChallengeReferral(archived, player.templateId);
       }
-      prepared = initializeRecommendationRecords(prepared, archivedIds);
+      prepared = archive ? restoreAlumniIndexes(prepared, archived) : initializeRecommendationRecords(prepared);
     }
     const before = prepared ? compact(prepared) : undefined;
     // Never trust an archive pointer when its backing storage is unavailable.
@@ -177,12 +183,10 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
             result = {value: outcome.value, state: next, saved, backupOk: true};
           };
           const legacy = current.state;
-          if (legacy && legacy.recommendationRulesVersion !== 11 && legacy.alumniArchive?.count) {
-            // Read only this gym's committed history once. The marker and IDs
-            // become visible together with the transaction; a missing/corrupt
-            // record must not grant a mistaken new first reward.
+          if (legacy?.alumniArchive?.count && (legacy.recommendationRulesVersion !== 11 || !legacy.challengeReferralCounts)) {
+            // Both indexes become visible with the archive transaction.
             const archive = legacy.alumniArchive;
-            const ids = new Set(recommendedTemplateIds(legacy));
+            const archived: Record<string, number> = {};
             let count = 0;
             const range = IDBKeyRange.bound([archive.id, 0], [archive.id, archive.count - 1]);
             const request = tx.objectStore('alumni').openCursor(range);
@@ -191,12 +195,12 @@ export function createGymHistory(storage: GymStorage, options: GymHistoryOptions
                 const cursor = request.result;
                 if (!cursor) {
                   if (count !== archive.count) throw new Error('alumni-unavailable');
-                  finish(initializeRecommendationRecords(legacy, ids));
+                  finish(restoreAlumniIndexes(legacy, archived));
                   return;
                 }
                 const entry = cursor.value as ArchivedPlayer;
                 if (entry.sequence !== count || !validGymAlumnus(entry.player, legacy)) throw new Error('invalid-alumni-record');
-                if (entry.player.templateId) ids.add(entry.player.templateId);
+                countChallengeReferral(archived, entry.player.templateId);
                 count++;
                 cursor.continue();
               } catch (error) { failure = error; tx.abort(); }

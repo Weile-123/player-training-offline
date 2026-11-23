@@ -1,5 +1,8 @@
 import {create} from 'zustand';
 import {activePlayers, advanceGym, dispatchGym, newGym, playerLevelCap, recoverySeconds, type GymAction, type GymResult, type GymState} from './game/gym/engine';
+import {shape, templateRules} from './game/contract/templates';
+import {overallRating} from './game/matching';
+import {statKeys, type Stats} from './game/types';
 import {gymSaveKeys, readGym, validGym, writeGym, type GymStorage} from './game/gym/save';
 import {createGymHistory, gymCloudRestoreBackupKey, isBrowserGymStorage, type AlumniPage, type GymHistoryOptions} from './game/gym/history';
 import {legacyOfflineLimitMs, settleOfflineGym, type OfflineTrainingReport} from './game/gym/offline';
@@ -23,6 +26,8 @@ function exclusive<T>(storage: GymStorage, work: () => Promise<T>): Promise<T> {
   return next;
 }
 
+export type GymDebugOptions = {recommendAllTemplates?: boolean};
+
 export type GymStore = {
   authorityMode?: 'local' | 'connecting' | 'timeflow' | 'error';
   authorityMessage?: string;
@@ -31,7 +36,7 @@ export type GymStore = {
   preparePlatformReward?: (action: GymAction) => Promise<{challengeId: string; confirmation: 'native-sdk-confirmation'} | undefined>;
   /** Local developer-only disposable gym; never persisted to the real repository. */
   debugSessionActive?: boolean;
-  debugSetGymLevel?: (level: number) => Promise<GymResult>;
+  debugSetGymLevel?: (level: number, options?: GymDebugOptions) => Promise<GymResult>;
   debugRestoreGym?: () => Promise<GymResult>;
   state: GymState;
   hasSave: boolean;
@@ -238,8 +243,35 @@ function browserStorage(): GymStorage {
 
 const gymStorage = browserStorage();
 
+/** Each sample enters the alumni archive and template index via the ordinary recommendation action. */
+function recommendDebugTemplates(gym: GymState): GymState {
+  const rookie = gym.player;
+  let state: GymState = {...gym, player: null};
+  const apply = (action: GymAction) => {
+    const result = dispatchGym(state, state.revision, action, state.updatedAt);
+    if (result.error) throw Error(result.error);
+    state = result.state;
+  };
+  for (const template of templateRules) {
+    apply({type: 'recruit'});
+    const player = state.player!;
+    const entryStats = Object.fromEntries(statKeys.map(key => [key, 24])) as Stats;
+    const stats = Object.fromEntries(statKeys.map(key => [key, Math.max(entryStats[key], template.stats[key])])) as Stats;
+    Object.assign(player, {
+      entryStats, stats, lastStyle: shape(stats), height: Math.round((template.height[0] + template.height[1]) / 2),
+      level: template.minLevel, peakLevel: template.minLevel, templateId: template.id, highestTier: template.tier,
+    });
+    apply({type: 'recommend', id: player.id});
+    const alumnus = state.alumni[state.alumni.length - 1];
+    state.collection[template.id] = {
+      firstAt: alumnus.recommendedAt, highestRating: overallRating(stats), highestValue: alumnus.finalValue,
+    };
+  }
+  return {...state, player: rookie};
+}
+
 /** Valid test fixtures own a separate memory repository, including their history. */
-export function createGymDebugStore(level: number, now: () => number = Date.now) {
+export function createGymDebugStore(level: number, now: () => number = Date.now, {recommendAllTemplates = false}: GymDebugOptions = {}) {
   if (!Number.isInteger(level) || level < 1 || level > 8) throw Error('请选择1至8级球馆');
   const values = new Map<string, string>();
   const storage: GymStorage = {getItem: key => values.get(key) ?? null, setItem: (key, value) => {values.set(key, value);}};
@@ -248,11 +280,12 @@ export function createGymDebugStore(level: number, now: () => number = Date.now)
   state.credits = 999;
   state.player!.enteredGymLevel = level;
   state.offlineRulesVersion = 2;
-  if (!writeGym(storage, state).ok) throw Error('测试球馆初始化失败');
+  const fixture = recommendAllTemplates ? recommendDebugTemplates(state) : state;
+  if (!writeGym(storage, fixture).ok) throw Error('测试球馆初始化失败');
   return createGymStore(storage, state.seed, now);
 }
 
 export const useGym = createGymLocalFirstStore(createGymStore(gymStorage), gymStorage, createGymAuthorityTransport(), {
   debugAvailable: gymDebugAvailable,
-  debugFactory: level => createGymDebugStore(level),
+  debugFactory: (level, options) => createGymDebugStore(level, Date.now, options),
 });

@@ -2,6 +2,41 @@
  --shoot-timer-space: 22px;
 }
 
+.game-screen.gym-game[hidden] {display:none;}
+
+.gym-game .stage-navigation .contract-stage-tools {gap:6px;}
+.gym-game .game-stage .stage-challenge-button {
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ gap:4px;
+ min-height:34px;
+ padding:5px 8px;
+ border:3px double #fff0bc;
+ border-radius:5px;
+ background:#e9bd63;
+ color:#251b12;
+ box-shadow:0 0 0 1px #46331a,2px 3px #081218aa;
+ font:clamp(12px,2.8cqw,17px)/1.2 var(--font-display);
+ white-space:nowrap;
+}
+.stage-challenge-button svg {
+ flex:none;
+ width:18px;
+ height:18px;
+ fill:none;
+ stroke:currentColor;
+ stroke-width:3;
+ stroke-linecap:round;
+ stroke-linejoin:round;
+}
+@container (max-width:365px) {
+ .gym-game .game-stage:has(.gym-local-test) .contract-stage-tools {
+  flex-direction:column;
+  align-items:flex-start;
+ }
+}
+
 .training-layout.contract-game.gym-game .game-viewport {
  --dock-height: calc(10px + var(--action-height) + var(--shoot-timer-space));
 }

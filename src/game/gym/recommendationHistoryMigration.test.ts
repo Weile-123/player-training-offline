@@ -41,6 +41,7 @@ async function archivedLegacy(indexedDB?: globalThis.IDBFactory) {
   expect(legacy.alumni).toHaveLength(100);
   expect(legacy.alumniArchive?.count).toBe(1);
   delete legacy.recommendationRulesVersion;
+  delete legacy.challengeReferralCounts;
   legacy.postgameRecommendedTemplates = ['jordan'];
   expect(writeGym(storage, legacy).ok).toBe(true);
   if (indexedDB) await replaceHot(indexedDB, legacy);
@@ -57,6 +58,7 @@ describe('one-time all-level recommendation history initialization', () => {
     const restored = store.getState().state;
     expect(restored.recommendationRulesVersion).toBe(11);
     expect(restored.postgameRecommendedTemplates).toEqual(['jordan', 'curry']);
+    expect(restored.challengeReferralCounts).toEqual({curry:1});
     expect(restored.credits).toBe(5_000);
     expect(restored.fame).toBe(context.legacy.fame);
     expect(restored.rng).toEqual(context.legacy.rng);
@@ -71,7 +73,11 @@ describe('one-time all-level recommendation history initialization', () => {
     expect(result.error).toBeUndefined();
     expect(result.state.credits).toBe(5_001);
     expect(result.state.alumni.at(-1)!.rewardCredits).toBe(1);
+    expect(result.state.challengeReferralCounts).toEqual({curry:2});
     expect(result.state.postgameRecommendedTemplates).not.toContain('bird');
+    const challenge = await store.getState().act({type:'start-challenge',attempt:0});
+    expect(challenge.error).toBeUndefined();
+    expect(challenge.state.challenge?.run.settings?.referrals).toEqual({curry:2});
     const restart = await store.getState().start();
     expect(restart.error).toBeUndefined();
     expect(restart.state.postgameRecommendedTemplates).toEqual([]);

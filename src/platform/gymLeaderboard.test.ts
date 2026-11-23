@@ -15,7 +15,7 @@ it('submits only a canonical progress reference; scores and identity are not sen
  const client = createGymLeaderboardClient({enabled: () => true, user: async () => ({puid: 'private-user'}), request});
  await expect(client.sync(reference)).resolves.toBe(true);
  expect(request).toHaveBeenCalledExactlyOnceWith('/leaderboard/submit', 'POST', {event: 'gym-progress', ...reference}, true);
- expect(client.getMessage()).toBe('最佳球员与声望成绩已同步');
+ expect(client.getMessage()).toBe('球馆排行成绩已同步');
 });
 it('uploads the current SDK nickname as display data with a progress reference, never a client identity or score',async()=>{
  const request=vi.fn().mockResolvedValue({accepted:true});
@@ -129,7 +129,7 @@ it('never displays an unacknowledged submission as success and never retries imp
  const request = vi.fn().mockResolvedValue({accepted: false});
  const client = createGymLeaderboardClient({enabled: () => true, user: async () => ({puid: 'one'}), request});
  await expect(client.sync(reference)).rejects.toThrow('未确认');
- expect(request).toHaveBeenCalledOnce(); expect(client.getMessage()).not.toBe('最佳球员与声望成绩已同步');
+ expect(request).toHaveBeenCalledOnce(); expect(client.getMessage()).not.toBe('球馆排行成绩已同步');
 });
 it('joins simultaneous submissions so a rank-page refresh waits for a pending home submission, and releases after failure', async () => {
  let reject!: (reason: unknown) => void;

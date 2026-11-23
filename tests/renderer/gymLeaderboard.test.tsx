@@ -10,17 +10,18 @@ let root: Root | null = null;
 const template = nbaTemplates[0], best = {playerId: 'gym-p1', templateId: template.id, value: '123456789', level: 25, stats: template.stats};
 const playerRow = {id: 'first', coach: '虎扑教练', score: best.value, best};
 const fameRow = {id: 'first', coach: '虎扑教练', score: '2580', best: null};
+const challengeRow = {id: 'first', coach: '虎扑教练', score: '67', best: null};
 beforeEach(() => {api.list.mockReset(); api.sync.mockReset().mockResolvedValue(true); api.configured = false; api.message = '';api.localMode=false;});
 afterEach(() => {if (root) act(() => root!.unmount()); root = null;});
 async function flush() {await act(async () => {for (let i = 0; i < 15; i++) await Promise.resolve();});}
 async function mount() {root = createRoot(document.getElementById('root')!); await act(async () => root!.render(<GymLeaderboard/>)); await flush();}
 async function click(name: string) {const button = [...document.querySelectorAll<HTMLButtonElement>('button')].find(item => item.textContent === name)!; await act(async () => button.click()); await flush();}
 
-it('uses the original two-tab layout and highlights the first three positions', async () => {
+it('uses the three-tab layout and highlights the first three positions', async () => {
  const entries = Array.from({length: 4}, (_, index) => ({...playerRow, id: `row-${index}`}));
  api.list.mockResolvedValue({entries, me: {rank: 2, entry: playerRow}}); await mount();
  expect(document.querySelector('.leaderboard-tabs')?.getAttribute('data-index')).toBe('0');
- expect(document.body.textContent).toContain('球员榜'); expect(document.body.textContent).toContain('声望榜');
+ expect([...document.querySelectorAll('[role=tab]')].map(tab=>tab.textContent)).toEqual(['球员榜','声望榜','挑战榜']);
  expect(document.querySelector('.online-personal.is-player')?.textContent).toContain('第 2 名');
  expect(document.querySelectorAll('.player-ranking > li')).toHaveLength(4);
  expect([...document.querySelectorAll('.leaderboard-rank')].map(node => node.getAttribute('data-place'))).toEqual(['1', '2', '3', '4']);
@@ -77,15 +78,20 @@ it('submits current local-first progress before reading rankings rather than dis
  expect(document.body.textContent).toContain('本机培养成果经服务器校验后更新排名');
 });
 
-it('shares one confirmed submission across both boards and submits again only on explicit refresh',async()=>{
+it('shares one confirmed submission across all three boards and shows cleared stages on the challenge board',async()=>{
  api.localMode=true;api.configured=true;
  let confirm!:(accepted:boolean)=>void;
  api.sync.mockImplementationOnce(()=>new Promise(resolve=>{confirm=resolve;}));
- api.list.mockImplementation(async board=>({entries:[board==='player'?playerRow:fameRow],me:null}));
+ api.list.mockImplementation(async board=>board==='challenge'?{entries:[challengeRow],me:{rank:1,entry:challengeRow}}:{entries:[board==='player'?playerRow:fameRow],me:null});
  await mount();await click('声望榜');
  expect(api.sync).toHaveBeenCalledTimes(1);expect(api.list).not.toHaveBeenCalled();
  await act(async()=>confirm(true));await flush();
  expect(document.querySelector('.endless-ranking')?.textContent).toContain('2580');
+ await click('挑战榜');
+ expect(document.querySelector('[role=tab][aria-selected=true]')?.textContent).toBe('挑战榜');
+ expect(document.querySelector('.endless-ranking')?.textContent).toContain('67 关');
+ expect(document.querySelector('.personal-score')?.textContent).toBe('67 关');
+ expect(api.list).toHaveBeenLastCalledWith('challenge');
  await click('球员榜');expect(api.sync).toHaveBeenCalledTimes(1);
  await click('刷新排行榜');expect(api.sync).toHaveBeenCalledTimes(2);
 });

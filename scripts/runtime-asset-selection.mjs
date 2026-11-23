@@ -1,19 +1,10 @@
 /** Build-time closure for the shipped Gym entry. Public originals remain intact. */
 import {readFileSync} from 'node:fs';
-import ts from 'typescript';
-
-const source=ts.createSourceFile('equipmentArt.ts',readFileSync(new URL('../src/game/gym/equipmentArt.ts',import.meta.url),'utf8'),ts.ScriptTarget.Latest,true,ts.ScriptKind.TS);
-let mapping;
-for(const statement of source.statements)if(ts.isVariableStatement(statement))for(const declaration of statement.declarationList.declarations){
-  if(declaration.name.getText(source)==='equipmentArtIds')mapping=declaration.initializer;
-}
-if(!mapping||!ts.isObjectLiteralExpression(mapping))throw Error('Equipment artwork mapping requires a reviewed asset closure');
-const equipmentImages=new Set();
-for(const entry of mapping.properties){
-  if(!ts.isPropertyAssignment(entry)||!ts.isStringLiteral(entry.initializer)||!/^relic_\d{3}$/.test(entry.initializer.text))throw Error('Dynamic equipment artwork requires a reviewed asset closure');
-  equipmentImages.add(`art/products/${entry.initializer.text}.png`);
-}
-if(!equipmentImages.size)throw Error('Current equipment artwork mapping is empty');
+const {relics}=JSON.parse(readFileSync(new URL('../src/game/contract/runtime/equipment.json',import.meta.url),'utf8'));
+const equipmentImages=new Set(relics.map(({id})=>{
+  if(!/^relic_\d{3}$/.test(id))throw Error('Invalid challenge equipment artwork ID');
+  return `art/products/${id}.png`;
+}));
 
 // The current entry is AppBootstrap -> GymHome. These former covers/buttons are
 // not used by it. Keep background-continuous.png because existing CSS refers to
@@ -26,8 +17,7 @@ const formerHomeImages=new Set([
 
 export function includeRuntimeAsset(path){
   if(formerHomeImages.has(path))return false;
-  // Legacy Gym equipment is migrated to the current catalog. Its preserved
-  // historical collection is displayed as a count, never as old ProductImages.
+  // Challenges can offer any original relic, including ones outside the gym shop.
   if(path.startsWith('art/products/'))return equipmentImages.has(path);
   return true;
 }

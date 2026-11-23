@@ -26,7 +26,9 @@ const updateNoticeVersion = 'level-cap-2000-v2';
 
 export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:boolean}={}) {
  const store = useGym();
- const [playing, setPlaying] = useState(false);
+ const [playing, setPlaying] = useState<'court' | 'challenge' | null>(null);
+ const challengeButton = useRef<HTMLButtonElement>(null);
+ const returningFromChallenge = useRef(false);
  const [panel, setPanel] = useState<HomePanel>(() => {
   try {return localStorage.getItem(updateNoticeKey) === updateNoticeVersion ? null : 'announcement';}
   catch {return 'announcement';}
@@ -66,6 +68,12 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   return()=>{active=false;cancelAnimationFrame(request);observer?.disconnect();window.removeEventListener('resize',schedule);window.visualViewport?.removeEventListener('resize',schedule);};
  },[playing,store.hasSave,tutorialMode]);
  useModalAccessibility(!playing&&!tutorialMode);
+ useEffect(() => {
+  if (!playing && returningFromChallenge.current) {
+   returningFromChallenge.current = false;
+   challengeButton.current?.focus();
+  }
+ }, [playing]);
  useEffect(() => gameAudio.install(document), []);
  useEffect(() => {
   let active=true;
@@ -96,14 +104,14 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
   const current = useGym.getState();
   if (busy || current.hydrating) return;
   // A late click from the pre-hydration screen can only continue an existing gym.
-  if (current.hasSave) {setPlaying(true); return;}
+  if (current.hasSave) {setPlaying('court'); return;}
   if(shouldOfferGymTutorial()){setTutorialError('');setPanel(null);setTutorialMode('new');return;}
   setBusy(true);
   try {
    const result = await useGym.getState().start();
    if (!result.error) {
     setPanel(null);
-    setPlaying(true);
+    setPlaying('court');
    }
   } finally { setBusy(false); }
  };
@@ -117,7 +125,7 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    setBusy(true);
    const current=useGym.getState();
    const result=current.hasSave?null:await current.start();
-   if(!result?.error){completeGymTutorial();setTutorialMode(null);setPanel(null);setPlaying(true);}
+   if(!result?.error){completeGymTutorial();setTutorialMode(null);setPanel(null);setPlaying('court');}
   }catch(error){setTutorialError(error instanceof Error?error.message:'开馆暂未成功，请重试');}
   finally{tutorialTransition.current=false;setBusy(false);}
  };
@@ -130,11 +138,12 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
 
  if(tutorialMode)return <GymTutorial onComplete={()=>void finishTutorial()} onSkip={()=>void finishTutorial()} error={tutorialError||store.actionError}/>;
 
- if (playing) return <GymGame onHome={() => {
+ if (playing) return <GymGame initialChallenge={playing==='challenge'} onHome={() => {
   const current = useGym.getState();
-  if (current.debugSessionActive) {void current.debugRestoreGym?.().then(() => setPlaying(false)); return;}
+  returningFromChallenge.current = playing==='challenge';
+  if (current.debugSessionActive) {void current.debugRestoreGym?.().then(() => setPlaying(null)); return;}
   void current.flush();
-  setPlaying(false);
+  setPlaying(null);
  }}/>;
 
  const titles = {settings: '游戏设置', collection: '收藏图鉴', rank: '排行榜', alumni: '球馆档案'};
@@ -149,7 +158,10 @@ export default function GymHome({startupAssetsReady=false}:{startupAssetsReady?:
    <section className="b-command" aria-label="球馆经营">
     {store.hasSave ? <>
      <div className="b-save"><span>当前球馆</span><strong>Lv.<b>{store.state.gymLevel}</b></strong><i/><span>赞助券 <b>{store.state.credits.toLocaleString('zh-CN')}</b></span></div>
-     <button type="button" className="b-continue" aria-label="继续经营" disabled={store.hydrating || busy} onClick={() => setPlaying(true)}><span>继续经营</span><i><GymHomeIcon name="arrow"/></i></button>
+     <button type="button" className="b-continue" aria-label="继续经营" disabled={store.hydrating || busy} onClick={() => setPlaying('court')}><span>继续经营</span><i><GymHomeIcon name="arrow"/></i></button>
+     <button type="button" className="b-challenge" aria-label="球馆挑战" ref={challengeButton} disabled={store.hydrating || busy} onClick={() => setPlaying('challenge')}>
+      <span aria-hidden="true"><GymHomeIcon name="rank"/></span><strong>球馆挑战</strong><small>新玩法</small>
+     </button>
     </> : <button type="button" className="b-new" aria-label="开设训练馆" aria-busy={busy || store.hydrating} disabled={busy || store.hydrating} onClick={() => void start()}><i><GymHomeIcon name="new"/></i><strong>{busy?'正在开馆…':store.hydrating?'读取中…':'开设训练馆'}</strong></button>}
    </section>
    <nav className="b-menu" aria-label="更多功能">

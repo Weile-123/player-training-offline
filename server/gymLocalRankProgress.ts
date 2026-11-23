@@ -1,6 +1,7 @@
 import {createHash} from 'node:crypto';
 import {parseGymCloudArchive} from '../src/platform/gymCloudArchive';
 import {playerValue} from '../src/game/gym/engine';
+import {challengeBest,challengeFamePerStage} from '../src/game/gym/challenge';
 import {templateById} from '../src/game/templates';
 import type {GymRankPlayer} from '../src/platform/gymLeaderboard';
 
@@ -19,7 +20,9 @@ export function validateLocalGymRankingArchive(raw: unknown, reference: {runId: 
  // Unmatched recommendations are deliberately absent from alumni. They may
  // still earn cooperation fame, so do not replace legitimate fame with the
  // alumni sum. The engine's maximum growth/course/brand/cooperation is <1000.
- if (BigInt(state.fame) < archivedFame || BigInt(state.fame) > recommended * 1000n) throw Error('球馆声望与推荐记录不一致');
+ const challenge = challengeBest(state.challenge);
+ const businessFame=BigInt(state.fame)-BigInt(challenge)*BigInt(challengeFamePerStage);
+ if (businessFame < archivedFame || businessFame > recommended * 1000n) throw Error('球馆声望与推荐记录不一致');
  let best: GymRankPlayer | null = null;
  for (const player of players) {
   if (!templateById(player.templateId)) continue;
@@ -45,5 +48,5 @@ export function validateLocalGymRankingArchive(raw: unknown, reference: {runId: 
  const content = JSON.stringify(state);
  return {runId: reference.runId, revision: state.revision, updatedAt: state.updatedAt,
   evidenceId: createHash('sha256').update(content).digest('hex'), source: 'local-validated' as const,
-  fame: state.fame, best};
+  fame: state.fame, challenge, best};
 }

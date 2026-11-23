@@ -5,13 +5,16 @@ import {hash, random, stream, type Stream} from '../contract/random';
 import {ledger, type Ledger} from '../contract/money';
 import {grow, match, shape} from '../contract/templates';
 import {cloneData} from '../../utils/cloneData';
-import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLevels, projects, trainingCreditMilestones, selectedRecruitmentPrice, selectedRecruitmentUnlockLevel, postgameRepeatTemplateCredits, type GymEquipment, type ProjectId} from './catalog';
+import {equipmentCatalog, legacyEquipmentCatalog, equipmentCatalogVersion, gymLevels, projects, projectLevelCap, trainingCreditMilestones, selectedRecruitmentPrice, selectedRecruitmentUnlockLevel, postgameRepeatTemplateCredits, type GymEquipment, type ProjectId} from './catalog';
 import {isSelectedRecruitmentDirection, selectedRecruitmentBase, type SelectedRecruitmentDirection} from './selectedRecruitment';
 import {trainingBias, trainingPlans, type TrainingPlanId, type TrainingProgress} from './training';
 import {buildCooperationOffers, type Cooperation, type CooperationStatus} from './cooperation';
 import {experienceForLevel, playerLevelCap, requiredExperience, shotExperience, type TrainingOutcome} from './progression';
 import {chalkTrainingShots, consumableById, teamSupplyRecovery, type GymConsumableId} from './consumables';
 import type {OfflineTrainingReport} from './offline';
+import {advanceChallenge, challengeRulesVersion, challengeUnlockLevel, challengeUsesCollection, challengeUsesManualMatchups, type ChallengeAction, type ChallengeRulesVersion, type GymChallenge} from './challenge';
+import {challengeTemplateIds} from './challengeCatalog';
+import {challengeProjectOffer, type ChallengeProjectId, type ChallengeProjectLevels} from './challengeProjects';
 
 export {projects, gymLevels, equipmentCatalog, trainingCreditMilestones, trainingPlanUnlockLevel, cooperationUnlockLevel, maximumRecommendationCredits, postgameRepeatTemplateCredits} from './catalog';
 export {trainingPlans} from './training';
@@ -54,6 +57,10 @@ export type GymAlumnus = GymPlayer & {recommendedAt: number; rewardCredits: numb
 /** Counts only older records moved out of the bounded recent alumni array. */
 export type GymAlumniArchive = {id: string; count: number; effectiveCount: number; legendCount: number; bestTier: number};
 export type GymState = {
+  challenge?: GymChallenge;
+  challengeProjects?: ChallengeProjectLevels;
+  /** Exact final-template counts across the recent alumni and their cold archive. */
+  challengeReferralCounts?: Record<string, number>;
   equipmentCatalogVersion?: 1 | 2 | 3;
   /** Migration-only snapshot: consumed once before newly rewritten effects can accrue. */
   pendingLegacyEquipmentEffects?: EquipmentBonuses;
@@ -81,12 +88,14 @@ export type GymState = {
 };
 export type HeightPreference = 'any' | 'guard' | 'forward' | 'center';
 export type GymAction =
+  | ChallengeAction
   | {type: 'train' | 'recommend'; id: string}
   | {type: 'use-drink'; id: string}
   | {type: 'recruit'; preference?: HeightPreference; mode?: 'selected'; direction?: SelectedRecruitmentDirection; expectedNextPlayer?: number; selectRecruited?: boolean}
   | {type: 'buy-equipment'; id: string; replaceId?: string; destination?: 'warehouse'}
   | {type: 'equip'; id: string; replaceId?: string}
   | {type: 'unequip' | 'sell-equipment' | 'upgrade-project'; id: string}
+  | {type: 'upgrade-challenge-project'; projectId: ChallengeProjectId}
   | {type: 'set-training-plan'; id: TrainingPlanId; playerId: string; scope?: 'roster'}
   | {type: 'accept-cooperation'; id: string; playerId: string; scope?: 'roster'}
   | {type: 'abandon-cooperation'; playerId: string; scope?: 'roster'}
@@ -334,6 +343,30 @@ export function recommendedTemplateIds(state: GymState): string[] {
   return [...ids];
 }
 
+export function challengePlayerPool(state: GymState, rulesVersion?: ChallengeRulesVersion): string[] {
+  if (challengeUsesManualMatchups(rulesVersion)) return [...challengeTemplateIds];
+  if (!challengeUsesCollection(rulesVersion)) return recommendedTemplateIds(state);
+  // Save the ordered prefix separately because JSONB sorts object properties.
+  const checkpoint=state.challenge?.collectionPool??[];
+  const seen=new Set(checkpoint);
+  const newUnlocks=Object.keys(state.collection).filter(id=>!seen.has(id)).sort();
+  return [...checkpoint,...newUnlocks];
+}
+
+export function challengeCanStart(state: GymState): boolean {
+  return state.gymLevel >= challengeUnlockLevel;
+}
+
+export function countChallengeReferral(counts: Record<string, number>, templateId: string | null): void {
+  if (templateId && templateById(templateId)) counts[templateId] = (counts[templateId] ?? 0) + 1;
+}
+
+export function challengeReferralCounts(alumni: readonly Pick<GymAlumnus, 'templateId'>[], archived?: Readonly<Record<string, number>>): Record<string, number> {
+  const counts = {...archived};
+  for (const player of alumni) countChallengeReferral(counts, player.templateId);
+  return counts;
+}
+
 /** Called once in the same transaction as the historical evidence read; never infers recommendations from collection. */
 export function initializeRecommendationRecords(state: GymState, archivedIds: Iterable<string> = []): GymState {
   if (state.recommendationRulesVersion === 11) return state;
@@ -366,8 +399,7 @@ export function projectCost(id: string, nextLevel: number): number {
 }
 
 export function projectCap(id: string, gymLevel: number): number {
-  const project = projectById.get(id);
-  return project ? Math.min(project.maxLevel, Math.max(0, gymLevel - project.unlockLevel + 1)) : 0;
+  return projectLevelCap(id, gymLevel);
 }
 
 export function projectOffer(state: GymState, id: string) {
@@ -611,6 +643,38 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
   const events: GymEvent[] = [];
   const player = next.player;
   switch (action.type) {
+    case 'start-challenge':
+    case 'refresh-challenge-draft':
+    case 'draft-challenge':
+    case 'play-challenge':
+    case 'assign-challenge-matchup':
+    case 'choose-challenge-reward':
+    case 'swap-challenge-lineup':
+    case 'revive-challenge':
+    case 'retire-challenge-run':
+    case 'take-challenge-reward': {
+      const rulesVersion=action.type==='start-challenge'?challengeRulesVersion:next.challenge?.run.rulesVersion;
+      const needsLegacyRecommendations = !challengeUsesCollection(rulesVersion) && !challengeUsesManualMatchups(rulesVersion);
+      if (needsLegacyRecommendations && next.recommendationRulesVersion !== 11 && next.alumniArchive?.count) return fail('推荐记录尚未恢复，请重新进入球馆后重试');
+      const indexed = needsLegacyRecommendations ? initializeRecommendationRecords(next) : next;
+      if (action.type === 'start-challenge' && challengeCanStart(next) && !next.challengeReferralCounts) {
+        if (next.alumniArchive?.count) return fail('推荐记录尚未恢复，请重新进入球馆后重试');
+        next.challengeReferralCounts = challengeReferralCounts(next.alumni);
+      }
+      const settings = action.type === 'start-challenge' && next.challengeReferralCounts
+        ? {projects: next.challengeProjects ?? {}, referrals: next.challengeReferralCounts} : undefined;
+      const change = advanceChallenge(next.challenge, action, next.seed, next.gymLevel, challengePlayerPool(indexed,rulesVersion), settings);
+      if ('error' in change) return fail(change.error);
+      if (!Number.isSafeInteger(next.fame + change.fame)) return fail('球馆声望已达到数值上限');
+      if (indexed!==next) {
+        next.recommendationRulesVersion = indexed.recommendationRulesVersion;
+        next.postgameRecommendedTemplates = indexed.postgameRecommendedTemplates;
+      }
+      next.challenge = change.challenge;
+      next.fame += change.fame;
+      events.push({type: action.type, fame: change.fame});
+      break;
+    }
     case 'double-offline-experience': {
       const reward=next.offlineReward;
       if(!reward || reward.report.reportId!==action.reportId) return fail('离线报告已变化，请重新打开后领取');
@@ -696,7 +760,10 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       }
       if (reward.isFirstPostgameRecommendation) next.postgameRecommendedTemplates = [...(next.postgameRecommendedTemplates ?? []), player.templateId!];
       // Free replacement of an undiscovered player is not a completed alumni record.
-      if (reward.tierId !== null) next.alumni.push({...player, recommendedAt: now, rewardCredits: reward.credits, rewardFame: reward.fame, finalValue: playerValue(next, player)});
+      if (reward.tierId !== null) {
+        next.alumni.push({...player, recommendedAt: now, rewardCredits: reward.credits, rewardFame: reward.fame, finalValue: playerValue(next, player)});
+        if (next.challengeReferralCounts) countChallengeReferral(next.challengeReferralCounts, player.templateId);
+      }
       next.credits += reward.credits;
       next.fame += reward.fame;
       next.player = next.bench.shift() ?? null;
@@ -919,6 +986,14 @@ export function dispatchGym(original: GymState, expectedRevision: number, action
       next.projects[project.id]++;
       reconcileRecovery(timed, next);
       events.push({type: 'project-upgraded', id: project.id});
+      break;
+    }
+    case 'upgrade-challenge-project': {
+      const offer = challengeProjectOffer(next, action.projectId);
+      if (offer.price === null || offer.nextLevel === null || !offer.canUpgrade) return fail(offer.reason ?? '挑战项目暂不可升级');
+      next.credits -= offer.price;
+      next.challengeProjects = {...next.challengeProjects, [action.projectId]: offer.nextLevel};
+      events.push({type: 'challenge-project-upgraded', id: action.projectId});
       break;
     }
     case 'upgrade-gym': {

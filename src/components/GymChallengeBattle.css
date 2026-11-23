@@ -1,0 +1,403 @@
+.gc-battle-portrait {
+  display: inline-block;
+  width: 42px;
+  height: 48px;
+  flex: none;
+  overflow: hidden;
+  background: #193c48;
+  vertical-align: middle;
+}
+
+.gc-battle-portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.gc-opponents,
+.gc-battle {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.gc-opponents-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 2px solid #16343e;
+  background: radial-gradient(#90b9b42e .8px, transparent 1px) 0 0/5px 5px, #163944;
+  box-shadow: inset 0 0 0 1px #ba995f;
+  color: #fff0cf;
+}
+
+.gc-opponents-heading h2 {
+  margin: 0;
+  line-height: 1.15;
+  font-size: 1.32em;
+}
+
+.gc-opponents-heading small,
+.gc-opponents-heading > span {
+  color: #f4cb83;
+  font-size: .82em;
+  font-weight: 800;
+}
+
+.gc-opponent-list,
+.gc-matchup-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.gc-opponent-list {
+  display: grid;
+  gap: 6px;
+}
+
+.gc-opponent {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 65px;
+  gap: 9px;
+  padding: 6px 8px;
+  border: 1px solid #b49a66;
+  background: #fff0cf;
+}
+
+.gc-opponent .gc-battle-portrait {
+  width: 49px;
+  height: 52px;
+}
+
+.gc-opponent-identity {
+  display: grid;
+  gap: 4px;
+  overflow-wrap: anywhere;
+  --tier-badge-size: 10px;
+}
+
+.gc-opponent-identity strong {
+  font-size: 1.06em;
+  line-height: 1.2;
+}
+
+.gc-opponent-stat {
+  display: grid;
+  justify-items: center;
+  min-width: 61px;
+  padding: 4px 6px;
+  border: 1px solid #b99961;
+  background: #ecd6a8;
+  color: #653d24;
+}
+
+.gc-opponent-stat span {
+  font-size: .82em;
+  font-weight: 700;
+}
+
+.gc-opponent-stat b {
+  color: #942d20;
+  font-size: 1.76em;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.05;
+}
+
+.gc-paired-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  color: #75562f;
+  font-size: .79em;
+  font-weight: 800;
+}
+
+.gc-paired-head span {padding-inline: 6px}
+.gc-paired-head > span:first-child {display:flex; align-items:baseline; gap:4px; white-space:nowrap}
+.gc-paired-head small {font-size:clamp(9px,2.4vw,12px); color:#795a34}
+.gc-paired-head span:last-child {text-align: right}
+
+.gc-paired-row {
+  min-height: 74px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+  padding: 5px;
+}
+
+.gc-paired-row[data-selected=true] {
+  border-color: #ab3928;
+  box-shadow: 0 0 0 1px #ab3928;
+  background: #ffe8b9;
+}
+
+.gc-paired-slot,
+.gc-paired-rival {
+  display: flex;
+  align-items: center;
+  gap: clamp(4px, 1.5vw, 9px);
+  min-width: 0;
+}
+
+.gc-paired-slot {
+  padding: 3px;
+  border: 1px dashed #b0915d;
+  background: #f4e4be;
+  color: #14343f;
+  text-align: left;
+  font: inherit;
+}
+
+.gc-paired-slot[data-filled=true] {border-style: solid; background: #fbebc7}
+
+.gc-paired-slot[aria-pressed=true] {
+  border-style: solid;
+  border-color: #a13224;
+  background: #ffeaba;
+}
+
+.gc-paired-slot:focus-visible {outline: 2px solid #a13224; outline-offset: 1px}
+.gc-paired-rival {flex-direction: row-reverse; text-align: right}
+
+.gc-paired-row .gc-battle-portrait,
+.gc-paired-empty {
+  width: clamp(27px, 10vw, 50px);
+  height: clamp(38px, 12vw, 54px);
+}
+
+.gc-paired-empty {
+  display: grid;
+  flex: none;
+  place-items: center;
+  border: 1px solid #c8ad79;
+  background: #eeddaf;
+  color: #6e4c29;
+  font-size: 1.28em;
+  font-weight: 900;
+}
+
+.gc-paired-identity {display: grid; min-width: 0; gap: 3px; overflow-wrap: anywhere}
+.gc-paired-identity strong {font-size: .93em; line-height: 1.18}
+.gc-paired-identity small {color: #684c2d; font-size: .77em; line-height: 1.15}
+
+.gc-paired-ability {
+  display: inline-flex;
+  align-items: baseline;
+  justify-self: start;
+  gap: 4px;
+  padding: 1px 4px;
+  border: 1px solid #bf9e65;
+  background: #eed9aa;
+  color: #714625;
+  font-size: .76em;
+  line-height: 1.2;
+}
+
+.gc-paired-ability b {color: #8f3022; font-size: 1.3em; font-weight: 900; font-variant-numeric: tabular-nums}
+.gc-paired-rival .gc-paired-ability {justify-self: end}
+.gc-paired-slot .gc-paired-ability {border-color: #87906b; background: #e9ead0; color: #385542}
+.gc-paired-slot .gc-paired-ability b {color: #185a43}
+
+@media (max-height: 640px) {
+  .gc-paired {gap: 6px}
+  .gc-paired .gc-opponents-heading {padding-block: 6px}
+  .gc-paired-row {min-height: 58px; padding: 4px}
+}
+
+.gc-battle-heading {
+  margin: 0;
+  padding: 0 0 5px;
+  border-bottom: 1px solid #ba9b65;
+  font-size: 1.14em;
+}
+
+.gc-battle-total {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  min-height: 78px;
+  padding: 7px 8px;
+  border: 2px solid #102d39;
+  color: #fff0c9;
+  background: #153742;
+  text-align: center;
+}
+
+.gc-battle-side {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gc-battle-side small {
+  font-size: .81em;
+  font-weight: 750;
+  overflow-wrap: anywhere;
+}
+
+.gc-battle-side b,
+.gc-matchup-score b {
+  color: #ffda86;
+  font-family: inherit;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.16;
+  paint-order: stroke fill;
+  -webkit-text-stroke: .8px #10191c;
+}
+
+.gc-battle-side b {
+  font-size: clamp(25px, 7vw, 36px);
+}
+
+.gc-battle-side .gc-battle-winner,
+.gc-matchup-score .gc-battle-winner {
+  color: #6ae6a3;
+}
+
+.gc-battle-side .gc-battle-winner {
+  font-size: clamp(33px, 9vw, 46px);
+}
+
+.gc-battle-verdict {
+  align-self: center;
+  padding: 4px 7px;
+  border: 1px solid #b59862;
+  color: #f9e4b7;
+  font-size: .85em;
+  white-space: nowrap;
+}
+
+.gc-battle-verdict.is-win {
+  border-color: #98cfaa;
+  background: #21634d;
+  color: #eaffdc;
+}
+
+.gc-battle-verdict.is-loss {
+  border-color: #d5a37a;
+  background: #922f27;
+}
+
+.gc-matchups {
+  border: 2px solid #16343e;
+  background: #faebc8;
+}
+
+.gc-matchup-heading,
+.gc-matchup {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(66px, 19vw, 105px) minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+.gc-matchup-heading {
+  padding: 4px 7px;
+  background: #163742;
+  color: #fae8be;
+  font-size: .75em;
+  font-weight: 800;
+}
+
+.gc-matchup-heading > :nth-child(2) {text-align: center}
+.gc-matchup-heading > :last-child {text-align: right}
+
+.gc-matchup {
+  min-height: 60px;
+  padding: 5px 6px;
+  border-top: 1px solid #be9f65;
+}
+
+.gc-matchup.is-counting {
+  background: #ffedb0;
+  box-shadow: inset 2px 0 #b57f31, inset -2px 0 #b57f31;
+}
+
+.gc-matchup-player {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.gc-matchup-player:last-child {
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+.gc-matchup-player .gc-battle-portrait {
+  width: clamp(27px, 8vw, 39px);
+  height: clamp(32px, 9vw, 46px);
+}
+
+.gc-matchup-player > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gc-matchup-player strong,
+.gc-matchup-player small {
+  font-size: clamp(10px, 2.6vw, 13px);
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.gc-matchup-player small {color: #684f30}
+
+.gc-matchup-result {
+  display: grid;
+  justify-items: center;
+  gap: 1px;
+  min-width: 0;
+  text-align: center;
+}
+
+.gc-matchup-result > strong {
+  font-size: .79em;
+  white-space: nowrap;
+}
+
+.gc-matchup-score {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 3px;
+  width: 100%;
+  min-height: 27px;
+  font-size: .91em;
+  font-weight: 900;
+  color: #593f2c;
+}
+
+.gc-matchup-score b {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: clamp(14px, 4.3vw, 21px);
+}
+
+.gc-matchup-score .gc-battle-winner {font-size: clamp(20px, 5.7vw, 28px)}
+.gc-matchup-dash {align-items: center}
+
+.gc-battle-sequenced .gc-battle-winner {
+  animation: gc-score-emphasis 220ms ease-out both;
+}
+
+@keyframes gc-score-emphasis {
+  from {transform: scale(.86)}
+  to {transform: scale(1)}
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gc-battle-sequenced .gc-battle-winner {animation: none}
+}

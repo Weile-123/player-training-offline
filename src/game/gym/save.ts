@@ -1,11 +1,14 @@
 import {hash} from '../contract/random';
 import {statKeys} from '../types';
 import {templateRules} from '../contract/templates';
-import {equipmentCatalog, previousEquipmentCatalog, legacyEquipmentCatalog, equipmentCanonicalIds, equipmentCatalogVersion, projects, maximumRecommendationCredits} from './catalog';
+import {equipmentCatalog, previousEquipmentCatalog, legacyEquipmentCatalog, equipmentCanonicalIds, equipmentCatalogVersion, projects, projectLevelCap, maximumRecommendationCredits} from './catalog';
 import {buildCooperationOffers} from './cooperation';
-import {legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymAlumnus, type GymPlayer, type GymState} from './engine';
+import {countChallengeReferral, legacyEquipmentPurchasePrice, staminaMax, type EquipmentBonuses, type GymAlumnus, type GymPlayer, type GymState} from './engine';
 import {playerLevelCap, requiredExperience} from './progression';
 import {allGymConsumables, maximumStoredChalkShots} from './consumables';
+import {validChallenge} from './challengeSave';
+import {challengeUnlockLevel} from './challenge';
+import {validChallengeProjectLevels} from './challengeProjects';
 
 export type GymStorage = Pick<Storage, 'getItem' | 'setItem'>;
 export const gymSaveKeys = {main: 'gym-management-v1', backup: 'gym-management-v1.backup'};
@@ -60,10 +63,12 @@ function equipmentTraining(value: unknown, athlete: Record<string, unknown>, all
 
 function player(value: unknown, updatedAt: number, gymLevel: number, legacy: boolean, balanceVersion: 1 | 2 | 3, equipmentMetadataRequired: boolean, allowMissingPartial: boolean): value is GymPlayer {
   const levelCap = balanceVersion === 3 ? playerLevelCap : legacyPlayerLevelCap;
+  const entryStatCap = record(value) && integer(value.enteredGymLevel, 1, gymLevel)
+    ? Math.max(54, 48 + projectLevelCap('recruitment', value.enteredGymLevel)) : 54;
   if (!record(value) || !text(value.id) || !text(value.name) || !integer(value.enteredAt, 0, updatedAt)
     || !integer(value.height, 178, 218) || !integer(value.level, 0, levelCap) || !integer(value.peakLevel, value.level, levelCap)
     || !integer(value.matchSeed, 0, 0xffffffff) || !integer(value.shots) || !integer(value.stamina, 0, 90)
-    || !integer(value.recoveryMs, 0, 19_999) || !stats(value.stats, 0, 99) || !stats(value.entryStats, 24, 54)
+    || !integer(value.recoveryMs, 0, 19_999) || !stats(value.stats, 0, 99) || !stats(value.entryStats, 24, entryStatCap)
     || !stats(value.bias, 0, 1, false) || !stats(value.lastStyle, -3, 3, false)) return false;
   const currentStats = value.stats;
   const entryStats = value.entryStats;
@@ -195,10 +200,9 @@ function validGymShape(value: unknown, legacy = false): value is GymState {
   const balanceVersion = value.balanceVersion === 3 ? 3 : value.balanceVersion === 2 ? 2 : 1;
   if (balanceVersion >= 2 && !has(value, 'bench')) return false;
   const projectLevels = value.projects;
-  if (Object.keys(projectLevels).length !== projects.length || !projects.every(project => {
-    const limit = Math.min(project.maxLevel, Math.max(0, value.gymLevel as number - project.unlockLevel + 1));
-    return integer(projectLevels[project.id], 0, limit);
-  })) return false;
+  if (Object.keys(projectLevels).length !== projects.length || !projects.every(project =>
+    integer(projectLevels[project.id], 0, projectLevelCap(project.id, value.gymLevel as number)))) return false;
+  if (has(value, 'challengeProjects') && (!validChallengeProjectLevels(value.challengeProjects) || value.gymLevel < challengeUnlockLevel)) return false;
   if (value.equippedEquipment.length > 4 + (value.projects.equipment as number)
     || !value.equippedEquipment.every(id => owned.includes(id))) return false;
   if (!legacyCatalog && new Set(value.equippedEquipment.map(id => equipmentById.get(id)!.family)).size !== value.equippedEquipment.length) return false;
@@ -230,6 +234,9 @@ function validGymShape(value: unknown, legacy = false): value is GymState {
   if (balanceVersion === 3 && activePlayers.some(athlete => athlete.stamina > maximumStamina)) return false;
   const playerIds = new Set(activePlayers.map(athlete => athlete.id));
   if (playerIds.size !== activePlayers.length) return false;
+  const referrals = value.challengeReferralCounts;
+  if (has(value, 'challengeReferralCounts') && !record(referrals)) return false;
+  const recentReferrals: Record<string, number> = {};
   for (const alumnus of value.alumni) {
     if (!record(alumnus)) return false;
     const fields: Record<string, unknown> = alumnus;
@@ -237,12 +244,24 @@ function validGymShape(value: unknown, legacy = false): value is GymState {
       || !integer(fields.recommendedAt, alumnus.enteredAt, value.updatedAt) || !integer(fields.rewardCredits, 0, maximumRecommendationCredits)
       || !integer(fields.rewardFame) || !money(fields.finalValue)) return false;
     playerIds.add(alumnus.id);
+    if (referrals) countChallengeReferral(recentReferrals, alumnus.templateId);
+  }
+  if (record(referrals)) {
+    const archivedCount = record(value.alumniArchive) ? value.alumniArchive.count as number : 0;
+    let archivedReferrals = 0;
+    for (const [id, count] of Object.entries(referrals)) {
+      const recent = recentReferrals[id] ?? 0;
+      if (!templateIds.has(id) || !integer(count, Math.max(1, recent), recent + archivedCount)) return false;
+      archivedReferrals += count - recent;
+    }
+    if (archivedReferrals > archivedCount || Object.keys(recentReferrals).some(id => !has(referrals, id))) return false;
   }
   return true;
 }
 
 export function validGym(value: unknown): value is GymState {
   if (!validGymShape(value)) return false;
+  if (value.challenge!==undefined && (value.gymLevel<challengeUnlockLevel || !validChallenge(value.challenge,value))) return false;
   return [...(value.player ? [value.player] : []), ...value.bench].every(athlete => athlete.cooperation === null
     || buildCooperationOffers(value, athlete).some(offer => offer.id === athlete.cooperation!.id));
 }

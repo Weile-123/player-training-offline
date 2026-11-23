@@ -8,7 +8,13 @@
 .leaderboard-tabs{display:grid;grid-template-columns:1fr 1fr;flex:none;position:relative;isolation:isolate;background:#102b3b;border:4px double #f2ddaf;outline:2px solid #102b3b;border-radius:12px;padding:3px}
 .leaderboard-tabs::before{content:'';position:absolute;inset:3px auto 3px 3px;width:calc((100% - 6px)/2);z-index:-1;transition:transform .26s cubic-bezier(.2,.8,.2,1);border-radius:7px;background:radial-gradient(#efb66b55 .7px,transparent 1px) 0 0/3px 3px,#bf2b22;box-shadow:inset 0 0 0 1px #eabe7b}
 .leaderboard-tabs[data-index="1"]::before{transform:translateX(100%)}
+.leaderboard-tabs[data-tab-count="3"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+.leaderboard-tabs[data-tab-count="3"]::before{width:calc((100% - 6px)/3)}
+.leaderboard-tabs[data-index="2"]::before{transform:translateX(200%)}
 .game-screen.comic-dialog-layer .leaderboard-tabs button{background:transparent;color:#f7eacc;border:0;box-shadow:none;border-radius:7px;min-height:36px;padding:7px 3px;font-size:clamp(15px,4.1cqw,23px);font-weight:1000;line-height:1.2}
+.game-screen.comic-dialog-layer .leaderboard-tabs[data-tab-count="3"] button{font-size:clamp(12px,3.6cqw,19px);white-space:nowrap}
+.game-screen.comic-dialog-layer .leaderboard-tabs button:disabled{cursor:default;background:#3c4849;color:#e0d9c2;opacity:1;padding-block:3px}
+.leaderboard-tabs button>small{display:block;font:10px/1.25 var(--font-body)}
 .leaderboard-tabs button:focus-visible{outline:2px solid #ffd46e;outline-offset:-3px}
 .leaderboard-limit{display:flex;align-items:center;justify-content:center;gap:17px;flex:none;margin:10px 13% 7px;padding:3px 10px;background:#b82e25;color:#fff0ce;clip-path:polygon(5% 0,100% 0,95% 100%,0 100%);font-size:clamp(13px,3.3cqw,19px);font-weight:950;letter-spacing:.1em}
 .leaderboard-limit span{font-size:.65em;color:#f0ce83}

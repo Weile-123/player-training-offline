@@ -1,5 +1,6 @@
 import {playerValue, type GymAlumnus, type GymState} from '../src/game/gym/engine';
 import {playerLevelCap} from '../src/game/gym/progression';
+import {challengeBest} from '../src/game/gym/challenge';
 import {validGym} from '../src/game/gym/save';
 import {templateById} from '../src/game/templates';
 import {statKeys} from '../src/game/types';
@@ -13,9 +14,13 @@ type Input = {binding: VerifiedBinding; evidenceId: string; state: GymState; alu
  * using that transaction's actor binding and unique verified evidence identifier.
  */
 export function verifiedGymRankingProgress({binding, evidenceId, state, alumni = state.alumni, previousBest = null}: Input) {
+ if (alumni.length !== state.alumni.length + (state.alumniArchive?.count ?? 0)) throw Error('Complete verified alumni history is required');
+ return rankingProgress({binding, evidenceId, state, alumni, previousBest});
+}
+
+function rankingProgress({binding, evidenceId, state, alumni = state.alumni, previousBest = null}: Input) {
  if (typeof window !== 'undefined') throw Error('Verified ranking progress is server-only');
  if (binding.applicationId !== activity.activityId || !binding.actor || binding.runId !== `${state.createdAt}-${state.seed}` || !/^[A-Za-z0-9_:-]{1,128}$/.test(evidenceId) || !validGym(state)) throw Error('Invalid trusted gym progress');
- if (alumni.length !== state.alumni.length + (state.alumniArchive?.count ?? 0)) throw Error('Complete verified alumni history is required');
  const candidates: GymRankPlayer[] = [];
  if (previousBest) candidates.push(previousBest);
  const add = (player: NonNullable<GymState['player']>, value: string) => {
@@ -28,12 +33,13 @@ export function verifiedGymRankingProgress({binding, evidenceId, state, alumni =
   if (!templateById(player.templateId) || !/^(0|[1-9]\d{0,159})$/.test(player.value) || !Number.isInteger(player.level) || player.level < 0 || player.level > playerLevelCap || !statKeys.every(key => Number.isInteger(player.stats[key]) && player.stats[key] >= 0 && player.stats[key] <= 99)) throw Error('Invalid previous verified player record');
  }
  const best = candidates.reduce<GymRankPlayer | null>((record, player) => !record || BigInt(player.value) > BigInt(record.value) ? player : record, null);
- return {puid: binding.actor, runId: binding.runId, revision: state.revision, evidenceId, fame: state.fame, best: best ? structuredClone(best) : null};
+ return {puid:binding.actor, runId:binding.runId, revision:state.revision, evidenceId, fame:state.fame,
+  challenge:challengeBest(state.challenge), best:best?structuredClone(best):null};
 }
 
 export type VerifiedGymRankingProgress = ReturnType<typeof verifiedGymRankingProgress>;
 
-export type AuthorityGymRankingProgress = VerifiedGymRankingProgress & {historyCount: number};
+export type AuthorityGymRankingProgress = Omit<VerifiedGymRankingProgress, 'challenge'> & {historyCount:number; challenge?:number};
 type CanonicalRankingDocument = {
  applicationId: string; actorId: string; provenance: 'server-created' | 'legacy-unverified' | null;
  state: GymState | null; ranking?: AuthorityGymRankingProgress | null;
@@ -52,16 +58,16 @@ export function buildAuthorityGymRankingProgress(document: CanonicalRankingDocum
   || !Number.isSafeInteger(previous.historyCount) || previous.historyCount < 0)) throw Error('Invalid ranking checkpoint binding');
  const archived = state.alumniArchive?.count ?? 0;
  if (archived > (previous?.historyCount ?? 0)) throw Error('Verified ranking history checkpoint is incomplete');
- const hotState = {...state}; delete hotState.alumniArchive;
- const progress = verifiedGymRankingProgress({
+ const progress = rankingProgress({
   binding: {applicationId: document.applicationId, actor: document.actorId, runId}, evidenceId,
-  // The previous trusted maximum covers cold records. This view intentionally
-  // removes only the archive counter; the canonical document stays untouched.
-  state: hotState, alumni: state.alumni, previousBest: previous?.best,
+  // The previous trusted maximum covers cold records; referral counts still
+  // need validation against the complete canonical state.
+  state, alumni: state.alumni, previousBest: previous?.best,
  });
  if (previous?.revision === state.revision) {
-  if (previous.fame !== progress.fame || JSON.stringify(previous.best) !== JSON.stringify(progress.best)) throw Error('Ranking changed without a canonical revision');
-  return structuredClone(previous);
+  if (previous.fame !== progress.fame || previous.challenge !== undefined && previous.challenge !== progress.challenge
+    || JSON.stringify(previous.best) !== JSON.stringify(progress.best)) throw Error('Ranking changed without a canonical revision');
+  return {...structuredClone(previous),challenge:progress.challenge};
  }
  return {...progress, historyCount: state.alumni.length + archived};
 }

@@ -9,11 +9,11 @@ import {nbaTemplates} from '../templates';
 
 const schedules: Record<ProjectId, number[]> = {
   endurance: [1, 2, 3, 5, 7, 10, 14, 20],
-  recovery: [1, 2, 4, 6, 11, 19, 35, 62],
-  recruitment: [2, 4, 7, 10, 14, 20],
+  recovery: [1, 2, 4, 6, 11, 19, 35, 62, 65, 69, 74, 80],
+  recruitment: [2, 4, 7, 10, 14, 20, 24, 29, 35, 42, 50, 59],
   equipment: [2, 4, 7, 12],
   automation: [3, 6, 10, 18, 32],
-  offline: [2, 4, 7, 12, 21],
+  offline: [2, 4, 7, 12, 21, 26, 32, 40],
 };
 
 function fixture(gymLevel = 8): GymState {
@@ -42,8 +42,8 @@ function priorPriceSave(gymLevel = 6): GymState {
 }
 
 describe('November economy price and gate adjustment', () => {
-  it('charges every project tier at its published price, retaining the four unchanged schedules', () => {
-    let state = fixture();
+  it('charges the published price for every tier through the extended project caps', () => {
+    let state = {...fixture(), credits: 2_000};
     const initialCredits = state.credits;
     for (const project of projects) {
       const prices = schedules[project.id];
@@ -60,7 +60,8 @@ describe('November economy price and gate adjustment', () => {
       expect(capped.error).toBe('项目已达到最高等级');
       expect(capped.state).toBe(state);
     }
-    expect(initialCredits - state.credits).toBe(399);
+    expect(initialCredits - state.credits).toBe(1_024);
+    expect(recoverySeconds(state)).toBe(8);
     expect(validGym(state)).toBe(true);
     expect(decodeGym(encodeGym(state))).toEqual(state);
   });

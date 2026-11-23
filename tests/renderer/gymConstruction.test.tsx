@@ -32,11 +32,13 @@ async function mount(state: GymState) {
 }
 function expansion() {return document.querySelector('[aria-label="下一球馆升级条件"]')!;}
 
-it('separates expansion and projects in the shared sliding tabs while retaining both routes', async () => {
+it('separates expansion and business projects and skips the locked challenge tab', async () => {
   const state = eligible(2, 100), before = structuredClone(state);
   const action = await mount(state);
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('[role="tablist"][aria-label="球馆经营分类"] [role="tab"]')];
-  expect(tabs.map(tab => tab.textContent)).toEqual(['球馆升级', '经营项目']);
+  expect(tabs.map(tab => tab.getAttribute('aria-label'))).toEqual(['球馆升级', '经营项目', '挑战项目']);
+  expect(tabs[2].disabled).toBe(true);
+  expect(tabs[2].textContent).toContain('球馆 3 级解锁');
   expect(tabs[0].getAttribute('aria-selected')).toBe('true');
   expect(expansion()).toBeTruthy();
   expect(document.querySelectorAll('.gm-project')).toHaveLength(0);
@@ -45,12 +47,37 @@ it('separates expansion and projects in the shared sliding tabs while retaining 
   expect(document.querySelector('.leaderboard-tabs')?.getAttribute('data-index')).toBe('1');
   expect(expansion()).toBeNull();
   expect(document.querySelectorAll('.gm-project')).toHaveLength(6);
-  await act(async () => tabs[1].dispatchEvent(new KeyboardEvent('keydown', {key: 'Home', bubbles: true})));
+  await act(async () => tabs[2].click());
+  expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+  await act(async () => tabs[1].dispatchEvent(new KeyboardEvent('keydown', {key: 'ArrowRight', bubbles: true})));
   expect(document.querySelector('.leaderboard-tabs')?.getAttribute('data-index')).toBe('0');
   expect(expansion()).toBeTruthy();
   expect(document.querySelectorAll('.gm-project')).toHaveLength(0);
   expect(state).toEqual(before);
   expect(action).not.toHaveBeenCalled();
+});
+
+it('unlocks challenge projects at level three and buys the first scouting upgrade for 12 coupons', async () => {
+  const state = eligible(3, 12);
+  const action = await mount(state);
+  const tab = document.querySelector<HTMLButtonElement>('[role="tab"][aria-label="挑战项目"]')!;
+  expect(tab.disabled).toBe(false);
+  await act(async () => tab.click());
+  expect(tab.getAttribute('aria-selected')).toBe('true');
+  expect(document.querySelectorAll('[data-challenge-project-id]')).toHaveLength(5);
+  expect(document.querySelector('[data-project-id]')).toBeNull();
+  const scouting = document.querySelector('[data-challenge-project-id="scouting"]')!;
+  expect(scouting.textContent).toContain('Lv.1 / 3');
+  expect(scouting.textContent).toContain('首发 10%');
+  const buy = scouting.querySelector<HTMLButtonElement>('.gm-project-upgrade')!;
+  expect(buy.textContent).toBe('升级12券');
+  await act(async () => buy.click());
+  expect(action).toHaveBeenCalledExactlyOnceWith({type: 'upgrade-challenge-project', projectId: 'scouting'});
+  const result = dispatchGym(state, state.revision, action.mock.calls[0][0], at);
+  expect(result.error).toBeUndefined();
+  expect(result.state.credits).toBe(0);
+  expect(result.state.challengeProjects).toEqual({scouting: 1});
+  expect(result.state.projects).toEqual(state.projects);
 });
 
 it('keeps the first expansion free and explains its permanent extra training place', async () => {

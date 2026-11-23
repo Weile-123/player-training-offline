@@ -76,6 +76,12 @@
   "deployedCodeHashTarget": "cloudfunctions/activity_api/gym/server/main.mjs",
   "deployedArchiveSha256": "88c2cfea7642d55ab4c3e91569ab941be5487ead43ca953ed53c69b0f1fec4d0",
   "localProgressMigration": "migrations/20261117000500_gym_local_rank_progress.sql",
+  "challengeBoardDeployment": {
+    "board": "challenge",
+    "scoreSource": "highest cleared challenge stage from the validated local archive or canonical server state",
+    "migration": "migrations/20261117000700_gym_challenge_rank.sql",
+    "migrationApplied": false
+  },
   "playerLevelDeployment": {
     "playerLevelCap": 2000,
     "migration": "migrations/20261117000600_gym_rank_level_cap.sql",

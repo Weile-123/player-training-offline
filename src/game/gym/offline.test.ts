@@ -31,14 +31,17 @@ function online(state: GymState, until: number): GymState {
 }
 
 describe('bounded offline automatic gym training', () => {
-  it('unlocks the free 30 minute window at gym two and caps upgrades at three hours', () => {
+  it('unlocks the free 30 minute window at gym two and caps extended upgrades at 225 minutes', () => {
     const state = newGym(start, 7);
     expect(offlineLimitMs(state)).toBe(0);
     state.gymLevel = 8;
-    expect([0, 1, 2, 3, 4, 5].map(level => {
+    expect([0, 1, 2, 3, 4, 5, 6, 7, 8].map(level => {
       state.projects.offline = level;
       return offlineLimitMs(state);
-    })).toEqual([1_800_000, 2_700_000, 3_600_000, 5_400_000, 7_200_000, 10_800_000]);
+    })).toEqual([30, 45, 60, 90, 120, 180, 195, 210, 225].map(minutes => minutes * 60_000));
+    state.ownedEquipment = ['relic_028'];
+    state.equippedEquipment = ['relic_028'];
+    expect(offlineLimitMs(state)).toBe(240 * 60_000);
   });
 
   it('only restores stamina before gym two or when all athletes remain manual', () => {
